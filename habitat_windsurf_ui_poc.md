@@ -18,34 +18,50 @@ A proof-of-concept course environment for teaching Windsurf UI development, focu
   plotly>=5.18.0
   ```
 
-### 2. Minimal Course Structure
+### 2. Repository Structure
 ```
 habitat-windsurf/
+├── README.md                # Course overview and quick start
+├── pyproject.toml           # Project dependencies and config
 ├── src/
-│   ├── core/
+│   ├── core/               # Core visualization components
 │   │   ├── __init__.py
-│   │   ├── container.py      # Minimal DI container
-│   │   └── visualization/    # Migrated from habitat_poc
+│   │   ├── container.py    # DI container
+│   │   └── visualization/  # Migrated from habitat_poc
 │   │       ├── __init__.py
 │   │       ├── graph.py
 │   │       └── layout.py
-│   └── course/
+│   └── lessons/            # Course-specific modules
 │       ├── __init__.py
-│       ├── lessons/
-│       │   ├── lesson_01_windsurf_basics.py
-│       │   └── lesson_02_guided_setup.py
-│       └── utils/
-│           └── feedback.py
-├── tests/
+│       ├── lesson_01/      # Windsurf Basics
+│       │   ├── __init__.py
+│       │   ├── graph_examples.py
+│       │   └── utils.py
+│       └── lesson_02/      # Guided Setup
+│           ├── __init__.py
+│           ├── setup_helpers.py
+│           └── viz_components.py
+├── tests/                  # Test suite
 │   ├── __init__.py
 │   ├── conftest.py
 │   └── test_visualization.py
-└── notebooks/
-    ├── 01_windsurf_basics.ipynb
-    └── 02_guided_setup.ipynb
+├── docs/                   # Documentation
+│   ├── lessons/
+│   │   ├── 01_windsurf_basics.md
+│   │   └── 02_guided_setup.md
+│   └── examples/           # Example code and outputs
+└── notebooks/             # Interactive notebooks
+    ├── lesson_01/
+    │   ├── basics.ipynb
+    │   └── exercises/
+    │       └── graph_creation.ipynb
+    └── lesson_02/
+        ├── setup.ipynb
+        └── exercises/
+            └── component_integration.ipynb
 ```
 
-### 3. Lesson Content and Notebook Structure
+### 3. Course Content and Notebook Structure
 
 #### Jupyter Notebook Template Structure
 ```
@@ -76,32 +92,30 @@ notebooks/
     └── data/
 ```
 
-#### Lesson .01 - Windsurf Basics
-1. Introduction to Windsurf IDE
-   - Installation and system requirements
-   - Authentication and account setup
-   - Editor theme selection
-   - Keybinding options (VS Code default vs Vim)
+#### Lesson .01 - Getting Started with Visualization
+1. Welcome to the Course
+   - Repository overview and structure
+   - Quick verification of Windsurf setup
+   - Course objectives and flow
+   - How to use this repository
 
-2. Core Windsurf Features
-   - Editor layout and components
-   - File navigation and management
-   - Command palette usage
-   - Settings configuration
-   - Extension management
+2. Understanding Graph Visualization
+   - Core visualization concepts
+   - Graph data structures in habitat
+   - Basic graph layouts and styling
+   - Real-time updates and WebSocket basics
 
-3. Basic UI Interactions
-   - Opening and managing workspaces
-   - File editing and saving
-   - Terminal integration
-   - Split views and panels
-   - Basic shortcuts
+3. Your First Graph Component
+   - Loading the example repository
+   - Exploring the visualization codebase
+   - Understanding component relationships
+   - Running the example graph
 
 4. Interactive Exercises
-   - Workspace Navigation Challenge
-   - UI Component Discovery Quest
-   - Settings Configuration Practice
-   - Extension Installation Workshop
+   - Graph Component Exploration
+   - Basic Graph Customization
+   - Real-time Update Implementation
+   - Component Integration Practice
 
 #### Lesson .02 - Guided Setup
 1. Development Environment Setup
@@ -125,7 +139,7 @@ notebooks/
 4. Interactive Exercises
    - Environment Setup Verification
    - Component Integration Practice
-   - Basic Graph Creation Workshop
+   - Basic Graph Creation Exercise
    - Real-time Update Implementation
 
 ### 4. Core Components to Migrate
@@ -145,22 +159,28 @@ notebooks/
 - Lesson guides in Markdown
 - Exercise solutions
 
-## Development Phases
+## Implementation Approach
 
-### Phase 1: Initial Setup (1-2 days)
+### Phase 1: Foundation Setup
 - [ ] Create project structure
 - [ ] Set up basic dependency injection
 - [ ] Migrate core visualization components
 
-### Phase 2: Course Content (2-3 days)
-- [ ] Create Lesson .01 content
-- [ ] Create Lesson .02 content
-- [ ] Develop basic exercises
+### Phase 2: Course Content
+- [ ] Create interactive notebooks and exercises
+- [ ] Implement example visualization components
+- [ ] Develop guided learning materials
 
-### Phase 3: Testing & Documentation (1-2 days)
+### Phase 3: Documentation & Testing
 - [ ] Implement core tests
-- [ ] Write setup documentation
-- [ ] Create exercise solutions
+- [ ] Create comprehensive documentation
+- [ ] Develop instructor guides
+
+### Learning Approach
+- **Self-Paced**: Course adapts to individual learning speeds
+- **Interactive**: Combines hands-on coding with guided exploration
+- **Flexible**: Supports both quick runs and deep dives
+- **Instructor-Supported**: Provides guidance while maintaining independence
 
 ## Technical Constraints
 - Keep dependencies minimal
@@ -169,9 +189,9 @@ notebooks/
 - Limit WebSocket complexity
 
 ## Success Criteria
-- [x] Students can set up Windsurf environment
+- [x] Participants can set up Windsurf environment
 - [x] Basic visualization components work
-- [x] Lessons are completable independently
+- [x] Course modules are completable independently
 - [x] Tests pass
 - [x] Documentation is clear and sufficient
 
