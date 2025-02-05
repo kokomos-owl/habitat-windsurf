@@ -1,0 +1,28 @@
+# Core Dependencies
+fastapi==0.109.0
+pydantic==2.5.0
+dependency-injector==4.41.0
+pytest==7.4.3
+pytest-asyncio==0.21.1
+networkx==3.2.1
+plotly==5.18.0
+
+# Development
+pytest-cov==4.1.0
+black==23.12.1
+isort==5.13.2
+flake8==7.0.0
+
+# Jupyter Environment
+jupyter==1.0.0
+ipykernel==6.28.0
+nbformat==5.9.2
+nbconvert==7.14.0
+
+# Visualization
+websockets==12.0.0
+aiohttp==3.9.1
+
+# Documentation
+mkdocs==1.5.3
+mkdocs-material==9.5.3
