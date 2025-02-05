@@ -3,7 +3,19 @@
 **Document Date**: 2025-02-05T08:27:42-05:00
 
 ## Project Overview
-Habitat Windsurf UI Course is a proof-of-concept educational environment focused on teaching visualization component development using the Windsurf IDE.
+
+### Workshop (Pre-Release Testing)
+Habitat Windsurf UI Course is a proof-of-concept educational environment focused on teaching visualization component development using the Windsurf IDE. The workshop baseline is implemented but requires comprehensive testing:
+
+#### Testing Required
+- [ ] Component integration validation
+- [ ] End-to-end exercise verification
+- [ ] Cross-browser compatibility
+- [ ] Performance benchmarking
+- [ ] User experience validation.
+
+### Internal Development (Not Part of Workshop)
+A parallel development effort is underway to migrate and enhance core visualization components. This work is internal and separate from the workshop content.
 
 ## Required Reading
 1. [POC Requirements](habitat_windsurf_ui_poc.md) - Core requirements and course structure
@@ -95,7 +107,7 @@ python -m src.core.server
 
 ## Development Tasks
 
-### Technical Stack
+### Workshop Technical Stack (Current Release)
 
 1. **Backend** (`src/backend/`)
    - FastAPI for REST and WebSocket
@@ -115,7 +127,7 @@ python -m src.core.server
    - PostgreSQL for persistence
    - Nginx for routing
 
-### Development Environment
+### Workshop Development Environment (Current Release)
 
 1. **Prerequisites**
    ```bash
