@@ -1,26 +1,50 @@
 # Habitat Windsurf UI Course State
 
-**Last Updated**: 2025-02-05T07:55:53-05:00
+**Last Updated**: 2025-02-05T08:07:07-05:00
 
 ## Current Phase
-Initial repository setup and component scaffolding
+Core visualization component development and course material creation
 
 ## Status Overview
 - [x] Initial requirements documentation
 - [x] Basic repository structure created
-- [x] Core component placeholders established
-- [ ] Component migration from habitat_poc
-- [ ] Course content development
+- [x] Core visualization components migrated
+- [x] Initial test suite implemented
+- [x] First lesson notebook created
+- [ ] WebSocket integration
+- [ ] Complete course content development
 
 ## Repository Structure Status
 
 ### Core Components
 - [x] src/core/visualization/ directory
-- [x] GraphVisualizer placeholder
-- [x] LayoutEngine placeholder
+- [x] GraphVisualizer with plotly integration
+- [x] LayoutEngine with multiple layouts
 - [x] DI Container setup
 - [ ] WebSocket implementation
 - [ ] API endpoints
+
+#### Senior Developer Tasks
+1. WebSocket Integration
+   - Design real-time update protocol
+   - Implement WebSocket server
+   - Create client-side handlers
+
+2. Architecture Enhancement
+   - Design component event system
+   - Plan scaling strategy
+   - Review security considerations
+
+#### Junior Developer Tasks
+1. Visualization Features
+   - Add node color customization
+   - Implement edge styling options
+   - Add zoom/pan controls
+
+2. Testing
+   - Add more unit tests
+   - Create integration tests
+   - Document test scenarios
 
 ### Documentation
 - [x] POC Requirements (habitat_windsurf_ui_poc.md)
@@ -33,9 +57,32 @@ Initial repository setup and component scaffolding
 ### Course Materials
 - [x] Notebook templates structure
 - [x] Lesson directory structure
-- [ ] Lesson 01 content implementation
-- [ ] Lesson 02 content implementation
-- [ ] Exercise implementations
+- [x] Lesson 01 basics notebook
+- [ ] Lesson 01 exercises
+- [ ] Lesson 02 implementation
+- [ ] Advanced exercise implementations
+
+#### Senior Developer Tasks
+1. Course Structure
+   - Design advanced visualization lessons
+   - Plan WebSocket integration tutorials
+   - Create architecture deep-dives
+
+2. Review Process
+   - Establish code review guidelines
+   - Create PR templates
+   - Set up CI/CD for notebooks
+
+#### Junior Developer Tasks
+1. Content Development
+   - Create basic exercise notebooks
+   - Write solution guides
+   - Add code comments and docstrings
+
+2. Documentation
+   - Update API documentation
+   - Create troubleshooting guides
+   - Write setup instructions
 
 ### Testing Infrastructure
 - [x] Basic test structure
