@@ -45,23 +45,88 @@ habitat-windsurf/
     └── 02_guided_setup.ipynb
 ```
 
-### 3. Lesson Content
+### 3. Lesson Content and Notebook Structure
+
+#### Jupyter Notebook Template Structure
+```
+notebooks/
+├── templates/
+│   ├── lesson_template.ipynb      # Base template for all lessons
+│   ├── exercise_template.ipynb    # Template for interactive exercises
+│   └── solution_template.ipynb    # Template for exercise solutions
+├── lessons/
+│   ├── 01_windsurf_basics/
+│   │   ├── lesson.ipynb
+│   │   ├── exercises/
+│   │   │   ├── 01_navigation.ipynb
+│   │   │   └── 02_ui_interaction.ipynb
+│   │   └── solutions/
+│   │       ├── 01_navigation_solution.ipynb
+│   │       └── 02_ui_interaction_solution.ipynb
+│   └── 02_guided_setup/
+│       ├── lesson.ipynb
+│       ├── exercises/
+│       │   ├── 01_environment_setup.ipynb
+│       │   └── 02_visualization_basics.ipynb
+│       └── solutions/
+│           ├── 01_environment_setup_solution.ipynb
+│           └── 02_visualization_basics_solution.ipynb
+└── resources/
+    ├── images/
+    └── data/
+```
 
 #### Lesson .01 - Windsurf Basics
-- Introduction to Windsurf IDE
-- Basic concepts and terminology
-- Simple visualization example
-- Interactive exercises:
-  - Opening and navigating Windsurf
-  - Basic UI component interaction
+1. Introduction to Windsurf IDE
+   - Installation and system requirements
+   - Authentication and account setup
+   - Editor theme selection
+   - Keybinding options (VS Code default vs Vim)
+
+2. Core Windsurf Features
+   - Editor layout and components
+   - File navigation and management
+   - Command palette usage
+   - Settings configuration
+   - Extension management
+
+3. Basic UI Interactions
+   - Opening and managing workspaces
+   - File editing and saving
+   - Terminal integration
+   - Split views and panels
+   - Basic shortcuts
+
+4. Interactive Exercises
+   - Workspace Navigation Challenge
+   - UI Component Discovery Quest
+   - Settings Configuration Practice
+   - Extension Installation Workshop
 
 #### Lesson .02 - Guided Setup
-- Setting up development environment
-- Loading visualization components
-- Creating first graph view
-- Interactive exercises:
-  - Environment configuration
-  - Running basic visualization
+1. Development Environment Setup
+   - Python environment configuration
+   - Required dependencies installation
+   - Project structure creation
+   - Virtual environment setup
+
+2. Visualization Components
+   - Understanding component architecture
+   - Loading and initializing components
+   - Basic graph visualization setup
+   - WebSocket integration basics
+
+3. Creating Your First Graph View
+   - Graph data structure setup
+   - Basic layout configuration
+   - Node and edge styling
+   - Interactive graph features
+
+4. Interactive Exercises
+   - Environment Setup Verification
+   - Component Integration Practice
+   - Basic Graph Creation Workshop
+   - Real-time Update Implementation
 
 ### 4. Core Components to Migrate
 - GraphVisualizer (simplified version)
