@@ -1,6 +1,6 @@
 # Habitat Windsurf UI Course Handoff
 
-**Document Date**: 2025-02-05T07:47:06-05:00
+**Document Date**: 2025-02-05T07:55:53-05:00
 
 ## Project Overview
 Habitat Windsurf UI Course is a proof-of-concept educational environment focused on teaching visualization component development using the Windsurf IDE.
@@ -60,25 +60,25 @@ python -m src.core.server
 3. Check GraphVisualizer initialization
 
 ## Current Progress
-- Initial documentation and planning phase complete
-- Repository structure defined
-- Core requirements established
+- Repository structure implemented
+- Core component placeholders created
+- Initial test framework established
+- Documentation framework in place
 
-## Immediate Tasks
-1. Repository Setup
-   - Initialize project structure
-   - Set up dependency management
-   - Configure test environment
+## Component Status
+1. Core Visualization
+   - GraphVisualizer (placeholder ready for implementation)
+   - LayoutEngine (placeholder ready for implementation)
+   - DI Container (basic setup complete)
 
-2. Component Migration
-   - GraphVisualizer
-   - LayoutEngine
-   - Basic WebSocket support
+2. Course Materials
+   - Directory structure complete
+   - Notebook templates created
+   - Initial lesson documentation started
 
-3. Course Development
-   - Create notebook templates
-   - Develop first lesson content
-   - Set up example code
+3. Testing
+   - Basic test structure in place
+   - Initial component tests implemented
 
 ## Points of Contact
 - Project Lead: [TBD]
@@ -87,41 +87,53 @@ python -m src.core.server
 
 ## Development Guidelines
 
-### Code Organization
-- Core visualization components in `src/core/visualization/`
-- Course-specific modules in `src/lessons/`
-- Tests mirror source structure in `tests/`
-- Notebooks organized by lesson in `notebooks/`
+### Repository Structure
+```
+habitat-windsurf/
+├── src/
+│   ├── core/
+│   │   ├── container.py         # DI container
+│   │   └── visualization/       # Core components
+│   │       ├── graph.py         # GraphVisualizer
+│   │       └── layout.py        # LayoutEngine
+│   └── lessons/                 # Course modules
+├── tests/
+│   ├── conftest.py
+│   └── test_visualization.py
+├── docs/
+│   └── lessons/
+│       └── 01_windsurf_basics.md
+└── notebooks/
+    ├── templates/
+    │   └── lesson_template.ipynb
+    ├── lesson_01/
+    └── lesson_02/
+```
 
 ### Testing Strategy
-1. Unit Tests: `pytest tests/unit/`
-   - Component initialization
-   - Basic functionality
-   - Error handling
+1. Component Tests
+   - Basic initialization tests implemented
+   - More tests to be added as components are developed
 
-2. Integration Tests: `pytest tests/integration/`
+2. Integration Tests (Planned)
    - Component interactions
-   - Data flow validation
    - WebSocket communication
+   - Graph visualization flow
 
-3. Course Material Tests: `pytest tests/course/`
-   - Notebook execution
-   - Exercise validation
+### Known Issues & Solutions
+1. Component Placeholders
+   - GraphVisualizer and LayoutEngine are stubs
+   - Implementation coming from habitat_poc
 
-### Common Issues & Solutions
-1. GraphVisualizer Import Errors
-   - Check PYTHONPATH includes project root
-   - Verify habitat_poc components accessible
-
-2. Notebook Kernel Issues
-   - Use `python -m ipykernel install --user --name=habitat-windsurf`
-   - Select 'habitat-windsurf' kernel in Jupyter
+2. Environment Setup
+   - Use provided virtual environment
+   - Run tests to verify setup
 
 ### Development Workflow
-1. Create feature branch from `main`
-2. Implement changes with tests
-3. Verify notebook compatibility
-4. Submit PR with documentation updates
+1. Check current component status in STATE.md
+2. Refer to POC requirements for implementation details
+3. Follow test-driven development approach
+4. Update documentation as components are implemented
 
 ## Handoff Checklist
 - [ ] Repository access granted
