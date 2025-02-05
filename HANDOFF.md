@@ -95,6 +95,62 @@ python -m src.core.server
 
 ## Development Tasks
 
+### Technical Stack
+
+1. **Backend** (`src/backend/`)
+   - FastAPI for REST and WebSocket
+   - SQLAlchemy for ORM
+   - Redis for real-time state
+   - GraphQL for complex queries
+
+2. **Frontend** (`src/frontend/`)
+   - React with TypeScript
+   - Plotly.js for visualization
+   - TailwindCSS for styling
+   - Apollo Client for GraphQL
+
+3. **Infrastructure** (`infra/`)
+   - Docker for containerization
+   - Redis for pub/sub
+   - PostgreSQL for persistence
+   - Nginx for routing
+
+### Development Environment
+
+1. **Prerequisites**
+   ```bash
+   # Required software:
+   python >= 3.9
+   node >= 16.0
+   docker >= 20.0
+   redis >= 6.0
+   ```
+
+2. **Setup Commands**
+   ```bash
+   # Backend setup
+   python -m venv venv
+   source venv/bin/activate
+   pip install -r requirements.txt
+   
+   # Frontend setup
+   cd frontend
+   npm install
+   ```
+
+3. **Development Flow**
+   ```bash
+   # Start services
+   docker-compose up -d     # Start infrastructure
+   make dev-backend        # Start FastAPI
+   make dev-frontend       # Start React
+   
+   # Development tools
+   make lint              # Run linters
+   make test              # Run tests
+   make docs              # Generate docs
+   ```
+
 ### Workshop Structure
 The repository implements a balanced user-agent approach:
 

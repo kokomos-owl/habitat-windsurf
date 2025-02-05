@@ -86,17 +86,41 @@ Balanced User-Agent Workshop Development with Framework Alignment
 - [ ] API endpoints
 
 #### Senior Developer Tasks
-1. WebSocket Integration
-   - Design real-time update protocol
-   - Implement WebSocket server
-   - Create client-side handlers
 
-2. Architecture Enhancement
-   - Design component event system
-   - Plan scaling strategy
-   - Review security considerations
+1. **WebSocket Integration** (`src/core/websocket/`)
+   ```python
+   # Key interfaces to implement:
+   class WebSocketManager:
+       async def handle_graph_updates(self)
+       async def broadcast_state_changes(self)
+   ```
+   - Protocol: GraphQL subscriptions over WebSocket
+   - Server: FastAPI with WebSocket support
+   - Client: React hooks for real-time updates
 
-#### Junior Developer Tasks
+2. **Architecture Enhancement** (`src/core/architecture/`)
+   ```python
+   # Event system structure:
+   class EventBus:
+       async def publish(self, event: Event)
+       async def subscribe(self, handler: EventHandler)
+   ```
+   - Event system: Pub/sub with type safety
+   - Scaling: Redis-based state management
+   - Security: JWT with role-based access
+
+3. **Framework Integration** (`src/integrations/`)
+   ```python
+   # Integration points:
+   class HabitatPOCConnector:
+       async def sync_graph_state(self)
+       async def handle_pattern_updates(self)
+   ```
+   - POC: Document processor bridge
+   - Evolution: AdaptiveID integration
+   - Metrics: Coherence validation
+
+### Junior Developer Tasks
 1. Visualization Features
    - Add node color customization
    - Implement edge styling options
