@@ -32,7 +32,7 @@ class BuildTracker:
     def __init__(self):
         self.steps_completed = []
         self.current_step = None
-        self.start_time = None
+        self.start_time = time.time()
         
     def start_step(self, name: str):
         """Start a new build step."""
@@ -48,7 +48,8 @@ class BuildTracker:
             
     def show_progress(self):
         """Display build progress."""
-        print(f"\nCompleted {len(self.steps_completed)} steps:")
+        elapsed = time.time() - self.start_time
+        print(f"\nCompleted {len(self.steps_completed)} steps in {elapsed:.1f}s:")
         for step in self.steps_completed:
             print(f"- {step}")
 
@@ -77,13 +78,48 @@ class WorkshopBuilder:
             'jupyter': 'For notebooks'
         }
         
+    def validate_environment(self) -> bool:
+        """Validate development environment.
+        
+        Returns:
+            bool: True if environment is valid
+            
+        Raises:
+            ValidationError: If environment is invalid
+            DependencyError: If required packages are missing
+        """
+        # Check Python version
+        if sys.version_info < (3, 8):
+            raise ValidationError("Python 3.8+ is required")
+            
+        # Check required packages
+        missing = []
+        for package in self.required_packages:
+            try:
+                __import__(package)
+            except ImportError:
+                missing.append(f"{package} ({self.required_packages[package]})")
+                
+        if missing:
+            raise DependencyError(f"Missing required packages:\n" + 
+                                "\n".join(f"- {pkg}" for pkg in missing))
+                                
+        # Validate directory structure
+        required_dirs = [self.components_dir, self.notebooks_dir, self.tests_dir]
+        for dir_path in required_dirs:
+            dir_path.mkdir(parents=True, exist_ok=True)
+            
+        return True
+        
     def build_step(self, message: str, delay: float = 1.0):
         """Display build step with animation."""
-        print(f"\n🔨 {message}", end="")
+        self.tracker.start_step(message)
+        print(f"\n🛠 {message}", end="")
         for _ in range(3):
             time.sleep(delay/3)
             print(".", end="", flush=True)
-        print(" ✓")
+        print(" ✅")
+        self.tracker.complete_step()
         
     def create_directory_structure(self):
         """Create core directory structure."""
@@ -91,6 +127,7 @@ class WorkshopBuilder:
         
         dirs = [
             self.components_dir,
+            self.notebooks_dir / "jumpstart",
             self.notebooks_dir / "lesson_01",
             self.tests_dir
         ]
@@ -137,7 +174,10 @@ class LayoutEngine:
         self.default_layout = default_layout
         self._layout_funcs = {
             'spring': nx.spring_layout,
-            'circular': nx.circular_layout
+            'circular': nx.circular_layout,
+            'random': nx.random_layout,
+            'shell': nx.shell_layout,
+            'spectral': nx.spectral_layout
         }
 '''
         
@@ -187,10 +227,24 @@ import networkx as nx
 from src.core.visualization.graph import GraphVisualizer
 from src.core.visualization.layout import LayoutEngine
 
+def test_environment():
+    """Test environment setup."""
+    import plotly
+    import jupyter
+    assert True, "Environment is properly set up"
+
 def test_graph_visualizer():
     """Test basic visualization creation."""
     viz = GraphVisualizer()
     assert viz is not None
+
+def test_layout_engine():
+    """Test layout calculations."""
+    engine = LayoutEngine()
+    G = nx.Graph()
+    G.add_edges_from([(1,2), (2,3)])
+    pos = engine.calculate_layout(G)
+    assert pos is not None
 '''
         
         with open(self.tests_dir / "test_graph_visualization.py", "w") as f:

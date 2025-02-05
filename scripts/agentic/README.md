@@ -1,6 +1,6 @@
-# Agentic Workshop Builder
+# Workshop Builder
 
-This script demonstrates how Windsurf can build and tear down the workshop environment automatically, showcasing the power of agentic development.
+This module implements a balanced approach to workshop setup and development, combining user-driven learning with agent-assisted automation. It demonstrates the optimal balance between manual implementation and automated assistance.
 
 ## Usage
 
@@ -18,10 +18,26 @@ python scripts/agentic/workshop_builder.py clean
 
 ## Features
 
-1. **Directory Structure**
-   - Creates core visualization components
-   - Sets up notebook directories
-   - Establishes test infrastructure
+### User-Focused Elements
+1. **Learning Components**
+   - Manual implementation exercises
+   - Code exploration tasks
+   - Custom feature development
+   - Testing practice
+
+### Agent-Assisted Features
+1. **Automation Support**
+   - Environment setup
+   - Code scaffolding
+   - Test generation
+   - Documentation updates
+
+### Collaborative Approach
+1. **Balanced Development**
+   - Interactive exercises
+   - Guided implementations
+   - Progressive complexity
+   - Hands-on practice
 
 2. **Component Implementation**
    - GraphVisualizer with plotly integration
