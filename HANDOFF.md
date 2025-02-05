@@ -1,6 +1,6 @@
 # Habitat Windsurf UI Course Handoff
 
-**Document Date**: 2025-02-05T08:07:07-05:00
+**Document Date**: 2025-02-05T08:14:17-05:00
 
 ## Project Overview
 Habitat Windsurf UI Course is a proof-of-concept educational environment focused on teaching visualization component development using the Windsurf IDE.
@@ -64,6 +64,7 @@ python -m src.core.server
 - Initial test suite passing
 - First lesson notebook created
 - Documentation structure established
+- Agentic workshop builder created
 
 ## Component Status
 1. Core Visualization
@@ -71,6 +72,7 @@ python -m src.core.server
    - LayoutEngine (multiple layouts supported)
    - DI Container (basic setup complete)
    - WebSocket (pending implementation)
+   - Agentic Builder (workshop automation)
 
 2. Course Materials
    - Directory structure complete
@@ -84,6 +86,22 @@ python -m src.core.server
    - Exercise validation pending
 
 ## Development Tasks
+
+### Agentic Workshop
+The repository now includes an agentic workshop builder that can:
+- Automatically create the workshop environment
+- Implement core visualization components
+- Set up notebooks and tests
+- Clean up the environment when needed
+
+To use the builder:
+```bash
+# Build workshop
+python scripts/agentic/workshop_builder.py
+
+# Clean up
+python scripts/agentic/workshop_builder.py clean
+```
 
 ### Senior Developer Focus
 1. Architecture & Integration

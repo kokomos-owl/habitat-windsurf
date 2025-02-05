@@ -168,6 +168,14 @@ notebooks/
   - GraphVisualizer with plotly integration
   - LayoutEngine with multiple layouts
   - Basic test suite passing
+  - Agentic workshop builder
+
+### Agentic Workshop Features
+- Automated environment setup
+- Component implementation
+- Test suite creation
+- Notebook generation
+- Environment cleanup
 
 ### Phase 2: Course Development (In Progress)
 - [x] Notebook templates created
@@ -189,6 +197,11 @@ notebooks/
    - Component event system
    - Performance optimization
    - Security considerations
+
+2. Agentic Development
+   - Extend workshop builder
+   - Add more automation features
+   - Implement validation checks
 
 2. Course Structure
    - Advanced lesson planning
