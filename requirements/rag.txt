@@ -1,0 +1,6 @@
+# RAG Integration Dependencies
+anthropic==0.7.4
+chromadb==0.4.22
+langchain==0.1.0
+sentence-transformers==2.2.2
+cohere==4.37
