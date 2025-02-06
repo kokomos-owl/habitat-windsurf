@@ -3,6 +3,7 @@
 from typing import Dict, Any, Optional, List
 import logging
 from motor.motor_asyncio import AsyncIOMotorClient
+from bson import ObjectId
 from pydantic import BaseModel, Field
 
 logger = logging.getLogger(__name__)
@@ -33,7 +34,8 @@ class MongoClient:
         try:
             connection_url = (
                 f"mongodb://{self.config.username}:{self.config.password}"
-                f"@{self.config.host}:{self.config.port}"
+                f"@{self.config.host}:{self.config.port}/{self.config.database}"
+                "?authSource=admin"
             )
             self.client = AsyncIOMotorClient(connection_url)
             self.db = self.client[self.config.database]
@@ -81,7 +83,13 @@ class MongoClient:
         """
         collection = self.db.visualizations
         doc = await collection.find_one({"doc_id": doc_id})
-        return doc if doc else None
+        if doc:
+            # Remove internal fields
+            if "_id" in doc:
+                del doc["_id"]
+            if "doc_id" in doc:
+                del doc["doc_id"]
+        return doc
         
     async def list_visualizations(
         self,
@@ -99,4 +107,11 @@ class MongoClient:
         """
         collection = self.db.visualizations
         cursor = collection.find().skip(skip).limit(limit)
-        return await cursor.to_list(length=limit)
+        docs = await cursor.to_list(length=limit)
+        
+        # Convert ObjectId to string
+        for doc in docs:
+            if "_id" in doc:
+                doc["_id"] = str(doc["_id"])
+                
+        return docs

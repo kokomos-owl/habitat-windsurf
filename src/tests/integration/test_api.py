@@ -1,6 +1,7 @@
 """Integration tests for API endpoints."""
 
 import pytest
+from contextlib import asynccontextmanager
 from fastapi.testclient import TestClient
 from fastapi import WebSocketDisconnect
 from typing import Dict, Any
@@ -11,6 +12,8 @@ from src.visualization.core.db.neo4j_client import Neo4jClient
 from src.visualization.websocket.manager import ConnectionManager
 from src.tests.mocks.mock_db import MockMongoClient, MockNeo4jClient
 from src.tests.mocks.mock_websocket import MockWebSocket, MockConnectionManager
+from src.tests.mocks.mock_db import MockMongoClient, MockNeo4jClient
+from src.tests.mocks.mock_websocket import MockWebSocket, MockConnectionManager
 
 @pytest.fixture
 def test_client():
@@ -18,31 +21,34 @@ def test_client():
     return TestClient(app)
 
 @pytest.fixture
-async def mock_deps():
+def mock_deps():
     """Setup mock dependencies."""
-    # Create mock clients
-    mock_mongo = MockMongoClient()
-    mock_neo4j = MockNeo4jClient()
-    mock_manager = MockConnectionManager()
-    
-    # Initialize mock clients
-    await mock_mongo.connect()
-    await mock_neo4j.connect()
-    
-    # Override dependency injection
-    app.dependency_overrides = {
-        MongoClient: lambda: mock_mongo,
-        Neo4jClient: lambda: mock_neo4j,
-        ConnectionManager: lambda: mock_manager
-    }
-    
-    try:
-        yield (mock_mongo, mock_neo4j, mock_manager)
-    finally:
-        # Cleanup
-        await mock_mongo.disconnect()
-        await mock_neo4j.disconnect()
-        app.dependency_overrides = {}
+    @asynccontextmanager
+    async def _mock_deps():
+        # Create mock clients
+        mock_mongo = MockMongoClient()
+        mock_neo4j = MockNeo4jClient()
+        mock_manager = MockConnectionManager()
+        
+        # Initialize mock clients
+        await mock_mongo.connect()
+        await mock_neo4j.connect()
+        
+        # Override dependency injection
+        app.dependency_overrides = {
+            MongoClient: lambda: mock_mongo,
+            Neo4jClient: lambda: mock_neo4j,
+            ConnectionManager: lambda: mock_manager
+        }
+        
+        try:
+            yield mock_mongo, mock_neo4j, mock_manager
+        finally:
+            await mock_mongo.disconnect()
+            await mock_neo4j.disconnect()
+            app.dependency_overrides = {}
+            
+    return _mock_deps()
 
 @pytest.mark.asyncio
 async def test_create_visualization(
@@ -89,6 +95,7 @@ async def test_create_visualization(
             for path in ["timeline", "network", "coherence"]
         )
 
+
 @pytest.mark.asyncio
 async def test_get_visualization(
     test_client: TestClient,
@@ -100,9 +107,9 @@ async def test_get_visualization(
         doc_id = "test_doc"
         test_data = {
             "file_paths": {
-                "timeline": "path/to/timeline.json",
-                "network": "path/to/network.json",
-                "coherence": "path/to/coherence.json"
+                "timeline": "visualizations/timeline.json",
+                "network": "visualizations/network.json",
+                "coherence": "visualizations/coherence.json"
             },
             "metadata": {
                 "doc_id": doc_id,
@@ -123,6 +130,8 @@ async def test_get_visualization(
         # Test non-existent visualization
         response = test_client.get("/api/v1/visualize/missing")
         assert response.status_code == 404
+
+
 
 @pytest.mark.asyncio
 async def test_websocket_endpoint(
@@ -156,6 +165,8 @@ async def test_websocket_endpoint(
         assert len(websocket.sent_messages) > 0
         assert websocket.sent_messages[-1]["type"] == "update"
 
+
+
 @pytest.mark.asyncio
 async def test_error_handling(
     test_client: TestClient,
@@ -173,3 +184,4 @@ async def test_error_handling(
         # Test missing visualization
         response = test_client.get("/api/v1/visualize/nonexistent")
         assert response.status_code == 404
+
