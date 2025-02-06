@@ -1,0 +1,26 @@
+{
+    "doc_id": "test_doc_001",
+    "temporal_stages": ["stage1", "stage2", "stage3"],
+    "concept_evolution": {
+        "concept1": [
+            {"stage": "stage1", "weight": 0.8},
+            {"stage": "stage2", "weight": 0.9},
+            {"stage": "stage3", "weight": 0.7}
+        ],
+        "concept2": [
+            {"stage": "stage1", "weight": 0.4},
+            {"stage": "stage2", "weight": 0.6},
+            {"stage": "stage3", "weight": 0.8}
+        ]
+    },
+    "relationship_changes": [
+        {"source": "concept1", "target": "concept2", "stage": "stage1", "weight": 0.5},
+        {"source": "concept1", "target": "concept2", "stage": "stage2", "weight": 0.7},
+        {"source": "concept1", "target": "concept2", "stage": "stage3", "weight": 0.9}
+    ],
+    "coherence_metrics": {
+        "stage1": 0.65,
+        "stage2": 0.75,
+        "stage3": 0.85
+    }
+}

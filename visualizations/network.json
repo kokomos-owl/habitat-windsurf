@@ -1,1 +1,1 @@
-{"directed": true, "multigraph": false, "graph": {}, "nodes": [{"id": "concept1"}, {"id": "concept2"}], "links": [{"type": "depends_on", "weight": 1.0, "source": "concept1", "target": "concept2"}]}
+{"directed": true, "multigraph": false, "graph": {}, "nodes": [{"id": "concept1"}, {"id": "concept2"}], "links": [{"type": "default", "weight": 0.9, "stage": "stage3", "source": "concept1", "target": "concept2"}]}

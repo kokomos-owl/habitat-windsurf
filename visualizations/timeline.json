@@ -1,1 +1,1 @@
-{"stages": ["stage1", "stage2", "stage3"], "evolution": {"concept1": [{"stage": "stage1", "state": "initial"}, {"stage": "stage2", "state": "evolved"}], "concept2": [{"stage": "stage2", "state": "initial"}, {"stage": "stage3", "state": "evolved"}]}}
+{"stages": ["stage1", "stage2", "stage3"], "evolution": {"concept1": [{"stage": "stage1", "weight": 0.8}, {"stage": "stage2", "weight": 0.9}, {"stage": "stage3", "weight": 0.7}], "concept2": [{"stage": "stage1", "weight": 0.4}, {"stage": "stage2", "weight": 0.6}, {"stage": "stage3", "weight": 0.8}]}}

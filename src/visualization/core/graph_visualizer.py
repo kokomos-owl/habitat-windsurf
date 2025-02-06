@@ -121,10 +121,11 @@ class GraphVisualizer:
         # Add relationships
         for rel in relationship_changes:
             graph.add_edge(
-                rel["from"],
-                rel["to"],
+                rel["source"],
+                rel["target"],
                 type=rel.get("type", "default"),
-                weight=rel.get("weight", 1.0)
+                weight=rel.get("weight", 1.0),
+                stage=rel.get("stage")
             )
             
         # Convert to visualization format
