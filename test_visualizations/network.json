@@ -1,0 +1,1 @@
+{"directed": true, "multigraph": false, "graph": {}, "nodes": [{"id": "concept1"}, {"id": "concept2"}], "links": [{"type": "related", "weight": 0.75, "source": "concept1", "target": "concept2"}]}
