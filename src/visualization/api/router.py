@@ -47,17 +47,11 @@ async def create_visualization(
     try:
         # Initialize clients
         await mongo_client.connect()
-        try:
-            await neo4j_client.connect()
-        except Exception as e:
-            # Log Neo4j connection error but continue
-            logger.warning(f"Neo4j connection failed: {str(e)}")
-        
-        # Initialize visualization
-        visualizer = GraphVisualizer()
+        await neo4j_client.connect()
         
         # Create visualizations
-        file_paths = await visualizer.create_evolution_view(
+        visualizer = GraphVisualizer()
+        vis_paths = await visualizer.create_evolution_view(
             request.temporal_stages,
             request.concept_evolution,
             request.relationship_changes,
@@ -65,32 +59,35 @@ async def create_visualization(
         )
         
         # Store in MongoDB
-        doc_id = await mongo_client.store_visualization(
-            request.doc_id,
-            {
-                "file_paths": file_paths,
-                "metadata": request.model_dump()
+        doc = {
+            "doc_id": request.doc_id,
+            "file_paths": vis_paths,
+            "metadata": {
+                "temporal_stages": request.temporal_stages,
+                "concept_evolution": request.concept_evolution,
+                "relationship_changes": request.relationship_changes,
+                "coherence_metrics": request.coherence_metrics
             }
-        )
-        
-        # Broadcast update
-        await manager.broadcast(
-            {
-                "type": "visualization_created",
-                "data": {"doc_id": doc_id}
-            }
-        )
-        
-        return {
-            "visualization_id": doc_id,
-            "file_paths": file_paths
         }
         
-    except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to create visualization: {str(e)}"
+        # Note: We preserve _id and doc_id for habitat_evolution compatibility
+        vis_id = await mongo_client.store_visualization(request.doc_id, doc)
+        
+        # Notify WebSocket clients
+        await manager.broadcast(
+            {"type": "visualization_created", "doc_id": request.doc_id}
         )
+        
+        return VisualizationResponse(
+            visualization_id=vis_id,
+            file_paths=vis_paths
+        )
+    except Exception as e:
+        logger.error(f"Error creating visualization: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        await mongo_client.disconnect()
+        await neo4j_client.disconnect()
 
 @router.get("/visualize/{doc_id}")
 async def get_visualization(

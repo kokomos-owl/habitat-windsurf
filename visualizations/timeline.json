@@ -1,1 +1,1 @@
-{"stages": ["stage1", "stage2"], "evolution": {"concept1": ["stage1", "stage2"]}}
+{"stages": ["stage1", "stage2", "stage3"], "evolution": {"concept1": [{"stage": "stage1", "state": "initial"}, {"stage": "stage2", "state": "evolved"}], "concept2": [{"stage": "stage2", "state": "initial"}, {"stage": "stage3", "state": "evolved"}]}}

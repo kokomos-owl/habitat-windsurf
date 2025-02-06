@@ -1,4 +1,4 @@
-"""Graph visualization module."""
+"""Graph visualization module for knowledge evolution tracking."""
 
 from typing import Dict, List, Any, Optional
 import os
@@ -19,9 +19,12 @@ class VisualizationConfig(BaseModel):
     layout_algorithm: str = Field(default="force_directed")
     node_size: int = Field(default=20)
     edge_width: float = Field(default=1.0)
+    timeline_height: int = Field(default=400)
+    network_height: int = Field(default=600)
+    coherence_height: int = Field(default=300)
 
 class GraphVisualizer:
-    """Visualizer for knowledge graph evolution."""
+    """Visualizer for knowledge graph evolution with timeline and network views."""
 
     def __init__(self, config: Optional[VisualizationConfig] = None):
         """Initialize visualizer.
@@ -40,6 +43,17 @@ class GraphVisualizer:
         relationship_changes: List[Dict[str, str]],
         coherence_metrics: Dict[str, float]
     ) -> Dict[str, str]:
+        """Create visualizations showing knowledge evolution.
+        
+        Args:
+            temporal_stages: List of stage names in temporal order
+            concept_evolution: Dictionary mapping concepts to their evolution data
+            relationship_changes: List of relationship changes between stages
+            coherence_metrics: Dictionary of coherence metrics
+            
+        Returns:
+            Dictionary mapping visualization types to file paths
+        """
         # Validate inputs
         if not temporal_stages:
             raise ValueError("No temporal stages provided")
