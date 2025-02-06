@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Knowledge Evolution Visualization</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+    <div id="visualization-container">
+        <div id="network-container"></div>
+        
+        <!-- Controls -->
+        <div class="controls">
+            <button class="control-button" id="toggle-labels">Toggle Labels</button>
+            <button class="control-button" id="reset-zoom">Reset Zoom</button>
+            <button class="control-button" id="export-graph">Export Graph</button>
+        </div>
+        
+        <!-- Stage selector -->
+        <div class="stage-selector">
+            <button class="stage-button active" data-stage="all">All Stages</button>
+            <button class="stage-button" data-stage="stage1">Stage 1</button>
+            <button class="stage-button" data-stage="stage2">Stage 2</button>
+            <button class="stage-button" data-stage="stage3">Stage 3</button>
+        </div>
+
+        <!-- Tooltip -->
+        <div id="tooltip"></div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="/static/js/network.js"></script>
+    <script src="/static/js/websocket.js"></script>
+    <script src="/static/js/main.js"></script>
+</body>
+</html>

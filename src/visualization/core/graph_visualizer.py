@@ -118,18 +118,60 @@ class GraphVisualizer:
         """Create network visualization data."""
         graph = nx.DiGraph()
         
-        # Add relationships
+        # Track node weights and relationships
+        node_weights = {}
+        node_relationships = {}
+        
+        # Process all relationships
         for rel in relationship_changes:
-            graph.add_edge(
-                rel["source"],
-                rel["target"],
-                type=rel.get("type", "default"),
-                weight=rel.get("weight", 1.0),
-                stage=rel.get("stage")
-            )
+            source = rel["source"]
+            target = rel["target"]
+            weight = rel.get("weight", 1.0)
+            stage = rel.get("stage")
             
-        # Convert to visualization format
-        return nx.node_link_data(graph)
+            # Update node weights
+            if source not in node_weights or weight > node_weights[source]:
+                node_weights[source] = weight
+            if target not in node_weights or weight > node_weights[target]:
+                node_weights[target] = weight
+                
+            # Track relationships
+            key = (source, target)
+            if key not in node_relationships or weight > node_relationships[key]["weight"]:
+                node_relationships[key] = {
+                    "weight": weight,
+                    "stage": stage,
+                    "confidence": 0.95  # Example confidence score
+                }
+        
+        # Add nodes with metadata
+        for node, weight in node_weights.items():
+            graph.add_node(
+                node,
+                weight=weight,
+                confidence=0.95,  # Example confidence score
+                type="concept"
+            )
+        
+        # Add relationships with metadata
+        for (source, target), rel_data in node_relationships.items():
+            graph.add_edge(
+                source,
+                target,
+                **rel_data
+            )
+        
+        # Convert to visualization format with metadata
+        graph_data = nx.node_link_data(graph)
+        
+        # Add visualization metadata
+        graph_data["metadata"] = {
+            "confidence_threshold": 0.95,
+            "relationship_types": ["concept", "temporal", "causal"],
+            "node_types": ["concept", "event", "entity"]
+        }
+        
+        return graph_data
         
     def _create_coherence_data(
         self,
