@@ -7,8 +7,7 @@ from src.visualization.core.db.mongo_client import MongoConfig
 from src.visualization.core.db.neo4j_client import Neo4jConfig
 from src.tests.mocks.mock_db import MockMongoClient, MockNeo4jClient
 
-pytestmark = pytest.mark.asyncio
-
+@pytest.mark.asyncio
 async def test_mongo_client():
     """Test MongoDB client operations."""
     # Create mock client
@@ -44,6 +43,7 @@ async def test_mongo_client():
     finally:
         await mock_mongo.disconnect()
 
+@pytest.mark.asyncio
 async def test_neo4j_client(
     sample_graph_data: Dict[str, Any]
 ):

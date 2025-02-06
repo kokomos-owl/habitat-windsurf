@@ -4,15 +4,23 @@ This module implements a balanced approach to workshop setup and development, co
 
 ## Usage
 
-### Build Workshop
-To build the workshop environment:
+### Setup Workshop
+To set up the workshop environment:
 ```bash
+# Start required services
+docker-compose up -d mongodb neo4j
+
+# Build workshop environment
 python scripts/agentic/workshop_builder.py
 ```
 
 ### Clean Environment
 To tear down the workshop environment:
 ```bash
+# Stop and remove containers
+docker-compose down
+
+# Clean workshop environment
 python scripts/agentic/workshop_builder.py clean
 ```
 
@@ -40,9 +48,12 @@ python scripts/agentic/workshop_builder.py clean
    - Hands-on practice
 
 2. **Component Implementation**
-   - GraphVisualizer with plotly integration
-   - LayoutEngine for graph layouts
-   - Basic test suite
+   - GraphVisualizer with Plotly integration
+   - MongoDB for data persistence
+   - Neo4j for graph operations (optional)
+   - FastAPI REST endpoints
+   - WebSocket for real-time updates
+   - Comprehensive test suite
 
 3. **Interactive Elements**
    - Example Jupyter notebooks
@@ -57,16 +68,20 @@ python scripts/agentic/workshop_builder.py clean
 ## Next Steps
 
 1. **Extend Builder**
-   - Add WebSocket implementation
-   - Include more visualization features
-   - Expand test coverage
+   - Add more visualization types
+   - Enhance graph layout algorithms
+   - Implement caching strategies
+   - Add authentication and authorization
 
 2. **Enhance Interactivity**
-   - Add more notebook examples
-   - Include interactive exercises
+   - Add advanced visualization examples
+   - Include performance optimization exercises
    - Create debugging scenarios
+   - Add deployment tutorials
 
 3. **Documentation**
-   - Add inline code comments
-   - Create API documentation
-   - Include troubleshooting guides
+   - Add API documentation using OpenAPI/Swagger
+   - Include deployment guides
+   - Add performance tuning documentation
+   - Create troubleshooting guides
+   - Document MongoDB and Neo4j integration

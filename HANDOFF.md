@@ -1,6 +1,6 @@
 # Habitat Windsurf UI Course Handoff
 
-**Document Date**: 2025-02-05T08:27:42-05:00
+**Document Date**: 2025-02-06T11:11:44-05:00
 
 ## Project Overview
 
@@ -34,15 +34,21 @@ habitat-windsurf/
 
 ### Prerequisites
 1. Python 3.11+
-2. Windsurf IDE installed
-3. Git
-4. Access to habitat_poc repository (for component migration)
+2. Docker and Docker Compose
+3. MongoDB
+4. Neo4j (optional)
+5. Windsurf IDE installed
+6. Git
+7. Access to habitat_poc repository (for component migration)
 
 ### Local Environment Setup
 ```bash
 # Clone repository
 git clone https://github.com/your-org/habitat-windsurf.git
 cd habitat-windsurf
+
+# Start required services
+docker-compose up -d mongodb neo4j
 
 # Create and activate virtual environment
 python -m venv venv
@@ -52,10 +58,10 @@ source venv/bin/activate  # or `venv\Scripts\activate` on Windows
 pip install -r requirements.txt
 
 # Run test suite
-pytest tests/
+python -m pytest
 
-# Start development server (when implemented)
-python -m src.core.server
+# Start development server
+uvicorn src.visualization.api.app:app --reload
 ```
 
 ### Configuration
@@ -64,6 +70,14 @@ python -m src.core.server
    ```env
    WINDSURF_HOME=/path/to/windsurf
    HABITAT_POC_PATH=/path/to/habitat_poc
+   MONGO_USERNAME=your_username
+   MONGO_PASSWORD=your_password
+   MONGO_HOST=localhost
+   MONGO_PORT=27017
+   NEO4J_USERNAME=neo4j
+   NEO4J_PASSWORD=your_password
+   NEO4J_HOST=localhost
+   NEO4J_PORT=7687
    ```
 
 ### Verification Steps
@@ -74,8 +88,12 @@ python -m src.core.server
 ## Current Progress
 
 ### Core Implementation
-- Basic visualization components (user-guided)
-- Initial test suite (agent-assisted)
+- GraphVisualizer with Plotly integration
+- MongoDB integration with authentication
+- Neo4j integration (optional)
+- WebSocket for real-time updates
+- FastAPI REST endpoints
+- Comprehensive test suite
 - First lesson notebook (balanced approach)
 - Documentation structure (collaborative)
 - Workshop builder (hybrid implementation)
@@ -88,10 +106,11 @@ python -m src.core.server
 
 ## Component Status
 1. Core Visualization
-   - GraphVisualizer (implemented with plotly)
-   - LayoutEngine (multiple layouts supported)
-   - DI Container (basic setup complete)
-   - WebSocket (pending implementation)
+   - GraphVisualizer (implemented with Plotly)
+   - MongoDB Client (authentication enabled)
+   - Neo4j Client (optional integration)
+   - WebSocket Manager (real-time updates)
+   - FastAPI Router (REST endpoints)
    - Agentic Builder (workshop automation)
 
 2. Course Materials

@@ -100,20 +100,27 @@ jupyter notebook notebooks/jumpstart/habitat_windsurf_jumpstart.ipynb
 - Basic concepts
 
 ### 2. Core Components
-- GraphVisualizer
-- LayoutEngine
-- WebSocket integration
+- GraphVisualizer with Plotly integration
+- MongoDB for data persistence
+- Neo4j for graph operations (optional)
+- WebSocket for real-time updates
+- FastAPI REST endpoints
 
 ### 3. Advanced Topics
-- Custom layouts
-- Real-time updates
+- Custom graph layouts
+- Real-time visualization updates
+- MongoDB and Neo4j integration
 - Performance optimization
+- Containerized deployment
 
 ## 🛠 Development
 
 ### Prerequisites
-- Python 3.8+
-- Jupyter Notebook
+- Python 3.11+
+- Docker and Docker Compose
+- MongoDB
+- Neo4j (optional)
+- FastAPI
 - NetworkX
 - Plotly
 
@@ -122,12 +129,18 @@ jupyter notebook notebooks/jumpstart/habitat_windsurf_jumpstart.ipynb
 habitat-windsurf/
 ├── notebooks/           # Interactive lessons
 │   ├── jumpstart/      # Getting started
-│   └── lesson_01/      # Basic visualization
+│   ├── lesson_01/      # Basic visualization
+│   └── lesson_02/      # Advanced features
 ├── scripts/
 │   └── agentic/        # Automation tools
 ├── src/
-│   └── core/           # Core components
-└── tests/              # Test suite
+│   ├── core/           # Core components
+│   ├── visualization/  # Visualization service
+│   │   ├── api/       # FastAPI endpoints
+│   │   ├── core/      # Core visualization logic
+│   │   └── websocket/ # Real-time updates
+│   └── tests/         # Test suite
+└── docker/            # Container configurations
 ```
 
 ## 🤝 Contributing
@@ -138,24 +151,51 @@ habitat-windsurf/
 
 ## 📖 Documentation
 
-- [State](STATE.md) - Current project state
-- [Handoff](HANDOFF.md) - Development handoff notes
-- [POC](habitat_windsurf_ui_poc.md) - Proof of concept details
+This repository is documented through several key files:
+
+### Core Documentation
+- [State](STATE.md) - Current project state, development status, and next steps
+- [Handoff](HANDOFF.md) - Development handoff notes, setup instructions, and component status
+- [POC](habitat_windsurf_ui_poc.md) - Proof of concept details and requirements
+
+### Additional Resources
+- [API Documentation](src/visualization/api/README.md) - REST API endpoints and WebSocket interface
+- [Component Guide](src/visualization/core/README.md) - Core visualization components
+- [Testing Guide](src/tests/README.md) - Test suite organization and execution
+
+### Important Notes
+1. MongoDB document IDs (_id and doc_id) are currently removed from responses for workshop compatibility
+2. These fields will be preserved in future versions for habitat_evolution integration
+3. Neo4j integration is optional and can be disabled if not needed
 
 ## 🧪 Testing
 
 ```bash
-# Run test suite
-python -m pytest tests/
+# Start required services
+docker-compose up -d mongodb neo4j
 
-# Run specific test
-python -m pytest tests/test_graph_visualization.py
+# Run test suite
+python -m pytest
+
+# Run specific test category
+python -m pytest src/tests/unit/
+python -m pytest src/tests/integration/
 ```
+
+The test suite includes:
+- Unit tests for core components
+- Integration tests for API endpoints
+- WebSocket connection tests
+- Database client tests
 
 ## 🧹 Cleanup
 
 To reset workshop environment:
 ```bash
+# Stop and remove containers
+docker-compose down
+
+# Clean workshop environment
 python scripts/agentic/workshop_builder.py clean
 ```
 

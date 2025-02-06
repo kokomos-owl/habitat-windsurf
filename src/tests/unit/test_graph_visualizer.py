@@ -6,8 +6,7 @@ import json
 
 from src.visualization.core.graph_visualizer import GraphVisualizer, VisualizationConfig
 
-pytestmark = pytest.mark.asyncio
-
+@pytest.mark.asyncio
 async def test_create_evolution_view(
     visualizer: GraphVisualizer,
     sample_graph_data: dict
@@ -47,6 +46,7 @@ async def test_create_evolution_view(
     assert "metrics" in coherence_data
     assert len(coherence_data["metrics"]) == 3
 
+@pytest.mark.asyncio
 async def test_create_timeline_data(
     visualizer: GraphVisualizer,
     sample_graph_data: dict
@@ -62,6 +62,7 @@ async def test_create_timeline_data(
     assert timeline_data["stages"] == sample_graph_data["temporal_stages"]
     assert timeline_data["evolution"] == sample_graph_data["concept_evolution"]
 
+@pytest.mark.asyncio
 async def test_create_network_data(
     visualizer: GraphVisualizer,
     sample_graph_data: dict
@@ -93,6 +94,7 @@ def test_visualization_config():
     assert config.node_size == 30
     assert config.edge_width == 2.0
 
+@pytest.mark.asyncio
 async def test_error_handling(visualizer: GraphVisualizer):
     """Test error handling in visualization creation."""
     with pytest.raises(ValueError):

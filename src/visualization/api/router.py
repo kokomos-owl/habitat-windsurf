@@ -69,7 +69,7 @@ async def create_visualization(
             request.doc_id,
             {
                 "file_paths": file_paths,
-                "metadata": request.dict()
+                "metadata": request.model_dump()
             }
         )
         
