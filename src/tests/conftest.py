@@ -20,15 +20,20 @@ async def mock_mongo() -> MockMongoClient:
     """Create mock MongoDB client."""
     client = MockMongoClient()
     await client.connect()
-    yield client
-    await client.disconnect()
+    try:
+        yield client
+    finally:
+        await client.disconnect()
 
 @pytest.fixture
 async def mock_neo4j() -> MockNeo4jClient:
     """Create mock Neo4j client."""
     client = MockNeo4jClient()
     await client.connect()
-    yield client
+    try:
+        yield client
+    finally:
+        await client.disconnect()
     await client.disconnect()
 
 @pytest.fixture

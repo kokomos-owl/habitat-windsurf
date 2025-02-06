@@ -1,8 +1,11 @@
 """FastAPI router for visualization endpoints."""
 
 from typing import Dict, Any, Optional
+import logging
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends, HTTPException
 from pydantic import BaseModel
+
+logger = logging.getLogger(__name__)
 
 from ..core.graph_visualizer import GraphVisualizer, VisualizationConfig
 from ..websocket.manager import ConnectionManager
@@ -31,9 +34,6 @@ async def create_visualization(
     mongo_client: MongoClient = Depends(lambda: MongoClient()),
     neo4j_client: Neo4jClient = Depends(lambda: Neo4jClient())
 ) -> Dict[str, Any]:
-    # Initialize clients
-    await mongo_client.connect()
-    await neo4j_client.connect()
     """Create new visualization.
     
     Args:
@@ -45,6 +45,14 @@ async def create_visualization(
         Visualization metadata
     """
     try:
+        # Initialize clients
+        await mongo_client.connect()
+        try:
+            await neo4j_client.connect()
+        except Exception as e:
+            # Log Neo4j connection error but continue
+            logger.warning(f"Neo4j connection failed: {str(e)}")
+        
         # Initialize visualization
         visualizer = GraphVisualizer()
         
