@@ -2,6 +2,28 @@
 
 A hands-on workshop for learning visualization component development using the Windsurf IDE. This workshop implements a balanced approach between user-driven learning and agent-assisted development, ensuring optimal skill development and understanding.
 
+## Features
+
+### Real-time Network Visualization
+- Interactive force-directed graph visualization
+- Dark theme with grid background
+- Smooth animations and transitions
+- Drag and zoom capabilities
+- Stage-based filtering
+
+### Error Handling and Status
+- Real-time status updates with glowing indicators
+- Step-by-step process visualization
+- Clear error messaging and state tracking
+- WebSocket-based live updates
+
+### Developer Experience
+- Modular component architecture
+- Clear separation of concerns
+- Comprehensive error handling
+- Real-time debugging capabilities
+- Extensive documentation
+
 ## Innovation and Value Proposition
 
 This approach is genuinely innovative and powerful for several key reasons:
