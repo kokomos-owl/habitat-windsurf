@@ -8,9 +8,9 @@
         "timestamp": "2025-02-07T05:35:22.522530"
       },
       "related_patterns": [
-        "wildfire_late",
+        "wildfire_mid",
         "storm_late",
-        "wildfire_mid"
+        "wildfire_late"
       ],
       "flow_velocity": 0.0,
       "flow_direction": 0.0,
@@ -39,9 +39,9 @@
         "timestamp": "2025-02-07T05:35:22.522982"
       },
       "related_patterns": [
-        "wildfire_late",
+        "wildfire_mid",
         "drought_late",
-        "wildfire_mid"
+        "wildfire_late"
       ],
       "flow_velocity": 0.0,
       "flow_direction": 0.0,
@@ -61,7 +61,55 @@
       "flow_velocity": 0.0,
       "flow_direction": 0.0,
       "last_updated": "2025-02-07T05:35:22.522734"
+    },
+    {
+      "pattern": "Temperature increase of 2.5\u00b0C impacts coastal regions",
+      "confidence": 0.8,
+      "temporal_context": {
+        "source": "climate_data",
+        "timestamp": "2025-02-07T10:21:28.269901"
+      },
+      "related_patterns": [],
+      "flow_velocity": 0.0,
+      "flow_direction": 0.0,
+      "last_updated": "2025-02-07T15:21:28.270578"
+    },
+    {
+      "pattern": "Temperature rise of 2.5\u00b0C",
+      "confidence": 0.8,
+      "temporal_context": {
+        "timestamp": "2025-02-07T10:28:41.922982",
+        "source": "climate_data"
+      },
+      "related_patterns": [],
+      "flow_velocity": 0.0,
+      "flow_direction": 0.0,
+      "last_updated": "2025-02-07T15:28:41.922997"
+    },
+    {
+      "pattern": "Coastal flooding increases",
+      "confidence": 0.8,
+      "temporal_context": {
+        "timestamp": "2025-02-07T10:28:41.926229",
+        "source": "climate_data"
+      },
+      "related_patterns": [],
+      "flow_velocity": 0.0,
+      "flow_direction": 0.0,
+      "last_updated": "2025-02-07T15:28:41.926255"
+    },
+    {
+      "pattern": "Ecosystem adaptation required",
+      "confidence": 0.8,
+      "temporal_context": {
+        "timestamp": "2025-02-07T10:28:41.928281",
+        "source": "climate_data"
+      },
+      "related_patterns": [],
+      "flow_velocity": 0.0,
+      "flow_direction": 0.0,
+      "last_updated": "2025-02-07T15:28:41.928291"
     }
   ],
-  "last_updated": "2025-02-07T05:35:22.522996"
+  "last_updated": "2025-02-07T15:28:41.928301"
 }
