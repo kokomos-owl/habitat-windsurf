@@ -4,40 +4,44 @@ A hands-on workshop for learning visualization component development using the W
 
 ## Features
 
-### Real-time Network Visualization
-- Interactive force-directed graph visualization
-- Dark theme with grid background
-- Smooth animations and transitions
-- Drag and zoom capabilities
-- Stage-based filtering
+### Pattern Evolution and Coherence Analysis
+- Dynamic pattern learning from climate risk data
+- Semantic relationship tracking with emphasis detection
+- Temporal coherence analysis
+- Real-time pattern evolution visualization
+- Cross-document pattern analysis
 
-### Error Handling and Status
-- Real-time status updates with glowing indicators
-- Step-by-step process visualization
-- Clear error messaging and state tracking
-- WebSocket-based live updates
+### Advanced Visualization and Analysis
+- Interactive pattern relationship graphs
+- Temporal evolution tracking
+- Coherence strength indicators
+- Pattern density visualization
+- Real-time evolution metrics
 
-### Developer Experience
-- Modular component architecture
-- Clear separation of concerns
-- Comprehensive error handling
-- Real-time debugging capabilities
-- Extensive documentation
+### Pattern-Aware Architecture
+- Semantic pattern extraction engine
+- Coherence calculation service
+- Evolution tracking system
+- Pattern relationship storage
+- Comprehensive documentation in `docs/PATTERN_EVOLUTION.md`
 
 ## Innovation and Value Proposition
 
 This approach is genuinely innovative and powerful for several key reasons:
 
-### Learning Evolution 🌱
-- Traditional workshops: Fixed pace, one-size-fits-all
-- This approach: Adaptive learning that respects individual rhythms
-- Users can deeply explore areas of interest while maintaining forward momentum
+### Pattern Learning Evolution 🌱
+- Dynamic pattern recognition from climate risk data
+- Adaptive coherence analysis based on context
+- Temporal relationship learning
+- Cross-document pattern discovery
+- Semantic emphasis detection
 
-### Agent-Human Partnership 🤝
-- Not just automation, but true collaboration
-- Agents provide scaffolding without taking over
-- Users maintain agency while having support exactly when needed
-- Creates a "learning conversation" rather than just following instructions
+### Pattern-Aware Development 🤝
+- Pattern evolution tracking and visualization
+- Coherence-based relationship analysis
+- Temporal context preservation
+- Dynamic pattern learning
+- Real-time evolution monitoring
 
 ### Habitat-Windsurf Synergy ⚡
 - Habitat's strength: Knowledge evolution and coherence

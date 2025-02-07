@@ -1,0 +1,67 @@
+{
+  "patterns": [
+    {
+      "pattern": "drought_late",
+      "confidence": 1.0,
+      "temporal_context": {
+        "timeframe": "late",
+        "timestamp": "2025-02-07T05:35:22.522530"
+      },
+      "related_patterns": [
+        "wildfire_late",
+        "storm_late",
+        "wildfire_mid"
+      ],
+      "flow_velocity": 0.0,
+      "flow_direction": 0.0,
+      "last_updated": "2025-02-07T05:35:22.522541"
+    },
+    {
+      "pattern": "wildfire_mid",
+      "confidence": 1.0,
+      "temporal_context": {
+        "timeframe": "mid",
+        "timestamp": "2025-02-07T05:35:22.520807"
+      },
+      "related_patterns": [
+        "drought_late",
+        "storm_late"
+      ],
+      "flow_velocity": 0.0,
+      "flow_direction": 0.0,
+      "last_updated": "2025-02-07T05:35:22.520815"
+    },
+    {
+      "pattern": "storm_late",
+      "confidence": 1.0,
+      "temporal_context": {
+        "timeframe": "late",
+        "timestamp": "2025-02-07T05:35:22.522982"
+      },
+      "related_patterns": [
+        "wildfire_late",
+        "drought_late",
+        "wildfire_mid"
+      ],
+      "flow_velocity": 0.0,
+      "flow_direction": 0.0,
+      "last_updated": "2025-02-07T05:35:22.522990"
+    },
+    {
+      "pattern": "wildfire_late",
+      "confidence": 1.0,
+      "temporal_context": {
+        "timeframe": "late",
+        "timestamp": "2025-02-07T05:35:22.522726"
+      },
+      "related_patterns": [
+        "drought_late",
+        "storm_late"
+      ],
+      "flow_velocity": 0.0,
+      "flow_direction": 0.0,
+      "last_updated": "2025-02-07T05:35:22.522734"
+    }
+  ],
+  "last_updated": "2025-02-07T05:35:22.522996"
+}

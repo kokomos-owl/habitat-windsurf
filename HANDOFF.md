@@ -65,40 +65,47 @@ Habitat Windsurf UI Course is an interactive visualization workshop focused on r
 - [ ] Memory leak testing
 - [ ] Load testing with WebSocket connections
 
-## Next Development Phase: Climate Risk Data Integration
+## Next Development Phase: Climate Risk Pattern Evolution
 
 ### Overview
-Implement mock data pipeline for climate risk visualization using `climate_risk_marthas_vineyard.txt` as source data.
+Implement dynamic pattern learning and coherence analysis for climate risk data, building on the initial implementation with `climate_risk_marthas_vineyard.txt` as source data.
 
 ### High-Level Steps
 
-1. **Data Ingestion (Mock NLP)**
-   - Create data parser for climate risk text file
-   - Extract key entities and relationships
-   - Structure data for MongoDB storage
-   - Note: Full NLP pipeline will be implemented later
+1. **Pattern Evolution System**
+   - Semantic pattern extraction with emphasis detection
+   - Temporal relationship tracking
+   - Pattern evolution metrics
+   - Coherence scoring system
+   - Note: See `docs/PATTERN_EVOLUTION.md` for details
 
-2. **MongoDB Integration**
-   - Define document schema for climate risk data
-   - Implement storage endpoints in FastAPI
-   - Preserve `_id` and `doc_id` for habitat_evolution
-   - Add mock coherence metrics
+2. **Pattern Storage and Analysis**
+   - Pattern-aware document schema in MongoDB
+   - Evolution tracking endpoints in FastAPI
+   - Coherence calculation service
+   - Pattern relationship storage
+   - Temporal context preservation
 
-3. **Neo4j Graph Construction (Mock)**
-   - Define graph schema for climate relationships
-   - Create mock relationship patterns
-   - Implement basic graph queries
-   - Note: Will be replaced by actual NLP-driven relationships
+3. **Pattern Visualization**
+   - Dynamic network graph for pattern relationships
+   - Temporal evolution visualization
+   - Coherence strength indicators
+   - Pattern density visualization
+   - Real-time evolution tracking
 
-4. **Visualization Updates**
-   - Add climate-specific node styling
-   - Implement risk level indicators
-   - Add new tooltip information
-   - Create climate-specific filters
+4. **Evolution Analysis Tools**
+   - Pattern evolution tracking interface
+   - Coherence analysis dashboard
+   - Temporal relationship explorer
+   - Pattern density analysis
+   - Cross-document pattern viewer
 
-5. **Testing Strategy**
-   - Unit tests for data parsing
-   - Integration tests for data flow
+5. **Testing and Validation**
+   - Pattern extraction validation
+   - Coherence calculation tests
+   - Evolution tracking verification
+   - Performance benchmarking
+   - Cross-document pattern tests
    - Visualization rendering tests
    - Mock data validation
 
