@@ -65,6 +65,49 @@ Habitat Windsurf UI Course is an interactive visualization workshop focused on r
 - [ ] Memory leak testing
 - [ ] Load testing with WebSocket connections
 
+## Next Development Phase: Climate Risk Data Integration
+
+### Overview
+Implement mock data pipeline for climate risk visualization using `climate_risk_marthas_vineyard.txt` as source data.
+
+### High-Level Steps
+
+1. **Data Ingestion (Mock NLP)**
+   - Create data parser for climate risk text file
+   - Extract key entities and relationships
+   - Structure data for MongoDB storage
+   - Note: Full NLP pipeline will be implemented later
+
+2. **MongoDB Integration**
+   - Define document schema for climate risk data
+   - Implement storage endpoints in FastAPI
+   - Preserve `_id` and `doc_id` for habitat_evolution
+   - Add mock coherence metrics
+
+3. **Neo4j Graph Construction (Mock)**
+   - Define graph schema for climate relationships
+   - Create mock relationship patterns
+   - Implement basic graph queries
+   - Note: Will be replaced by actual NLP-driven relationships
+
+4. **Visualization Updates**
+   - Add climate-specific node styling
+   - Implement risk level indicators
+   - Add new tooltip information
+   - Create climate-specific filters
+
+5. **Testing Strategy**
+   - Unit tests for data parsing
+   - Integration tests for data flow
+   - Visualization rendering tests
+   - Mock data validation
+
+### Key Considerations
+- Keep mock pipeline modular for easy replacement
+- Document all assumptions about future NLP integration
+- Maintain compatibility with habitat_evolution ID system
+- Focus on visualization features that will remain relevant
+
 ### Internal Development (Not Part of Workshop)
 A parallel development effort is underway to migrate and enhance core visualization components. This work is internal and separate from the workshop content.
 
