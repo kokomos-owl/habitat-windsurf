@@ -22,12 +22,12 @@ class NetworkGraph {
         const defs = this.svg.append('defs');
         const pattern = defs.append('pattern')
             .attr('id', 'grid')
-            .attr('width', 50)
-            .attr('height', 50)
+            .attr('width', 25)
+            .attr('height', 25)
             .attr('patternUnits', 'userSpaceOnUse');
 
         pattern.append('path')
-            .attr('d', 'M 50 0 L 0 0 0 50')
+            .attr('d', 'M 25 0 L 0 0 0 25')
             .style('fill', 'none')
             .style('stroke', '#2d2d2d')
             .style('stroke-width', '1');
@@ -54,9 +54,24 @@ class NetworkGraph {
         this.g.attr('transform', event.transform);
     }
 
-    update(data, stage) {
+    update(data, stage, error = null) {
+        console.log('Updating graph with data:', data);
+        console.log('Current stage:', stage);
+        
         this.currentStage = stage;
-        this.metadata = data.metadata || {};
+        this.metadata = data?.metadata || {};
+        
+        // Update error box
+        this.updateErrorBox(error);
+        
+        // Ensure data has required properties
+        if (!data || !data.links || !data.nodes) {
+            console.error('Invalid data structure:', data);
+            return;
+        }
+        
+        console.log('Filtered nodes:', data.nodes);
+        console.log('Filtered links:', data.links);
         
         // Filter data for current stage if needed
         const filteredLinks = data.links.filter(link => !stage || link.stage === stage);
@@ -136,6 +151,9 @@ class NetworkGraph {
             .attr('in', 'SourceGraphic');
 
         // Update simulation
+        console.log('Updating simulation with nodes:', filteredNodes);
+        console.log('Updating simulation with links:', filteredLinks);
+        
         this.simulation
             .nodes(filteredNodes)
             .force('link').links(filteredLinks);
@@ -192,6 +210,70 @@ class NetworkGraph {
         if (!event.active) this.simulation.alphaTarget(0);
         d.fx = null;
         d.fy = null;
+    }
+
+    updateErrorBox(error) {
+        const steps = [
+            { id: 'data', message: 'Loading visualization data' },
+            { id: 'nodes', message: 'Processing network nodes' },
+            { id: 'links', message: 'Processing network links' },
+            { id: 'simulation', message: 'Running force simulation' }
+        ];
+
+        // Create error box if it doesn't exist
+        let errorBox = d3.select('#error-box');
+        if (errorBox.empty()) {
+            errorBox = this.container.append('div')
+                .attr('id', 'error-box')
+                .attr('class', 'error-box');
+
+            const stepList = errorBox.append('ul')
+                .attr('class', 'step-list');
+
+            steps.forEach(step => {
+                const item = stepList.append('li')
+                    .attr('class', 'step-item')
+                    .attr('data-step', step.id);
+
+                item.append('div')
+                    .attr('class', 'status-indicator');
+
+                item.append('p')
+                    .attr('class', 'step-message')
+                    .text(step.message);
+            });
+        }
+
+        // Update step statuses
+        if (error) {
+            // Find which step failed based on error message
+            const failedStep = error.toLowerCase().includes('data') ? 'data' :
+                             error.toLowerCase().includes('node') ? 'nodes' :
+                             error.toLowerCase().includes('link') ? 'links' : 'simulation';
+
+            steps.forEach(step => {
+                const indicator = errorBox.select(`[data-step="${step.id}"] .status-indicator`);
+                if (step.id === failedStep) {
+                    indicator.attr('class', 'status-indicator error');
+                    errorBox.select(`[data-step="${step.id}"] .step-message`)
+                        .text(`${step.message} - ${error}`);
+                } else if (steps.findIndex(s => s.id === step.id) < steps.findIndex(s => s.id === failedStep)) {
+                    indicator.attr('class', 'status-indicator success');
+                    errorBox.select(`[data-step="${step.id}"] .step-message`)
+                        .text(step.message);
+                } else {
+                    indicator.attr('class', 'status-indicator');
+                }
+            });
+        } else {
+            // All steps succeeded
+            steps.forEach(step => {
+                errorBox.select(`[data-step="${step.id}"] .status-indicator`)
+                    .attr('class', 'status-indicator success');
+                errorBox.select(`[data-step="${step.id}"] .step-message`)
+                    .text(step.message);
+            });
+        }
     }
 
     resetZoom() {

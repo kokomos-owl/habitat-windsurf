@@ -139,6 +139,8 @@ async def get_visualization(doc_id: str) -> VisualizationResponse:
         
     except Exception as e:
         logger.error(f"Error getting visualization: {e}")
+        if isinstance(e, HTTPException):
+            raise e
         raise HTTPException(
             status_code=500,
             detail=f"Error getting visualization: {str(e)}"

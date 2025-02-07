@@ -1,5 +1,8 @@
+console.log('Starting visualization initialization...');
+
 // Initialize network visualization
 const network = new NetworkGraph('network-container');
+console.log('Network graph initialized');
 
 // Stage selector functionality
 const stageButtons = document.querySelectorAll('.stage-button');
@@ -51,20 +54,45 @@ document.getElementById('export-graph').addEventListener('click', () => {
 const ws = new WebSocket(`ws://${window.location.host}/api/v1/ws/client1`);
 
 ws.onmessage = (event) => {
-    const data = JSON.parse(event.data);
-    network.update(data, currentStage);
+    try {
+        const data = JSON.parse(event.data);
+        network.update(data, currentStage, null);
+    } catch (error) {
+        console.error('Error processing WebSocket data:', error);
+        network.update({
+            nodes: [],
+            links: [],
+            metadata: {},
+            directed: true,
+            multigraph: false,
+            graph: {}
+        }, currentStage, 'Failed to process real-time update');
+    }
 };
 
 // Initial data fetch
 async function fetchVisualizationData() {
+    console.log('Fetching visualization data...');
     try {
+        console.log('Fetching data from API...');
         const response = await fetch('/api/v1/visualize/latest');
+        console.log('API response:', response);
         if (!response.ok) throw new Error('Failed to fetch visualization data');
         
         const data = await response.json();
-        network.update(data, currentStage);
+        console.log('Parsed API response:', data);
+        console.log('Network data:', data.network_data);
+        network.update(data.network_data, currentStage, null);
     } catch (error) {
         console.error('Error fetching visualization data:', error);
+        network.update({
+            nodes: [],
+            links: [],
+            metadata: {},
+            directed: true,
+            multigraph: false,
+            graph: {}
+        }, currentStage, error.message || 'Failed to fetch data');
     }
 }
 
