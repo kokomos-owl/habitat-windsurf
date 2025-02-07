@@ -239,8 +239,14 @@ class ClimateRiskProcessor:
     def __init__(self):
         self.pattern_extractor = SemanticPatternExtractor()
         
-    async def process_document(self, doc_path: str) -> ProcessingResult:
-        """Process climate risk document using pattern evolution."""
+    async def process_document(self, doc_path: str, doc_id: str = None, adaptive_id: str = None) -> ProcessingResult:
+        """Process climate risk document using pattern evolution.
+        
+        Args:
+            doc_path: Path to document
+            doc_id: MongoDB document ID
+            adaptive_id: Adaptive ID for evolution tracking
+        """
         try:
             start_time = datetime.utcnow()
             validation_errors = []
@@ -255,6 +261,12 @@ class ClimateRiskProcessor:
                 validation_errors.append(f"Document not found: {doc_path}")
                 return ProcessingResult([], start_time, validation_errors)
             
+            # Generate IDs if not provided
+            if not doc_id:
+                doc_id = str(hash(path.name))
+            if not adaptive_id:
+                adaptive_id = f"doc_{doc_id}_{start_time.timestamp()}"
+            
             # Read document
             try:
                 content = path.read_text()
@@ -266,63 +278,80 @@ class ClimateRiskProcessor:
             # Extract patterns using evolution tracking
             metrics = await self.pattern_extractor.extract(content)
             
-            # Calculate overall evolution metrics
+            # Calculate evolution metrics with interface context
             evolution_metrics = None
             if metrics:
-                # Calculate coherence based on temporal relationships and semantic weights
                 combined = EvolutionMetrics()
                 
-                # Group metrics by timeframe
-                timeframe_groups = defaultdict(list)
+                # Group metrics by interface context
+                interface_groups = defaultdict(list)
                 for metric in metrics:
-                    timeframe_groups[metric.timeframe].append(metric)
+                    # Create interface context
+                    interface_key = f"{metric.timeframe}_{metric.risk_type}"
+                    interface_groups[interface_key].append(metric)
                 
-                # Calculate coherence for each timeframe group
+                # Calculate coherence based on interface relationships
                 total_coherence = 0.0
-                for timeframe, group in timeframe_groups.items():
-                    # Higher coherence when multiple risks share same timeframe
+                for interface_key, group in interface_groups.items():
+                    # Base coherence on interface strength
+                    interface_coherence = 0.5  # Base coherence
+                    
+                    # Adjust for pattern density
                     if len(group) > 1:
-                        group_coherence = 0.8 + (0.1 * (len(group) - 2))  # Base 0.8, +0.1 for each additional
-                        # Adjust by semantic weights
-                        avg_weight = sum(m.semantic_weight for m in group) / len(group)
-                        group_coherence *= avg_weight
-                        total_coherence += group_coherence
-                    else:
-                        # Single metric in timeframe - base coherence from semantic weight
-                        group_coherence = 0.4 * group[0].semantic_weight
-                        total_coherence += group_coherence
+                        interface_coherence += 0.1 * (len(group) - 1)
+                    
+                    # Adjust for semantic relationships
+                    semantic_coherence = sum(m.semantic_weight for m in group) / len(group)
+                    interface_coherence *= semantic_coherence
+                    
+                    # Adjust for temporal alignment
+                    temporal_groups = defaultdict(list)
+                    for m in group:
+                        temporal_groups[m.timeframe].append(m)
+                    if len(temporal_groups) > 1:
+                        interface_coherence *= 1.2  # Bonus for temporal spread
+                    
+                    total_coherence += interface_coherence
                 
                 # Normalize coherence
-                if timeframe_groups:
-                    combined.coherence = min(total_coherence / len(timeframe_groups), 1.0)
+                if interface_groups:
+                    combined.coherence = min(total_coherence / len(interface_groups), 1.0)
                 else:
-                    # Ensure minimum coherence when metrics exist
                     combined.coherence = 0.3
                 
-                # Calculate other metrics
+                # Calculate interface-aware metrics
                 for metric in metrics:
                     if metric.evolution_metrics:
-                        combined.stability += metric.evolution_metrics.stability
-                        combined.emergence_rate += metric.evolution_metrics.emergence_rate
-                        combined.cross_pattern_flow += metric.evolution_metrics.cross_pattern_flow
+                        # Weight by interface context
+                        interface_weight = len(interface_groups[f"{metric.timeframe}_{metric.risk_type}"]) / len(metrics)
+                        combined.stability += metric.evolution_metrics.stability * interface_weight
+                        combined.emergence_rate += metric.evolution_metrics.emergence_rate * interface_weight
+                        combined.cross_pattern_flow += metric.evolution_metrics.cross_pattern_flow * interface_weight
                 
-                # Average stability and other metrics
-                n = len(metrics)
-                combined.stability /= n
-                combined.emergence_rate /= n
-                combined.cross_pattern_flow /= n
                 evolution_metrics = combined
             
             # Validate results
             if not metrics:
                 validation_errors.append("No metrics found in document")
             
-            return ProcessingResult(
+            result = ProcessingResult(
                 metrics=metrics,
                 processing_time=start_time,
                 validation_errors=validation_errors,
                 evolution_metrics=evolution_metrics
             )
+            
+            # Track document evolution
+            if hasattr(self, 'evolution_tracker'):
+                evolution_result = self.evolution_tracker.process_document(
+                    doc_id=doc_id,
+                    adaptive_id=adaptive_id,
+                    content=content,
+                    processor_result=result
+                )
+                logger.debug(f"Evolution tracking result: {evolution_result}")
+            
+            return result
             
         except Exception as e:
             logger.error(f"Document processing error: {e}")
