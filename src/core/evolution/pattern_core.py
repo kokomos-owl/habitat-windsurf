@@ -9,13 +9,13 @@ evolution tracking while providing enhanced evidence chains and temporal mapping
 from typing import Dict, Any, List, Optional, Set, Union, Tuple
 from dataclasses import dataclass, field
 from datetime import datetime
-import threading
+from threading import Lock, RLock
 import logging
 from uuid import uuid4
 
 from core.interfaces.base_states import BaseProjectState
 from core.events.event_manager import EventManager
-from core.events.event_types import EventType
+from core.events.event_manager import EventType
 from core.utils.timestamp_service import TimestampService
 from core.utils.version_service import VersionService
 from core.utils.logging_config import get_logger
@@ -28,6 +28,14 @@ class DensityMetrics:
     cross_domain_strength: float = 0.0
     interface_recognition: float = 0.0
     viscosity: float = 0.0
+    
+    def __post_init__(self):
+        """Post initialization validation."""
+        self.global_density = float(self.global_density)
+        self.local_density = float(self.local_density)
+        self.cross_domain_strength = float(self.cross_domain_strength)
+        self.interface_recognition = float(self.interface_recognition)
+        self.viscosity = float(self.viscosity)
     
     def calculate_interface_strength(self) -> float:
         """Calculate interface recognition strength."""
@@ -174,7 +182,7 @@ class PatternCore:
         self.timestamp_service = timestamp_service or TimestampService()
         self.event_manager = event_manager or EventManager()
         self.version_service = version_service or VersionService()
-        self._lock = threading.Lock()
+        self._lock = RLock()
         
         # Enhanced pattern observation storage
         self.evidence_chains: Dict[str, List[PatternEvidence]] = {}
@@ -197,6 +205,17 @@ class PatternCore:
         # Cross-reference tracking
         self.pattern_references: Dict[str, Set[str]] = {}
         self.reference_strengths: Dict[str, Dict[str, float]] = {}
+        
+        # Thresholds
+        self.evidence_threshold = 0.3
+        self.temporal_threshold = 0.3
+        self.density_threshold = 0.3
+        self.viscosity_threshold = 0.35
+        self.stability_threshold = 0.3
+        
+        # Observation history
+        self.pattern_history: List[Dict[str, Any]] = []
+        self.latest_observations: Dict[str, Any] = {}
         
         # Logger initialization
         self.logger = get_logger(__name__)
@@ -464,7 +483,7 @@ class PatternCore:
                 window_refs.update(self.pattern_references[pattern])
         
         # Calculate emergence factors
-        density_factor = window.density_metrics.local_density
+        density_factor = window.density_metrics.local_density if window.density_metrics else 0.0
         reference_factor = (
             len(window_refs) / len(window.patterns)
             if pattern_id in window_refs else 0.0
@@ -472,11 +491,13 @@ class PatternCore:
         viscosity_factor = window.viscosity_gradient
         
         # Weighted emergence rate
-        return (
+        emergence_rate = (
             0.4 * density_factor +
             0.3 * reference_factor +
             0.3 * viscosity_factor
         )
+        
+        return max(0.0, min(1.0, emergence_rate))
     
     def assess_interface_strength(self, pattern_id: str, window_id: str) -> Dict[str, Any]:
         """Assess interface strength for a pattern in a learning window.
