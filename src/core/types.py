@@ -12,6 +12,14 @@ class DensityMetrics:
     cross_domain_strength: float = 0.0
     interface_recognition: float = 0.0
     viscosity: float = 0.0
+    
+    def calculate_interface_strength(self) -> float:
+        """Calculate interface recognition strength."""
+        return (
+            0.4 * self.cross_domain_strength +
+            0.3 * self.viscosity +
+            0.3 * self.local_density
+        )
 
 @dataclass
 class UncertaintyMetrics:

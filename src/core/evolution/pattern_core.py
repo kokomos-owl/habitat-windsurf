@@ -19,31 +19,7 @@ from core.events.event_manager import EventType
 from core.utils.timestamp_service import TimestampService
 from core.utils.version_service import VersionService
 from core.utils.logging_config import get_logger
-
-@dataclass
-class DensityMetrics:
-    """Metrics for pattern density and interface strength."""
-    global_density: float = 0.0
-    local_density: float = 0.0
-    cross_domain_strength: float = 0.0
-    interface_recognition: float = 0.0
-    viscosity: float = 0.0
-    
-    def __post_init__(self):
-        """Post initialization validation."""
-        self.global_density = float(self.global_density)
-        self.local_density = float(self.local_density)
-        self.cross_domain_strength = float(self.cross_domain_strength)
-        self.interface_recognition = float(self.interface_recognition)
-        self.viscosity = float(self.viscosity)
-    
-    def calculate_interface_strength(self) -> float:
-        """Calculate interface recognition strength."""
-        return (
-            0.4 * self.cross_domain_strength +
-            0.3 * self.viscosity +
-            0.3 * self.local_density
-        )
+from core.types import DensityMetrics
 
 @dataclass
 class LearningWindow:
@@ -54,6 +30,13 @@ class LearningWindow:
     density_metrics: DensityMetrics = field(default_factory=DensityMetrics)
     coherence_level: float = 0.0
     viscosity_gradient: float = 0.0
+    
+    def __post_init__(self):
+        """Post initialization validation."""
+        if not isinstance(self.density_metrics, DensityMetrics):
+            self.density_metrics = DensityMetrics()
+        self.coherence_level = float(self.coherence_level)
+        self.viscosity_gradient = float(self.viscosity_gradient)
     
     def update_viscosity(self, new_patterns: List[str]) -> float:
         """Update viscosity gradient based on pattern changes."""
@@ -405,7 +388,7 @@ class PatternCore:
             if len(evidence_chain) > 1:
                 prev_evidence = evidence_chain[-2]
                 evolution_metrics.stability = self._calculate_stability(
-                    current_evidence, prev_evidence
+                    pattern_id, window
                 )
             
             # Update emergence rate based on window context
@@ -428,40 +411,39 @@ class PatternCore:
                 "recognition_threshold": evolution_metrics.calculate_recognition_threshold()
             }
     
-    def _calculate_stability(self, current: PatternEvidence, previous: PatternEvidence) -> float:
-        """Calculate pattern stability between evidence points.
+    def _calculate_stability(self, pattern_id: str, window: LearningWindow) -> float:
+        """Calculate pattern stability in window context.
         
         Args:
-            current: Current pattern evidence
-            previous: Previous pattern evidence
+            pattern_id: Pattern to analyze
+            window: Learning window context
             
         Returns:
             float: Stability score
         """
-        if not current.uncertainty_metrics or not previous.uncertainty_metrics:
+        if not window.patterns:
             return 0.0
             
-        # Compare uncertainty metrics
-        confidence_delta = abs(
-            current.uncertainty_metrics.calculate_overall_confidence() -
-            previous.uncertainty_metrics.calculate_overall_confidence()
+        # Calculate temporal stability based on pattern presence
+        temporal_stability = 1.0 if pattern_id in window.patterns else 0.0
+        
+        # Calculate interface stability
+        interface_stability = window.density_metrics.interface_recognition
+        
+        # Calculate viscosity stability
+        viscosity_stability = 1.0 - window.viscosity_gradient  # Lower gradient means higher stability
+        
+        # Weighted combination
+        stability = (
+            0.4 * temporal_stability +
+            0.3 * interface_stability +
+            0.3 * viscosity_stability
         )
         
-        # Compare density scores if available
-        density_delta = 0.0
-        if current.density_metrics and previous.density_metrics:
-            density_delta = abs(
-                current.calculate_density_score() -
-                previous.calculate_density_score()
-            )
+        # Update stability tracking
+        self.stability_scores[pattern_id] = stability
         
-        # Calculate stability (inverse of change)
-        stability = 1.0 - (
-            0.6 * confidence_delta +
-            0.4 * density_delta
-        )
-        
-        return max(0.0, min(1.0, stability))
+        return min(1.0, max(0.0, stability))  # Ensure stability is between 0 and 1
     
     def _calculate_emergence_rate(self, pattern_id: str, window: LearningWindow) -> float:
         """Calculate pattern emergence rate in window context.
@@ -967,61 +949,6 @@ class PatternCore:
             current.end_time = datetime.now()
             if current.start_time:
                 current.duration = (current.end_time - current.start_time).total_seconds()
-
-    def _calculate_stability(self, evidence: PatternEvidence) -> float:
-        """Calculate pattern stability score."""
-        pattern_type = evidence.pattern_type
-        
-        # Get historical evidence
-        historical = self.evidence_chains.get(pattern_type, [])
-        if not historical:
-            return 1.0
-            
-        # Calculate temporal stability
-        temporal_stability = evidence.uncertainty_metrics.temporal_stability
-        
-        # Calculate cross-reference stability
-        cross_ref_stability = len(evidence.cross_references) / max(
-            len(self.pattern_references), 1
-        )
-        
-        # Calculate evidence chain stability
-        chain_stability = len(historical) / max(
-            sum(len(chain) for chain in self.evidence_chains.values()), 1
-        )
-        
-        # Weighted combination
-        stability = (
-            0.4 * temporal_stability +
-            0.3 * cross_ref_stability +
-            0.3 * chain_stability
-        )
-        
-        # Update stability tracking
-        self.stability_scores[pattern_type] = stability
-        
-        return stability
-
-    def _calculate_emergence_rate(self, evidence: PatternEvidence) -> float:
-        """Calculate pattern emergence rate."""
-        pattern_type = evidence.pattern_type
-        
-        # Get historical evidence
-        historical = self.evidence_chains.get(pattern_type, [])
-        if not historical:
-            return 0.0
-            
-        # Calculate rate of evidence accumulation
-        total_patterns = sum(len(chain) for chain in self.evidence_chains.values())
-        pattern_count = len(historical)
-        
-        emergence = pattern_count / max(total_patterns, 1)
-        
-        # Update emergence tracking
-        self.emergence_rates[pattern_type] = emergence
-        
-        return emergence
-
     def _update_cross_references(self, evidence: PatternEvidence) -> None:
         """Update pattern cross-references."""
         evidence_id = evidence.evidence_id
