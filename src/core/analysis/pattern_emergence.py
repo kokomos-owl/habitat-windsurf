@@ -70,26 +70,46 @@ class PatternEmergenceTracker:
     
     async def observe_elements(
         self,
-        elements: List[StructuralElement],
-        context: StructureContext
+        elements: List[Any],
+        context: Any
     ) -> Dict[str, Any]:
         """
-        Observe structural elements for emerging patterns.
+        Observe elements for emerging patterns.
         
         Args:
-            elements: List of structural elements to observe
-            context: Analysis context
+            elements: List of elements to observe (StructuralElement or PatternEvidence)
+            context: Analysis context (StructureContext or TemporalContext)
             
         Returns:
             Dict containing newly emerged and evolved patterns
         """
         timestamp = self.timestamp_service.get_timestamp()
         
+        # Convert PatternEvidence to format compatible with pattern tracking
+        processed_elements = []
+        for element in elements:
+            if hasattr(element, 'pattern_type'):
+                # Handle PatternEvidence
+                element_id = getattr(element, 'evidence_id', str(id(element)))
+                pattern_type = element.pattern_type
+                metadata = {
+                    'density': element.density_metrics.local_density if hasattr(element, 'density_metrics') else 0.0,
+                    'coherence': element.evolution_metrics.coherence_level if hasattr(element, 'evolution_metrics') else 0.0,
+                    'stability': element.evolution_metrics.stability if hasattr(element, 'evolution_metrics') else 0.0
+                }
+            else:
+                # Handle StructuralElement
+                element_id = element.element_id
+                pattern_type = element.element_type
+                metadata = element.metadata
+            
+            processed_elements.append(element)
+        
         # Look for potential patterns
-        new_patterns = await self._discover_patterns(elements, timestamp)
+        new_patterns = await self._discover_patterns(processed_elements, timestamp)
         
         # Update existing patterns
-        evolved_patterns = self._evolve_patterns(elements, timestamp)
+        evolved_patterns = self._evolve_patterns(processed_elements, timestamp)
         
         # Track evolution
         self._track_evolution(new_patterns, evolved_patterns, timestamp)
@@ -102,7 +122,7 @@ class PatternEmergenceTracker:
     
     async def _discover_patterns(
         self,
-        elements: List[StructuralElement],
+        elements: List[Any],
         timestamp: datetime
     ) -> List[EmergentPattern]:
         """Discover new patterns naturally."""
@@ -121,8 +141,41 @@ class PatternEmergenceTracker:
             if coherence < self.confidence_threshold:
                 continue
             
-            # Find earliest emergence time
-            first_seen = min(e.emergence_time for e in group_elements)
+            # Find earliest emergence time based on element type
+            first_seen = timestamp
+            if hasattr(group_elements[0], 'pattern_type'):
+                # PatternEvidence
+                if hasattr(group_elements[0], 'evolution_metrics'):
+                    first_seen = min(
+                        e.evolution_metrics.first_seen 
+                        for e in group_elements 
+                        if e.evolution_metrics
+                    )
+            else:
+                # StructuralElement
+                first_seen = min(getattr(e, 'emergence_time', timestamp) for e in group_elements)
+            
+            # Create metadata based on element type
+            metadata = {}
+            if hasattr(group_elements[0], 'pattern_type'):
+                # PatternEvidence metadata
+                metadata = {
+                    'density': sum(getattr(e.density_metrics, 'local_density', 0.0) for e in group_elements) / len(group_elements),
+                    'coherence': sum(getattr(e.evolution_metrics, 'coherence_level', 0.0) for e in group_elements) / len(group_elements),
+                    'stability': sum(getattr(e.evolution_metrics, 'stability', 0.0) for e in group_elements) / len(group_elements)
+                }
+            else:
+                # StructuralElement metadata
+                for element in group_elements:
+                    for key, value in element.metadata.items():
+                        if key not in metadata:
+                            metadata[key] = []
+                        metadata[key].append(value)
+                
+                # Average numeric metadata
+                for key, values in metadata.items():
+                    if all(isinstance(v, (int, float)) for v in values):
+                        metadata[key] = sum(values) / len(values)
             
             # Create emergent pattern
             pattern = EmergentPattern(
@@ -132,13 +185,15 @@ class PatternEmergenceTracker:
                 first_seen=first_seen,
                 last_seen=timestamp,
                 confidence=coherence,
-                stability=0.5  # Initial stability
+                stability=metadata.get('stability', 0.5),  # Use stability from metadata if available
+                metadata=metadata
             )
             
             # Track pattern
             self.emergent_patterns[pattern.pattern_id] = pattern
             for element in group_elements:
-                self.element_to_patterns[element.element_id].add(pattern.pattern_id)
+                element_id = getattr(element, 'evidence_id', getattr(element, 'element_id', str(id(element))))
+                self.element_to_patterns[element_id].add(pattern.pattern_id)
             
             new_patterns.append(pattern)
         
@@ -146,7 +201,7 @@ class PatternEmergenceTracker:
     
     def _evolve_patterns(
         self,
-        elements: List[StructuralElement],
+        elements: List[Any],
         timestamp: datetime
     ) -> List[EmergentPattern]:
         """Evolve existing patterns naturally."""
@@ -154,31 +209,58 @@ class PatternEmergenceTracker:
         
         for pattern in self.emergent_patterns.values():
             # Look for new elements that fit pattern
-            new_elements = [
-                e for e in elements
-                if e.element_id not in self.element_to_patterns or
-                pattern.pattern_id not in self.element_to_patterns[e.element_id]
-            ]
+            new_elements = []
+            for element in elements:
+                element_id = getattr(element, 'evidence_id', getattr(element, 'element_id', str(id(element))))
+                if element_id not in self.element_to_patterns or \
+                   pattern.pattern_id not in self.element_to_patterns[element_id]:
+                    new_elements.append(element)
             
             if not new_elements:
                 continue
             
             # Calculate fit with pattern
-            fitting_elements = [
-                e for e in new_elements
-                if self._calculate_element_fit(e, pattern) > self.confidence_threshold
-            ]
+            fitting_elements = []
+            for element in new_elements:
+                fit = self._calculate_element_fit(element, pattern)
+                if fit > self.confidence_threshold:
+                    fitting_elements.append(element)
             
             if fitting_elements:
                 # Update pattern
                 pattern.elements.extend(fitting_elements)
                 pattern.last_seen = timestamp
                 pattern.confidence = self._calculate_group_coherence(pattern.elements)
-                pattern.stability = self._calculate_pattern_stability(pattern)
+                
+                # Update pattern metadata based on new elements
+                if hasattr(fitting_elements[0], 'pattern_type'):
+                    # Update PatternEvidence based metadata
+                    all_elements = pattern.elements
+                    pattern.metadata.update({
+                        'density': sum(getattr(e.density_metrics, 'local_density', 0.0) for e in all_elements) / len(all_elements),
+                        'coherence': sum(getattr(e.evolution_metrics, 'coherence_level', 0.0) for e in all_elements) / len(all_elements),
+                        'stability': sum(getattr(e.evolution_metrics, 'stability', 0.0) for e in all_elements) / len(all_elements)
+                    })
+                    pattern.stability = pattern.metadata['stability']
+                else:
+                    # Update StructuralElement based metadata
+                    for element in fitting_elements:
+                        for key, value in element.metadata.items():
+                            if key not in pattern.metadata:
+                                pattern.metadata[key] = []
+                            pattern.metadata[key].append(value)
+                    
+                    # Average numeric metadata
+                    for key, values in pattern.metadata.items():
+                        if isinstance(values, list) and all(isinstance(v, (int, float)) for v in values):
+                            pattern.metadata[key] = sum(values) / len(values)
+                    
+                    pattern.stability = self._calculate_pattern_stability(pattern)
                 
                 # Update tracking
                 for element in fitting_elements:
-                    self.element_to_patterns[element.element_id].add(pattern.pattern_id)
+                    element_id = getattr(element, 'evidence_id', getattr(element, 'element_id', str(id(element))))
+                    self.element_to_patterns[element_id].add(pattern.pattern_id)
                 
                 evolved_patterns.append(pattern)
         
@@ -186,20 +268,32 @@ class PatternEmergenceTracker:
     
     def _group_by_similarity(
         self,
-        elements: List[StructuralElement]
-    ) -> Dict[str, List[StructuralElement]]:
+        elements: List[Any]
+    ) -> Dict[str, List[Any]]:
         """Group elements by natural similarity."""
-        groups: DefaultDict[str, List[StructuralElement]] = defaultdict(list)
+        groups: DefaultDict[str, List[Any]] = defaultdict(list)
         
         for element in elements:
-            # Consider multiple factors for grouping
-            if element.element_type == 'section':
+            # Handle both StructuralElement and PatternEvidence
+            if hasattr(element, 'element_type'):
+                # StructuralElement grouping
                 depth = element.metadata.get('depth', 0)
-                group_key = f"section_depth_{depth}"
-            elif element.element_type == 'list':
-                group_key = 'list_items'
+                if element.element_type == 'section':
+                    group_key = f"section_depth_{depth}"
+                elif element.element_type == 'list':
+                    group_key = 'list_items'
+                else:
+                    group_key = element.element_type
+            elif hasattr(element, 'pattern_type'):
+                # PatternEvidence grouping
+                if element.evolution_metrics:
+                    coherence = element.evolution_metrics.coherence_level
+                    stability = element.evolution_metrics.stability
+                    group_key = f"{element.pattern_type}_{coherence:.1f}_{stability:.1f}"
+                else:
+                    group_key = element.pattern_type
             else:
-                # Group by coherence
+                # Group by coherence for unknown types
                 best_group = None
                 best_coherence = 0
                 
@@ -220,14 +314,46 @@ class PatternEmergenceTracker:
     
     def _calculate_group_coherence(
         self,
-        elements: List[StructuralElement]
+        elements: List[Any]
     ) -> float:
         """Calculate natural coherence of a group."""
         if not elements:
             return 0.0
             
-        # Consider multiple factors
-        type_coherence = len(set(e.element_type for e in elements)) == 1
+        # Handle both StructuralElement and PatternEvidence
+        if hasattr(elements[0], 'element_type'):
+            # StructuralElement coherence
+            type_coherence = len(set(e.element_type for e in elements)) == 1
+            depth_coherence = len(set(
+                e.metadata.get('depth', 0) for e in elements
+            )) == 1
+            
+            return (
+                0.6 * float(type_coherence) +
+                0.4 * float(depth_coherence)
+            )
+        elif hasattr(elements[0], 'pattern_type'):
+            # PatternEvidence coherence
+            type_coherence = len(set(e.pattern_type for e in elements)) == 1
+            
+            # Consider evolution metrics if available
+            if all(e.evolution_metrics for e in elements):
+                coherence_levels = [
+                    e.evolution_metrics.coherence_level
+                    for e in elements
+                ]
+                stability_levels = [
+                    e.evolution_metrics.stability
+                    for e in elements
+                ]
+                
+                return (
+                    0.4 * float(type_coherence) +
+                    0.3 * (sum(coherence_levels) / len(coherence_levels)) +
+                    0.3 * (sum(stability_levels) / len(stability_levels))
+                )
+            
+            return float(type_coherence)
         
         # Density similarity
         densities = [e.density for e in elements]
@@ -257,26 +383,71 @@ class PatternEmergenceTracker:
     
     def _calculate_element_fit(
         self,
-        element: StructuralElement,
+        element: Any,
         pattern: EmergentPattern
     ) -> float:
         """Calculate how well an element fits a pattern."""
-        # Similar to group coherence but comparing one element to pattern
-        return self._calculate_group_coherence(pattern.elements + [element])
+        if hasattr(element, 'pattern_type'):
+            # PatternEvidence fit calculation
+            if element.pattern_type != pattern.pattern_type:
+                return 0.0
+            
+            # Evolution metrics match
+            metrics_match = 0.0
+            if hasattr(element, 'evolution_metrics') and 'coherence' in pattern.metadata:
+                coherence_diff = abs(
+                    element.evolution_metrics.coherence_level - pattern.metadata['coherence']
+                )
+                stability_diff = abs(
+                    element.evolution_metrics.stability - pattern.metadata['stability']
+                )
+                metrics_match = 1.0 - (coherence_diff + stability_diff) / 2
+            
+            # Density metrics match
+            density_match = 0.0
+            if hasattr(element, 'density_metrics') and 'density' in pattern.metadata:
+                density_diff = abs(
+                    element.density_metrics.local_density - pattern.metadata['density']
+                )
+                density_match = 1.0 - min(density_diff, 1.0)
+            
+            # Coherence with pattern elements
+            coherence = self._calculate_group_coherence(pattern.elements + [element])
+            
+            return (
+                0.4 * float(element.pattern_type == pattern.pattern_type) +
+                0.3 * metrics_match +
+                0.2 * density_match +
+                0.1 * coherence
+            )
+        else:
+            # Similar to group coherence but comparing one element to pattern
+            return self._calculate_group_coherence(pattern.elements + [element])
     
     def _calculate_pattern_stability(
         self,
         pattern: EmergentPattern
     ) -> float:
         """Calculate natural stability of a pattern."""
-        # Consider multiple factors
+        # Check if pattern has elements with evolution metrics
+        if pattern.elements and hasattr(pattern.elements[0], 'pattern_type'):
+            # Use average stability from evolution metrics
+            stabilities = []
+            for element in pattern.elements:
+                if hasattr(element, 'evolution_metrics'):
+                    stabilities.append(element.evolution_metrics.stability)
+            
+            if stabilities:
+                return sum(stabilities) / len(stabilities)
+        
+        # For StructuralElements or mixed patterns
         age_seconds = max(0.1, (pattern.last_seen - pattern.first_seen).total_seconds())
         age_factor = min(1.0, age_seconds / (60 * 60))  # Max age of 1 hour for testing
         
         # Size contribution
         size_factor = min(1.0, pattern.element_count / 5)  # Max size of 5 elements
         
-        # Coherence contribution
+        # Coherence contribution 
         coherence_factor = pattern.confidence
         
         # Consistency contribution - how consistently we see this pattern
