@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Dict, Any, List, Optional
 
-from core.interfaces.base_states import BaseProjectState
+from src.core.interfaces.base_states import BaseProjectState
 
 @dataclass
 class DensityMetrics:
@@ -27,6 +27,7 @@ class UncertaintyMetrics:
     confidence: float = 0.0
     interface_confidence: float = 0.0
     viscosity_stability: float = 0.0
+    temporal_stability: float = 1.0
     
     def calculate_overall_confidence(self) -> float:
         """Calculate overall confidence score."""
