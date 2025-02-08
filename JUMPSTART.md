@@ -1,6 +1,6 @@
 # Habitat Windsurf: Key Action Items
 
-**Document Date**: 2025-02-07T13:28:49-05:00
+**Document Date**: 2025-02-08T11:07:18-05:00
 
 ## Immediate Actions (First 48 Hours)
 
@@ -79,6 +79,8 @@
 - Coherence calculation
 - Real-time updates via WebSocket
 - Basic test coverage
+- DensityMetrics integration
+- Pattern evolution tracking improvements
 
 ### 🚧 In Progress
 - Cross-document pattern analysis

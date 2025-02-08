@@ -1,6 +1,6 @@
 # Flow Pattern Visualization Guide
 
-**Document Date**: 2025-02-07T10:33:09-05:00
+**Document Date**: 2025-02-08T11:07:18-05:00
 
 ## Overview
 
@@ -86,11 +86,11 @@ ws.onPatternUpdate = (data) => {
 
 ### 2. Evolution Stages
 
-Patterns progress through stages:
-- "emerging": Early formation
-- "evolving": Active development
-- "stabilizing": Nearing stability
-- "stable": Consistent pattern
+Patterns progress through stages with enhanced metrics:
+- "emerging": Early formation (DensityMetrics tracking)
+- "evolving": Active development (Interface recognition)
+- "stabilizing": Nearing stability (Cross-domain strength)
+- "stable": Consistent pattern (Global density)
 
 ### 3. Metrics Visualization
 
