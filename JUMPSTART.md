@@ -1,6 +1,25 @@
 # Habitat Windsurf: Key Action Items
 
-**Document Date**: 2025-02-08T11:07:18-05:00
+## Understanding Flow-Based Design
+
+Habitat uses a flow-based architecture that may be different from traditional systems you've worked with. Key concepts to understand:
+
+1. Continuous vs Discrete
+   - Systems use continuous metrics rather than discrete states
+   - Transitions happen naturally through flow mechanics
+   - Resources are managed through pressure differentials
+
+2. Natural Adaptation
+   - Systems adapt automatically to changing conditions
+   - No need to manually manage state transitions
+   - Built-in backpressure handling
+
+3. Pattern Evolution
+   - Patterns emerge naturally from data flows
+   - Evolution happens through continuous gradients
+   - Relationships form based on natural affinities
+
+**Document Date**: 2025-02-08T13:04:23-05:00
 
 ## Immediate Actions (First 48 Hours)
 
@@ -81,6 +100,9 @@
 - Basic test coverage
 - DensityMetrics integration
 - Pattern evolution tracking improvements
+- Pattern evidence handling
+- Pattern type-based grouping
+- Timestamp tracking
 
 ### 🚧 In Progress
 - Cross-document pattern analysis

@@ -1,6 +1,26 @@
 # Habitat Windsurf Next TODOs
 
-**Last Updated**: 2025-02-08T11:07:18-05:00
+## Flow-Based Architecture Enhancement
+
+### 1. Flow Visualization
+- [ ] Implement real-time flow metric visualization
+- [ ] Add pressure differential mapping
+- [ ] Create flow network diagrams
+- [ ] Visualize pattern evolution gradients
+
+### 2. Flow Mechanics
+- [ ] Enhance pressure calculation algorithms
+- [ ] Implement multi-dimensional flow spaces
+- [ ] Add energy state tracking
+- [ ] Improve cross-pattern flow analysis
+
+### 3. System Integration
+- [ ] Connect flow metrics across components
+- [ ] Implement system-wide pressure management
+- [ ] Add flow-based circuit breakers
+- [ ] Create flow monitoring dashboard
+
+**Last Updated**: 2025-02-08T13:04:23-05:00
 
 ## High Priority Tasks
 
@@ -65,6 +85,9 @@
 - [x] Basic test coverage
 - [x] DensityMetrics integration
 - [x] Pattern evolution tracking
+- [x] Pattern evidence handling
+- [x] Pattern type-based grouping
+- [x] Pattern timestamp tracking
 
 ### Infrastructure
 - [x] MongoDB integration

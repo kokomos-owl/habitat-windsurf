@@ -1,6 +1,26 @@
 # Habitat Windsurf UI Course Handoff
 
-**Document Date**: 2025-02-08T11:07:18-05:00
+## Key Architectural Principle: Flow-Based Design
+
+Habitat's architecture is built on flow-based principles, moving away from traditional discrete state machines to a more natural, continuous approach:
+
+1. Flow Mechanics
+   - Continuous metrics instead of discrete states
+   - Pressure-based resource management
+   - Natural pattern evolution
+
+2. System Benefits
+   - More resilient to changing conditions
+   - Better handling of edge cases
+   - Natural adaptation to load
+
+3. Implementation Areas
+   - Temporal processing (adaptive windows)
+   - Pattern evolution
+   - Resource management
+   - System coordination
+
+**Document Date**: 2025-02-08T13:04:23-05:00
 
 ## Project Overview
 
@@ -24,6 +44,9 @@ Habitat Windsurf UI Course is an interactive visualization workshop focused on r
 - Emergence-based coherence validation
 - Adaptive temporal consistency checks
 - Domain ontology integration
+- Pattern evidence handling
+- Pattern type-based grouping
+- Timestamp tracking
 
 ### Status System
 - Real-time process tracking

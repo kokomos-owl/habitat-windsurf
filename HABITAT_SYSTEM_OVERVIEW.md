@@ -1,6 +1,17 @@
 # Habitat System Overview
 
-**Last Updated**: 2025-02-08T11:22:02-05:00
+## Core Philosophy: Flow-Based Architecture
+
+Habitat implements a flow-based architecture that models system behavior using principles from fluid dynamics. Instead of discrete states and rigid transitions, the system uses continuous metrics and natural flows to handle:
+
+- Pattern Evolution
+- Temporal Processing
+- System Adaptation
+- Resource Management
+
+This approach enables more natural and resilient system behavior, better reflecting real-world phenomena.
+
+**Last Updated**: 2025-02-08T13:04:23-05:00
 
 ## Vision
 
@@ -74,11 +85,13 @@ Habitat's primary innovation lies in its approach to system learning and adaptat
 
 #### 1. Pattern Evolution System
 ```python
-# Implements pattern tracking with density metrics
-class PatternEvolution:
+# Implements pattern tracking with density metrics and evolution tracking
+class PatternEmergenceTracker:
     def __init__(self):
-        self.density_metrics = DensityMetrics()
-        self.temporal_context = TemporalContext()
+        self.timestamp_service = TimestampService()
+        self.temporal_core = TemporalCore()
+        self.emergent_patterns = {}
+        self.element_to_patterns = defaultdict(set)
 ```
 
 #### 2. Validation Framework
