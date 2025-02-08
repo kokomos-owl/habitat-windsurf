@@ -12,6 +12,12 @@ from src.core.analysis.structure_analysis import (
     StructuralElement,
     StructureContext
 )
+from src.core.types import (
+    DensityMetrics,
+    PatternEvolutionMetrics,
+    PatternEvidence,
+    TemporalContext
+)
 
 @pytest.fixture
 def pattern_tracker():
@@ -34,6 +40,32 @@ def analysis_context():
         content_type="text",
         analysis_depth=2
     )
+
+@pytest.fixture
+def pattern_evidence():
+    """Create pattern evidence elements."""
+    base_time = datetime.now()
+    
+    def create_evidence(idx, time_offset):
+        return PatternEvidence(
+            evidence_id=f"evidence{idx}",
+            pattern_type="climate_risk",
+            evolution_metrics=PatternEvolutionMetrics(
+                coherence_level=0.7 + (idx * 0.1),
+                stability=0.6 + (idx * 0.1),
+                transition_rate=0.2
+            ),
+            density_metrics=DensityMetrics(
+                local_density=0.8,
+                global_density=0.6
+            ),
+            temporal_context=TemporalContext(
+                start_time=base_time + timedelta(minutes=time_offset),
+                end_time=base_time + timedelta(minutes=time_offset+60)
+            )
+        )
+    
+    return [create_evidence(i, i*60) for i in range(3)]
 
 @pytest.fixture
 def similar_elements():

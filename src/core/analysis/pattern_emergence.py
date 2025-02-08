@@ -144,13 +144,11 @@ class PatternEmergenceTracker:
             # Find earliest emergence time based on element type
             first_seen = timestamp
             if hasattr(group_elements[0], 'pattern_type'):
-                # PatternEvidence
-                if hasattr(group_elements[0], 'evolution_metrics'):
-                    first_seen = min(
-                        e.evolution_metrics.first_seen 
-                        for e in group_elements 
-                        if e.evolution_metrics
-                    )
+                # PatternEvidence - use timestamp
+                first_seen = min(
+                    e.timestamp
+                    for e in group_elements
+                )
             else:
                 # StructuralElement
                 first_seen = min(getattr(e, 'emergence_time', timestamp) for e in group_elements)
@@ -285,13 +283,8 @@ class PatternEmergenceTracker:
                 else:
                     group_key = element.element_type
             elif hasattr(element, 'pattern_type'):
-                # PatternEvidence grouping
-                if element.evolution_metrics:
-                    coherence = element.evolution_metrics.coherence_level
-                    stability = element.evolution_metrics.stability
-                    group_key = f"{element.pattern_type}_{coherence:.1f}_{stability:.1f}"
-                else:
-                    group_key = element.pattern_type
+                # PatternEvidence grouping - only use pattern_type
+                group_key = element.pattern_type
             else:
                 # Group by coherence for unknown types
                 best_group = None
