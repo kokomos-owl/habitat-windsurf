@@ -22,8 +22,24 @@ app.add_middleware(
 examples_output_dir = Path(__file__).parent.parent.parent.parent / "examples" / "output"
 app.mount("/visualizations", StaticFiles(directory=str(examples_output_dir)), name="visualizations")
 
-town_metrics_dir = Path(__file__).parent.parent / "visualization" / "output"
-app.mount("/town-metrics", StaticFiles(directory=str(town_metrics_dir)), name="town-metrics")
+# Get absolute paths to output directories
+base_dir = Path(__file__).resolve().parent.parent
+town_metrics_dir = base_dir / "visualization" / "output"
+print(f"Town metrics directory: {town_metrics_dir}")
+print(f"Directory exists: {town_metrics_dir.exists()}")
+print(f"Directory contents: {list(town_metrics_dir.glob('*'))}")
+
+# Serve the static image file
+app.mount("/static", StaticFiles(directory=str(town_metrics_dir)), name="static")
+
+# Serve an HTML page that displays the visualization
+@app.get("/town-metrics/visualization")
+async def get_town_metrics_visualization():
+    """Return the interactive town metrics visualization."""
+    visualization_path = town_metrics_dir / "climate_risk_visualization.html"
+    if not visualization_path.exists():
+        raise HTTPException(status_code=404, detail="Visualization not found")
+    return FileResponse(visualization_path)
 
 @app.get("/", response_class=HTMLResponse)
 async def root():
@@ -136,13 +152,7 @@ async def health_check():
     """Health check endpoint."""
     return {"status": "healthy"}
 
-@app.get("/town-metrics/visualization")
-async def get_town_metrics_visualization():
-    """Return the town metrics visualization."""
-    visualization_path = town_metrics_dir / "climate_risk_visualization.png"
-    if not visualization_path.exists():
-        raise HTTPException(status_code=404, detail="Visualization not found")
-    return FileResponse(visualization_path)
+
 
 if __name__ == "__main__":
     import uvicorn

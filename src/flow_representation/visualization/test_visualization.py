@@ -1,7 +1,7 @@
 """Test script for climate risk visualization."""
 
 from src.flow_representation.visualization.metrics.town_metrics import TownMetricsProcessor
-from src.flow_representation.visualization.maps.choropleth import ClimateRiskMapVisualizer
+from src.flow_representation.visualization.maps.leaflet_visualizer import LeafletVisualizer
 from pathlib import Path
 
 def main():
@@ -51,18 +51,16 @@ def main():
     }
     
     # Create visualization
-    visualizer = ClimateRiskMapVisualizer()
+    visualizer = LeafletVisualizer()
     
     # Create output directory if it doesn't exist
     output_dir = Path(__file__).parent / 'output'
     output_dir.mkdir(exist_ok=True)
     
     # Generate and save visualization
-    output_path = output_dir / 'climate_risk_visualization.png'
-    visualizer.create_visualization(
-        data,
-        min_max_values,
-        str(output_path)
+    output_path = visualizer.generate_visualization(
+        sample_metrics,
+        output_dir
     )
     
     print(f"Visualization saved to {output_path}")
