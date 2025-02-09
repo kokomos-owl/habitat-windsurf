@@ -2,8 +2,9 @@
 
 from enum import Enum
 from dataclasses import dataclass
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 from datetime import datetime, timedelta
+import numpy as np
 
 class FlowState(Enum):
     """States of a metric flow with transition awareness."""
@@ -31,12 +32,21 @@ class FlowStateManager:
         self.stability_threshold = 0.85
         self.learning_threshold = 0.65
         
-        # Track metric differentials over time
-        self.metric_history: Dict[str, list] = {
-            'confidence': [],
-            'temporal_stability': [],
-            'pattern_matches': []
+        # Vector space dimensions and their characteristics
+        self.dimensions = {
+            'coherence': {'weight': 2.0, 'attractor_threshold': 0.7},
+            'emergence': {'weight': 1.5, 'attractor_threshold': 0.6},
+            'stability': {'weight': 1.0, 'attractor_threshold': 0.8},
+            'temporal': {'weight': 1.0, 'attractor_threshold': 0.5}
         }
+        
+        # Flow field parameters
+        self.field_resolution = 0.1  # Grid resolution for flow field
+        self.attractor_radius = 0.2  # Radius for attractor detection
+        
+        # Track metric history in vector space
+        self.metric_history: List[Dict[str, float]] = []
+        self.history_window = 100
         
         # Track state transitions
         self.transitions: list[FlowTransition] = []
@@ -50,84 +60,175 @@ class FlowStateManager:
         # Update metric history
         self._update_metric_history(metrics)
         
-        # Calculate differentials
-        differentials = self._calculate_differentials()
+        # Calculate vector position
+        position = self._calculate_vector_position(metrics)
         
-        # Check for emergence first
-        if self._detect_emergence(differentials) and current_state == FlowState.ACTIVE:
-            self._record_transition(current_state, FlowState.EMERGING, metrics, differentials['confidence'])
-            return FlowState.EMERGING
-            
-        # From EMERGING, we can go to LEARNING or back to ACTIVE
-        if current_state == FlowState.EMERGING:
-            if metrics['confidence'] < self.learning_threshold:
-                self._record_transition(current_state, FlowState.LEARNING, metrics, differentials['confidence'])
-                return FlowState.LEARNING
-            elif self._is_pattern_stable(metrics, pattern_stats):
-                self._record_transition(current_state, FlowState.ACTIVE, metrics, differentials['confidence'])
-                return FlowState.ACTIVE
+        # Get emergence dimension index
+        emergence_dim = list(self.dimensions.keys()).index('emergence')
+        emergence_strength = position[emergence_dim] / self.dimensions['emergence']['weight']
+        
+        # Calculate state transition metrics
+        stability_score = self._calculate_stability_score(metrics, pattern_stats)
+        learning_need = self._calculate_learning_need(metrics, pattern_stats)
+        
+        # State transition logic using vector space analysis
+        if current_state == FlowState.ACTIVE:
+            if emergence_strength > self.dimensions['emergence']['attractor_threshold']:
+                self._record_transition(current_state, FlowState.EMERGING, metrics, 0.0)
+                return FlowState.EMERGING
                 
-        # Check other state transitions
-        if metrics['confidence'] > self.stability_threshold and current_state in [FlowState.ACTIVE, FlowState.LEARNING]:
-            self._record_transition(current_state, FlowState.STABLE, metrics, differentials['confidence'])
+        elif current_state == FlowState.EMERGING:
+            # Prioritize learning transition when confidence is low
+            confidence = metrics.get('confidence', 1.0)
+            if confidence < self.learning_threshold:
+                self._record_transition(current_state, FlowState.LEARNING, metrics, 0.0)
+                return FlowState.LEARNING
+            elif stability_score > self.stability_threshold:
+                self._record_transition(current_state, FlowState.STABLE, metrics, 0.0)
+                return FlowState.STABLE
+                
+        elif current_state == FlowState.LEARNING:
+            if stability_score > self.stability_threshold:
+                self._record_transition(current_state, FlowState.STABLE, metrics, 0.0)
+                return FlowState.STABLE
+            
+        # From STABLE, check for deprecation
+        elif current_state == FlowState.STABLE:
+            if self._should_deprecate(metrics, pattern_stats):
+                self._record_transition(current_state, FlowState.DEPRECATED, metrics, 0.0)
+                return FlowState.DEPRECATED
+            elif learning_need > self.learning_threshold:
+                self._record_transition(current_state, FlowState.LEARNING, metrics, 0.0)
+                return FlowState.LEARNING
+                
+        # Check for deprecation in any state
+        if self._should_deprecate(metrics, pattern_stats):
+            self._record_transition(current_state, FlowState.DEPRECATED, metrics, 0.0)
+            return FlowState.DEPRECATED
+            
+        # Default transitions based on stability and learning needs
+        if stability_score > self.stability_threshold:
+            self._record_transition(current_state, FlowState.STABLE, metrics, 0.0)
             return FlowState.STABLE
             
-        if metrics['confidence'] < self.learning_threshold and current_state != FlowState.LEARNING:
-            self._record_transition(current_state, FlowState.LEARNING, metrics, differentials['confidence'])
+        if learning_need > self.learning_threshold:
+            self._record_transition(current_state, FlowState.LEARNING, metrics, 0.0)
             return FlowState.LEARNING
-            
-        # Check for deprecation
-        if self._should_deprecate(metrics, pattern_stats):
-            self._record_transition(current_state, FlowState.DEPRECATED, metrics, differentials['confidence'])
-            return FlowState.DEPRECATED
             
         return current_state
     
     def _update_metric_history(self, metrics: Dict[str, float]) -> None:
         """Update historical metrics."""
-        timestamp = datetime.now()
-        for metric_type, value in metrics.items():
-            if metric_type in self.metric_history:
-                self.metric_history[metric_type].append((timestamp, value))
-                
-        # Prune old data
-        cutoff = timestamp - self.emergence_window
-        for metric_type in self.metric_history:
-            self.metric_history[metric_type] = [
-                (ts, val) for ts, val in self.metric_history[metric_type]
-                if ts > cutoff
-            ]
+        # Add new metrics to history
+        self.metric_history.append(metrics)
+        
+        # Keep only the last history_window entries
+        if len(self.metric_history) > self.history_window:
+            self.metric_history = self.metric_history[-self.history_window:]
     
     def _calculate_differentials(self) -> Dict[str, float]:
         """Calculate rate of change for each metric."""
         differentials = {}
-        for metric_type, history in self.metric_history.items():
-            if len(history) < 2:
-                differentials[metric_type] = 0.0
-                continue
-                
-            # Calculate weighted moving average of changes
-            changes = []
-            weights = []
-            for i in range(1, len(history)):
-                time_diff = (history[i][0] - history[i-1][0]).total_seconds()
-                value_diff = history[i][1] - history[i-1][1]
-                if time_diff > 0:
-                    rate = value_diff / time_diff
-                    changes.append(rate)
-                    weights.append(1 / (i + 1))  # More recent changes weighted higher
-                    
-            if changes:
-                differentials[metric_type] = sum(c * w for c, w in zip(changes, weights)) / sum(weights)
-            else:
-                differentials[metric_type] = 0.0
+        
+        if len(self.metric_history) < 2:
+            return differentials
+            
+        # Get current and previous metrics
+        current = self.metric_history[-1]
+        previous = self.metric_history[-2]
+        
+        # Calculate differentials for key metrics
+        for metric in ['coherence', 'emergence_potential', 'temporal_stability', 'confidence']:
+            current_val = current.get(metric, 0.0)
+            prev_val = previous.get(metric, 0.0)
+            differentials[metric] = current_val - prev_val
                 
         return differentials
+
     
-    def _detect_emergence(self, differentials: Dict[str, float]) -> bool:
-        """Detect if pattern is showing signs of emergence."""
-        # Check emergence potential in metrics
-        return differentials.get('emergence_potential', 0) > self.emergence_threshold
+    def _calculate_stability_score(self, metrics: Dict[str, float], pattern_stats: Dict[str, Any]) -> float:
+        """Calculate overall stability score using multiple metrics."""
+        # Get relevant metrics
+        temporal_stability = metrics.get('temporal_stability', 0.0)
+        coherence = metrics.get('coherence', 0.0)
+        confidence = metrics.get('confidence', 0.0)
+        pattern_count = len(pattern_stats.get('active_patterns', []))
+        
+        # Calculate stability components
+        temporal_weight = 2.0
+        coherence_weight = 1.5
+        confidence_weight = 1.0
+        pattern_weight = 0.5
+        
+        stability_factors = [
+            temporal_stability * temporal_weight,
+            coherence * coherence_weight,
+            confidence * confidence_weight,
+            min(pattern_count / 10.0, 1.0) * pattern_weight  # Normalize pattern count
+        ]
+        
+        return sum(stability_factors) / (temporal_weight + coherence_weight + confidence_weight + pattern_weight)
+        
+    def _calculate_learning_need(self, metrics: Dict[str, float], pattern_stats: Dict[str, Any]) -> float:
+        """Calculate the need for learning based on pattern behavior."""
+        # Get relevant metrics
+        emergence_potential = metrics.get('emergence_potential', 0.0)
+        pattern_matches = metrics.get('pattern_matches', 0)
+        temporal_variance = metrics.get('temporal_variance', 0.0)
+        
+        learning_factors = [
+            emergence_potential * 2.0,  # Weight emergence heavily
+            (1.0 - pattern_matches/100.0) if pattern_matches > 0 else 1.0,  # Inverse of pattern matches
+            temporal_variance
+        ]
+        
+        return sum(learning_factors) / 4.0  # Normalize
+        
+    def _calculate_vector_position(self, metrics: Dict[str, float]) -> np.ndarray:
+        """Calculate position in vector space using metric values."""
+        position = np.zeros(len(self.dimensions))
+        
+        # Map metrics to dimensions with fallbacks
+        metric_mapping = {
+            'coherence': metrics.get('coherence', 0.0),
+            'emergence': metrics.get('emergence_potential', metrics.get('confidence', 0.0)),
+            'stability': metrics.get('stability', metrics.get('success_rate', 0.0)),
+            'temporal': metrics.get('temporal_stability', 1.0 - metrics.get('temporal_variance', 0.0))
+        }
+        
+        # Calculate weighted position
+        for i, (dim, params) in enumerate(self.dimensions.items()):
+            position[i] = metric_mapping.get(dim, 0.0) * params['weight']
+                
+        return position
+    
+    def _detect_emergence(self, differentials: Dict[str, float]) -> float:
+        """Detect emergence using vector space analysis."""
+        if len(self.metric_history) < 2:
+            return 0.0
+            
+        # Calculate current and previous positions
+        current_metrics = self.metric_history[-1]
+        prev_metrics = self.metric_history[-2]
+        
+        current_pos = self._calculate_vector_position(current_metrics)
+        prev_pos = self._calculate_vector_position(prev_metrics)
+        
+        # Calculate emergence characteristics
+        emergence_dim = list(self.dimensions.keys()).index('emergence')
+        emergence_strength = current_pos[emergence_dim] / self.dimensions['emergence']['weight']
+        
+        # Calculate flow characteristics
+        velocity = current_pos - prev_pos
+        speed = np.linalg.norm(velocity)
+        
+        # Weight emergence by both position and movement
+        emergence_score = emergence_strength * (1.0 + min(speed / self.field_resolution, 1.0))
+        
+        return emergence_score
+
+
+
     
     def _is_pattern_stable(self, metrics: Dict[str, float], pattern_stats: Dict[str, Any]) -> bool:
         """Check if pattern has stabilized."""
