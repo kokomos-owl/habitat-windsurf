@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Martha's Vineyard Climate Risk Flow</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #1a1a1a;
+            --grid-color: rgba(255, 255, 255, 0.03);
+            --node-highlight: rgba(74, 144, 226, 0.7);
+            --link-color: rgba(255, 255, 255, 0.15);
+            --text-primary: rgba(255, 255, 255, 0.9);
+            --text-secondary: rgba(255, 255, 255, 0.5);
+            --control-bg: rgba(64, 64, 64, 0.8);
+            --control-hover: rgba(80, 80, 80, 0.9);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            overflow: hidden;
+        }
+
+        .graph-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .grid-background {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-size: 40px 40px;
+            background-image:
+                linear-gradient(to right, var(--grid-color) 1px, transparent 1px),
+                linear-gradient(to bottom, var(--grid-color) 1px, transparent 1px);
+        }
+
+        #graph-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .controls-overlay {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 6px;
+            z-index: 2;
+        }
+
+        .btn {
+            background: rgba(40, 40, 40, 0.95);
+            border: none;
+            color: rgba(255, 255, 255, 0.7);
+            padding: 5px 12px;
+            border-radius: 2px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            font-size: 12px;
+            height: 26px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: fit-content;
+        }
+
+        .btn:hover {
+            background: rgba(50, 50, 50, 0.95);
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .btn.primary {
+            background: rgb(74, 144, 226);
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .btn.primary:hover {
+            background: rgb(84, 154, 236);
+        }
+
+        .visualization-frame {
+            position: absolute;
+            top: 60px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: 2fr 1fr;
+            gap: 10px;
+            padding: 10px;
+        }
+
+        .viz-panel {
+            background: rgba(30, 30, 30, 0.95);
+            border-radius: 4px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .viz-panel h3 {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+        }
+
+        .error-panel {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            width: 300px;
+            max-height: 200px;
+            overflow-y: auto;
+            background: #4c4c4c61;
+            border: 1px solid #66666652;
+            border-radius: 4px;
+            padding: 10px;
+            font-size: 10pt;
+            color: #e0e0e0;
+            z-index: 1000;
+        }
+
+        .error-panel ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .error-panel li {
+            padding: 4px 0;
+            border-bottom: 1px solid #666;
+        }
+
+        .error-panel li:last-child {
+            border-bottom: none;
+        }
+
+        .error-panel .error-io { color: #ff9494; }
+        .error-panel .error-ws { color: #94ff94; }
+        .error-panel .error-pipeline { color: #9494ff; }
+    </style>
+</head>
+<body>
+    <div id="errorPanel" class="error-panel">
+        <ul id="errorList"></ul>
+    </div>
+
+    <div class="graph-container">
+        <div class="grid-background"></div>
+        <div class="controls-overlay">
+            <button class="btn" onclick="toggleView('coherence')">Coherence</button>
+            <button class="btn" onclick="toggleView('cross_pattern_flow')">Cross Pattern Flow</button>
+            <button class="btn" onclick="toggleView('emergence_rate')">Emergence Rate</button>
+            <button class="btn" onclick="toggleView('geographic')">Geographic</button>
+            <button class="btn primary" onclick="resetView()">Reset View</button>
+        </div>
+        <div class="visualization-frame">
+            <div class="viz-panel">
+                <h3>Timeline Evolution</h3>
+                <iframe id="timeline-frame" style="flex: 1; border: none;"></iframe>
+            </div>
+            <div class="viz-panel">
+                <h3>Pattern Network</h3>
+                <iframe id="network-frame" style="flex: 1; border: none;"></iframe>
+            </div>
+            <div class="viz-panel">
+                <h3>Topology View</h3>
+                <iframe id="topology-frame" style="flex: 1; border: none;"></iframe>
+            </div>
+            <div class="viz-panel">
+                <h3>Current Metrics</h3>
+                <iframe id="metrics-frame" style="flex: 1; border: none;"></iframe>
+            </div>
+            <div class="viz-panel">
+                <h3>Key Insights</h3>
+                <iframe id="insights-frame" style="flex: 1; border: none;"></iframe>
+            </div>
+            <div class="viz-panel">
+                <h3>Dimension Controls</h3>
+                <iframe id="controls-frame" style="flex: 1; border: none;"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentView = 'coherence';
+        const baseUrl = 'http://localhost:8000/visualizations/';
+
+        function loadVisualization(view) {
+            const frames = {
+                'timeline-frame': `mv_climate_risk_${view}.html#timeline`,
+                'network-frame': `mv_climate_risk_${view}.html#network`,
+                'topology-frame': `mv_climate_risk_${view}.html#topology`,
+                'metrics-frame': `mv_climate_risk_${view}.html#metrics`,
+                'insights-frame': `mv_climate_risk_${view}.html#insights`,
+                'controls-frame': `mv_climate_risk_${view}.html#controls`
+            };
+
+            Object.entries(frames).forEach(([frameId, src]) => {
+                document.getElementById(frameId).src = baseUrl + src;
+            });
+        }
+
+        function toggleView(view) {
+            currentView = view;
+            loadVisualization(view);
+            
+            // Update button states
+            document.querySelectorAll('.controls-overlay .btn').forEach(btn => {
+                if (btn.textContent.toLowerCase() === view.replace('_', ' ')) {
+                    btn.classList.add('primary');
+                } else {
+                    btn.classList.remove('primary');
+                }
+            });
+        }
+
+        function resetView() {
+            toggleView('coherence');
+        }
+
+        function addError(message, type = 'io') {
+            const errorList = document.getElementById('errorList');
+            const li = document.createElement('li');
+            li.textContent = message;
+            li.className = `error-${type}`;
+            errorList.appendChild(li);
+            
+            // Remove error after 5 seconds
+            setTimeout(() => {
+                li.remove();
+            }, 5000);
+        }
+
+        // Initialize with coherence view
+        document.addEventListener('DOMContentLoaded', () => {
+            toggleView('coherence');
+        });
+    </script>
+</body>
+</html>
