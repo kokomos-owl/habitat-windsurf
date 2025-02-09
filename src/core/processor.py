@@ -164,7 +164,7 @@ class ClimateRiskProcessor:
             # Get overall evolution metrics
             evolution_metrics = None
             if metrics:
-                avg_stability = sum(m.evolution_metrics.stability_score for m in metrics) / len(metrics)
+                avg_stability = sum(m.evolution_metrics.stability for m in metrics) / len(metrics)
                 evolution_metrics = EvolutionMetrics(
                     stability=avg_stability,
                     coherence=sum(m.evolution_metrics.coherence for m in metrics) / len(metrics),

@@ -64,9 +64,13 @@ async def test_document_processing(processor, test_document):
     # Check confidence levels
     assert all(m.confidence > 0.6 for m in result.metrics)
     
-    # Verify evolution metrics
+    # Verify evolution metrics using vector space dimensions
     assert result.evolution_metrics.stability > 0
-    assert result.evolution_metrics.trend in {'stable', 'improving', 'degrading', 'unknown'}
+    assert result.evolution_metrics.coherence > 0
+    assert 0 <= result.evolution_metrics.emergence_rate <= 1
+    assert 0 <= result.evolution_metrics.cross_pattern_flow <= 1
+    assert 0 <= result.evolution_metrics.energy_state <= 1
+    assert 0 <= result.evolution_metrics.adaptation_rate <= 1
 
 def test_pattern_recognition(test_document):
     """Test pattern recognition capabilities."""
