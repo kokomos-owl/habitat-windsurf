@@ -72,7 +72,7 @@ class MockDataGenerator:
                 if next_state['flow_id'] not in self.flow_manager.active_flows:
                     self.flow_manager.create_flow(
                         next_state['flow_id'],
-                        source_pattern=next_state['metrics']['risk_type']
+                        next_state['metrics']['risk_type']
                     )
                 
                 flow = self.flow_manager.active_flows[next_state['flow_id']]

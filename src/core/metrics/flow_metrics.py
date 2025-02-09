@@ -76,7 +76,7 @@ class MetricFlowManager:
         if flow_id in self.active_flows:
             return self.active_flows[flow_id]
             
-        flow = MetricFlow(flow_id=flow_id, source_pattern=source_pattern)
+        flow = MetricFlow(flow_id, source_pattern)
         self.active_flows[flow_id] = flow
         
         if source_pattern not in self.pattern_flows:

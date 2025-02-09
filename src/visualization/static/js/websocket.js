@@ -6,7 +6,7 @@ class WebSocketManager {
 
     connect() {
         const clientId = 'client_' + Math.random().toString(36).substr(2, 9);
-        this.ws = new WebSocket(`ws://localhost:8000/api/v1/ws/${clientId}`);
+        this.ws = new WebSocket(`ws://localhost:8765/ws/${clientId}`);
         
         this.ws.onopen = () => {
             console.log('WebSocket connected');
