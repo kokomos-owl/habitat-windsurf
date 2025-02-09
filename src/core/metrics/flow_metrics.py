@@ -21,24 +21,39 @@ class MetricFlow:
     history: List[Dict[str, Any]] = field(default_factory=list)
     
     def calculate_flow_confidence(self) -> float:
-        """Calculate overall confidence based on flow metrics."""
+        """Calculate overall confidence based on flow metrics and field topology."""
         weights = {
-            'base_confidence': 0.3,
-            'viscosity': 0.2,
-            'density': 0.2,
+            'base_confidence': 0.25,
+            'viscosity': 0.15,
+            'density': 0.15,
             'temporal_stability': 0.15,
-            'cross_validation': 0.15
+            'cross_validation': 0.15,
+            'field_stability': 0.15  # New weight for field topology
         }
+        
+        # Get field stability from topology
+        field_state = self._analyze_vector_field()
+        field_stability = 1.0 - min(1.0, field_state.divergence / self.collapse_threshold)
         
         scores = {
             'base_confidence': self.confidence,
             'viscosity': 1.0 - (self.viscosity / 2),  # Lower viscosity is better
             'density': self.density,
             'temporal_stability': self.temporal_stability,
-            'cross_validation': self.cross_validation_score
+            'cross_validation': self.cross_validation_score,
+            'field_stability': field_stability
         }
         
         return sum(scores[k] * weights[k] for k in weights)
+
+@dataclass
+class VectorFieldState:
+    """Represents the state of the vector field at a point in time."""
+    magnitude: float
+    direction: float
+    divergence: float
+    curl: float
+    critical_points: List[Dict[str, Any]] = field(default_factory=list)
 
 class MetricFlowManager:
     """Manages metric flows through the system."""
@@ -46,9 +61,88 @@ class MetricFlowManager:
     def __init__(self):
         self.active_flows: Dict[str, MetricFlow] = {}
         self.pattern_flows: Dict[str, List[str]] = {}
+        self.field_history: List[VectorFieldState] = []
+        
+        # Topology parameters
+        self.field_resolution = 0.1
+        self.attractor_radius = 0.2
+        self.collapse_threshold = 0.3
         
         # Confidence thresholds
         self.min_confidence = 0.6
+        
+    def _analyze_vector_field(self) -> VectorFieldState:
+        """Analyze vector field topology to detect pattern collapse."""
+        if not self.history:
+            return VectorFieldState(0.0, 0.0, 0.0, 0.0)
+            
+        # Calculate field characteristics
+        current = self.history[-1]
+        previous = self.history[-2] if len(self.history) > 1 else current
+        
+        # Calculate vector components
+        dx = current['confidence'] - previous['confidence']
+        dy = current['temporal_stability'] - previous['temporal_stability']
+        
+        # Calculate field properties
+        magnitude = (dx**2 + dy**2)**0.5
+        direction = math.atan2(dy, dx)
+        
+        # Calculate field derivatives
+        if len(self.history) > 2:
+            ddx = dx - (previous['confidence'] - self.history[-3]['confidence'])
+            ddy = dy - (previous['temporal_stability'] - self.history[-3]['temporal_stability'])
+            divergence = ddx + ddy
+            curl = ddy - ddx
+        else:
+            divergence = 0.0
+            curl = 0.0
+            
+        # Identify critical points
+        critical_points = []
+        if magnitude < self.field_resolution:
+            critical_type = 'attractor' if divergence < 0 else 'source'
+            critical_points.append({
+                'type': critical_type,
+                'position': (current['confidence'], current['temporal_stability']),
+                'strength': abs(divergence)
+            })
+            
+        return VectorFieldState(
+            magnitude=magnitude,
+            direction=direction,
+            divergence=divergence,
+            curl=curl,
+            critical_points=critical_points
+        )
+        
+    def detect_pattern_collapse(self, flow_id: str) -> Optional[Dict[str, Any]]:
+        """Detect if a pattern is collapsing using vector field topology."""
+        flow = self.active_flows.get(flow_id)
+        if not flow or len(flow.history) < 3:
+            return None
+            
+        # Analyze field topology
+        field_state = self._analyze_vector_field()
+        
+        # Check for collapse conditions
+        is_collapsing = (
+            field_state.divergence > self.collapse_threshold or
+            (field_state.magnitude > 0.5 and field_state.curl > 0.7) or
+            any(p['type'] == 'source' and p['strength'] > 0.8 
+                for p in field_state.critical_points)
+        )
+        
+        if is_collapsing:
+            return {
+                'flow_id': flow_id,
+                'collapse_type': 'topology_based',
+                'severity': min(1.0, field_state.divergence / self.collapse_threshold),
+                'field_state': field_state,
+                'recovery_chance': 1.0 - (field_state.magnitude / 2)
+            }
+            
+        return None
         self.preferred_confidence = 0.8
         
         # Pattern recognition settings

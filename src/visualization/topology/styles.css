@@ -1,0 +1,65 @@
+/* Topology Visualization Styles */
+
+.vector-field-layer {
+    pointer-events: none;
+}
+
+.streamline {
+    transition: stroke-width 0.3s ease;
+}
+
+.critical-point {
+    transition: transform 0.3s ease;
+}
+
+.critical-point .glyph {
+    transition: font-size 0.3s ease;
+}
+
+.warning-border {
+    transition: stroke-width 0.3s ease;
+}
+
+.warning-icon {
+    transition: transform 0.3s ease;
+}
+
+/* Animations */
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.2); opacity: 0.7; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes flash {
+    0% { opacity: 1; }
+    50% { opacity: 0.3; }
+    100% { opacity: 1; }
+}
+
+/* Critical Point Types */
+.critical-point.attractor .glyph {
+    fill: #44ff44;
+}
+
+.critical-point.source .glyph {
+    fill: #ff4444;
+}
+
+.critical-point.saddle .glyph {
+    fill: #ffff44;
+}
+
+/* Warning States */
+.warning-border.severe {
+    stroke: #ff4444;
+    animation: flash 1s infinite;
+}
+
+.warning-border.moderate {
+    stroke: #ffff44;
+}
+
+.warning-border.mild {
+    stroke: #44ff44;
+}
