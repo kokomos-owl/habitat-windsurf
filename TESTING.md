@@ -28,6 +28,14 @@
 
 ## Visualization Service Testing Results
 
+### Town Visualization
+- ✅ GeoJSON generation for town boundaries
+- ✅ Metric-based color blending
+- ✅ Heatmap layer functionality
+- ✅ Static file serving for data
+- ⚠️ Town boundary accuracy (using simplified polygons)
+- ⚠️ Color scheme refinement needed
+
 ### API Endpoints
 - ✅ POST `/api/v1/visualize`: Successfully creates visualizations
 - ✅ GET `/api/v1/visualize/{doc_id}`: Successfully retrieves visualizations

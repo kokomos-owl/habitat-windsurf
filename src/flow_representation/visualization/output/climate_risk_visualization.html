@@ -93,8 +93,16 @@
                     'Light Theme': lightLayer
                 };
 
+                // Add willReadFrequently to canvas for better performance with heatmap
+                const canvas = document.createElement('canvas');
+                canvas.willReadFrequently = true;
+                L.heatLayer.prototype._initCanvas = function() {
+                    this._canvas = canvas;
+                    this._ctx = canvas.getContext('2d');
+                };
+                
                 // Load town boundaries
-                fetch('maps/data/mv_towns.json')
+                fetch('/data/mv_towns.json')
                     .then(response => response.json())
                     .then(geojson => {
                         // Create polygon layer

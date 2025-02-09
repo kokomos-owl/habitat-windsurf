@@ -31,9 +31,16 @@ Habitat now implements a controlled pattern evolution system with the following 
 
 ## Project Overview
 
-Habitat Windsurf UI Course implements a controlled pattern evolution system that allows step-wise visualization of climate risk patterns. The system demonstrates modern real-time visualization practices with a focus on pattern-specific evolution and state management.
+Habitat Windsurf UI Course implements a controlled pattern evolution system that allows step-wise visualization of climate risk patterns. The system demonstrates modern real-time visualization practices with a focus on pattern-specific evolution and state management. Recent updates include polygon-based town visualization with metric-driven color blending.
 
 ## Component Architecture
+
+### Town Visualization System
+- LeafletVisualizer: Main visualization component
+  * GeoJSON-based town boundaries
+  * Metric-driven color blending
+  * Interactive heatmap layer
+  * Popup metric displays
 
 ### Pattern Evolution Server
 - `pattern_evolution_server.py`: WebSocket-based evolution control

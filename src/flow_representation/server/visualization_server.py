@@ -22,6 +22,10 @@ app.add_middleware(
 examples_output_dir = Path(__file__).parent.parent.parent.parent / "examples" / "output"
 app.mount("/visualizations", StaticFiles(directory=str(examples_output_dir)), name="visualizations")
 
+# Mount the visualization output directory
+visualization_output_dir = Path(__file__).parent.parent / "visualization" / "output"
+app.mount("/data", StaticFiles(directory=str(visualization_output_dir)), name="data")
+
 # Get absolute paths to output directories
 base_dir = Path(__file__).resolve().parent.parent
 town_metrics_dir = base_dir / "visualization" / "output"

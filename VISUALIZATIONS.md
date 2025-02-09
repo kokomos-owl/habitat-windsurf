@@ -2,7 +2,23 @@
 
 ## Current Implementation State
 
-Habitat's visualization system now implements controlled pattern evolution with step-wise state transitions:
+Habitat's visualization system now implements town-based visualization with metric overlays and controlled pattern evolution:
+
+### Town Visualization
+1. **Boundary Display**
+   - GeoJSON-based polygon overlays
+   - Dynamic boundary generation
+   - Interactive town selection
+
+2. **Metric Visualization**
+   - Color blending based on metrics:
+     * Red: 40% coherence + 20% emergence rate
+     * Green: 40% cross pattern flow + 20% social support
+     * Blue: 40% emergence rate + 20% coherence
+   - Interactive popups with detailed metrics
+   - Heatmap layer for aggregate view
+
+### Pattern Evolution
 
 1. Pattern Evolution Server
    - WebSocket-based real-time updates

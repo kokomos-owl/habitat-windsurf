@@ -25,9 +25,10 @@
 
 ### In Progress
 1. Flow Visualization
-   - Real-time metric display
-   - Flow network mapping
-   - Pressure visualization
+   - Town polygon overlays implemented
+   - Metric-based color blending
+   - Interactive heatmap layer
+   - GeoJSON-based boundary visualization
 
 2. Advanced Features
    - Multi-dimensional flows
@@ -57,7 +58,8 @@ Controlled pattern evolution visualization implemented, testing in progress:
 - [x] Pattern-specific characteristics
 - [x] State transition controls
 - [x] Error handling and status display
-- [ ] Vector field topology integration
+- [x] Town boundary visualization
+- [ ] Accurate town polygon shapes
 - [ ] Performance optimization
 - [ ] Cross-pattern relationship visualization
 

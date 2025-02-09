@@ -20,6 +20,16 @@ class LeafletVisualizer:
             'minZoom': 9
         }
         
+        # Town coordinates (centroids)
+        self.town_coordinates = {
+            'Aquinnah': [-70.8260, 41.3474],
+            'Chilmark': [-70.7574, 41.3432],
+            'Edgartown': [-70.5133, 41.3896],
+            'Oak Bluffs': [-70.5595, 41.4546],
+            'Tisbury': [-70.6134, 41.4532],
+            'West Tisbury': [-70.6784, 41.3815]
+        }
+        
         # Create the template directory if it doesn't exist
         self.template_dir.mkdir(exist_ok=True)
         
@@ -48,10 +58,35 @@ class LeafletVisualizer:
         point_data = self.create_point_data(town_data)
         
         # Copy GeoJSON file to output directory
-        import shutil
-        geojson_src = self.data_dir / 'mv_towns.json'
-        geojson_dst = output_dir / 'mv_towns.json'
-        shutil.copy(geojson_src, geojson_dst)
+        import shutil, json
+        
+        # Create data directory if it doesn't exist
+        self.data_dir.mkdir(exist_ok=True)
+        
+        # Create GeoJSON with proper coordinate order
+        geojson = {
+            "type": "FeatureCollection",
+            "features": [{
+                "type": "Feature",
+                "properties": {"name": town},
+                "geometry": {
+                    "type": "Polygon",
+                    "coordinates": [[
+                        [coords[0], coords[1]],  # start/end point
+                        [coords[0] - 0.01, coords[1] + 0.01],  # top left
+                        [coords[0] + 0.01, coords[1] + 0.01],  # top right
+                        [coords[0] + 0.01, coords[1] - 0.01],  # bottom right
+                        [coords[0] - 0.01, coords[1] - 0.01],  # bottom left
+                        [coords[0], coords[1]]  # close the polygon
+                    ]]
+                }
+            } for town, coords in self.town_coordinates.items()]
+        }
+        
+        # Save GeoJSON file
+        geojson_path = output_dir / 'mv_towns.json'
+        with open(geojson_path, 'w') as f:
+            json.dump(geojson, f)
         
         # Create HTML template
         template = Template('''
@@ -149,8 +184,16 @@ class LeafletVisualizer:
                     'Light Theme': lightLayer
                 };
 
+                // Add willReadFrequently to canvas for better performance with heatmap
+                const canvas = document.createElement('canvas');
+                canvas.willReadFrequently = true;
+                L.heatLayer.prototype._initCanvas = function() {
+                    this._canvas = canvas;
+                    this._ctx = canvas.getContext('2d');
+                };
+                
                 // Load town boundaries
-                fetch('maps/data/mv_towns.json')
+                fetch('/data/mv_towns.json')
                     .then(response => response.json())
                     .then(geojson => {
                         // Create polygon layer
