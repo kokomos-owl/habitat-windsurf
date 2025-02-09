@@ -5,12 +5,23 @@ import { interpolateViridis } from 'd3-scale-chromatic';
 import { line } from 'd3-shape';
 
 export class TopologyVisualizer {
+    private socket: WebSocket;
+    private reconnectAttempts: number = 0;
+    private maxReconnectAttempts: number = 5;
+    private reconnectDelay: number = 1000; // Start with 1 second
     private svg: any;
     private width: number;
     private height: number;
     private config: VisualizerConfig;
 
-    constructor(containerId: string, width: number, height: number, config?: Partial<VisualizerConfig>) {
+    constructor(
+        containerId: string,
+        width: number,
+        height: number,
+        config?: Partial<VisualizerConfig>,
+        wsUrl: string = 'ws://localhost:8765'
+    ) {
+        this.initializeWebSocket(wsUrl);
         this.width = width;
         this.height = height;
         this.config = {
@@ -29,6 +40,70 @@ export class TopologyVisualizer {
         this.svg.append('g').attr('class', 'vector-field-layer');
         this.svg.append('g').attr('class', 'critical-points-layer');
         this.svg.append('g').attr('class', 'warning-layer');
+    }
+    
+    private initializeWebSocket(wsUrl: string) {
+        this.socket = new WebSocket(wsUrl);
+        
+        this.socket.onopen = () => {
+            console.log('Connected to visualization server');
+            this.reconnectAttempts = 0;
+            this.requestUpdate();
+        };
+        
+        this.socket.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            this.handleServerUpdate(data);
+        };
+        
+        this.socket.onclose = () => {
+            console.log('Disconnected from server');
+            this.handleReconnect(wsUrl);
+        };
+        
+        this.socket.onerror = (error) => {
+            console.error('WebSocket error:', error);
+        };
+    }
+    
+    private handleReconnect(wsUrl: string) {
+        if (this.reconnectAttempts < this.maxReconnectAttempts) {
+            this.reconnectAttempts++;
+            const delay = this.reconnectDelay * Math.pow(2, this.reconnectAttempts - 1);
+            
+            console.log(`Attempting to reconnect in ${delay}ms...`);
+            setTimeout(() => {
+                this.initializeWebSocket(wsUrl);
+            }, delay);
+        } else {
+            console.error('Max reconnection attempts reached');
+        }
+    }
+    
+    private handleServerUpdate(data: any) {
+        if (data.vector_field) {
+            this.updateVectorField(data.vector_field);
+        }
+        
+        if (data.critical_points) {
+            this.updateCriticalPoints(data.critical_points);
+        }
+        
+        if (data.collapse_warning) {
+            this.showCollapseWarning(data.collapse_warning);
+        }
+    }
+    
+    private requestUpdate() {
+        if (this.socket.readyState === WebSocket.OPEN) {
+            this.socket.send(JSON.stringify({
+                type: 'request_update'
+            }));
+        }
+    }
+    
+    public startAutoUpdate(interval: number = 1000) {
+        setInterval(() => this.requestUpdate(), interval);
     }
 
     public updateVectorField(field: FieldIndicator): void {

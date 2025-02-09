@@ -71,6 +71,20 @@ class MetricFlowManager:
         # Confidence thresholds
         self.min_confidence = 0.6
         
+    def create_flow(self, flow_id: str, source_pattern: str) -> MetricFlow:
+        """Create a new metric flow."""
+        if flow_id in self.active_flows:
+            return self.active_flows[flow_id]
+            
+        flow = MetricFlow(flow_id=flow_id, source_pattern=source_pattern)
+        self.active_flows[flow_id] = flow
+        
+        if source_pattern not in self.pattern_flows:
+            self.pattern_flows[source_pattern] = []
+        self.pattern_flows[source_pattern].append(flow_id)
+        
+        return flow
+        
     def _analyze_vector_field(self) -> VectorFieldState:
         """Analyze vector field topology to detect pattern collapse."""
         if not self.history:
