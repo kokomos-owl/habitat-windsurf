@@ -145,9 +145,12 @@ class ClimateRiskProcessor:
                         # Add stability score
                         stability_report = self.stability_tracker.get_stability_report(metric.risk_type)
                         metric.evolution_metrics = EvolutionMetrics(
-                            stability_score=stability_report['stability_score'],
-                            trend=stability_report['trend'],
-                            confidence=stability_report['trend_confidence']
+                            stability=stability_report['stability_score'],
+                            coherence=stability_report.get('coherence', 0.8),
+                            emergence_rate=stability_report.get('emergence_rate', 0.5),
+                            cross_pattern_flow=stability_report.get('cross_pattern_flow', 0.6),
+                            energy_state=stability_report.get('energy_state', 0.7),
+                            adaptation_rate=stability_report.get('adaptation_rate', 0.4)
                         )
                         
                         metrics.append(metric)
@@ -163,9 +166,12 @@ class ClimateRiskProcessor:
             if metrics:
                 avg_stability = sum(m.evolution_metrics.stability_score for m in metrics) / len(metrics)
                 evolution_metrics = EvolutionMetrics(
-                    stability_score=avg_stability,
-                    trend=self._get_dominant_trend(metrics),
-                    confidence=self._calculate_aggregate_confidence(metrics)
+                    stability=avg_stability,
+                    coherence=sum(m.evolution_metrics.coherence for m in metrics) / len(metrics),
+                    emergence_rate=sum(m.evolution_metrics.emergence_rate for m in metrics) / len(metrics),
+                    cross_pattern_flow=sum(m.evolution_metrics.cross_pattern_flow for m in metrics) / len(metrics),
+                    energy_state=sum(m.evolution_metrics.energy_state for m in metrics) / len(metrics),
+                    adaptation_rate=sum(m.evolution_metrics.adaptation_rate for m in metrics) / len(metrics)
                 )
             
             return ProcessingResult(

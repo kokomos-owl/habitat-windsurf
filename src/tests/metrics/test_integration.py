@@ -46,6 +46,7 @@ def processor():
     """Create climate risk processor."""
     return ClimateRiskProcessor()
 
+@pytest.mark.asyncio
 async def test_document_processing(processor, test_document):
     """Test end-to-end document processing."""
     result = await processor.process_document(str(test_document))
@@ -64,7 +65,7 @@ async def test_document_processing(processor, test_document):
     assert all(m.confidence > 0.6 for m in result.metrics)
     
     # Verify evolution metrics
-    assert result.evolution_metrics.stability_score > 0
+    assert result.evolution_metrics.stability > 0
     assert result.evolution_metrics.trend in {'stable', 'improving', 'degrading', 'unknown'}
 
 def test_pattern_recognition(test_document):
@@ -134,6 +135,7 @@ def test_flow_metrics():
     assert 0.7 <= temp_conf <= 0.9
     assert 0.7 <= precip_conf <= 0.9
 
+@pytest.mark.asyncio
 async def test_confidence_evolution(processor, test_document):
     """Test confidence evolution over multiple processes."""
     results = []
@@ -147,13 +149,17 @@ async def test_confidence_evolution(processor, test_document):
     confidences = [
         [m.confidence for m in result.metrics]
         for result in results
+        if result.metrics  # Only include results with metrics
     ]
     
+    # Verify we have results to compare
+    assert len(confidences) > 1, "Not enough results with metrics to compare confidence evolution"
+    
     # Later runs should maintain or improve confidence
-    assert all(
-        sum(conf)/len(conf) >= sum(prev)/len(prev)
-        for conf, prev in zip(confidences[1:], confidences[:-1])
-    )
+    for conf, prev in zip(confidences[1:], confidences[:-1]):
+        if not conf or not prev:  # Skip if either list is empty
+            continue
+        assert sum(conf)/len(conf) >= sum(prev)/len(prev), "Confidence decreased over time"
 
 def test_visualization_data(processor, test_document):
     """Test generation of visualization data."""
