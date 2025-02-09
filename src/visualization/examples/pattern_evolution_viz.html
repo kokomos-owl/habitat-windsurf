@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pattern Evolution Visualization</title>
+    <style>
+        body { 
+            margin: 0;
+            background: #1a1a1a;
+            color: #fff;
+            font-family: Arial, sans-serif;
+        }
+        #status {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            padding: 10px;
+            background: rgba(0,0,0,0.8);
+            border-radius: 5px;
+            max-width: 300px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .success { color: #4CAF50; }
+        .error { color: #f44336; }
+        #controls {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            padding: 10px;
+            background: rgba(0,0,0,0.8);
+            border-radius: 5px;
+        }
+        button {
+            margin: 5px;
+            padding: 8px 15px;
+            background: #4CAF50;
+            border: none;
+            color: white;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        button:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+        #graph {
+            width: 100vw;
+            height: 100vh;
+        }
+        .pattern-controls {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #333;
+        }
+        .pattern-btn {
+            background: #2196F3;
+        }
+        .pattern-btn.active {
+            background: #1976D2;
+        }
+    </style>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+    <div id="status">
+        <h3>Status</h3>
+        <div id="status-content"></div>
+    </div>
+    
+    <div id="controls">
+        <button id="load-initial">Load Initial State</button>
+        <button id="evolve-step" disabled>Evolve Step</button>
+        <button id="reset" disabled>Reset</button>
+        <div class="pattern-controls">
+            <h4>Pattern View</h4>
+            <button class="pattern-btn active" data-pattern="0">Initial</button>
+            <button class="pattern-btn" data-pattern="1">t=20</button>
+            <button class="pattern-btn" data-pattern="2">t=50</button>
+            <button class="pattern-btn" data-pattern="3">t=100</button>
+        </div>
+    </div>
+    
+    <div id="graph"></div>
+
+    <script>
+        // Status logging
+        function logStatus(message, type = 'info') {
+            const statusContent = document.getElementById('status-content');
+            const div = document.createElement('div');
+            div.textContent = message;
+            div.className = type;
+            statusContent.appendChild(div);
+            statusContent.scrollTop = statusContent.scrollHeight;
+        }
+
+        // WebSocket connection
+        let ws;
+        function connectWebSocket() {
+            ws = new WebSocket('ws://localhost:8765');
+            
+            ws.onopen = () => {
+                logStatus('Connected to server', 'success');
+                document.getElementById('load-initial').disabled = false;
+            };
+            
+            ws.onclose = () => {
+                logStatus('Disconnected from server', 'error');
+                setTimeout(connectWebSocket, 1000);
+            };
+            
+            ws.onerror = (error) => {
+                logStatus('WebSocket error: ' + error.message, 'error');
+            };
+            
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                if (data.type === 'state_update') {
+                    updateGraph(data.state);
+                    document.getElementById('evolve-step').disabled = false;
+                    logStatus('Updated visualization state', 'success');
+                } else if (data.type === 'error') {
+                    logStatus(data.message, 'error');
+                }
+            };
+        }
+
+        // Graph visualization
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+        
+        const svg = d3.select('#graph')
+            .append('svg')
+            .attr('width', width)
+            .attr('height', height);
+            
+        const simulation = d3.forceSimulation()
+            .force('link', d3.forceLink().id(d => d.id))
+            .force('charge', d3.forceManyBody().strength(-300))
+            .force('center', d3.forceCenter(width / 2, height / 2));
+            
+        function updateGraph(state) {
+            // Clear existing graph
+            svg.selectAll('*').remove();
+            
+            // Create the arrow marker
+            svg.append('defs').append('marker')
+                .attr('id', 'arrowhead')
+                .attr('viewBox', '-0 -5 10 10')
+                .attr('refX', 20)
+                .attr('refY', 0)
+                .attr('orient', 'auto')
+                .attr('markerWidth', 6)
+                .attr('markerHeight', 6)
+                .append('path')
+                .attr('d', 'M0,-5L10,0L0,5')
+                .attr('fill', '#999');
+                
+            const link = svg.append('g')
+                .selectAll('line')
+                .data(state.links)
+                .enter().append('line')
+                .attr('stroke', '#999')
+                .attr('stroke-opacity', 0.6)
+                .attr('stroke-width', d => Math.sqrt(d.weight) * 2)
+                .attr('marker-end', 'url(#arrowhead)');
+                
+            const node = svg.append('g')
+                .selectAll('circle')
+                .data(state.nodes)
+                .enter().append('circle')
+                .attr('r', d => d.type === 'pattern' ? 12 : 8)
+                .attr('fill', d => {
+                    if (d.type === 'pattern') {
+                        return d.stage === 'stage1' ? '#4CAF50' :
+                               d.stage === 'stage2' ? '#2196F3' :
+                               '#f44336';
+                    }
+                    return '#999';
+                });
+                
+            const label = svg.append('g')
+                .selectAll('text')
+                .data(state.nodes)
+                .enter().append('text')
+                .text(d => d.label)
+                .attr('font-size', 10)
+                .attr('dx', 15)
+                .attr('dy', 4)
+                .attr('fill', '#fff');
+                
+            simulation
+                .nodes(state.nodes)
+                .on('tick', () => {
+                    link
+                        .attr('x1', d => d.source.x)
+                        .attr('y1', d => d.source.y)
+                        .attr('x2', d => d.target.x)
+                        .attr('y2', d => d.target.y);
+                        
+                    node
+                        .attr('cx', d => d.x)
+                        .attr('cy', d => d.y);
+                        
+                    label
+                        .attr('x', d => d.x)
+                        .attr('y', d => d.y);
+                });
+                
+            simulation.force('link')
+                .links(state.links);
+                
+            simulation.alpha(1).restart();
+        }
+
+        // Event handlers
+        document.getElementById('load-initial').addEventListener('click', () => {
+            ws.send(JSON.stringify({
+                type: 'load_initial',
+                file: 'data/climate_risk/climate_risk_marthas_vineyard.txt'
+            }));
+            document.getElementById('reset').disabled = false;
+        });
+
+        document.getElementById('evolve-step').addEventListener('click', () => {
+            ws.send(JSON.stringify({
+                type: 'evolve_step'
+            }));
+        });
+
+        document.getElementById('reset').addEventListener('click', () => {
+            ws.send(JSON.stringify({
+                type: 'reset'
+            }));
+            document.getElementById('evolve-step').disabled = true;
+        });
+
+        // Pattern view controls
+        document.querySelectorAll('.pattern-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.pattern-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                ws.send(JSON.stringify({
+                    type: 'set_pattern',
+                    pattern: parseInt(btn.dataset.pattern)
+                }));
+            });
+        });
+
+        // Initialize
+        connectWebSocket();
+    </script>
+</body>
+</html>

@@ -9,6 +9,12 @@ from pathlib import Path
 import logging
 from dataclasses import asdict
 
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+
 from src.core.metrics.flow_metrics import MetricFlowManager
 from src.core.processor import ClimateRiskProcessor
 from src.visualization.topology.TopologyConnector import TopologyConnector
@@ -29,7 +35,15 @@ class VisualizationServer:
     async def register(self, websocket: websockets.WebSocketServerProtocol):
         """Register a new client."""
         self.clients.add(websocket)
-        logger.info(f"Client connected. Total clients: {len(self.clients)}")
+        logger.info(f"Client connected from {websocket.remote_address}. Total clients: {len(self.clients)}")
+        
+        # Send initial state
+        state = self.connector.get_visualization_state()
+        logger.info(f"Sending initial state: {len(state['nodes'])} nodes, {len(state['links'])} links")
+        
+        wrapped_state = {'type': 'state_update', 'state': state}
+        await websocket.send(json.dumps(wrapped_state))
+        logger.info("Initial state sent successfully")
         
     async def unregister(self, websocket: websockets.WebSocketServerProtocol):
         """Unregister a client."""
@@ -39,12 +53,22 @@ class VisualizationServer:
     async def send_update(self, message: Dict):
         """Send update to all connected clients."""
         if not self.clients:
+            logger.warning("No clients connected, skipping update")
             return
         
-        message_str = json.dumps(message)
-        await asyncio.gather(
-            *[client.send(message_str) for client in self.clients]
-        )
+        logger.info(f"Preparing update for {len(self.clients)} clients")
+        logger.info(f"Message contains: {len(message['nodes'])} nodes, {len(message['links'])} links")
+        
+        wrapped_message = {'type': 'state_update', 'state': message}
+        message_str = json.dumps(wrapped_message)
+        
+        try:
+            await asyncio.gather(
+                *[client.send(message_str) for client in self.clients]
+            )
+            logger.info("Update sent successfully to all clients")
+        except Exception as e:
+            logger.error(f"Error sending update: {str(e)}")
         
     async def handle_client(self, websocket: websockets.WebSocketServerProtocol, path: str):
         """Handle client connection."""

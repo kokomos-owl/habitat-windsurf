@@ -15,10 +15,72 @@ class TopologyConnector:
         """Get current state for visualization."""
         field_state = self.flow_manager._analyze_vector_field()
         
+        # Get active flows and patterns
+        flows = self.flow_manager.active_flows
+        patterns = self.flow_manager.pattern_flows
+        
+        # Create nodes for each pattern and flow
+        nodes = []
+        links = []
+        
+        # Add pattern nodes
+        for pattern, flow_ids in patterns.items():
+            stage = 'stage1'
+            if 'precipitation' in pattern.lower():
+                stage = 'stage1'
+            elif 'drought' in pattern.lower():
+                stage = 'stage2'
+            elif 'wildfire' in pattern.lower():
+                stage = 'stage3'
+                
+            nodes.append({
+                'id': f'pattern_{pattern}',
+                'label': pattern,
+                'type': 'pattern',
+                'stage': stage
+            })
+            
+            # Add flow nodes and links
+            for flow_id in flow_ids:
+                flow = flows[flow_id]
+                nodes.append({
+                    'id': flow_id,
+                    'label': f'Flow {flow_id}',
+                    'type': 'flow',
+                    'stage': stage,
+                    'metrics': {
+                        'stability': getattr(flow, 'stability', 0.5),
+                        'coherence': getattr(flow, 'coherence', 0.5),
+                        'energy_state': getattr(flow, 'energy_state', 0.5)
+                    }
+                })
+                
+                links.append({
+                    'source': f'pattern_{pattern}',
+                    'target': flow_id,
+                    'weight': getattr(flow, 'confidence', 0.5),
+                    'stage': stage
+                })
+        
+        # Calculate average metrics across all flows
+        total_flows = len(flows)
+        if total_flows > 0:
+            avg_stability = sum(getattr(flow, 'stability', 0.5) for flow in flows.values()) / total_flows
+            avg_coherence = sum(getattr(flow, 'coherence', 0.5) for flow in flows.values()) / total_flows
+            avg_energy = sum(getattr(flow, 'energy_state', 0.5) for flow in flows.values()) / total_flows
+        else:
+            avg_stability = avg_coherence = avg_energy = 0.5
+            
         return {
-            'vector_field': self._prepare_field_data(field_state),
-            'critical_points': self._prepare_critical_points(field_state),
-            'collapse_warning': self._check_collapse_warning(field_state)
+            'nodes': nodes,
+            'links': links,
+            'metadata': {
+                'stability': avg_stability,
+                'coherence': avg_coherence,
+                'energy_state': avg_energy,
+                'total_patterns': len(patterns),
+                'total_flows': total_flows
+            }
         }
     
     def _prepare_field_data(self, state: VectorFieldState) -> Dict:

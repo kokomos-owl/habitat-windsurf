@@ -50,12 +50,8 @@
 
     <!-- Scripts -->
     <script src="https://d3js.org/d3.v7.min.js"></script>
-    <script src="../static/js/websocket.js"></script>
     <script src="../static/js/network.js"></script>
-    <script src="../static/js/coherence.js"></script>
-    <script src="../static/js/timeline.js"></script>
-    <script src="../static/js/flow_visualizer.js"></script>
-    <script src="../static/js/main.js"></script>
+    <script src="../static/js/websocket.js"></script>
     
     <script>
         // Initialize WebSocket connection
@@ -64,17 +60,19 @@
         
         // Handle incoming messages
         wsManager.onMessage = (data) => {
+            console.log('Received data:', data);
+            
             // Update network visualization
-            network.update(data);
+            network.update(data.state, null);
             
             // Update metrics
-            if (data.vector_field) {
+            if (data.state && data.state.metadata) {
                 document.getElementById('stability-value').textContent = 
-                    (data.vector_field.magnitude * 100).toFixed(1) + '%';
+                    (data.state.metadata.stability * 100).toFixed(1) + '%';
                 document.getElementById('coherence-value').textContent = 
-                    ((1 - Math.abs(data.vector_field.divergence)) * 100).toFixed(1) + '%';
+                    (data.state.metadata.coherence * 100).toFixed(1) + '%';
                 document.getElementById('energy-value').textContent = 
-                    (data.vector_field.curl * 100).toFixed(1) + '%';
+                    (data.state.metadata.energy_state * 100).toFixed(1) + '%';
             }
         };
         

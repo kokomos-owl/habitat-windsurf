@@ -71,12 +71,12 @@ class MetricFlowManager:
         # Confidence thresholds
         self.min_confidence = 0.6
         
-    def create_flow(self, flow_id: str, source_pattern: str) -> MetricFlow:
+    def create_flow(self, *, flow_id: str, source_pattern: str) -> MetricFlow:
         """Create a new metric flow."""
         if flow_id in self.active_flows:
             return self.active_flows[flow_id]
             
-        flow = MetricFlow(flow_id, source_pattern)
+        flow = MetricFlow(flow_id=flow_id, source_pattern=source_pattern)
         self.active_flows[flow_id] = flow
         
         if source_pattern not in self.pattern_flows:
@@ -87,7 +87,7 @@ class MetricFlowManager:
         
     def _analyze_vector_field(self) -> VectorFieldState:
         """Analyze vector field topology to detect pattern collapse."""
-        if not self.history:
+        if not self.field_history:
             return VectorFieldState(0.0, 0.0, 0.0, 0.0)
             
         # Calculate field characteristics
@@ -167,17 +167,7 @@ class MetricFlowManager:
             'trend': r'(?:increase|decrease|rise|fall|grew|dropped)\s+(?:by|to|from)?\s*[-+]?\d*\.?\d+\s*%?'
         }
         
-    def create_flow(self, pattern: str) -> MetricFlow:
-        """Create a new metric flow from a pattern."""
-        flow_id = f"flow_{len(self.active_flows) + 1}"
-        flow = MetricFlow(flow_id=flow_id, source_pattern=pattern)
-        
-        self.active_flows[flow_id] = flow
-        if pattern not in self.pattern_flows:
-            self.pattern_flows[pattern] = []
-        self.pattern_flows[pattern].append(flow_id)
-        
-        return flow
+
         
     def extract_metrics(self, text: str, context: Optional[Dict] = None) -> List[Dict[str, Any]]:
         """Extract metrics using flow-based pattern matching."""

@@ -6,10 +6,11 @@ class WebSocketManager {
 
     connect() {
         const clientId = 'client_' + Math.random().toString(36).substr(2, 9);
-        this.ws = new WebSocket(`ws://localhost:8765/ws/${clientId}`);
+        this.ws = new WebSocket(`ws://localhost:8765`);
         
         this.ws.onopen = () => {
             console.log('WebSocket connected');
+            this.send({ type: 'request_update' });
         };
 
         this.ws.onmessage = (event) => {

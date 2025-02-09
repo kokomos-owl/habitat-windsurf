@@ -1,0 +1,58 @@
+{
+    "patterns": [
+        {
+            "risk_type": "precipitation",
+            "initial_metrics": {
+                "stability": 0.85,
+                "coherence": 0.75,
+                "energy_state": 0.65
+            },
+            "nodes": [
+                {"id": "p1", "type": "precipitation", "value": 0.8},
+                {"id": "p2", "type": "precipitation", "value": 0.7},
+                {"id": "p3", "type": "precipitation", "value": 0.9}
+            ],
+            "links": [
+                {"source": "p1", "target": "p2", "strength": 0.7},
+                {"source": "p2", "target": "p3", "strength": 0.8},
+                {"source": "p3", "target": "p1", "strength": 0.6}
+            ]
+        },
+        {
+            "risk_type": "drought",
+            "initial_metrics": {
+                "stability": 0.65,
+                "coherence": 0.85,
+                "energy_state": 0.45
+            },
+            "nodes": [
+                {"id": "d1", "type": "drought", "value": 0.6},
+                {"id": "d2", "type": "drought", "value": 0.8},
+                {"id": "d3", "type": "drought", "value": 0.7}
+            ],
+            "links": [
+                {"source": "d1", "target": "d2", "strength": 0.8},
+                {"source": "d2", "target": "d3", "strength": 0.7},
+                {"source": "d3", "target": "d1", "strength": 0.9}
+            ]
+        },
+        {
+            "risk_type": "wildfire",
+            "initial_metrics": {
+                "stability": 0.75,
+                "coherence": 0.65,
+                "energy_state": 0.75
+            },
+            "nodes": [
+                {"id": "w1", "type": "wildfire", "value": 0.7},
+                {"id": "w2", "type": "wildfire", "value": 0.9},
+                {"id": "w3", "type": "wildfire", "value": 0.8}
+            ],
+            "links": [
+                {"source": "w1", "target": "w2", "strength": 0.6},
+                {"source": "w2", "target": "w3", "strength": 0.8},
+                {"source": "w3", "target": "w1", "strength": 0.7}
+            ]
+        }
+    ]
+}

@@ -55,20 +55,28 @@ class NetworkGraph {
     }
 
     update(data, stage, error = null) {
-        console.log('Updating graph with data:', data);
-        console.log('Current stage:', stage);
-        
-        this.currentStage = stage;
-        this.metadata = data?.metadata || {};
-        
-        // Update error box
-        this.updateErrorBox(error);
-        
-        // Ensure data has required properties
-        if (!data || !data.links || !data.nodes) {
-            console.error('Invalid data structure:', data);
-            return;
-        }
+        try {
+            console.log('Updating graph with data:', data);
+            console.log('Current stage:', stage);
+            
+            this.currentStage = stage;
+            this.metadata = data?.metadata || {};
+            
+            // Update error box
+            this.updateErrorBox(error);
+            
+            // Ensure data has required properties
+            if (!data || !data.links || !data.nodes) {
+                const errorMsg = 'Invalid data structure received';
+                console.error(errorMsg, data);
+                this.updateErrorBox(errorMsg);
+                return;
+            }
+            
+            // Log data statistics
+            console.log(`Received ${data.nodes.length} nodes and ${data.links.length} links`);
+            console.log('Node types:', new Set(data.nodes.map(n => n.type)));
+            console.log('Link weights:', data.links.map(l => l.weight));
         
         console.log('Filtered nodes:', data.nodes);
         console.log('Filtered links:', data.links);
@@ -99,6 +107,23 @@ class NetworkGraph {
             .data(filteredNodes, d => d.id);
 
         nodes.exit().remove();
+        
+        // Update simulation
+        this.simulation.nodes(filteredNodes);
+        this.simulation.force('link').links(filteredLinks);
+        this.simulation.alpha(1).restart();
+        
+        // Add tick handler
+        this.simulation.on('tick', () => {
+            this.linksGroup.selectAll('.link')
+                .attr('x1', d => d.source.x)
+                .attr('y1', d => d.source.y)
+                .attr('x2', d => d.target.x)
+                .attr('y2', d => d.target.y);
+
+            this.nodesGroup.selectAll('.node')
+                .attr('transform', d => `translate(${d.x},${d.y})`);
+        });
 
         const nodesEnter = nodes.enter()
             .append('g')
@@ -114,13 +139,13 @@ class NetworkGraph {
         circles.append('circle')
             .attr('r', 20)
             .attr('class', 'glow')
-            .style('fill', '#4299e1')
+            .style('fill', d => d.type === 'pattern' ? '#4299e1' : '#9f7aea')
             .style('filter', 'url(#glow)');
 
         circles.append('circle')
             .attr('r', 15)
-            .style('fill', '#63b3ed')
-            .style('stroke', '#2b6cb0')
+            .style('fill', d => d.type === 'pattern' ? '#63b3ed' : '#b794f4')
+            .style('stroke', d => d.type === 'pattern' ? '#2b6cb0' : '#553c9a')
             .style('stroke-width', '2px');
 
         nodesEnter.append('text')
@@ -149,6 +174,10 @@ class NetworkGraph {
             .attr('in', 'coloredBlur');
         feMerge.append('feMergeNode')
             .attr('in', 'SourceGraphic');
+        } catch (err) {
+            console.error('Error updating network graph:', err);
+            this.updateErrorBox(`Error updating network graph: ${err.message}`);
+        }
 
         // Update simulation
         console.log('Updating simulation with nodes:', filteredNodes);
