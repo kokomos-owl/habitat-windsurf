@@ -12,7 +12,7 @@ Key Concepts:
     - Adaptive Confidence: Trust in patterns grows with stability
 """
 
-from typing import Dict, List, Set, Optional, Tuple
+from typing import Dict, List, Set, Optional, Tuple, Any
 from dataclasses import dataclass, field
 from datetime import datetime
 import numpy as np

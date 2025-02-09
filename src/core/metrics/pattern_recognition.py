@@ -1,8 +1,19 @@
-"""Enhanced pattern recognition for climate metrics."""
+"""Enhanced pattern recognition for climate metrics with improved temporal context."""
 
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Set, Any
 import re
+import logging
+from .pattern_learner import PatternLearner
+
+logger = logging.getLogger(__name__)
+
+@dataclass
+class TemporalContext:
+    """Represents temporal information in text."""
+    indicator_type: str
+    value: str
+    confidence: float = 1.0
 
 @dataclass
 class PatternMatch:
@@ -14,26 +25,55 @@ class PatternMatch:
     confidence: float = 1.0
 
 class ClimatePatternRecognizer:
-    """Advanced pattern recognition for climate data."""
+    """Advanced pattern recognition for climate data with learning capabilities."""
     
     def __init__(self):
-        # Core numeric patterns
-        self.numeric_patterns = {
-            'precise_number': r'(?P<value>[-+]?\d*\.?\d+)\s*(?P<unit>\w+)?',
-            'range': r'(?P<start>[-+]?\d*\.?\d+)\s*(?:to|-)\s*(?P<end>[-+]?\d*\.?\d+)\s*(?P<unit>\w+)?',
-            'percentage': r'(?P<value>[-+]?\d*\.?\d+)\s*%'
+        self.learner = PatternLearner()
+        
+        # Temporal patterns with named capture groups
+        self.temporal_patterns = {
+            'year': r'(?:by\s+)?(?P<year>20\d{2})',  # e.g., "by 2050"
+            'reference_year': r'(?:compared\s+to|relative\s+to|since|from)\s+(?P<ref_year>\d{4})',  # e.g., "since 2000"
+            'term': r'\b(?P<term>short|medium|long)\s*-?\s*term\b',
+            'century_period': r'\b(?:by\s+)?(?P<period>mid|late|early)\s*-?\s*century\b'  # e.g., "by mid-century"
         }
         
-        # Climate-specific patterns
+        # Climate-specific patterns with temporal context integration
         self.climate_patterns = {
-            'temperature_change': r'(?:temperature|temp\.?)\s+(?:increase[ds]?|decrease[ds]?|rise[ds]?|fall[ds]?|change[ds]?)\s+(?:by|to|from)?\s*(?P<value>[-+]?\d*\.?\d+)\s*(?P<unit>°[CF]|degrees?\s*[CF]?)',
-            'precipitation_change': r'(?:precipitation|rainfall)\s+(?:increase[ds]?|decrease[ds]?|change[ds]?)\s+(?:by|to|from)?\s*(?P<value>[-+]?\d*\.?\d+)\s*(?P<unit>mm|inches|%)',
-            'sea_level_rise': r'sea\s+level\s+(?:rise|increase)[ds]?\s+(?:by|to|from)?\s*(?P<value>[-+]?\d*\.?\d+)\s*(?P<unit>m|meters|ft|feet|inches)',
-            'frequency_pattern': r'(?P<event>flood|storm|drought|heat\s+wave)s?\s+occur\w*\s+(?P<value>\d+(?:\.\d+)?)\s*(?:times|%)?\s*(?:per|a|each)?\s*(?P<unit>year|month|decade)',
-            'intensity_pattern': r'(?P<event>flood|storm|drought|heat\s+wave)s?\s+intensit\w+\s+(?:increase[ds]?|decrease[ds]?)\s+(?:by|to)?\s*(?P<value>[-+]?\d*\.?\d+)\s*(?P<unit>%|times)',
-            'threshold_pattern': r'(?:above|below|exceeds?|under)\s+(?P<value>[-+]?\d*\.?\d+)\s*(?P<unit>°[CF]|mm|inches)\s*(?:threshold|level|mark)',
-            'trend_pattern': r'(?P<trend>upward|downward|increasing|decreasing)\s+trend\s+of\s+(?P<value>[-+]?\d*\.?\d+)\s*(?P<unit>%|°[CF]|mm|inches)?\s*(?:per|a|each)?\s*(?P<period>year|decade)'
+            'temperature_change': (
+                r'(?P<context_pre>[^.]*?)'  # Capture pre-context
+                r'temperature\s+'  # Base word
+                r'(?:will\s+)?'  # Optional future tense
+                r'(?:increase[ds]?|decrease[ds]?|rise[ds]?|fall[ds]?|change[ds]?)'  # Action
+                r'\s+(?:by|to|from|between)?\s*'  # Optional preposition
+                r'(?P<value>[-+]?\d*\.?\d+)'  # Value
+                r'\s*(?P<unit>°[CF]|degrees?\s*[CF]?)'  # Unit
+                r'(?P<context_post>[^.]*)'  # Capture post-context
+            ),
+            'precipitation_change': (
+                r'(?P<context_pre>[^.]*?)'
+                r'(?:precipitation|rainfall)\s+'
+                r'(?:will\s+)?'
+                r'(?:increase[ds]?|decrease[ds]?|change[ds]?)'
+                r'\s+(?:by|to|from|between)?\s*'
+                r'(?P<value>[-+]?\d*\.?\d+)'
+                r'\s*(?P<unit>mm|inches|%)'
+                r'(?P<context_post>[^.]*)'
+            ),
+            'sea_level_rise': (
+                r'(?P<context_pre>[^.]*?)'
+                r'sea\s+level\s+'
+                r'(?:rise|increase)[ds]?\s+'
+                r'(?:is\s+projected\s+to\s+be|will\s+be)?\s*'
+                r'(?P<value>[-+]?\d*\.?\d+)'
+                r'\s*(?P<unit>m|meters|ft|feet|inches)'
+                r'(?P<context_post>[^.]*)'
+            )
         }
+        
+        # Register patterns with learner
+        for pattern_type, pattern in self.climate_patterns.items():
+            self.learner.register_pattern(pattern_type, pattern)
         
         # Confidence modifiers
         self.confidence_modifiers = {
@@ -42,110 +82,121 @@ class ClimatePatternRecognizer:
             'data_terms': {'measured', 'observed', 'recorded', 'analyzed'},
             'model_terms': {'projected', 'modeled', 'simulated', 'predicted'}
         }
-        
+    
+    def _find_temporal_indicators(self, text: str) -> List[TemporalContext]:
+        """Find all temporal indicators in text."""
+        indicators = []
+        for indicator_type, pattern in self.temporal_patterns.items():
+            for match in re.finditer(pattern, text, re.IGNORECASE):
+                # Get the named group value
+                value = next((v for k, v in match.groupdict().items() if v is not None), match.group(0))
+                indicators.append(TemporalContext(
+                    indicator_type=indicator_type,
+                    value=value,
+                    confidence=1.0
+                ))
+        return indicators
+    
     def find_patterns(self, text: str) -> List[PatternMatch]:
         """Find all climate-related patterns in text."""
         matches = []
         
         # Find climate-specific patterns
-        for pattern_type, pattern in self.climate_patterns.items():
+        for pattern_type, base_pattern in self.climate_patterns.items():
+            logger.debug(f"Searching for pattern type: {pattern_type}")
+            
+            # Get evolved pattern if available
+            pattern = self.learner.get_best_pattern(pattern_type) or base_pattern
+            
             for match in re.finditer(pattern, text, re.IGNORECASE):
-                context = self._extract_context(text, match)
-                confidence = self._calculate_confidence(match, context)
-                
-                matches.append(PatternMatch(
-                    pattern_type=pattern_type,
-                    value=match.group('value'),
-                    unit=match.group('unit') if 'unit' in match.groupdict() else None,
-                    context=context,
-                    confidence=confidence
-                ))
-        
-        # Find general numeric patterns
-        for pattern_type, pattern in self.numeric_patterns.items():
-            for match in re.finditer(pattern, text, re.IGNORECASE):
-                if not self._is_duplicate_match(match, matches):
-                    context = self._extract_context(text, match)
+                try:
+                    logger.debug(f"Found match: {match.group(0)}")
+                    
+                    # Get pre and post context
+                    pre_context = match.group('context_pre') if 'context_pre' in match.groupdict() else ""
+                    post_context = match.group('context_post') if 'context_post' in match.groupdict() else ""
+                    context_text = f"{pre_context} {match.group(0)} {post_context}"
+                    
+                    # Find temporal indicators in the context
+                    temporal_indicators = self._find_temporal_indicators(context_text)
+                    
+                    context = {
+                        'surrounding_text': context_text.strip(),
+                        'temporal_indicators': [
+                            {
+                                'type': indicator.indicator_type,
+                                'value': indicator.value,
+                                'confidence': indicator.confidence
+                            }
+                            for indicator in temporal_indicators
+                        ],
+                        'certainty_modifiers': self._find_certainty_modifiers(context_text)
+                    }
+                    
                     confidence = self._calculate_confidence(match, context)
                     
-                    matches.append(PatternMatch(
+                    # Extract value
+                    value = match.group('value')
+                    
+                    match_obj = PatternMatch(
                         pattern_type=pattern_type,
-                        value=match.group('value'),
+                        value=value,
                         unit=match.group('unit') if 'unit' in match.groupdict() else None,
                         context=context,
                         confidence=confidence
-                    ))
+                    )
+                    
+                    matches.append(match_obj)
+                    
+                    # Record success/failure based on temporal indicators
+                    success = bool(temporal_indicators)
+                    self.learner.record_result(pattern_type, text, success)
+                    
+                except (IndexError, AttributeError) as e:
+                    logger.error(f"Error processing match: {e}")
+                    self.learner.record_result(pattern_type, text, False)
+                    continue
         
         return matches
     
-    def _extract_context(self, text: str, match: re.Match) -> Dict[str, Any]:
-        """Extract contextual information around the match."""
-        # Get surrounding text (50 chars before and after)
-        start = max(0, match.start() - 50)
-        end = min(len(text), match.end() + 50)
-        context_text = text[start:end]
-        
-        context = {
-            'surrounding_text': context_text,
-            'certainty_modifiers': set(),
-            'data_source': None,
-            'temporal_indicators': []
-        }
-        
-        # Check for certainty modifiers
+    def _find_certainty_modifiers(self, text: str) -> Dict[str, Set[str]]:
+        """Find certainty modifiers in text."""
+        modifiers = {}
         for term_type, terms in self.confidence_modifiers.items():
-            found_terms = {term for term in terms if term in context_text.lower()}
+            found_terms = {term for term in terms if term in text.lower()}
             if found_terms:
-                context['certainty_modifiers'].add(term_type)
-        
-        # Look for temporal indicators
-        temporal_patterns = [
-            (r'\b\d{4}\b', 'year'),
-            (r'\b(?:in|by|before|after)\s+\d{4}\b', 'reference_year'),
-            (r'\b(?:short|medium|long)-term\b', 'term'),
-            (r'\b(?:early|mid|late)-century\b', 'century_period')
-        ]
-        
-        for pattern, indicator_type in temporal_patterns:
-            if re.search(pattern, context_text, re.IGNORECASE):
-                context['temporal_indicators'].append(indicator_type)
-        
-        return context
+                modifiers[term_type] = found_terms
+        return modifiers
     
     def _calculate_confidence(self, match: re.Match, context: Dict[str, Any]) -> float:
-        """Calculate confidence score for a pattern match."""
-        base_confidence = 0.7  # Start with moderate confidence
+        """Calculate confidence score for a match."""
+        confidence = 1.0
         
         # Adjust for certainty modifiers
         if 'certainty_modifiers' in context:
-            if 'certainty_terms' in context['certainty_modifiers']:
-                base_confidence += 0.1
-            if 'uncertainty_terms' in context['certainty_modifiers']:
-                base_confidence -= 0.1
-            if 'data_terms' in context['certainty_modifiers']:
-                base_confidence += 0.15
-            if 'model_terms' in context['certainty_modifiers']:
-                base_confidence += 0.05
+            modifiers = context['certainty_modifiers']
+            if 'uncertainty_terms' in modifiers:
+                confidence *= 0.8
+            if 'certainty_terms' in modifiers:
+                confidence *= 1.2
+            if 'data_terms' in modifiers:
+                confidence *= 1.3
+            if 'model_terms' in modifiers:
+                confidence *= 0.9
         
         # Adjust for temporal context
         if context.get('temporal_indicators'):
-            base_confidence += 0.1
+            confidence *= 1.1
+            
+        # Adjust for pattern quality
+        if match.group(0):  # Full match exists
+            confidence *= 1.0 + (len(match.groups()) / 10)  # More captured groups = higher confidence
+            
+        return min(1.0, confidence)  # Cap at 1.0
         
-        # Adjust for value reasonableness
-        try:
-            value = float(match.group('value'))
-            if abs(value) > 1000 or abs(value) < 0.0001:
-                base_confidence *= 0.8
-        except (ValueError, IndexError):
-            base_confidence *= 0.9
-        
-        return min(1.0, max(0.0, base_confidence))
-    
-    def _is_duplicate_match(self, new_match: re.Match, existing_matches: List[PatternMatch]) -> bool:
-        """Check if a match overlaps with existing matches."""
-        new_span = new_match.span()
-        return any(
-            new_span[0] <= match.context.get('match_end', 0) and
-            new_span[1] >= match.context.get('match_start', 0)
-            for match in existing_matches
-        )
+    def get_pattern_stats(self) -> Dict[str, Dict[str, any]]:
+        """Get statistics about pattern evolution."""
+        return {
+            pattern_type: self.learner.get_pattern_stats(pattern_type)
+            for pattern_type in self.climate_patterns.keys()
+        }
