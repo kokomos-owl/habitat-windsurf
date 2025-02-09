@@ -11,7 +11,7 @@ class TownMetricsProcessor:
     def __init__(self):
         """Initialize the processor."""
         self.data_dir = Path(__file__).parent.parent / 'maps' / 'data'
-        self.geojson_path = self.data_dir / 'marthas_vineyard.geojson'
+        self.geojson_path = self.data_dir / 'mv_towns.geojson'
         
         # Load town boundaries
         self.town_boundaries = gpd.read_file(self.geojson_path)
@@ -32,7 +32,7 @@ class TownMetricsProcessor:
         """
         # Here we'll integrate with the actual climate risk metrics
         # For now, using placeholder data
-        for town in self.town_boundaries['TOWN'].unique():
+        for town in self.town_boundaries['name'].unique():
             for metric in self.metrics.keys():
                 # This will be replaced with actual metric calculations
                 self.metrics[metric][town] = metrics_data.get(
@@ -69,6 +69,6 @@ class TownMetricsProcessor:
         metrics_df = self.get_metric_values()
         return self.town_boundaries.merge(
             metrics_df,
-            left_on='TOWN',
+            left_on='name',
             right_index=True
         )

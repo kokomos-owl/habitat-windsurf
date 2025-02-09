@@ -1,7 +1,7 @@
 """FastAPI server for serving flow visualizations."""
 
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 import os
@@ -18,9 +18,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Mount the output directory as static files
-output_dir = Path(__file__).parent.parent.parent.parent / "examples" / "output"
-app.mount("/visualizations", StaticFiles(directory=str(output_dir)), name="visualizations")
+# Mount the output directories as static files
+examples_output_dir = Path(__file__).parent.parent.parent.parent / "examples" / "output"
+app.mount("/visualizations", StaticFiles(directory=str(examples_output_dir)), name="visualizations")
+
+town_metrics_dir = Path(__file__).parent.parent / "visualization" / "output"
+app.mount("/town-metrics", StaticFiles(directory=str(town_metrics_dir)), name="town-metrics")
 
 @app.get("/", response_class=HTMLResponse)
 async def root():
@@ -30,6 +33,14 @@ async def root():
         "cross_pattern_flow",
         "emergence_rate",
         "geographic"
+    ]
+    
+    special_visualizations = [
+        {
+            "name": "Town Metrics Overview",
+            "url": "/town-metrics/visualization",
+            "description": "Interactive visualization of climate risk metrics across Martha's Vineyard towns"
+        }
     ]
     
     html_content = """
@@ -96,6 +107,23 @@ async def root():
     
     html_content += """
             </ul>
+            
+            <h2>Special Visualizations</h2>
+            <ul class="visualization-list">
+    """
+    
+    for viz in special_visualizations:
+        html_content += f"""
+                <li class=\"visualization-item\">
+                    <a href=\"{viz['url']}\" target=\"_blank\">
+                        {viz['name']}
+                    </a>
+                    <p style=\"color: #666; margin: 5px 0 0;\">{viz['description']}</p>
+                </li>
+        """
+    
+    html_content += """
+            </ul>
         </div>
     </body>
     </html>
@@ -107,6 +135,14 @@ async def root():
 async def health_check():
     """Health check endpoint."""
     return {"status": "healthy"}
+
+@app.get("/town-metrics/visualization")
+async def get_town_metrics_visualization():
+    """Return the town metrics visualization."""
+    visualization_path = town_metrics_dir / "climate_risk_visualization.png"
+    if not visualization_path.exists():
+        raise HTTPException(status_code=404, detail="Visualization not found")
+    return FileResponse(visualization_path)
 
 if __name__ == "__main__":
     import uvicorn
