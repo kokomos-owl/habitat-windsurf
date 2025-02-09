@@ -111,30 +111,44 @@ class ChoroplethLayer:
         return fig
         
     def _create_geographic_choropleth(self) -> go.Figure:
-        """Create Martha's Vineyard geographic choropleth."""
+        """Create Martha's Vineyard geographic scatter plot."""
         values = self._get_dimension_values()
         
-        # This is a placeholder for actual MV geojson
-        # We'll enhance this with real geographic data
+        # Approximate coordinates for Martha's Vineyard towns
+        mv_coords = {
+            "Oak_Bluffs": {"lat": 41.4557, "lon": -70.5618},
+            "Tisbury": {"lat": 41.4529, "lon": -70.6120},
+            "West_Tisbury": {"lat": 41.3818, "lon": -70.6787},
+            "Edgartown": {"lat": 41.3890, "lon": -70.5134},
+            "Chilmark": {"lat": 41.3443, "lon": -70.7454},
+            "Aquinnah": {"lat": 41.3474, "lon": -70.8371},
+            "Vineyard_Haven": {"lat": 41.4532, "lon": -70.6023}
+        }
+        
         fig = go.Figure()
         
-        fig.add_trace(go.Choropleth(
-            # This will be replaced with actual MV geometry
-            locations=list(values.keys()),
-            z=list(values.values()),
-            colorscale="Viridis",
-            colorbar_title=self.active_dimension
-        ))
+        for region, value in values.items():
+            coord = mv_coords.get(region, {"lat": 0, "lon": 0})
+            fig.add_trace(go.Scatter(
+                x=[coord["lon"]],
+                y=[coord["lat"]],
+                mode="markers+text",
+                marker=dict(
+                    size=50,
+                    color=value,
+                    colorscale="Viridis",
+                    showscale=True,
+                    colorbar=dict(title=self.active_dimension)
+                ),
+                text=f"{region}<br>{value:.2f}",
+                name=region,
+                hoverinfo="text"
+            ))
         
         fig.update_layout(
             title=f"Martha's Vineyard - {self.active_dimension}",
-            geo=dict(
-                scope='usa',
-                projection=dict(type='mercator'),
-                showland=True,
-                landcolor='rgb(243, 243, 243)',
-                countrycolor='rgb(204, 204, 204)'
-            )
+            xaxis=dict(title="Longitude", range=[-70.9, -70.4]),
+            yaxis=dict(title="Latitude", range=[41.3, 41.5], scaleanchor="x", scaleratio=1)
         )
         
         return fig

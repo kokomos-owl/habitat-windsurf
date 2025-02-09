@@ -5,6 +5,7 @@ from src.flow_representation.core.flow_state import FlowState, FlowDimensions
 from src.flow_representation.visualization.flow_representation import FlowRepresentation
 
 def create_climate_risk_visualization():
+    print("Starting visualization creation...")
     """Create visualization of climate risk patterns."""
     flow_rep = FlowRepresentation()
     
@@ -87,18 +88,29 @@ def create_climate_risk_visualization():
             flow_rep.add_state(state)
     
     # Create visualization
+    print("Creating initial visualization...")
     fig = flow_rep.create_visualization()
+    print("Initial visualization created.")
     
     # Show different dimension views
+    print("Creating dimension views...")
     for dimension in ["coherence", "cross_pattern_flow", "emergence_rate"]:
+        print(f"Creating view for {dimension}...")
         flow_rep.set_active_dimension(dimension)
         fig = flow_rep.create_visualization()
-        fig.write_html(f"mv_climate_risk_{dimension}.html")
+        output_path = f"examples/output/mv_climate_risk_{dimension}.html"
+        print(f"Saving to {output_path}")
+        fig.write_html(output_path)
+        print(f"Saved {dimension} view.")
     
     # Toggle between abstract and geographic views
+    print("Creating geographic view...")
     flow_rep.toggle_choropleth_mode()
     fig = flow_rep.create_visualization()
-    fig.write_html("mv_climate_risk_geographic.html")
+    output_path = "examples/output/mv_climate_risk_geographic.html"
+    print(f"Saving to {output_path}")
+    fig.write_html(output_path)
+    print("Saved geographic view.")
 
 if __name__ == "__main__":
     create_climate_risk_visualization()

@@ -74,17 +74,17 @@ class FlowRepresentation:
         fig = make_subplots(
             rows=2, cols=3,
             subplot_titles=(
-                "Timeline Evolution",
-                "Pattern Network",
-                "Topology View",
-                "Current Metrics",
-                "Key Insights",
-                "Dimension Controls"
+                'Timeline Evolution',
+                'Pattern Network',
+                'Topology View',
+                'Current Metrics',
+                'Key Insights',
+                'Dimension Controls'
             ),
             column_widths=[0.3, 0.3, 0.4],
             specs=[
-                [{}, {}, {}],
-                [{}, {}, {}]
+                [{'type': 'xy'}, {'type': 'xy'}, {'type': 'xy'}],
+                [{'type': 'table'}, {'type': 'table'}, {'type': 'table'}]
             ]
         )
         
