@@ -47,6 +47,12 @@ class LeafletVisualizer:
         # Process town data
         point_data = self.create_point_data(town_data)
         
+        # Copy GeoJSON file to output directory
+        import shutil
+        geojson_src = self.data_dir / 'mv_towns.json'
+        geojson_dst = output_dir / 'mv_towns.json'
+        shutil.copy(geojson_src, geojson_dst)
+        
         # Create HTML template
         template = Template('''
         {% autoescape false %}
@@ -143,8 +149,61 @@ class LeafletVisualizer:
                     'Light Theme': lightLayer
                 };
 
-                // Create overlay layers
-                const markersLayer = L.layerGroup();
+                // Load town boundaries
+                fetch('maps/data/mv_towns.json')
+                    .then(response => response.json())
+                    .then(geojson => {
+                        // Create polygon layer
+                        const polygonLayer = L.geoJSON(geojson, {
+                            style: function(feature) {
+                                const townName = feature.properties.name;
+                                const townData = points.find(p => p.name === townName);
+                                if (!townData) return {};
+                                
+                                // Calculate blended color based on metrics
+                                const metrics = townData.metrics;
+                                const r = Math.round(255 * (0.4 * metrics.coherence + 0.2 * metrics.emergence_rate));
+                                const g = Math.round(255 * (0.4 * metrics.cross_pattern_flow + 0.2 * metrics.social_support));
+                                const b = Math.round(255 * (0.4 * metrics.emergence_rate + 0.2 * metrics.coherence));
+                                
+                                return {
+                                    fillColor: `rgb(${r},${g},${b})`,
+                                    weight: 2,
+                                    opacity: 1,
+                                    color: 'white',
+                                    fillOpacity: 0.7
+                                };
+                            },
+                            onEachFeature: function(feature, layer) {
+                                const townName = feature.properties.name;
+                                const townData = points.find(p => p.name === townName);
+                                if (!townData) return;
+                                
+                                // Add popup with metrics
+                                layer.bindPopup(`
+                                    <div class="info">
+                                        <h3>${townName}</h3>
+                                        <div class="metric-row">
+                                            <span class="metric-label">Coherence</span>
+                                            <span class="metric-value">${(townData.metrics.coherence * 100).toFixed(1)}%</span>
+                                        </div>
+                                        <div class="metric-row">
+                                            <span class="metric-label">Emergence Rate</span>
+                                            <span class="metric-value">${(townData.metrics.emergence_rate * 100).toFixed(1)}%</span>
+                                        </div>
+                                        <div class="metric-row">
+                                            <span class="metric-label">Cross Pattern Flow</span>
+                                            <span class="metric-value">${(townData.metrics.cross_pattern_flow * 100).toFixed(1)}%</span>
+                                        </div>
+                                        <div class="metric-row">
+                                            <span class="metric-label">Social Support</span>
+                                            <span class="metric-value">${(townData.metrics.social_support * 100).toFixed(1)}%</span>
+                                        </div>
+                                    </div>
+                                `);
+                            }
+                        }).addTo(map);
+                    });
                 
                 // Create heatmap data
                 const heatData = points.map(point => {
@@ -179,15 +238,13 @@ class LeafletVisualizer:
                 });
 
                 const overlayLayers = {
-                    'Town Markers': markersLayer,
                     'Heat Map': heatLayer
                 };
 
-                // Add all layer controls
+                // Add layer controls
                 L.control.layers(baseLayers, overlayLayers, {position: 'topright'}).addTo(map);
                 
                 // Add default layers
-                markersLayer.addTo(map);
                 heatLayer.addTo(map);
 
                 // Create legend
@@ -196,69 +253,14 @@ class LeafletVisualizer:
                     const div = L.DomUtil.create('div', 'info legend');
                     div.innerHTML = `
                         <h3>Metrics Legend</h3>
-                        <div><i style="background: rgb(255, 128, 128)"></i>Coherence</div>
-                        <div><i style="background: rgb(128, 255, 128)"></i>Emergence Rate</div>
-                        <div><i style="background: rgb(128, 128, 255)"></i>Cross Pattern Flow</div>
-                        <div><i style="background: rgb(255, 255, 255)"></i>Social Support</div>
+                        <div><i style="background: rgb(255, 0, 0)"></i>Coherence</div>
+                        <div><i style="background: rgb(0, 255, 0)"></i>Cross Pattern Flow</div>
+                        <div><i style="background: rgb(0, 0, 255)"></i>Emergence Rate</div>
                     `;
                     return div;
                 };
                 legend.addTo(map);
 
-                // Add points to markers layer
-                points.forEach(point => {
-                    // Calculate blended color
-                    const coherenceColor = [255, 128, 128];
-                    const emergenceColor = [128, 255, 128];
-                    const flowColor = [128, 128, 255];
-                    
-                    const r = (coherenceColor[0] * point.metrics.coherence + 
-                              emergenceColor[0] * point.metrics.emergence_rate + 
-                              flowColor[0] * point.metrics.cross_pattern_flow) / 3;
-                    const g = (coherenceColor[1] * point.metrics.coherence + 
-                              emergenceColor[1] * point.metrics.emergence_rate + 
-                              flowColor[1] * point.metrics.cross_pattern_flow) / 3;
-                    const b = (coherenceColor[2] * point.metrics.coherence + 
-                              emergenceColor[2] * point.metrics.emergence_rate + 
-                              flowColor[2] * point.metrics.cross_pattern_flow) / 3;
-                    
-                    // Blend with white based on social support
-                    const white = 255 * point.metrics.social_support;
-                    const color = `rgb(${Math.min(255, r + white)}, ${Math.min(255, g + white)}, ${Math.min(255, b + white)})`;
-                    
-                    // Create circle marker
-                    const marker = L.circleMarker([point.coordinates[1], point.coordinates[0]], {
-                        radius: 12 + 20 * point.metrics.social_support,
-                        fillColor: color,
-                        color: '#ffffff',
-                        weight: 2,
-                        opacity: 0.2,
-                        fillOpacity: 0.8
-                    }).addTo(markersLayer);
-
-                    // Add popup
-                    marker.bindPopup(`
-                        <div class="info">
-                            <h3>${point.name}</h3>
-                            <div class="metric-row">
-                                <span class="metric-label">Coherence</span>
-                                <span class="metric-value">${(point.metrics.coherence * 100).toFixed(1)}%</span>
-                            </div>
-                            <div class="metric-row">
-                                <span class="metric-label">Emergence Rate</span>
-                                <span class="metric-value">${(point.metrics.emergence_rate * 100).toFixed(1)}%</span>
-                            </div>
-                            <div class="metric-row">
-                                <span class="metric-label">Cross Pattern Flow</span>
-                                <span class="metric-value">${(point.metrics.cross_pattern_flow * 100).toFixed(1)}%</span>
-                            </div>
-                            <div class="metric-row">
-                                <span class="metric-label">Social Support</span>
-                                <span class="metric-value">${(point.metrics.social_support * 100).toFixed(1)}%</span>
-                            </div>
-                        </div>
-                    `);
-                });
             </script>
         </body>
         </html>
