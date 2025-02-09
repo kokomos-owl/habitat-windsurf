@@ -23,36 +23,29 @@ class LeafletVisualizer:
         # Create the template directory if it doesn't exist
         self.template_dir.mkdir(exist_ok=True)
         
-    def create_point_data(self, metrics_data):
-        """Convert town metrics into point data format."""
-        # Town center coordinates (approximate)
-        town_coordinates = {
-            'Aquinnah': [-70.8259, 41.3474],
-            'Chilmark': [-70.7459, 41.3432],
-            'West Tisbury': [-70.6837, 41.3815],
-            'Tisbury': [-70.6093, 41.4532],
-            'Oak Bluffs': [-70.5595, 41.4557],
-            'Edgartown': [-70.5132, 41.3890]
-        }
+    def create_point_data(self, town_data):
+        """Process town data for visualization.
         
-        point_data = []
-        for town, coords in town_coordinates.items():
-            point = {
-                'name': town,
-                'coordinates': coords,
-                'metrics': {
-                    metric: metrics_data.get(f'{town}_{metric}', 0)
-                    for metric in ['coherence', 'cross_pattern_flow', 'emergence_rate', 'social_support']
-                }
-            }
-            point_data.append(point)
+        Args:
+            town_data: List of dictionaries containing town data with coordinates and metrics
             
-        return point_data
+        Returns:
+            List of dictionaries containing point data
+        """
+        return town_data
         
-    def generate_visualization(self, metrics_data, output_dir):
-        """Generate an interactive visualization using Leaflet."""
-        # Convert metrics to point data
-        point_data = self.create_point_data(metrics_data)
+    def generate_visualization(self, town_data, output_dir):
+        """Generate an interactive visualization using Leaflet.
+        
+        Args:
+            town_data: List of dictionaries containing town data with coordinates and metrics
+            output_dir: Directory to save the visualization
+            
+        Returns:
+            Path to the generated visualization file
+        """
+        # Process town data
+        point_data = self.create_point_data(town_data)
         
         # Create HTML template
         template = Template('''

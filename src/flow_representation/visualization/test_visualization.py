@@ -41,15 +41,6 @@ def main():
     metrics_processor = TownMetricsProcessor()
     metrics_processor.process_climate_metrics(sample_metrics)
     
-    # Get data with geometries
-    data = metrics_processor.merge_with_geometry()
-    
-    # Get min/max values for each metric
-    min_max_values = {
-        metric: metrics_processor.get_metric_range(metric)
-        for metric in metrics_processor.metrics.keys()
-    }
-    
     # Create visualization
     visualizer = LeafletVisualizer()
     
@@ -59,7 +50,7 @@ def main():
     
     # Generate and save visualization
     output_path = visualizer.generate_visualization(
-        sample_metrics,
+        metrics_processor.get_town_coordinates(),
         output_dir
     )
     

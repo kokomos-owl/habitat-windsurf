@@ -1,8 +1,5 @@
 """Process climate risk metrics for Martha's Vineyard towns."""
 
-import pandas as pd
-import geopandas as gpd
-from pathlib import Path
 from typing import Dict, List, Tuple
 
 class TownMetricsProcessor:
@@ -10,11 +7,15 @@ class TownMetricsProcessor:
     
     def __init__(self):
         """Initialize the processor."""
-        self.data_dir = Path(__file__).parent.parent / 'maps' / 'data'
-        self.geojson_path = self.data_dir / 'mv_towns.geojson'
-        
-        # Load town boundaries
-        self.town_boundaries = gpd.read_file(self.geojson_path)
+        # Town coordinates (centroids)
+        self.town_coordinates = {
+            'Aquinnah': [-70.8260, 41.3474],
+            'Chilmark': [-70.7574, 41.3432],
+            'Edgartown': [-70.5133, 41.3896],
+            'Oak Bluffs': [-70.5595, 41.4546],
+            'Tisbury': [-70.6134, 41.4532],
+            'West Tisbury': [-70.6784, 41.3815]
+        }
         
         # Initialize metrics storage
         self.metrics = {
@@ -30,11 +31,10 @@ class TownMetricsProcessor:
         Args:
             metrics_data: Dictionary containing metric values for each town
         """
-        # Here we'll integrate with the actual climate risk metrics
-        # For now, using placeholder data
-        for town in self.town_boundaries['name'].unique():
+        # Process metrics for each town
+        for town in self.town_coordinates.keys():
             for metric in self.metrics.keys():
-                # This will be replaced with actual metric calculations
+                # Get metric value with fallback to 0.0
                 self.metrics[metric][town] = metrics_data.get(
                     f"{town}_{metric}", 
                     0.0
@@ -52,23 +52,20 @@ class TownMetricsProcessor:
         values = list(self.metrics[metric].values())
         return min(values), max(values)
     
-    def get_metric_values(self) -> pd.DataFrame:
-        """Get all metric values as a DataFrame.
+    def get_town_coordinates(self) -> List[Dict[str, any]]:
+        """Get coordinates for each town.
         
         Returns:
-            DataFrame with towns as index and metrics as columns
+            List of dictionaries containing town coordinates
         """
-        return pd.DataFrame(self.metrics)
-    
-    def merge_with_geometry(self) -> gpd.GeoDataFrame:
-        """Merge metric values with town geometries.
-        
-        Returns:
-            GeoDataFrame with metrics and geometries
-        """
-        metrics_df = self.get_metric_values()
-        return self.town_boundaries.merge(
-            metrics_df,
-            left_on='name',
-            right_index=True
-        )
+        return [
+            {
+                'name': town,
+                'coordinates': coords,
+                'metrics': {
+                    metric: self.metrics[metric][town]
+                    for metric in self.metrics.keys()
+                }
+            }
+            for town, coords in self.town_coordinates.items()
+        ]
