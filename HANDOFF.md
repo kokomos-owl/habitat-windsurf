@@ -1,13 +1,13 @@
 # Habitat Windsurf UI Course Handoff
 
-## Key Architectural Principle: Flow-Based Design
+## Key Architectural Principle: Dimensionalized Vector Space Design
 
-Habitat's architecture is built on flow-based principles, moving away from traditional discrete state machines to a more natural, continuous approach:
+Habitat's architecture has evolved to use a sophisticated dimensionalized vector space approach, representing a significant advancement in document ingestion and pattern analysis:
 
-1. Flow Mechanics
-   - Continuous metrics instead of discrete states
-   - Pressure-based resource management
-   - Natural pattern evolution
+1. Vector Space Mechanics
+   - Multi-dimensional pattern representation (coherence, emergence, stability, temporal)
+   - Vector field topology for pattern analysis
+   - Continuous pattern evolution through vector space
 
 2. System Benefits
    - More resilient to changing conditions

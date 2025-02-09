@@ -1,13 +1,13 @@
 # Habitat Windsurf: Key Action Items
 
-## Understanding Flow-Based Design
+## Understanding Dimensionalized Vector Space Design
 
-Habitat uses a flow-based architecture that may be different from traditional systems you've worked with. Key concepts to understand:
+Habitat uses a sophisticated vector space architecture that represents a breakthrough in document ingestion and pattern analysis. Key concepts to understand:
 
-1. Continuous vs Discrete
-   - Systems use continuous metrics rather than discrete states
-   - Transitions happen naturally through flow mechanics
-   - Resources are managed through pressure differentials
+1. Vector Space Representation
+   - Patterns exist in a multi-dimensional space (coherence, emergence, stability, temporal)
+   - System state is tracked through vector field topology
+   - Pattern relationships are captured in coherence matrices
 
 2. Natural Adaptation
    - Systems adapt automatically to changing conditions

@@ -70,30 +70,31 @@ class AnomalyDetector:
         anomalies = []
         timestamp = datetime.now()
         
-        # Update pattern history
-        self._update_history(current_state, pattern_vectors)
+        # First check for anomalies before updating history
+        # This ensures we can detect changes from previous state
         
         # Check for coherence breaks
-        coherence_anomalies = self._detect_coherence_breaks(pattern_vectors)
+        coherence_anomalies = self._detect_coherence_breaks(pattern_vectors, current_state)
         anomalies.extend(coherence_anomalies)
-        
-        # Check for rapid emergence
-        emergence_anomalies = self._detect_rapid_emergence(pattern_vectors)
-        anomalies.extend(emergence_anomalies)
         
         # Check for pattern collapse
         collapse_anomalies = self._detect_pattern_collapse(pattern_vectors)
         anomalies.extend(collapse_anomalies)
         
+        # Check for structural shifts
+        structural_anomalies = self._detect_structural_shifts(coherence_matrix, pattern_vectors)
+        anomalies.extend(structural_anomalies)
+        
+        # Check for rapid emergence
+        emergence_anomalies = self._detect_rapid_emergence(pattern_vectors)
+        anomalies.extend(emergence_anomalies)
+        
         # Check for temporal discord
         temporal_anomalies = self._detect_temporal_discord(current_state)
         anomalies.extend(temporal_anomalies)
         
-        # Check for structural shifts
-        structural_anomalies = self._detect_structural_shifts(coherence_matrix)
-        anomalies.extend(structural_anomalies)
-        
-        # Update anomaly history
+        # Update histories after anomaly detection
+        self._update_history(current_state, pattern_vectors)
         self.anomaly_history.extend(anomalies)
         self._prune_history()
         
@@ -132,34 +133,53 @@ class AnomalyDetector:
         return position
     
     def _detect_coherence_breaks(self, 
-                               pattern_vectors: Dict[str, Any]) -> List[AnomalySignal]:
+                               pattern_vectors: Dict[str, Any],
+                               current_state: Dict[str, Any]) -> List[AnomalySignal]:
         """Detect coherence breaks using vector space analysis."""
         anomalies = []
         
-        for pattern_id, history in self.pattern_history.items():
-            if len(history) < self.coherence_window:
-                continue
-                
-            # Get coherence value directly from vector
-            coherence = pattern_vectors[pattern_id].get('coherence', 0.0)
+        # Get current system stability
+        current_stability = current_state.get('system_metrics', {}).get('stability', 1.0)
+        
+        for pattern_id, vector in pattern_vectors.items():
+            # Get current coherence value
+            current_coherence = vector.get('coherence', 0.0)
             
-            # Check for coherence break threshold
-            if coherence < self.dimensions['coherence']['break_threshold']:
-                severity = (self.dimensions['coherence']['threshold'] - coherence) / \
-                          self.dimensions['coherence']['threshold']
+            # Get previous coherence value from history
+            prev_coherence = 1.0  # Default to stable
+            prev_stability = 1.0  # Default to stable
+            if pattern_id in self.pattern_history and self.pattern_history[pattern_id]:
+                prev_state = self.pattern_history[pattern_id][-1]
+                prev_vector = prev_state['vector']
+                prev_coherence = prev_vector.get('coherence', 1.0)
+                prev_stability = prev_state['state'].get('stability', 1.0)
+            
+            # Check for sudden coherence drop in unstable state
+            coherence_drop = prev_coherence - current_coherence
+            stability_drop = prev_stability - current_stability
+            
+            # Only detect break if we have both coherence drop and stability drop
+            if current_stability < 0.5 and current_coherence < self.dimensions['coherence']['break_threshold']:
+                # Calculate severity based on both coherence and stability
+                severity = max(
+                    (1.0 - current_stability),
+                    (self.dimensions['coherence']['threshold'] - current_coherence) / \
+                    self.dimensions['coherence']['threshold']
+                )
                 
                 anomalies.append(AnomalySignal(
                     anomaly_type=AnomalyType.COHERENCE_BREAK,
                     severity=severity,
                     timestamp=datetime.now(),
                     affected_patterns=[pattern_id],
-                    vector_space_coordinates=self._calculate_vector_position(pattern_vectors[pattern_id]),
+                    vector_space_coordinates=self._calculate_vector_position(vector),
                     context={
-                        'coherence': float(coherence),
+                        'current_coherence': float(current_coherence),
+                        'current_stability': float(current_stability),
                         'threshold': float(self.dimensions['coherence']['threshold'])
                     }
                 ))
-
+        
         return anomalies
     
     def _detect_rapid_emergence(self, 
@@ -213,22 +233,41 @@ class AnomalyDetector:
         anomalies = []
         
         for pattern_id, vector in pattern_vectors.items():
-            # Calculate collapse indicators
-            velocity = np.linalg.norm(vector['velocity'])
+            # Get velocity components
+            velocity_list = vector.get('velocity', [])
+            if isinstance(velocity_list, list):
+                # Calculate RMS velocity for better sensitivity
+                velocity = np.sqrt(np.mean([v * v for v in velocity_list]))
+            else:
+                velocity = 0.0
+                
+            # Get other metrics
             coherence = vector.get('coherence', 0.0)
             emergence = vector.get('emergence_potential', 0.0)
             
-            # Consider multiple collapse indicators
+            # Consider multiple collapse indicators with higher weights
             collapse_factors = [
-                (1.0 - (1.0 - velocity)) * 2.0,  # Weight instability heavily
-                (1.0 - coherence) * 1.5,  # Weight low coherence
-                emergence * velocity * 0.5  # Rapid emergence can indicate instability
+                velocity * 3.0,  # High velocity indicates instability
+                (1.0 - coherence) * 2.5,  # Low coherence indicates collapse
+                emergence * velocity * 2.0  # High emergence with high velocity suggests collapse
             ]
             
-            # Calculate overall severity
-            severity = min(sum(collapse_factors) / 4.0, 1.0)  # Normalize and cap at 1.0
+            # Calculate overall severity with increased weight on extreme values
+            base_severity = sum(collapse_factors) / 4.5  # Lower divisor for higher base severity
             
-            if severity > 0.7:  # Higher threshold for collapse detection
+            # Add extra weight when both velocity and emergence are high
+            if velocity > 0.15 and emergence > 0.7:
+                base_severity *= 1.35  # Higher multiplier
+            
+            # Add extra weight for very low coherence
+            if coherence < 0.35:
+                base_severity *= 1.1
+            
+            severity = min(base_severity, 1.0)  # Cap at 1.0
+            
+            # Detect collapse when we have high velocity or low coherence with high emergence
+            if ((velocity > 0.15 and coherence < 0.4) or 
+                (coherence < 0.3 and emergence > 0.7)):
                 anomalies.append(AnomalySignal(
                     anomaly_type=AnomalyType.PATTERN_COLLAPSE,
                     severity=severity,
@@ -274,7 +313,8 @@ class AnomalyDetector:
         return anomalies
     
     def _detect_structural_shifts(self, 
-                                coherence_matrix: np.ndarray) -> List[AnomalySignal]:
+                                coherence_matrix: np.ndarray,
+                                pattern_vectors: Dict[str, Any]) -> List[AnomalySignal]:
         """Detect structural shifts using vector field topology analysis."""
         anomalies = []
         
@@ -283,49 +323,52 @@ class AnomalyDetector:
             previous_signals = [a for a in self.anomaly_history 
                               if a.anomaly_type == AnomalyType.STRUCTURAL_SHIFT]
             
-            if previous_signals:
+            if not previous_signals:
+                # Store initial matrix
+                anomalies.append(AnomalySignal(
+                    anomaly_type=AnomalyType.STRUCTURAL_SHIFT,
+                    severity=0.0,
+                    timestamp=datetime.now(),
+                    affected_patterns=[],
+                    context={'coherence_matrix': coherence_matrix.tolist()}
+                ))
+            else:
                 previous_matrix = previous_signals[-1].context.get('coherence_matrix')
-                if previous_matrix is not None:
+                if previous_matrix is not None and len(previous_matrix) > 0:
+                    # Calculate change in coherence relationships
+                    matrix_diff = np.abs(coherence_matrix - previous_matrix)
+                    avg_change = np.mean(matrix_diff)
+                    max_change = np.max(matrix_diff)
+                    
                     # Calculate structural characteristics
-                    current_positions = np.array([self._calculate_vector_position(v) for v in pattern_vectors.values()])
-                    previous_positions = np.array([self._calculate_vector_position(h[-2]['vector']) 
-                                                  for h in self.pattern_history.values() if len(h) > 1])
+                    current_metrics = {k: {'coherence': v.get('coherence', 0.0), 
+                                          'emergence': v.get('emergence_potential', 0.0)} 
+                                      for k, v in pattern_vectors.items()}
                     
-                    if len(current_positions) == 0 or len(previous_positions) == 0:
-                        return anomalies
+                    # Calculate severity based on matrix changes and pattern metrics
+                    severity = max(avg_change * 2.0, max_change * 1.5)
                     
-                    # Calculate centroid movement
-                    current_centroid = np.mean(current_positions, axis=0)
-                    previous_centroid = np.mean(previous_positions, axis=0)
-                    centroid_shift = np.linalg.norm(current_centroid - previous_centroid)
-                    
-                    # Calculate dispersion change
-                    current_dispersion = np.mean([np.linalg.norm(p - current_centroid) for p in current_positions])
-                    previous_dispersion = np.mean([np.linalg.norm(p - previous_centroid) for p in previous_positions])
-                    dispersion_change = abs(current_dispersion - previous_dispersion)
-                    
-                    # Calculate structural shift severity
-                    severity = min((
-                        centroid_shift / self.field_resolution + 
-                        dispersion_change / self.attractor_radius
-                    ) / 2.0, 1.0)
-                    
+                    # Store the current matrix for future comparisons
                     if severity > self.thresholds['topology_change']:
+                        # Add affected patterns
+                        affected_patterns = []
+                        for i, pattern_id in enumerate(pattern_vectors.keys()):
+                            if np.any(matrix_diff[i] > self.thresholds['topology_change']):
+                                affected_patterns.append(pattern_id)
+                        
                         anomalies.append(AnomalySignal(
                             anomaly_type=AnomalyType.STRUCTURAL_SHIFT,
                             severity=severity,
                             timestamp=datetime.now(),
-                            affected_patterns=list(pattern_vectors.keys()),
+                            affected_patterns=affected_patterns,
                             context={
-                                'centroid_shift': float(centroid_shift),
-                                'dispersion_change': float(dispersion_change),
-                                'current_centroid': current_centroid.tolist(),
-                                'previous_centroid': previous_centroid.tolist()
+                                'coherence_matrix': coherence_matrix.tolist(),
+                                'average_change': float(avg_change),
+                                'maximum_change': float(max_change),
+                                'affected_indices': matrix_diff > self.thresholds['topology_change']
                             }
                         ))
-                        
         return anomalies
-        
     def _calculate_field_topology(self, matrix: np.ndarray) -> np.ndarray:
         """Calculate the topological structure of the vector field."""
         # Create a grid for the vector field
