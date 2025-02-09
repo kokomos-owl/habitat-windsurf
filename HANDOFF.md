@@ -1,52 +1,71 @@
 # Habitat Windsurf UI Course Handoff
 
-## Key Architectural Principle: Dimensionalized Vector Space Design
+## Key Implementation: Pattern Evolution System
 
-Habitat's architecture has evolved to use a sophisticated dimensionalized vector space approach, representing a significant advancement in document ingestion and pattern analysis:
+Habitat now implements a controlled pattern evolution system with the following key features:
 
-1. Vector Space Mechanics
-   - Multi-dimensional pattern representation (coherence, emergence, stability, temporal)
-   - Vector field topology for pattern analysis
-   - Continuous pattern evolution through vector space
+1. Evolution Architecture
+   - WebSocket-based real-time updates
+   - Pattern-specific evolution characteristics
+   - Gradient-based state transitions
+   - Step-wise temporal control
 
-2. System Benefits
-   - More resilient to changing conditions
-   - Better handling of edge cases
-   - Natural adaptation to load
+2. Pattern Types
+   - Precipitation (high stability, moderate coherence)
+   - Drought (high coherence, low energy)
+   - Wildfire (high energy, moderate stability)
 
-3. Implementation Areas
-   - Temporal processing (adaptive windows)
-   - Pattern evolution
-   - Resource management
-   - System coordination
+3. Evolution Controls
+   - Initial state loading
+   - Step-by-step advancement
+   - Temporal state jumps
+   - Pattern reset capability
 
-**Document Date**: 2025-02-08T13:04:23-05:00
+4. Status Management
+   - Connection tracking
+   - Data loading status
+   - Evolution progress
+   - Error reporting
+
+**Document Date**: 2025-02-09T11:36:15-05:00
 
 ## Project Overview
 
-Habitat Windsurf UI Course is an interactive visualization workshop focused on real-time network visualization and status tracking. The project demonstrates modern web development practices with a focus on user experience and error handling.
+Habitat Windsurf UI Course implements a controlled pattern evolution system that allows step-wise visualization of climate risk patterns. The system demonstrates modern real-time visualization practices with a focus on pattern-specific evolution and state management.
 
 ## Component Architecture
 
-### Visualization Layer
-- `flow_visualizer.py`: Plotly-based flow pattern visualization
-- Interactive graph visualization with coherence-based coloring
-- Real-time pattern evolution tracking
-- Structure-meaning relationship visualization
-- Pattern density and temporal metrics
+### Pattern Evolution Server
+- `pattern_evolution_server.py`: WebSocket-based evolution control
+- Pattern-specific evolution characteristics
+- Gradient-based state transitions
+- Real-time status updates
+- Comprehensive error handling
 
-### Pattern Evolution System
-- Dynamic pattern state management
-- Coherence calculation and tracking
-- Temporal relationship analysis
-- Evolution stage determination
-- Pattern density metrics
-- Emergence-based coherence validation
-- Adaptive temporal consistency checks
-- Domain ontology integration
-- Pattern evidence handling
-- Pattern type-based grouping
-- Timestamp tracking
+### Data Structure
+```json
+{
+    "patterns": [
+        {
+            "risk_type": "precipitation",
+            "initial_metrics": {
+                "stability": 0.85,
+                "coherence": 0.75,
+                "energy_state": 0.65
+            },
+            "nodes": [...],
+            "links": [...]
+        }
+    ]
+}
+```
+
+### Evolution Controls
+- Initial state loading (t=0)
+- Step-wise advancement
+- Temporal jumps (t=20, t=50, t=100)
+- Pattern reset
+- Status tracking
 
 ### Status System
 - Real-time process tracking

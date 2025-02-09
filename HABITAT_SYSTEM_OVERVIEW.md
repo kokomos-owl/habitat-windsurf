@@ -2,52 +2,89 @@
 
 ## Introduction
 
-Habitat is a software system that processes and analyzes documents using principles from fluid dynamics. The system tracks how information patterns emerge and change over time, similar to how fluids flow and adapt to their environment.
+Habitat is a pattern evolution system that processes and analyzes climate risk data using principles from fluid dynamics and vector field topology. The system implements controlled pattern evolution with step-wise state transitions, allowing for detailed analysis of how patterns emerge and change over time.
 
-**Last Updated**: 2025-02-09T04:38:46-05:00
+**Last Updated**: 2025-02-09T11:36:15-05:00
 
-## System Design
+## Pattern Evolution System
 
-### Flow-Based Architecture
+### Pattern Types and Characteristics
 
-The system uses continuous measurements rather than fixed states to process information:
+The system manages three distinct pattern types, each with unique evolution characteristics:
 
-1. **Pattern Processing**: Tracks how information patterns form and change
-2. **Time Management**: Handles how patterns develop over time
-3. **Resource Control**: Adjusts processing speed based on system load
-4. **Adaptation**: Changes behavior based on incoming information
+1. **Precipitation Patterns**
+   - High base stability (0.85)
+   - Moderate coherence (0.75)
+   - Moderate energy (0.65)
+   - Low noise scale (0.02)
 
-This design helps the system handle varying workloads and changing information patterns effectively.
+2. **Drought Patterns**
+   - Moderate stability (0.65)
+   - High coherence (0.85)
+   - Low energy (0.45)
+   - Medium noise scale (0.03)
 
-### Current Capabilities
+3. **Wildfire Patterns**
+   - Moderate stability (0.75)
+   - Moderate coherence (0.65)
+   - High energy (0.75)
+   - High noise scale (0.04)
 
-#### Core Functions
-- Processes documents using fluid dynamics concepts
-- Adjusts processing speed automatically when under heavy load
-- Maintains system stability during high-volume operations
-- Tracks pattern changes over time
+### Evolution Controls
 
-#### Technical Implementation
-- Uses type checking throughout the codebase
-- Includes comprehensive error handling
-- Features extensive test coverage
-- Provides detailed system documentation
+#### State Management
+- Initial state loading
+- Step-wise advancement
+- Temporal state jumps (t=0, t=20, t=50, t=100)
+- Pattern reset capability
 
-#### Areas for Improvement
-1. **Documentation**
-   - Clearer explanations of core concepts
-   - Better guides for new developers
-   - More examples of common use cases
+#### Evolution Characteristics
+- Gradient-based transitions
+- Pattern-specific evolution rates
+- Time-scaled noise
+- Bounded metric ranges
 
-2. **Tools and Monitoring**
-   - Better visibility into system metrics
-   - Improved debugging tools
-   - Enhanced system monitoring
+### Implementation Architecture
 
-3. **Integration**
-   - Simpler connection to other systems
-   - Standard patterns for common integrations
-   - Performance monitoring tools
+#### Pattern Evolution Server
+- WebSocket-based communication
+- Real-time state updates
+- Error handling and status tracking
+- Pattern-specific evolution control
+
+#### Data Structure
+```json
+{
+    "patterns": [
+        {
+            "risk_type": "precipitation",
+            "initial_metrics": {
+                "stability": 0.85,
+                "coherence": 0.75,
+                "energy_state": 0.65
+            },
+            "nodes": [...],
+            "links": [...]
+        }
+    ]
+}
+```
+
+#### Next Steps
+1. **Vector Field Integration**
+   - Topology-based analysis
+   - Critical point detection
+   - Flow field visualization
+
+2. **Performance Optimization**
+   - State transition efficiency
+   - Memory usage optimization
+   - WebSocket message batching
+
+3. **Pattern Relationships**
+   - Cross-pattern interactions
+   - Emergence detection
+   - Collapse prediction
 
 ## System Purpose
 

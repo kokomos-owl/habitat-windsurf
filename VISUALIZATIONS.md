@@ -1,52 +1,80 @@
 # Flow Pattern Visualization Guide
 
-## Vector Space Visualization Principles
+## Current Implementation State
 
-Habitat's visualizations now leverage the dimensionalized vector space architecture through:
+Habitat's visualization system now implements controlled pattern evolution with step-wise state transitions:
 
-1. Vector Field Visualization
-   - Streamplot visualization of pattern flow
-   - Critical point identification
-   - Vector field topology mapping
-   - Pattern trajectory tracking
+1. Pattern Evolution Server
+   - WebSocket-based real-time updates
+   - Controlled step-wise evolution
+   - Pattern-specific characteristics
+   - Gradient-based state changes
 
-2. Multi-dimensional Display
-   - Interactive 3D pattern space
-   - Coherence matrix heatmaps
-   - Emergence potential gradients
-   - Pattern velocity vectors
+2. Pattern Types and Metrics
+   - Precipitation patterns (high stability)
+   - Drought patterns (high coherence)
+   - Wildfire patterns (high energy)
+   - Cross-pattern relationships
 
-3. Network Dynamics
-   - Force-directed layouts
-   - Flow-based edge bundling
-   - Natural pattern clustering
-   - Emergence visualization
+3. Evolution Controls
+   - Initial state loading
+   - Step-by-step evolution
+   - Temporal state jumps (t=0, t=20, t=50, t=100)
+   - Pattern reset capability
 
-4. Interactive Elements
-   - Real-time flow control
-   - Pressure point adjustment
-   - Flow path exploration
-   - Pattern evolution tracking
+4. Status Tracking
+   - Connection status
+   - Data loading status
+   - Evolution step status
+   - Error reporting
 
-**Document Date**: 2025-02-09T08:07:51-05:00
+**Document Date**: 2025-02-09T11:36:15-05:00
 
-## Document-Ingest-Process-Visualize Flow
+## Pattern Evolution Implementation
 
-### Current Implementation
-1. Document Ingestion
-   - Climate risk document parsing
-   - Metadata extraction
-   - Initial pattern identification
+### 1. Data Structure
+```json
+{
+    "patterns": [
+        {
+            "risk_type": "precipitation",
+            "initial_metrics": {
+                "stability": 0.85,
+                "coherence": 0.75,
+                "energy_state": 0.65
+            },
+            "nodes": [...],
+            "links": [...]
+        }
+    ]
+}
+```
 
-2. Processing Pipeline
-   - Vector space metric calculation
-   - Pattern evolution tracking
-   - Cross-pattern relationship analysis
+### 2. Evolution Characteristics
 
-3. Visualization Generation
-   - Multi-dimensional metric display
-   - Pattern flow visualization
-   - Evolution trajectory tracking
+#### Precipitation Patterns
+- High base stability (0.85)
+- Moderate coherence (0.75)
+- Moderate energy (0.65)
+- Low noise scale (0.02)
+
+#### Drought Patterns
+- Moderate stability (0.65)
+- High coherence (0.85)
+- Low energy (0.45)
+- Medium noise scale (0.03)
+
+#### Wildfire Patterns
+- Moderate stability (0.75)
+- Moderate coherence (0.65)
+- High energy (0.75)
+- High noise scale (0.04)
+
+### 3. State Transitions
+- Controlled drift toward base values
+- Time-scaled random fluctuations
+- Pattern-specific evolution rates
+- Bounded metric ranges
 
 ## Topology-Based Visual Language
 
