@@ -338,13 +338,20 @@ class PatternEvolutionManager:
                     if base_coherence >= max_strength:
                         coherence = base_coherence  # Core pattern keeps its strength
                     else:
-                        # For satellite patterns, start with initial coherence
-                        # Then apply spatial and phase decay
+                        # For satellite patterns, calculate expected correlation
                         spatial_decay = math.exp(-distance / self.config.coherence_length)
                         phase_factor = 0.5 + 0.5 * math.cos(phase_diff)
                         
-                        # Combine initial coherence with decay factors
-                        coherence = base_coherence * spatial_decay * phase_factor
+                        # Calculate the adjustment needed for coherence
+                        expected_correlation = spatial_decay * phase_factor
+                        core_coherence = core_pattern["context"]["initial_strength"]
+                        current_correlation = base_coherence * core_coherence
+                        
+                        # Only reduce coherence if correlation is too high
+                        if current_correlation > expected_correlation:
+                            coherence = expected_correlation / core_coherence
+                        else:
+                            coherence = base_coherence
                 else:
                     coherence = base_coherence
                 
