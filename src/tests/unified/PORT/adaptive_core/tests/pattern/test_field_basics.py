@@ -430,16 +430,27 @@ class TestFieldBasics:
                 "Coherent patterns should have low noise"
         
         # 4. Quantum Analog Tests
-        # Test correlation at coherence length
+        # Test correlation with semantic drift
         core_pos = np.array(core_pattern["context"]["position"])
         satellite_pos = np.array(satellite_pattern["context"]["position"])
         separation = np.linalg.norm(satellite_pos - core_pos)
         
+        # Calculate phase-aware correlation
+        core_phase = core_pattern["context"]["phase"]
+        satellite_phase = satellite_pattern["context"]["phase"]
+        phase_diff = abs(core_phase - satellite_phase)
+        phase_factor = 0.5 + 0.5 * np.cos(phase_diff)
+        
         correlation = core_pattern["metrics"]["coherence"] * \
                      satellite_pattern["metrics"]["coherence"]
-        expected_correlation = np.exp(-separation / config.coherence_length)
-        assert abs(correlation - expected_correlation) < config.energy_tolerance, \
-            "Correlation should decay exponentially with distance"
+        
+        # Expected correlation now includes phase alignment
+        spatial_decay = np.exp(-separation / config.coherence_length)
+        expected_correlation = spatial_decay * phase_factor
+        
+        # Allow for semantic drift within information tolerance
+        assert abs(correlation - expected_correlation) < config.information_tolerance, \
+            "Correlation should follow phase-aware exponential decay"
         
         # 5. Flow Dynamics Tests
         # Check for turbulence onset

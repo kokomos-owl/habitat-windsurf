@@ -309,48 +309,46 @@ class PatternEvolutionManager:
             # Calculate new metrics
             metrics = await self._calculate_metrics(pattern, related_patterns)
             
-            # Update coherence based on pattern position and strength
+            # Update coherence based on pattern position, strength, and phase relationships
             if "context" in pattern:
                 # Base coherence is the initial strength
                 base_coherence = pattern["context"].get("initial_strength", 0.0)
-                
-                # Calculate position
                 position = pattern["context"].get("position", [0, 0])
+                phase = pattern["context"].get("phase", 0.0)
                 
-                # Find the nearest core pattern (pattern with highest strength)
+                # Find the core pattern (pattern with highest strength)
                 core_pattern = None
-                min_distance = float('inf')
+                max_strength = -1
                 
                 for related in related_patterns:
                     if "context" in related:
-                        p2 = related["context"].get("position", [0, 0])
-                        distance = ((position[0] - p2[0])**2 + (position[1] - p2[1])**2)**0.5
-                        
-                        if distance < min_distance:
-                            min_distance = distance
+                        strength = related["context"].get("initial_strength", 0.0)
+                        if strength > max_strength:
+                            max_strength = strength
                             core_pattern = related
                 
                 if core_pattern:
-                    # Calculate coherence based on quantum correlation
-                    core_strength = core_pattern["context"].get("initial_strength", 0.0)
-                    coherence_length = self.config.coherence_length
+                    # Calculate distance and phase difference to core pattern
+                    core_pos = core_pattern["context"].get("position", [0, 0])
+                    core_phase = core_pattern["context"].get("phase", 0.0)
+                    distance = ((position[0] - core_pos[0])**2 + (position[1] - core_pos[1])**2)**0.5
+                    phase_diff = abs(phase - core_phase)
                     
-                    # Coherence decays exponentially with distance
-                    coherence = base_coherence * core_strength * math.exp(-min_distance / coherence_length)
-                    
-                    # Phase relationship modifies coherence
-                    phase1 = pattern["context"].get("phase", 0.0)
-                    phase2 = core_pattern["context"].get("phase", 0.0)
-                    phase_diff = abs(phase1 - phase2)
-                    phase_factor = math.cos(phase_diff)
-                    
-                    # Apply phase modification
-                    coherence *= (0.5 + 0.5 * phase_factor)  # Scale to [0, 1]
+                    # For the core pattern, use its initial strength
+                    if base_coherence >= max_strength:
+                        coherence = base_coherence  # Core pattern keeps its strength
+                    else:
+                        # For satellite patterns, start with initial coherence
+                        # Then apply spatial and phase decay
+                        spatial_decay = math.exp(-distance / self.config.coherence_length)
+                        phase_factor = 0.5 + 0.5 * math.cos(phase_diff)
+                        
+                        # Combine initial coherence with decay factors
+                        coherence = base_coherence * spatial_decay * phase_factor
                 else:
-                    # If no related patterns, coherence is just the base strength
                     coherence = base_coherence
                 
-                # Ensure coherence stays within bounds
+                # Allow for semantic drift within bounds
                 metrics.coherence = max(0.0, min(1.0, coherence))
             
             # Analyze pattern quality
