@@ -28,6 +28,15 @@ class SignalMetrics:
     persistence: float  # 0-1: How long pattern maintains integrity
     reproducibility: float  # 0-1: How consistently pattern appears
 
+    def _asdict(self) -> Dict[str, float]:
+        """Convert to dictionary for serialization."""
+        return {
+            'strength': self.strength,
+            'noise_ratio': self.noise_ratio,
+            'persistence': self.persistence,
+            'reproducibility': self.reproducibility
+        }
+
 @dataclass
 class FlowMetrics:
     """Metrics for pattern flow dynamics."""
@@ -35,6 +44,15 @@ class FlowMetrics:
     back_pressure: float  # 0-1: Counter-forces to emergence
     volume: float  # 0-1: Quantity of pattern instances
     current: float  # -1 to 1: Rate and direction of flow
+
+    def _asdict(self) -> Dict[str, float]:
+        """Convert to dictionary for serialization."""
+        return {
+            'viscosity': self.viscosity,
+            'back_pressure': self.back_pressure,
+            'volume': self.volume,
+            'current': self.current
+        }
 
 class PatternQualityAnalyzer:
     """Analyzes pattern quality and dynamics."""

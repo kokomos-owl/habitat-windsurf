@@ -328,22 +328,19 @@ class TestFieldBasics:
         4. Coherence is maintained within expected bounds
         """
         manager, field = setup_basic_field
-        active_params = config.get_active_parameters()
+        active_params = manager.config.get_active_parameters()
         
         # Create a test pattern with wave and flow characteristics
-        pattern_data = {
-            "type": "test_pattern",
-            "content": "Hello, Field!",
-            "context": {
+        result = await manager.register_pattern(
+            pattern_type="test_pattern",
+            content={"message": "Hello, Field!"},
+            context={
                 "position": [5, 5],  # Center of field
                 "initial_strength": 1.0,
                 "phase": 0.0,
                 "group_velocity": active_params['group_velocity'] if 'group_velocity' in active_params else 0.5
             }
-        }
-        
-        # Register and evolve pattern
-        result = await manager.register_pattern(**pattern_data)
+        )
         assert result.success
         pattern_id = result.data["id"]
         await manager._update_pattern_metrics(pattern_id)
