@@ -48,7 +48,7 @@ class FieldVisualizer:
         
         # Plot patterns
         for pattern in patterns:
-            pos = pattern["context"]["position"]
+            pos = pattern["position"]
             strength = pattern["metrics"]["energy_state"]
             coherence = pattern["metrics"]["coherence"]
             
@@ -83,7 +83,7 @@ class FieldVisualizer:
         
         # Add patterns
         for pattern in patterns:
-            pos = pattern["context"]["position"]
+            pos = pattern["position"]
             ax.scatter(pos[0], pos[1], c='red', s=100, zorder=5)
         
         ax.set_title("Pattern Flow Field")
@@ -98,7 +98,7 @@ class FieldVisualizer:
         # Create coherence field
         coherence_field = np.zeros_like(field)
         for pattern in patterns:
-            pos = pattern["context"]["position"]
+            pos = pattern["position"]
             coherence = pattern["metrics"]["coherence"]
             # Add Gaussian contribution
             y, x = np.ogrid[-pos[0]:field.shape[0]-pos[0],
@@ -114,7 +114,7 @@ class FieldVisualizer:
         
         # Add patterns
         for pattern in patterns:
-            pos = pattern["context"]["position"]
+            pos = pattern["position"]
             coherence = pattern["metrics"]["coherence"]
             ax.scatter(pos[1], pos[0], c='red', s=100*coherence,
                       label=f'Pattern (c={coherence:.2f})')

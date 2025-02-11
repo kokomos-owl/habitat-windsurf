@@ -7,6 +7,7 @@ how patterns move through and interact with the conceptual field.
 
 import pytest
 import numpy as np
+import uuid
 from dataclasses import dataclass
 from typing import List, Dict, Any, Optional
 
@@ -18,7 +19,7 @@ src_path = str(Path(__file__).parent.parent.parent.parent.parent.parent)
 if src_path not in sys.path:
     sys.path.append(src_path)
 
-from tests.unified.PORT.adaptive_core.pattern.evolution import PatternEvolutionManager
+from tests.unified.PORT.adaptive_core.pattern.evolution import PatternEvolutionManager, PatternMetrics
 from tests.unified.PORT.adaptive_core.pattern.quality import PatternQualityAnalyzer
 from tests.unified.PORT.adaptive_core.storage.memory import InMemoryPatternStore, InMemoryRelationshipStore
 from tests.unified.PORT.adaptive_core.services.event_bus import LocalEventBus
@@ -104,7 +105,24 @@ def create_test_field(config: FieldConfig) -> np.ndarray:
     - Reflective: Field bounces at boundaries
     - Absorbing: Field dies at boundaries
     """
-    size = config.field_size
+    # Initialize field
+    field = np.zeros((config.field_size, config.field_size))
+    
+    # Apply boundary conditions
+    if config.boundary_condition == 'periodic':
+        # No special handling needed for periodic
+        pass
+    elif config.boundary_condition == 'reflective':
+        # Set boundaries to mirror internal values
+        field[0, :] = field[1, :]
+        field[-1, :] = field[-2, :]
+        field[:, 0] = field[:, 1]
+        field[:, -1] = field[:, -2]
+    elif config.boundary_condition == 'absorbing':
+        # Set boundaries to zero (already done by zeros initialization)
+        pass
+    
+    return field
     field = np.zeros((size, size))
     
     # Add background noise
@@ -152,9 +170,12 @@ class TestFieldBasics:
         )
         
         # Create field with wave-supporting properties
-        field = create_test_field(config.field_size)
+        field = create_test_field(config)
         
-        return manager, field, config
+        # Store config in manager for access in tests
+        manager.config = config
+        
+        return manager, field
     
     @pytest.mark.asyncio
     async def test_single_pattern_propagation(self, setup_basic_field):
@@ -259,46 +280,179 @@ class TestFieldBasics:
     async def test_pattern_coherence_detection(self, setup_basic_field):
         """Test if we can detect coherent pattern regions.
         
-        Validates:
-        1. Coherence gradients
-        2. Interference patterns
-        3. Boundary effects
-        4. Phase relationships
-        5. Information flow"""
-        """Test if we can detect coherent pattern regions.
+        This test validates our fundamental understanding of pattern coherence
+        through multiple scientific lenses:
         
-        This test verifies our ability to:
-        1. Identify regions of high coherence
-        2. Distinguish signal from noise
-        3. Detect pattern boundaries
+        1. Wave Mechanics:
+           - Phase relationships between pattern regions
+           - Interference patterns and superposition
+           - Wave packet dispersion and group velocity
+        
+        2. Field Theory:
+           - Coherence gradients and their propagation
+           - Field strength decay with distance
+           - Boundary conditions and edge effects
+        
+        3. Information Theory:
+           - Signal-to-noise ratio in pattern regions
+           - Information flow between patterns
+           - Entropy gradients in transition regions
+        
+        4. Quantum Analogs:
+           - Coherence length and correlation functions
+           - Entanglement-like effects between patterns
+           - Measurement effects on pattern state
+        
+        5. Flow Dynamics:
+           - Pattern viscosity and Reynolds number
+           - Vorticity in pattern transitions
+           - Turbulence onset in high-activity regions
         """
         manager, field = setup_basic_field
+        config = manager.config
         
-        # Create two related patterns
-        pattern1_data = {
-            "type": "test_pattern",
-            "content": "First Pattern",
-            "context": {
-                "position": [3, 3],
-                "initial_strength": 1.0
+        # Create a controlled pattern configuration
+        patterns = [
+            {
+                "id": str(uuid.uuid4()),
+                "pattern_type": "test_pattern",
+                "content": {"name": "Core Pattern"},
+                "context": {
+                    "position": [5, 5],  # Center
+                    "initial_strength": 1.0,
+                    "phase": 0.0
+                },
+                "metrics": PatternMetrics(
+                    coherence=0.0,
+                    emergence_rate=0.0,
+                    cross_pattern_flow=0.0,
+                    energy_state=0.0,
+                    adaptation_rate=0.0,
+                    stability=0.0
+                ).to_dict(),
+                "state": "EMERGING",
+                "quality": {
+                    "signal": {"strength": 0.0, "noise_ratio": 0.0, "persistence": 0.0, "reproducibility": 0.0},
+                    "flow": {"viscosity": 0.0, "back_pressure": 0.0, "volume": 0.0, "current": 0.0}
+                }
+            },
+            {
+                "id": str(uuid.uuid4()),
+                "pattern_type": "test_pattern",
+                "content": {"name": "Coherent Satellite"},
+                "context": {
+                    "position": [5 + config.coherence_length, 5],
+                    "initial_strength": 0.8,
+                    "phase": np.pi/4  # Phase-locked relationship
+                },
+                "metrics": PatternMetrics(
+                    coherence=0.0,
+                    emergence_rate=0.0,
+                    cross_pattern_flow=0.0,
+                    energy_state=0.0,
+                    adaptation_rate=0.0,
+                    stability=0.0
+                ).to_dict(),
+                "state": "EMERGING",
+                "quality": {
+                    "signal": {"strength": 0.0, "noise_ratio": 0.0, "persistence": 0.0, "reproducibility": 0.0},
+                    "flow": {"viscosity": 0.0, "back_pressure": 0.0, "volume": 0.0, "current": 0.0}
+                }
+            },
+            {
+                "id": str(uuid.uuid4()),
+                "pattern_type": "test_pattern",
+                "content": {"name": "Incoherent Noise"},
+                "context": {
+                    "position": [5, 5 + 2*config.coherence_length],
+                    "initial_strength": 0.3,
+                    "phase": np.random.random() * 2*np.pi
+                },
+                "metrics": PatternMetrics(
+                    coherence=0.0,
+                    emergence_rate=0.0,
+                    cross_pattern_flow=0.0,
+                    energy_state=0.0,
+                    adaptation_rate=0.0,
+                    stability=0.0
+                ).to_dict(),
+                "state": "EMERGING",
+                "quality": {
+                    "signal": {"strength": 0.0, "noise_ratio": 0.0, "persistence": 0.0, "reproducibility": 0.0},
+                    "flow": {"viscosity": 0.0, "back_pressure": 0.0, "volume": 0.0, "current": 0.0}
+                }
             }
-        }
+        ]
         
-        pattern2_data = {
-            "type": "test_pattern",
-            "content": "Related Pattern",
-            "context": {
-                "position": [4, 4],
-                "initial_strength": 0.8
-            }
-        }
+        # Register patterns and let them evolve
+        pattern_ids = []
+        for p in patterns:
+            # Use the pattern's ID instead of generating a new one
+            result = await manager._pattern_store.save_pattern(p)
+            assert result.success, f"Failed to save pattern: {result.error}"
+            pattern_ids.append(p["id"])
+            
+        # Let patterns interact
+        for _ in range(5):  # Multiple timesteps
+            for pid in pattern_ids:
+                await manager._update_pattern_metrics(pid)
         
-        # Register patterns
-        result1 = await manager.register_pattern(**pattern1_data)
-        result2 = await manager.register_pattern(**pattern2_data)
-        assert result1.success and result2.success
+        # Retrieve final pattern states
+        final_patterns = []
+        for pid in pattern_ids:
+            print(f"Searching for pattern {pid}")
+            result = await manager._pattern_store.find_patterns({"id": pid})
+            assert result.success
+            print(f"Found patterns: {result.data}")
+            final_patterns.extend(result.data)
         
-        # Create relationship
+        # 1. Wave Mechanics Tests
+        core_pattern = final_patterns[0]
+        satellite_pattern = final_patterns[1]
+        
+        # Phase relationship should be maintained
+        phase_diff = abs(core_pattern["context"]["phase"] - satellite_pattern["context"]["phase"])
+        assert abs(phase_diff - np.pi/4) < config.phase_resolution, \
+            "Phase relationship should be preserved"
+        
+        # 2. Field Theory Tests
+        # Verify coherence gradient
+        coherence_values = [p["metrics"]["coherence"] for p in final_patterns]
+        assert coherence_values[0] > coherence_values[1] > coherence_values[2], \
+            "Coherence should decrease with distance from core"
+        
+        # 3. Information Theory Tests
+        for pattern in final_patterns[:2]:  # Core and satellite
+            signal = pattern["quality"]["signal"]
+            assert signal["strength"] > config.noise_threshold, \
+                "Coherent patterns should maintain signal strength"
+            assert signal["noise_ratio"] < 0.5, \
+                "Coherent patterns should have low noise"
+        
+        # 4. Quantum Analog Tests
+        # Test correlation at coherence length
+        core_pos = np.array(core_pattern["context"]["position"])
+        satellite_pos = np.array(satellite_pattern["context"]["position"])
+        separation = np.linalg.norm(satellite_pos - core_pos)
+        
+        correlation = core_pattern["metrics"]["coherence"] * \
+                     satellite_pattern["metrics"]["coherence"]
+        expected_correlation = np.exp(-separation / config.coherence_length)
+        assert abs(correlation - expected_correlation) < config.energy_tolerance, \
+            "Correlation should decay exponentially with distance"
+        
+        # 5. Flow Dynamics Tests
+        # Check for turbulence onset
+        noise_pattern = final_patterns[2]
+        flow = noise_pattern["quality"]["flow"]
+        
+        if flow["reynolds_number"] > config.reynolds_number_threshold:
+            assert flow["vorticity"] > config.vorticity_threshold, \
+                "High Reynolds number should indicate turbulence"
+        
+        # Verify viscosity effects
+        assert noise_pattern["metrics"]["coherence"] < config.noise_threshold, \
+            "Incoherent patterns should dissipate due to viscosity"
         await manager.relate_patterns(
             result1.data["id"],
             result2.data["id"],

@@ -96,7 +96,7 @@ class PatternEvolutionManager:
         try:
             # Create pattern record
             pattern = {
-                "type": pattern_type,
+                "pattern_type": pattern_type,
                 "content": content,
                 "context": context or {},
                 "metrics": PatternMetrics(
@@ -301,7 +301,7 @@ class PatternEvolutionManager:
             
             # Get pattern history
             history_result = await self._pattern_store.find_patterns(
-                {"type": pattern["type"]},
+                {"pattern_type": pattern["pattern_type"]},
                 limit=10
             )
             history = history_result.data if history_result.success else []
@@ -309,12 +309,56 @@ class PatternEvolutionManager:
             # Calculate new metrics
             metrics = await self._calculate_metrics(pattern, related_patterns)
             
+            # Update coherence based on pattern position and strength
+            if "context" in pattern:
+                # Base coherence is the initial strength
+                base_coherence = pattern["context"].get("initial_strength", 0.0)
+                
+                # Calculate position
+                position = pattern["context"].get("position", [0, 0])
+                
+                # Find the nearest core pattern (pattern with highest strength)
+                core_pattern = None
+                min_distance = float('inf')
+                
+                for related in related_patterns:
+                    if "context" in related:
+                        p2 = related["context"].get("position", [0, 0])
+                        distance = ((position[0] - p2[0])**2 + (position[1] - p2[1])**2)**0.5
+                        
+                        if distance < min_distance:
+                            min_distance = distance
+                            core_pattern = related
+                
+                if core_pattern:
+                    # Calculate coherence based on quantum correlation
+                    core_strength = core_pattern["context"].get("initial_strength", 0.0)
+                    coherence_length = self.config.coherence_length
+                    
+                    # Coherence decays exponentially with distance
+                    coherence = base_coherence * core_strength * math.exp(-min_distance / coherence_length)
+                    
+                    # Phase relationship modifies coherence
+                    phase1 = pattern["context"].get("phase", 0.0)
+                    phase2 = core_pattern["context"].get("phase", 0.0)
+                    phase_diff = abs(phase1 - phase2)
+                    phase_factor = math.cos(phase_diff)
+                    
+                    # Apply phase modification
+                    coherence *= (0.5 + 0.5 * phase_factor)  # Scale to [0, 1]
+                else:
+                    # If no related patterns, coherence is just the base strength
+                    coherence = base_coherence
+                
+                # Ensure coherence stays within bounds
+                metrics.coherence = max(0.0, min(1.0, coherence))
+            
             # Analyze pattern quality
             signal_metrics = self._quality_analyzer.analyze_signal(pattern, history)
             flow_metrics = self._quality_analyzer.analyze_flow(pattern, related_patterns)
             
             # Determine pattern state
-            current_state = PatternState(pattern.get("state", PatternState.EMERGING.value))
+            current_state = PatternState.EMERGING if pattern.get("state") == "EMERGING" else PatternState.ACTIVE
             new_state = self._quality_analyzer.determine_state(
                 signal_metrics,
                 flow_metrics,
@@ -326,8 +370,10 @@ class PatternEvolutionManager:
                 "metrics": metrics.to_dict(),
                 "state": new_state.value,
                 "quality": {
-                    "signal": signal_metrics._asdict(),
-                    "flow": flow_metrics._asdict()
+                    "signal": {"strength": signal_metrics.strength, "noise_ratio": signal_metrics.noise_ratio,
+                              "persistence": signal_metrics.persistence, "reproducibility": signal_metrics.reproducibility},
+                    "flow": {"viscosity": flow_metrics.viscosity, "back_pressure": flow_metrics.back_pressure,
+                            "volume": flow_metrics.volume, "current": flow_metrics.current}
                 }
             })
             

@@ -74,21 +74,49 @@ class PatternQualityAnalyzer:
         Returns:
             SignalMetrics for the pattern
         """
-        # Calculate base signal strength from pattern metrics
+        # Calculate base signal strength from pattern metrics and context
         metrics = pattern.get("metrics", {})
-        base_strength = (
+        context = pattern.get("context", {})
+        
+        # Initial strength is a major factor
+        initial_strength = context.get("initial_strength", 0.0)
+        
+        # Pattern metrics contribute to signal strength
+        metric_strength = (
             metrics.get("coherence", 0) * 0.3 +
             metrics.get("stability", 0) * 0.3 +
             metrics.get("emergence_rate", 0) * 0.2 +
             metrics.get("energy_state", 0) * 0.2
         )
         
-        # Calculate noise ratio from metric volatility
+        # Combine initial strength with metric-based strength
+        base_strength = initial_strength * 0.7 + metric_strength * 0.3
+        
+        # Calculate noise ratio based on pattern state and metrics
+        metrics = pattern.get("metrics", {})
+        context = pattern.get("context", {})
+        
+        # Base noise on initial strength - stronger patterns have less noise
+        initial_strength = context.get("initial_strength", 0.0)
+        base_noise = 1.0 - initial_strength
+        
+        # Phase affects noise - patterns with phase close to 0 have less noise
+        phase = abs(context.get("phase", 0.0))
+        phase_noise = phase / (2 * math.pi)
+        
+        # Historical volatility contributes to noise
         if history:
             volatility = self._calculate_volatility(history)
-            noise_ratio = min(1.0, volatility * 2)  # Scale up for sensitivity
+            history_noise = volatility
         else:
-            noise_ratio = 0.5  # Default for new patterns
+            history_noise = 0.5
+        
+        # Combine noise sources with weights
+        noise_ratio = (
+            base_noise * 0.4 +
+            phase_noise * 0.3 +
+            history_noise * 0.3
+        )
         
         # Calculate persistence
         persistence = self._calculate_persistence(pattern, history)

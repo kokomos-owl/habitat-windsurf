@@ -106,8 +106,10 @@ class InMemoryPatternStore(PatternStore):
                           metadata: Optional[Dict[str, Any]] = None) -> StorageResult[str]:
         """Save pattern to memory."""
         try:
-            pattern_id = str(uuid.uuid4())
-            self._patterns[pattern_id] = copy.deepcopy(pattern)
+            pattern_id = pattern.get("id", str(uuid.uuid4()))
+            pattern_copy = copy.deepcopy(pattern)
+            pattern_copy["id"] = pattern_id
+            self._patterns[pattern_id] = pattern_copy
             
             meta = StorageMetadata(
                 created_at=TimeProvider.now(),
