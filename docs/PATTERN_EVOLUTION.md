@@ -15,20 +15,24 @@ The Pattern Evolution system in habitat-windsurf implements a dynamic approach t
   - From-to pattern detection for change metrics
 
 ### 2. Pattern Evolution Tracking
-- **Purpose**: Monitor how patterns evolve and relate over time
+- **Purpose**: Monitor how patterns evolve and relate over time through wave mechanics and flow dynamics
 - **Key Metrics**:
-  - Coherence: Measure of pattern relationships and temporal alignment
-  - Stability: Pattern consistency over time
-  - Emergence Rate: New pattern formation frequency
-  - Cross-Pattern Flow: Inter-pattern influence measurement
+  - Coherence: Measure of pattern relationships and phase alignment
+  - Stability: Pattern consistency and resistance to dissipation
+  - Energy State: Pattern activation and influence strength
+  - Flow Dynamics: Viscosity, back pressure, and current metrics
+  - Phase Relationships: Wave-like behavior and interference patterns
 
-### 3. Coherence Analysis
-- **Purpose**: Evaluate the strength and quality of pattern relationships
-- **Scoring Components**:
-  - Temporal Alignment (0.8 base score for shared timeframes)
-  - Semantic Weight (20% boost per emphasis word)
-  - Pattern Density (additional 0.1 per related pattern)
-  - Minimum Coherence (0.3 baseline when patterns exist)
+### 3. Multi-Modal Analysis
+- **Purpose**: Evaluate patterns through multiple scientific lenses
+- **Analysis Modes**:
+  - COHERENCE: Pattern relationships and signal quality
+  - WAVE: Phase relationships and propagation dynamics
+  - FLOW: Viscosity, turbulence, and dissipation effects
+  - QUANTUM: Entanglement-like effects and measurement impact
+  - INFORMATION: Entropy gradients and correlation functions
+
+See [Flow Dynamics and Pattern Dissipation](theory/flow_dynamics.md) for detailed implementation.
 
 ## Current Implementation
 
@@ -52,11 +56,12 @@ class SemanticPatternExtractor:
     ]
 ```
 
-### Coherence Calculation
-- **Base Coherence**: 0.4 for single patterns
-- **Group Coherence**: 0.8 + (0.1 * additional_patterns)
-- **Semantic Adjustment**: Multiply by average semantic weight
-- **Normalization**: Ensure final score is between 0 and 1
+### Pattern Analysis Framework
+- **Core Patterns**: Coherence ≥ 0.8, minimal noise, perfect persistence
+- **Satellite Patterns**: Inherit coherence through phase relationships
+- **Incoherent Patterns**: Coherence ≤ 0.3, high viscosity, natural dissipation
+- **Flow Dynamics**: Viscosity, back pressure, volume, and current metrics
+- **Phase Mechanics**: Exponential decay with distance, phase factor influence
 
 ## Transition to habitat_evolution
 

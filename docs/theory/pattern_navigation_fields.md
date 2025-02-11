@@ -9,10 +9,11 @@ This document outlines a theoretical framework for pattern navigation in concept
 ### 1.1 Field Theory Applications
 
 Pattern evolution can be understood through the lens of field theory, where:
-- Patterns exist as disturbances in a conceptual field
-- Information propagates as waves through the field
-- Field strength decays with semantic distance
-- Interactions create interference patterns
+- Core patterns (coherence ≥ 0.8) act as stable field sources
+- Satellite patterns inherit coherence through phase relationships
+- Field strength decays exponentially with distance: exp(-d/coherence_length)
+- Phase differences (φ) modulate pattern interactions: 0.5 + 0.5*cos(φ)
+- Flow dynamics govern pattern dissipation and propagation
 
 ### 1.2 Navigation Markers
 
@@ -161,24 +162,55 @@ where:
 - p(x) is pattern probability distribution
 - ∇ρ guides high-information paths
 
-#### A.1.3 Coherence Metrics
-Pattern coherence quantified through correlation functions:
+#### A.1.3 Pattern Flow Dynamics
+Pattern evolution governed by flow metrics and phase relationships:
 
-```
-C(r) = <ψ(x)ψ(x+r)> / <ψ²>
-λ_c = ∫C(r)dr  // coherence length
+```python
+# Flow Dynamics
+viscosity = (1 - coherence) * stability_factor * energy_factor
+if coherence <= 0.3:  # Incoherent patterns
+    viscosity *= 1.5   # 50% higher viscosity
+
+# Phase Relationships
+phase_factor = 0.5 + 0.5 * cos(phase_diff)
+spatial_decay = exp(-distance / coherence_length)
+correlation = phase_factor * spatial_decay
+
+# Pattern Dissipation
+if viscosity > threshold:
+    coherence *= (1.0 - viscosity_factor)
+    energy_state *= (1.0 - viscosity_factor)
 ```
 
-#### A.1.4 Phase Transitions
-Landau-Ginzburg equation for pattern state transitions:
+#### A.1.4 Pattern State Evolution
+Pattern state determined by signal and flow metrics:
 
+```python
+# Signal Metrics
+class SignalMetrics:
+    strength: float      # Pattern signal clarity
+    noise_ratio: float   # Signal noise level
+    persistence: float   # Pattern integrity
+    reproducibility: float # Pattern consistency
+
+# Flow Metrics
+class FlowMetrics:
+    viscosity: float     # Propagation resistance
+    back_pressure: float # Emergence counter-forces
+    volume: float        # Pattern quantity
+    current: float       # Flow direction/rate
+
+# State Transitions
+if coherence >= 0.8:           # Core pattern
+    noise_ratio = 0.1
+    persistence = 1.0
+elif coherence <= 0.3:         # Incoherent pattern
+    noise_ratio = min(0.8, noise_threshold + 0.5 * incoherence)
+    persistence = min(0.4, base_persistence)
+else:                          # Satellite pattern
+    noise_ratio = calculate_noise_with_phase_impact()
+    persistence = scale_by_coherence(base_persistence)
 ```
-F[ψ] = ∫(α|ψ|² + β|ψ|⁴ + γ|∇ψ|²)dx
-```
-where:
-- F is the free energy functional
-- α,β control stability
-- γ determines interface energy
 
 ### A.2 Navigation Algorithms
 

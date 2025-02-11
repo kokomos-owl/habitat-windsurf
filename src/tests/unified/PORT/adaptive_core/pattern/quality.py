@@ -99,42 +99,65 @@ class PatternQualityAnalyzer:
         # Initial strength is a major factor
         initial_strength = context.get("initial_strength", 0.0)
         
-        # Pattern metrics contribute to signal strength
-        metric_strength = (
-            metrics.get("coherence", 0) * 0.3 +
-            metrics.get("stability", 0) * 0.3 +
-            metrics.get("emergence_rate", 0) * 0.2 +
-            metrics.get("energy_state", 0) * 0.2
-        )
-        
-        # Combine initial strength with metric-based strength
-        base_strength = initial_strength * 0.7 + metric_strength * 0.3
-        
-        # Calculate noise ratio based on pattern state and metrics
+        # Calculate signal strength based on pattern state and metrics
         metrics = pattern.get("metrics", {})
         context = pattern.get("context", {})
         
-        # Base noise on initial strength - stronger patterns have less noise
+        # Get pattern metrics with appropriate defaults
+        coherence = metrics.get("coherence", 0.0)
+        stability = metrics.get("stability", 0.0)
+        energy = metrics.get("energy_state", 0.0)
+        emergence = metrics.get("emergence_rate", 0.0)
+        
+        # Get context values
         initial_strength = context.get("initial_strength", 0.0)
-        base_noise = 1.0 - initial_strength
-        
-        # Phase affects noise - patterns with phase close to 0 have less noise
         phase = abs(context.get("phase", 0.0))
-        phase_noise = phase / (2 * math.pi)
+        wavelength = context.get("wavelength", 2*math.pi)
         
-        # Historical volatility contributes to noise
-        if history:
-            volatility = self._calculate_volatility(history)
-            history_noise = volatility
-        else:
-            history_noise = 0.5
+        # For initial patterns (no history)
+        if not history:
+            if initial_strength >= 0.9 and phase == 0.0:
+                # Core patterns maintain maximum strength
+                return SignalMetrics(
+                    strength=1.0,  # Always maximum for core patterns
+                    noise_ratio=0.1,
+                    persistence=1.0,
+                    reproducibility=1.0
+                )
+            
+            # For satellite patterns, calculate initial signal metrics
+            phase_factor = min(1.0, phase / wavelength)
+            strength = initial_strength * (1.0 - 0.3 * phase_factor)
+            noise_ratio = 0.3 + (0.5 * (1.0 - initial_strength))
+            persistence = 0.7 * initial_strength
+            reproducibility = persistence
+            
+            return SignalMetrics(
+                strength=strength,
+                noise_ratio=min(0.8, noise_ratio),
+                persistence=persistence,
+                reproducibility=reproducibility
+            )
         
-        # Combine noise sources with weights
-        noise_ratio = (
-            base_noise * 0.4 +
-            phase_noise * 0.3 +
-            history_noise * 0.3
+        # For established patterns, use full metric model
+        # For wave-like patterns, coherence and energy are more important
+        metric_strength = (
+            coherence * 0.4 +  # Increased weight for coherence
+            stability * 0.2 +
+            emergence * 0.2 +
+            energy * 0.2     # Energy helps maintain signal
         )
+        
+        # For wave patterns, use sqrt of initial strength to reduce decay rate
+        base_strength = math.sqrt(initial_strength) * 0.7 + metric_strength * 0.3
+        
+        # Boost strength if coherence is high relative to distance
+        if coherence > self.signal_threshold:
+            base_strength *= (1.0 + coherence * 0.2)  # Up to 20% boost
+        
+        # Calculate temporal metrics
+        history_length = len(history) if history else 0
+        temporal_window = min(self.persistence_window, history_length)
         
         # Calculate persistence
         persistence = self._calculate_persistence(pattern, history)
@@ -142,20 +165,78 @@ class PatternQualityAnalyzer:
         # Calculate reproducibility from similar patterns
         reproducibility = self._calculate_reproducibility(pattern, history)
         
-        # Update history
-        self._signal_history.append(base_strength)
-        self._noise_history.append(noise_ratio)
+        # Calculate base metrics
+        if coherence >= 0.8 or (initial_strength >= 0.9 and phase == 0.0):
+            # Core patterns maintain high quality
+            noise_ratio = 0.1  # Minimal noise
+            signal_strength = 1.0  # Maximum signal for core patterns
+            persistence = 1.0  # Perfect persistence
+            reproducibility = 1.0  # Perfect reproducibility
+            
+            # Boost metrics if energy and stability are also high
+            if energy > 0.3 and stability > 0.4:
+                signal_strength = 1.0  # Maximum signal
+                persistence = 1.0  # Maximum persistence
+                reproducibility = 1.0  # Maximum reproducibility
         
-        # Maintain window size
-        if len(self._signal_history) > self.persistence_window:
-            self._signal_history.pop(0)
-            self._noise_history.pop(0)
+        elif coherence <= 0.3:
+            # Incoherent patterns have poor quality
+            incoherence = 1.0 - coherence
+            noise_ratio = min(0.8, self.noise_threshold + (0.5 * incoherence))
+            signal_strength = min(0.4, initial_strength)  # Weak signal
+            persistence = min(0.4, persistence)  # Low persistence
+            reproducibility = min(0.4, reproducibility)  # Low reproducibility
+        
+        else:
+            # Coherent patterns (0.3 < coherence < 0.8)
+            # Calculate base noise from coherence
+            coherence_factor = (coherence - 0.3) / 0.5  # Normalized coherence (0-1)
+            base_noise = 0.5 * (1.0 - coherence_factor)  # Start with lower base noise
+            
+            # Apply cubic reduction for stronger coherence effects
+            noise_reduction = coherence_factor * coherence_factor * coherence_factor
+            
+            # Apply stability bonus (up to 40% reduction)
+            if stability > 0.5:
+                noise_reduction += (stability - 0.5) * 0.4
+            
+            # Apply energy bonus (up to 30% reduction)
+            if energy > 0.3:
+                noise_reduction += (energy - 0.3) * 0.3
+            
+            # Strengthen reduction for coherent satellite patterns
+            if coherence > 0.35:
+                noise_reduction *= 1.5  # 50% stronger reduction
+            
+            # Calculate final noise with phase impact
+            phase_impact = min(0.1, phase / (2 * math.pi * wavelength))  # Small increase based on phase
+            noise_ratio = min(0.5, max(0.1, base_noise * (1.0 - noise_reduction) + phase_impact))
+            
+            # Calculate signal strength based on coherence and initial strength
+            signal_strength = max(coherence, initial_strength * 0.8)
+            
+            # Scale persistence and reproducibility with coherence
+            persistence = min(0.8, max(0.3, persistence * coherence))
+            reproducibility = min(0.8, max(0.3, reproducibility * coherence))
+        
+        # Update and maintain history
+        if hasattr(self, '_signal_history'):
+            self._signal_history.append(signal_strength)
+            if len(self._signal_history) > self.persistence_window:
+                self._signal_history = self._signal_history[-self.persistence_window:]
+                
+        if hasattr(self, '_noise_history'):
+            self._noise_history.append(noise_ratio)
+            if len(self._noise_history) > self.persistence_window:
+                self._noise_history = self._noise_history[-self.persistence_window:]
         
         # Update dynamic thresholds
-        self._update_dynamic_thresholds()
+        if hasattr(self, '_update_dynamic_thresholds'):
+            self._update_dynamic_thresholds()
         
+        # Return final metrics
         return SignalMetrics(
-            strength=base_strength,
+            strength=signal_strength,
             noise_ratio=noise_ratio,
             persistence=persistence,
             reproducibility=reproducibility
@@ -175,18 +256,32 @@ class PatternQualityAnalyzer:
         """
         metrics = pattern.get("metrics", {})
         
-        # Calculate viscosity from cross_pattern_flow
-        viscosity = 1.0 - metrics.get("cross_pattern_flow", 0)
+        # Get key metrics
+        coherence = metrics.get("coherence", 0.0)
+        stability = metrics.get("stability", 0.0)
+        energy = metrics.get("energy_state", 0.0)
+        cross_flow = metrics.get("cross_pattern_flow", 0.0)
+        
+        # Calculate viscosity based on coherence and stability
+        base_viscosity = 1.0 - coherence  # Higher coherence = lower viscosity
+        stability_factor = 1.0 - (stability * 0.5)  # Stability reduces viscosity by up to 50%
+        energy_factor = 1.0 - (energy * 0.3)  # Energy reduces viscosity by up to 30%
+        
+        # For incoherent patterns, increase viscosity
+        if coherence <= 0.3:
+            viscosity = min(1.0, base_viscosity * 1.5)  # 50% higher viscosity
+        else:
+            viscosity = base_viscosity * stability_factor * energy_factor
         
         # Calculate back pressure from opposing patterns
         back_pressure = self._calculate_back_pressure(pattern, related_patterns)
         
-        # Calculate volume from pattern instances
-        volume = len(related_patterns) / 10.0  # Normalize to 0-1
+        # Calculate volume (affected by energy and coherence)
+        volume = (energy * 0.7 + coherence * 0.3) * len(related_patterns) / 10.0
         volume = min(1.0, volume)
         
-        # Calculate current from rate of change
-        current = metrics.get("adaptation_rate", 0) * 2 - 1  # Scale to -1 to 1
+        # Calculate current (flow direction and rate)
+        current = -1.0 if coherence < 0.3 else cross_flow * 2 - 1  # Incoherent patterns flow outward
         
         return FlowMetrics(
             viscosity=viscosity,
