@@ -80,3 +80,18 @@ data/mongodb/
 node_modules/
 package-lock.json
 yarn.lock
+
+# Test environment
+test_venv/
+**/plots/
+**/test_output/
+.pytest_cache/
+
+# Test artifacts
+src/tests/**/plots/*.png
+src/tests/**/plots/*.pdf
+src/tests/**/plots/*.svg
+src/tests/**/test_output/
+*.coverage
+coverage.xml
+.coverage.*

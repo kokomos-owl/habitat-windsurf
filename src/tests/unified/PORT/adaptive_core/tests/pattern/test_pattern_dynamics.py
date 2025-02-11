@@ -5,7 +5,7 @@ import numpy as np
 from dataclasses import dataclass
 from typing import List, Dict, Any, Tuple
 import matplotlib.pyplot as plt
-from .test_field_visualization import FieldVisualizer, VisualizationConfig
+from test_field_visualization import FieldVisualizer, VisualizationConfig
 from pathlib import Path
 
 @dataclass
