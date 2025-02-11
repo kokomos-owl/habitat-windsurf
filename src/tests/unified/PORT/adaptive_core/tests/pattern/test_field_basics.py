@@ -104,7 +104,8 @@ class TestFieldBasics:
             active_modes=[
                 AnalysisMode.COHERENCE,  # Primary: Pattern coherence and relationships
                 AnalysisMode.WAVE,       # Required: Phase relationships
-                AnalysisMode.INFORMATION # Required: Correlation tolerances
+                AnalysisMode.INFORMATION, # Required: Correlation tolerances
+                AnalysisMode.FLOW        # Required: Viscosity effects
             ],
             propagation_speed=1.0,
             wavelength=2.0,
@@ -387,17 +388,17 @@ class TestFieldBasics:
                     "wavelength": config.wavelength  # Natural wavelength
                 },
                 "metrics": PatternMetrics(
-                    coherence=0.0,
-                    emergence_rate=0.0,
+                    coherence=1.0,  # High coherence for core
+                    emergence_rate=0.8,
                     cross_pattern_flow=0.0,
-                    energy_state=0.0,
+                    energy_state=0.8,  # High energy state
                     adaptation_rate=0.0,
-                    stability=0.0
+                    stability=0.9  # High stability
                 ).to_dict(),
-                "state": "emerging",
+                "state": "stable",  # Start in stable state
                 "quality": {
-                    "signal": {"strength": 0.0, "noise_ratio": 0.0, "persistence": 0.0, "reproducibility": 0.0},
-                    "flow": {"viscosity": 1.0, "back_pressure": 0.0, "volume": 0.0, "current": 0.0}
+                    "signal": {"strength": 1.0, "noise_ratio": 0.1, "persistence": 0.9, "reproducibility": 0.9},
+                    "flow": {"viscosity": 0.2, "back_pressure": 0.0, "volume": 0.0, "current": 0.0}
                 }
             },
             {
@@ -409,19 +410,7 @@ class TestFieldBasics:
                     "initial_strength": np.exp(-config.coherence_length/config.wavelength),  # Natural decay
                     "phase": 2*np.pi * (config.coherence_length/config.wavelength),  # Natural phase progression
                 },
-                "metrics": PatternMetrics(
-                    coherence=0.6,  # Start with moderate coherence
-                    emergence_rate=0.5,
-                    cross_pattern_flow=0.0,
-                    energy_state=0.3,  # Moderate energy state
-                    adaptation_rate=0.0,
-                    stability=0.6  # Moderate stability
-                ).to_dict(),
-                "state": "stable",  # Start in stable state
-                "quality": {
-                    "signal": {"strength": 0.6, "noise_ratio": 0.3, "persistence": 0.6, "reproducibility": 0.6},
-                    "flow": {"viscosity": 0.5, "back_pressure": 0.0, "volume": 0.0, "current": 0.0}
-                }
+                # Let metrics be calculated based on context
             },
             {
                 "id": str(uuid.uuid4()),
@@ -432,19 +421,7 @@ class TestFieldBasics:
                     "initial_strength": 0.3,
                     "phase": np.random.random() * 2*np.pi
                 },
-                "metrics": PatternMetrics(
-                    coherence=0.3,  # Low coherence for noise
-                    emergence_rate=0.2,
-                    cross_pattern_flow=0.0,
-                    energy_state=0.1,  # Low energy state
-                    adaptation_rate=0.0,
-                    stability=0.2  # Low stability
-                ).to_dict(),
-                "state": "noise",  # Start in noise state
-                "quality": {
-                    "signal": {"strength": 0.3, "noise_ratio": 0.8, "persistence": 0.2, "reproducibility": 0.2},
-                    "flow": {"viscosity": 0.8, "back_pressure": 0.2, "volume": 0.1, "current": -0.5}
-                }
+                # Let metrics be calculated based on context
             }
         ]
         
@@ -458,7 +435,7 @@ class TestFieldBasics:
             
         # Let patterns interact
         print("\n=== PATTERN EVOLUTION TRACE ===")
-        for timestep in range(5):  # Multiple timesteps
+        for timestep in range(10):  # More timesteps to allow for dissipation
             print(f"\nTimestep {timestep + 1}:")
             for pid in pattern_ids:
                 await manager._update_pattern_metrics(pid)
