@@ -10,11 +10,19 @@ import numpy as np
 from dataclasses import dataclass
 from typing import List, Dict, Any, Optional
 
-from ...pattern.evolution import PatternEvolutionManager
-from ...pattern.quality import PatternQualityAnalyzer
-from ...storage.memory import InMemoryPatternStore, InMemoryRelationshipStore
-from ...services.event_bus import LocalEventBus
-from ...services.time_provider import TimeProvider
+import sys
+from pathlib import Path
+
+# Add src to path
+src_path = str(Path(__file__).parent.parent.parent.parent.parent.parent)
+if src_path not in sys.path:
+    sys.path.append(src_path)
+
+from tests.unified.PORT.adaptive_core.pattern.evolution import PatternEvolutionManager
+from tests.unified.PORT.adaptive_core.pattern.quality import PatternQualityAnalyzer
+from tests.unified.PORT.adaptive_core.storage.memory import InMemoryPatternStore, InMemoryRelationshipStore
+from tests.unified.PORT.adaptive_core.services.event_bus import LocalEventBus
+from tests.unified.PORT.adaptive_core.services.time_provider import TimeProvider
 
 @dataclass
 class FieldConfig:

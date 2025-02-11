@@ -86,8 +86,16 @@ def mock_coherence_checker():
     return MockCoherenceChecker()
 
 # Import and configure mocks from both repos
-from ...mocks.mock_db import MockDB
-from ...mocks.mock_websocket import MockWebSocket
+import sys
+from pathlib import Path
+
+# Add src to path
+src_path = str(Path(__file__).parent.parent.parent)
+if src_path not in sys.path:
+    sys.path.append(src_path)
+
+from tests.mocks.mock_db import MockDB
+from tests.mocks.mock_websocket import MockWebSocket
 
 @pytest.fixture
 def mock_db():
