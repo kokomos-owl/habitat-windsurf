@@ -267,9 +267,10 @@ class PatternQualityAnalyzer:
         stability_factor = 1.0 - (stability * 0.5)  # Stability reduces viscosity by up to 50%
         energy_factor = 1.0 - (energy * 0.3)  # Energy reduces viscosity by up to 30%
         
-        # For incoherent patterns, increase viscosity
+        # For incoherent patterns, increase viscosity significantly
         if coherence <= 0.3:
-            viscosity = min(1.0, base_viscosity * 1.5)  # 50% higher viscosity
+            # Double base viscosity and add 0.2 to ensure it exceeds noise threshold
+            viscosity = min(1.0, base_viscosity * 2.0 + 0.2)
         else:
             viscosity = base_viscosity * stability_factor * energy_factor
         

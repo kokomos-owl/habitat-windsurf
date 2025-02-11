@@ -19,14 +19,14 @@ src_path = str(Path(__file__).parent.parent.parent.parent.parent.parent)
 if src_path not in sys.path:
     sys.path.append(src_path)
 
-from tests.unified.PORT.adaptive_core.pattern.evolution import PatternEvolutionManager, PatternMetrics
-from tests.unified.PORT.adaptive_core.pattern.quality import PatternQualityAnalyzer
-from tests.unified.PORT.adaptive_core.storage.memory import InMemoryPatternStore, InMemoryRelationshipStore
-from tests.unified.PORT.adaptive_core.services.event_bus import LocalEventBus
-from tests.unified.PORT.adaptive_core.services.time_provider import TimeProvider
+from unified.PORT.adaptive_core.pattern.evolution import PatternEvolutionManager, PatternMetrics
+from unified.PORT.adaptive_core.pattern.quality import PatternQualityAnalyzer
+from unified.PORT.adaptive_core.storage.memory import InMemoryPatternStore, InMemoryRelationshipStore
+from unified.PORT.adaptive_core.services.event_bus import LocalEventBus
+from unified.PORT.adaptive_core.services.time_provider import TimeProvider
 
 from typing import List, Optional, Dict, Any
-from tests.unified.PORT.adaptive_core.config.field_config import AnalysisMode, FieldConfig
+from unified.PORT.adaptive_core.config.field_config import AnalysisMode, FieldConfig
 
 
 @dataclass
