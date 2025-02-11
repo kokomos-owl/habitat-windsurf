@@ -269,8 +269,8 @@ class PatternQualityAnalyzer:
         
         # For incoherent patterns, increase viscosity significantly
         if coherence <= 0.3:
-            # Double base viscosity and add 0.2 to ensure it exceeds noise threshold
-            viscosity = min(1.0, base_viscosity * 2.0 + 0.2)
+            # Triple base viscosity and add 0.3 to ensure stronger dissipation
+            viscosity = min(1.0, base_viscosity * 3.0 + 0.3)
         else:
             viscosity = base_viscosity * stability_factor * energy_factor
         
