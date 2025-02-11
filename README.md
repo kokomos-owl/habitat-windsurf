@@ -1,5 +1,16 @@
 # Habitat Windsurf UI Workshop
 
+## 🎯 Latest Breakthrough: Field-Driven Pattern Regulation
+
+We've achieved a significant breakthrough in pattern regulation through field-driven evolution. The system now enables:
+
+- Natural emergence of pattern behavior through field gradients
+- Self-organizing coherence/incoherence handling
+- Dynamic pattern stability through field coupling
+- Adaptive flow regulation with turbulence awareness
+
+See [PATTERN_REGULATION_BREAKTHROUGH.md](src/tests/unified/PORT/adaptive_core/pattern/PATTERN_REGULATION_BREAKTHROUGH.md) for detailed technical documentation.
+
 A hands-on workshop for learning visualization component development using the Windsurf IDE. This workshop implements a balanced approach between user-driven learning and agent-assisted development, ensuring optimal skill development and understanding.
 
 ## Features

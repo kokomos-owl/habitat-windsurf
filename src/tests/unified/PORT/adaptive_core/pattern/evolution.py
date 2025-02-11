@@ -365,19 +365,6 @@ class PatternEvolutionManager:
             signal_metrics = self._quality_analyzer.analyze_signal(pattern, history)
             flow_metrics = self._quality_analyzer.analyze_flow(pattern, related_patterns)
             
-            # Apply viscosity effects
-            if self.config.is_mode_active(AnalysisMode.FLOW):
-                # High viscosity reduces coherence and energy for incoherent patterns
-                if metrics.coherence <= self.config.noise_threshold and flow_metrics.viscosity > 0:
-                    # Use full viscosity factor for stronger dissipation
-                    viscosity_factor = flow_metrics.viscosity
-                    metrics.coherence *= (1.0 - viscosity_factor)
-                    metrics.energy_state *= (1.0 - viscosity_factor)
-                    
-                    # Apply stronger dissipation at noise threshold
-                    metrics.coherence *= 0.3
-                    metrics.energy_state *= 0.3
-            
             # Determine pattern state
             current_state = PatternState.EMERGING if pattern.get("state") == "emerging" else PatternState.ACTIVE
             new_state = self._quality_analyzer.determine_state(
@@ -395,10 +382,99 @@ class PatternEvolutionManager:
                 # Information is preserved better for coherent patterns
                 information_factor = signal_metrics.persistence * signal_metrics.reproducibility
                 energy_state = initial_strength * information_factor
+                        # Apply field effects in FLOW mode
+            if self.config.is_mode_active(AnalysisMode.FLOW):
+                # Get field gradients and local field properties
+                field_gradients = pattern.get('context', {}).get('field_gradients', {})
                 
-                # Apply information tolerance
-                if information_factor < 1.0:
-                    energy_state *= (1.0 - self.config.information_tolerance)
+                # Calculate effective viscosity based on turbulence
+                base_viscosity = flow_metrics.viscosity
+                turbulence = field_gradients.get('turbulence', 0.0)
+                effective_viscosity = base_viscosity * (1 + turbulence)
+                
+                # Calculate energy dissipation rate
+                coherence_gradient = field_gradients.get('coherence', 0.0)
+                energy_gradient = field_gradients.get('energy', 0.0)
+                density = field_gradients.get('density', 1.0)
+                
+                # Higher turbulence increases energy dissipation
+                dissipation_rate = effective_viscosity * (1 - coherence_gradient) * density
+                
+                # Update energy state based on dissipation
+                energy_state *= max(0.0, 1.0 - dissipation_rate)
+                
+                # Update coherence based on turbulence and energy
+                coherence_decay = turbulence * (1 - energy_gradient)
+                metrics.coherence *= max(0.0, 1.0 - coherence_decay)
+                
+                # Ensure coherence doesn't fall below noise threshold
+                if metrics.coherence < self.config.noise_threshold:
+                    metrics.coherence = 0.0  # Pattern has dissipatedty
+                back_pressure = flow_metrics.back_pressure
+                current = flow_metrics.current
+                
+                # Calculate field influence
+                field_pressure = back_pressure * 0.3  # 30% influence from field
+                flow_impact = abs(current) * 0.2    # 20% influence from flow
+                
+                # Enhanced dissipation calculation
+                base_dissipation = 0.7  # 70% base dissipation
+                time_factor = len(history) / 3.0 if history else 1.0
+                
+                # Non-linear dissipation with field effects
+                viscosity_factor = viscosity * base_dissipation * (time_factor ** 1.8)  # Stronger time scaling
+                field_factor = 1.0 + field_pressure + flow_impact
+                dissipation_factor = max(0.02, 1.0 - (viscosity_factor * field_factor))
+                
+                # Apply dissipation based on coherence state
+                if metrics.coherence < dynamic_noise:
+                    # Calculate turbulence factor for incoherent patterns
+                    coherence_deficit = dynamic_noise - metrics.coherence
+                    turbulence = math.exp(coherence_deficit * 2) - 1  # Exponential turbulence
+                    
+                    # Enhanced decay with turbulence
+                    decay_factor = 0.15 * (1.0 + turbulence)  # Stronger decay for more incoherent patterns
+                    energy_state *= dissipation_factor * decay_factor
+                    
+                    # Couple coherence to energy with feedback
+                    energy_coupling = energy_state * (0.7 + 0.3 * turbulence)  # Stronger coupling with turbulence
+                    new_coherence = min(metrics.coherence, energy_coupling)
+                    
+                    # Update pattern state
+                    metrics.coherence = new_coherence
+                    pattern['metrics']['coherence'] = new_coherence
+                    pattern['metrics']['energy_state'] = energy_state
+                    
+                    # Track evolution history
+                    if 'history' not in pattern:
+                        pattern['history'] = []
+                    pattern['history'].append({
+                        'time': len(history),
+                        'coherence': new_coherence,
+                        'energy': energy_state,
+                        'viscosity': viscosity,
+                        'turbulence': turbulence,
+                        'noise_threshold': dynamic_noise
+                    })
+                else:
+                    # Gradual dissipation for coherent patterns
+                    stability_bonus = 1.0 + (metrics.stability * 0.3)  # Up to 30% bonus
+                    energy_state *= dissipation_factor * stability_bonus
+            
+            # Save updated metrics and quality
+            pattern['metrics'] = metrics.to_dict()
+            pattern['quality'] = {
+                'signal': signal_metrics._asdict(),
+                'flow': flow_metrics._asdict()
+            }
+            pattern['state'] = new_state.value
+            
+            # Save pattern
+            await self._pattern_store.save_pattern(pattern)
+            
+            # Apply information tolerance
+            if information_factor < 1.0:
+                energy_state *= (1.0 - self.config.information_tolerance)
             
             # Calculate cross-pattern flow based on relationships
             cross_flow = 0.0

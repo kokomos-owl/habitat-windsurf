@@ -95,20 +95,29 @@ class InMemoryStateStore(StateStore):
             return StorageResult(False, error=str(e))
 
 class InMemoryPatternStore(PatternStore):
-    """In-memory implementation of PatternStore."""
+    """In-memory implementation of PatternStore with history tracking."""
     
     def __init__(self):
         self._patterns: Dict[str, Dict[str, Any]] = {}
+        self._history: Dict[str, List[Dict[str, Any]]] = {}  # pattern_id -> [historical states]
         self._metadata: Dict[str, StorageMetadata] = {}
     
     async def save_pattern(self,
                           pattern: Dict[str, Any],
                           metadata: Optional[Dict[str, Any]] = None) -> StorageResult[str]:
-        """Save pattern to memory."""
+        """Save pattern to memory and update history."""
         try:
             pattern_id = pattern.get("id", str(uuid.uuid4()))
             pattern_copy = copy.deepcopy(pattern)
             pattern_copy["id"] = pattern_id
+            
+            # Store current state in history
+            if pattern_id in self._patterns:
+                if pattern_id not in self._history:
+                    self._history[pattern_id] = []
+                self._history[pattern_id].append(self._patterns[pattern_id])
+            
+            # Update current state
             self._patterns[pattern_id] = pattern_copy
             
             meta = StorageMetadata(
@@ -136,6 +145,9 @@ class InMemoryPatternStore(PatternStore):
                 if all(pattern.get(k) == v for k, v in query.items()):
                     result = pattern.copy()
                     result['id'] = id
+                    # Add history to pattern
+                    if id in self._history:
+                        result['history'] = copy.deepcopy(self._history[id])
                     matches.append(result)
             
             # Apply offset and limit

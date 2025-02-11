@@ -1,5 +1,209 @@
 # Next Development Tasks
 
+# Architectural Integration Plan
+
+## Core Architecture Updates 🏗️
+
+### 1. Pattern Evolution System (`src/core/`)
+
+#### Immediate Implementation Tasks
+- [ ] Implement `GradientFlowController` in `src/core/flow/gradient/controller.py`
+  ```python
+  class GradientFlowController:
+      def calculate_flow(self, gradients: FieldGradients) -> FlowMetrics:
+          # Calculate flow based on field gradients
+          pass
+  ```
+
+- [ ] Create `FieldDrivenPatternManager` in `src/core/pattern_evolution.py`
+  ```python
+  class FieldDrivenPatternManager:
+      def __init__(self):
+          self.gradient_analyzer = GradientAnalyzer()
+          self.flow_controller = FlowController()
+          self.pattern_store = PatternStore()
+
+      async def evolve_patterns(self, field_state: FieldState) -> List[Pattern]:
+          # Implement field-driven evolution
+          pass
+  ```
+
+- [ ] Add `PatternQualityAnalyzer` in `src/core/quality/analyzer.py`
+  ```python
+  class PatternQualityAnalyzer:
+      def analyze_pattern(self, pattern, field_state) -> QualityMetrics:
+          # Analyze pattern quality through field lens
+          pass
+  ```
+
+### 2. Flow Management (`src/core/flow/`)
+
+#### Implementation Requirements
+- [ ] Complete `TurbulenceModel` in `src/core/flow/gradient/turbulence.py`
+  ```python
+  class TurbulenceModel:
+      def calculate_effects(self, field_state: FieldState) -> TurbulenceMetrics:
+          # Model turbulence effects on patterns
+          pass
+  ```
+
+- [ ] Implement `FieldAnalyzer` in `src/core/flow/gradient/analyzer.py`
+  ```python
+  class FieldAnalyzer:
+      def analyze_gradients(self, field_state: FieldState) -> FieldGradients:
+          # Analyze field gradients and conditions
+          pass
+  ```
+
+- [ ] Create gradient flow tests in `src/tests/unified/PORT/adaptive_core/tests/pattern/test_gradient_flow.py`
+  ```python
+  class TestGradientFlow:
+      async def test_turbulence_effects(self):
+          # Test turbulence impact on flow
+          pass
+  ```
+
+### 3. Visualization Updates (`src/core/visualization/`)
+
+#### Visualization Components
+- [ ] Create `GradientVisualizer` in `src/core/visualization/gradient_view.py`
+  ```python
+  class GradientVisualizer:
+      def render_field_gradients(self, field_state: FieldState) -> Dict[str, Any]:
+          # Visualize coherence and energy gradients
+          pass
+  ```
+
+- [ ] Implement `FlowRenderer` in `src/core/visualization/flow_view.py`
+  ```python
+  class FlowRenderer:
+      def render_pattern_flow(self, patterns: List[Pattern], flow: FlowMetrics) -> Dict[str, Any]:
+          # Render pattern flow and turbulence
+          pass
+  ```
+
+- [ ] Add `CoherenceIndicator` in `src/core/visualization/indicators.py`
+  ```python
+  class CoherenceIndicator:
+      def create_threshold_markers(self, patterns: List[Pattern]) -> List[Marker]:
+          # Create visual markers for coherence thresholds
+          pass
+  ```
+
+#### Integration Tests
+- [ ] Create visualization tests in `src/tests/unified/PORT/adaptive_core/tests/visualization/`
+  ```python
+  class TestGradientVisualization:
+      def test_gradient_rendering(self):
+          # Test gradient visualization
+          pass
+
+      def test_flow_rendering(self):
+          # Test flow visualization
+          pass
+
+      def test_coherence_indicators(self):
+          # Test threshold indicators
+          pass
+  ```
+
+## Test Architecture Enhancement (`src/tests/`) 🧪
+
+### 1. Core Test Integration
+- [ ] Update `test_pattern_evolution.py` for field-driven patterns
+  ```python
+  class TestFieldDrivenEvolution:
+      async def test_pattern_field_interaction(self):
+          # Test pattern evolution in field
+          pass
+
+      async def test_coherence_emergence(self):
+          # Test natural coherence emergence
+          pass
+  ```
+
+- [ ] Enhance `test_flow_dynamics.py` with gradient tests
+  ```python
+  class TestGradientFlow:
+      def test_gradient_based_flow(self):
+          # Test gradient-driven flow
+          pass
+
+      def test_turbulence_effects(self):
+          # Test turbulence impact
+          pass
+  ```
+
+- [ ] Add `test_field_coupling.py` for field-pattern interaction
+  ```python
+  class TestFieldCoupling:
+      async def test_field_pattern_coupling(self):
+          # Test field-pattern coupling
+          pass
+
+      async def test_multi_pattern_interaction(self):
+          # Test pattern interactions in field
+          pass
+  ```
+
+### 2. PORT Integration (`src/tests/unified/PORT/`)
+
+#### Pattern Integration
+- [ ] Update `adaptive_core/pattern/quality.py`
+  ```python
+  class PatternQualityAnalyzer:
+      def analyze_field_quality(self, field_state):
+          # Analyze pattern quality in field
+          pass
+  ```
+
+#### Flow Components
+- [ ] Enhance `core/flow/gradient_controller.py`
+  ```python
+  class GradientFlowController:
+      def calculate_field_flow(self, field_state):
+          # Calculate flow in field context
+          pass
+  ```
+
+#### Emergence System
+- [ ] Update `emergence/field_emergence.py`
+  ```python
+  class FieldEmergenceTracker:
+      def track_pattern_emergence(self, field_state):
+          # Track emergence in field context
+          pass
+  ```
+
+#### RAG Integration
+- [ ] Modify `rag/pattern_aware_rag.py`
+  ```python
+  class PatternAwareRAG:
+      def process_field_patterns(self, field_state):
+          # Process patterns with field awareness
+          pass
+  ```
+
+## Pattern Regulation Enhancement Tasks 💡
+
+### 1. Field Gradient System
+- [ ] Implement multi-dimensional field gradients
+- [ ] Add adaptive gradient thresholds
+- [ ] Enhance turbulence modeling
+- [ ] Create field visualization tools
+
+### 2. Pattern Evolution
+- [ ] Add pattern lifecycle tracking
+- [ ] Implement pattern merging logic
+- [ ] Create evolution history visualization
+- [ ] Add pattern relationship mapping
+
+### 3. Flow Dynamics
+- [ ] Enhance cross-pattern interactions
+- [ ] Implement advanced turbulence models
+- [ ] Add flow visualization tools
+- [ ] Create flow analysis dashboard
+
 ## Post-Porting Integration Tasks 🔄
 
 ### 1. Module Integration and Testing

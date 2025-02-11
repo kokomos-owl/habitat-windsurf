@@ -385,7 +385,13 @@ class TestFieldBasics:
                     "position": [5, 5],  # Center
                     "initial_strength": 1.0,  # Maximum strength at core
                     "phase": 0.0,  # Reference phase
-                    "wavelength": config.wavelength  # Natural wavelength
+                    "wavelength": config.wavelength,  # Natural wavelength
+                    "field_gradients": {
+                        "coherence": 1.0,  # Strong coherence gradient
+                        "energy": 0.8,    # High energy gradient
+                        "density": 1.0,   # Maximum density
+                        "turbulence": 0.0  # No turbulence at core
+                    }
                 },
                 "metrics": PatternMetrics(
                     coherence=1.0,  # High coherence for core
@@ -398,7 +404,7 @@ class TestFieldBasics:
                 "state": "stable",  # Start in stable state
                 "quality": {
                     "signal": {"strength": 1.0, "noise_ratio": 0.1, "persistence": 0.9, "reproducibility": 0.9},
-                    "flow": {"viscosity": 0.2, "back_pressure": 0.0, "volume": 0.0, "current": 0.0}
+                    "flow": {"viscosity": 0.2, "back_pressure": 0.0, "volume": 0.0, "current": 0.0, "turbulence": 0.0}
                 }
             },
             {
@@ -409,8 +415,26 @@ class TestFieldBasics:
                     "position": [5 + config.coherence_length, 5],
                     "initial_strength": np.exp(-config.coherence_length/config.wavelength),  # Natural decay
                     "phase": 2*np.pi * (config.coherence_length/config.wavelength),  # Natural phase progression
+                    "field_gradients": {
+                        "coherence": 0.6,  # Moderate coherence gradient
+                        "energy": 0.4,    # Moderate energy gradient
+                        "density": 0.5,   # Medium density
+                        "turbulence": 0.2  # Slight turbulence
+                    }
                 },
-                # Let metrics be calculated based on context
+                "metrics": PatternMetrics(
+                    coherence=0.6,  # Start with moderate coherence
+                    emergence_rate=0.5,
+                    cross_pattern_flow=0.0,
+                    energy_state=0.3,  # Moderate energy state
+                    adaptation_rate=0.0,
+                    stability=0.6  # Moderate stability
+                ).to_dict(),
+                "state": "stable",  # Start in stable state
+                "quality": {
+                    "signal": {"strength": 0.6, "noise_ratio": 0.3, "persistence": 0.6, "reproducibility": 0.6},
+                    "flow": {"viscosity": 0.5, "back_pressure": 0.0, "volume": 0.0, "current": 0.0, "turbulence": 0.2}
+                }
             },
             {
                 "id": str(uuid.uuid4()),
@@ -419,9 +443,27 @@ class TestFieldBasics:
                 "context": {
                     "position": [5, 5 + 2*config.coherence_length],
                     "initial_strength": 0.3,
-                    "phase": np.random.random() * 2*np.pi
+                    "phase": np.random.random() * 2*np.pi,
+                    "field_gradients": {
+                        "coherence": 0.2,  # Weak coherence gradient
+                        "energy": 0.1,    # Low energy gradient
+                        "density": 0.3,   # Low density
+                        "turbulence": 0.8  # High turbulence
+                    }
                 },
-                # Let metrics be calculated based on context
+                "metrics": PatternMetrics(
+                    coherence=0.3,  # Low coherence for noise
+                    emergence_rate=0.2,
+                    cross_pattern_flow=0.0,
+                    energy_state=0.1,  # Low energy state
+                    adaptation_rate=0.0,
+                    stability=0.2  # Low stability
+                ).to_dict(),
+                "state": "noise",  # Start in noise state
+                "quality": {
+                    "signal": {"strength": 0.3, "noise_ratio": 0.8, "persistence": 0.2, "reproducibility": 0.2},
+                    "flow": {"viscosity": 0.8, "back_pressure": 0.2, "volume": 0.1, "current": -0.5, "turbulence": 0.8}
+                }
             }
         ]
         
@@ -435,6 +477,9 @@ class TestFieldBasics:
             
         # Let patterns interact
         print("\n=== PATTERN EVOLUTION TRACE ===")
+        initial_coherence = {}
+        final_coherence = {}
+        
         for timestep in range(10):  # More timesteps to allow for dissipation
             print(f"\nTimestep {timestep + 1}:")
             for pid in pattern_ids:
@@ -442,10 +487,32 @@ class TestFieldBasics:
                 result = await manager._pattern_store.find_patterns({"id": pid})
                 if result.success:
                     p = result.data[0]
+                    if timestep == 0:
+                        initial_coherence[p['content']['name']] = p['metrics']['coherence']
+                    final_coherence[p['content']['name']] = p['metrics']['coherence']
+                    
                     print(f"Pattern '{p['content']['name']}':")
                     print(f"  Coherence: {p['metrics']['coherence']:.3f}")
                     print(f"  Energy: {p['metrics']['energy_state']:.3f}")
                     print(f"  Flow: {p['metrics']['cross_pattern_flow']:.3f}")
+        
+        # Verify pattern evolution
+        print("\n=== PATTERN EVOLUTION VERIFICATION ===")
+        print(f"Initial Coherence:")
+        for name, coherence in initial_coherence.items():
+            print(f"{name}: {coherence:.3f}")
+        print(f"\nFinal Coherence:")
+        for name, coherence in final_coherence.items():
+            print(f"{name}: {coherence:.3f}")
+            
+        # Core pattern should maintain high coherence
+        assert final_coherence['Core Pattern'] >= 0.9, "Core pattern should maintain high coherence"
+        
+        # Satellite pattern should maintain moderate coherence due to phase relationship
+        assert 0.4 <= final_coherence['Coherent Satellite'] <= 0.8, "Satellite pattern should maintain moderate coherence"
+        
+        # Incoherent pattern should dissipate
+        assert final_coherence['Incoherent Noise'] < config.noise_threshold, "Incoherent patterns should dissipate due to viscosity"
         
         # Retrieve final pattern states
         final_patterns = []

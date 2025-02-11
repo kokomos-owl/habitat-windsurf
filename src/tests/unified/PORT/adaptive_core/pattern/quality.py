@@ -245,7 +245,7 @@ class PatternQualityAnalyzer:
     def analyze_flow(self,
                     pattern: Dict[str, Any],
                     related_patterns: List[Dict[str, Any]]) -> FlowMetrics:
-        """Analyze pattern flow dynamics.
+        """Analyze pattern flow dynamics with granular noise and feedback.
         
         Args:
             pattern: Current pattern state
@@ -255,34 +255,103 @@ class PatternQualityAnalyzer:
             FlowMetrics for the pattern
         """
         metrics = pattern.get("metrics", {})
+        history = pattern.get("history", [])
+        context = pattern.get("context", {})
         
-        # Get key metrics
+        # Get key metrics with noise granularity
         coherence = metrics.get("coherence", 0.0)
         stability = metrics.get("stability", 0.0)
         energy = metrics.get("energy_state", 0.0)
         cross_flow = metrics.get("cross_pattern_flow", 0.0)
         
-        # Calculate viscosity based on coherence and stability
-        base_viscosity = 1.0 - coherence  # Higher coherence = lower viscosity
-        stability_factor = 1.0 - (stability * 0.5)  # Stability reduces viscosity by up to 50%
-        energy_factor = 1.0 - (energy * 0.3)  # Energy reduces viscosity by up to 30%
+        # Get field gradients and turbulence
+        field_gradients = context.get('field_gradients', {})
+        turbulence = field_gradients.get('turbulence', 0.0)
+        coherence_gradient = field_gradients.get('coherence', coherence)
+        energy_gradient = field_gradients.get('energy', energy)
+        density = field_gradients.get('density', 1.0)
         
-        # For incoherent patterns, increase viscosity significantly
+        # Calculate time-based noise threshold
+        time_steps = len(history)
+        if time_steps > 0:
+            # Add slight oscillation to noise threshold
+            noise_freq = 0.5  # Frequency of noise variation
+            noise_amp = 0.05   # Amplitude of variation
+            noise_offset = math.sin(time_steps * noise_freq) * noise_amp
+            
+            # Dynamic noise threshold based on pattern age
+            age_factor = min(1.0, time_steps / 8.0)  # Saturates after 8 steps
+            base_noise = 0.3 + noise_offset
+            dynamic_noise = base_noise * (1.0 + age_factor * 0.2)  # Up to 20% increase
+            
+            # Store in context for evolution manager
+            context["dynamic_noise_threshold"] = dynamic_noise
+        
+        # Calculate base viscosity from coherence gradient
+        base_viscosity = 1.0 - coherence_gradient
+        
+        # Add granular variations based on local field state
+        field_variations = []
+        for related in related_patterns:
+            rel_coherence = related.get("metrics", {}).get("coherence", 0.0)
+            rel_energy = related.get("metrics", {}).get("energy_state", 0.0)
+            
+            # Calculate local field gradient
+            gradient = abs(coherence - rel_coherence)
+            field_variations.append(gradient * rel_energy)
+        
+        # Compute field feedback factor
+        field_feedback = sum(field_variations) / (len(field_variations) + 1) if field_variations else 0.0
+        
+        # Dynamic viscosity calculation
         if coherence <= 0.3:
-            # Triple base viscosity and add 0.3 to ensure stronger dissipation
-            viscosity = min(1.0, base_viscosity * 3.0 + 0.3)
+            # Non-linear viscosity increase for incoherent patterns
+            time_factor = min(1.0, time_steps / 5.0)
+            viscosity_growth = math.exp(time_factor) - 1  # Exponential growth
+            
+            # Add turbulence effects
+            turbulence_factor = 1.0 + (turbulence * 2.0)  # Turbulence doubles viscosity at max
+            
+            # Calculate effective viscosity
+            local_factor = 1.0 + field_feedback
+            viscosity = min(1.0, base_viscosity * turbulence_factor * (1.0 + viscosity_growth) * local_factor)
         else:
-            viscosity = base_viscosity * stability_factor * energy_factor
+            # Normal viscosity with field influence and turbulence
+            stability_factor = 1.0 - (stability * 0.5)
+            energy_factor = 1.0 - (energy_gradient * 0.3)
+            turbulence_factor = 1.0 + (turbulence * 0.5)  # Less turbulence impact for coherent patterns
+            viscosity = base_viscosity * stability_factor * energy_factor * turbulence_factor * (1.0 + field_feedback * 0.3)
         
-        # Calculate back pressure from opposing patterns
-        back_pressure = self._calculate_back_pressure(pattern, related_patterns)
+        # Enhanced back pressure calculation with density and gradients
+        base_pressure = self._calculate_back_pressure(pattern, related_patterns)
+        gradient_pressure = abs(coherence_gradient - coherence) + abs(energy_gradient - energy)
+        pressure_factor = 1.0 + (density * 0.5) + (gradient_pressure * 0.3)
+        back_pressure = base_pressure * pressure_factor + (density * 0.2)  # Add density baseline
         
-        # Calculate volume (affected by energy and coherence)
-        volume = (energy * 0.7 + coherence * 0.3) * len(related_patterns) / 10.0
-        volume = min(1.0, volume)
+        # Volume calculation with density and turbulence
+        volume_base = energy * 0.6 + coherence * 0.4  # Increase coherence influence
+        volume_factor = density * (1.0 - turbulence * 0.7)  # Reduce turbulence impact
+        volume = volume_base * volume_factor
+        volume = min(1.0, max(0.2, volume))  # Ensure minimum volume
         
-        # Calculate current (flow direction and rate)
-        current = -1.0 if coherence < 0.3 else cross_flow * 2 - 1  # Incoherent patterns flow outward
+        # Calculate current with gradient effects
+        coherence_diff = abs(coherence_gradient - coherence)
+        energy_diff = abs(energy_gradient - energy)
+        gradient_strength = coherence_diff + energy_diff
+        
+        if coherence <= 0.3:
+            # Strong dissipation for incoherent patterns
+            current = -1.0 * (1.0 + turbulence + gradient_strength)
+        else:
+            # Flow driven by gradients and cross-pattern interactions
+            gradient_direction = 1.0 if coherence_gradient > coherence else -1.0
+            base_flow = gradient_direction * gradient_strength * 2.0
+            
+            # Add cross-pattern flow contribution
+            cross_flow_contribution = cross_flow * (1.0 - gradient_strength)
+            
+            # Combine and apply turbulence damping
+            current = (base_flow + cross_flow_contribution) * (1.0 - turbulence * 0.3)
         
         return FlowMetrics(
             viscosity=viscosity,
