@@ -31,7 +31,7 @@ class FieldVisualizer:
     
     def __init__(self, config: Optional[VisualizationConfig] = None):
         self.config = config or VisualizationConfig()
-        plt.style.use('seaborn')
+        sns.set_style('whitegrid')
     
     def plot_field_state(self, 
                         field: np.ndarray,

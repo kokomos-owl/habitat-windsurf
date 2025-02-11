@@ -2,11 +2,20 @@
 
 import pytest
 import numpy as np
+import asyncio
 from dataclasses import dataclass
-from typing import List, Dict, Any, Tuple
+from typing import List, Dict, Any, Tuple, Optional
 import matplotlib.pyplot as plt
 from test_field_visualization import FieldVisualizer, VisualizationConfig
 from pathlib import Path
+
+# Local test configuration
+@pytest.fixture
+def event_loop():
+    """Create event loop for async tests."""
+    loop = asyncio.get_event_loop_policy().new_event_loop()
+    yield loop
+    loop.close()
 
 @dataclass
 class DynamicsConfig:
@@ -75,7 +84,7 @@ class TestPatternDynamics:
         # Set initial field values
         for pattern in patterns:
             pos = pattern["position"]
-            field[pos[0], pos[1]] = pattern["strength"]
+            field[int(pos[0]), int(pos[1])] = pattern["strength"]
         
         return field, patterns
     
@@ -99,10 +108,10 @@ class TestPatternDynamics:
             pos = pattern["position"]
             
             # Calculate local coherence
-            x_start = max(0, pos[0] - config.interaction_range)
-            x_end = min(field.shape[0], pos[0] + config.interaction_range + 1)
-            y_start = max(0, pos[1] - config.interaction_range)
-            y_end = min(field.shape[1], pos[1] + config.interaction_range + 1)
+            x_start = int(max(0, pos[0] - config.interaction_range))
+            x_end = int(min(field.shape[0], pos[0] + config.interaction_range + 1))
+            y_start = int(max(0, pos[1] - config.interaction_range))
+            y_end = int(min(field.shape[1], pos[1] + config.interaction_range + 1))
             
             local_field = field[x_start:x_end, y_start:y_end]
             
@@ -124,8 +133,8 @@ class TestPatternDynamics:
         # Calculate midpoint between patterns
         pos1 = patterns[0]["position"]
         pos2 = patterns[1]["position"]
-        mid_x = (pos1[0] + pos2[0]) // 2
-        mid_y = (pos1[1] + pos2[1]) // 2
+        mid_x = int((pos1[0] + pos2[0]) // 2)
+        mid_y = int((pos1[1] + pos2[1]) // 2)
         
         # Analyze interference region
         interference_strength = field[mid_x, mid_y]
