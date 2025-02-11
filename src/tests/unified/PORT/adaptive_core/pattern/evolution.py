@@ -368,15 +368,15 @@ class PatternEvolutionManager:
             # Apply viscosity effects
             if self.config.is_mode_active(AnalysisMode.FLOW):
                 # High viscosity reduces coherence and energy for incoherent patterns
-                if metrics.coherence < self.config.noise_threshold and flow_metrics.viscosity > 0:
-                    viscosity_factor = flow_metrics.viscosity * 0.8
+                if metrics.coherence <= self.config.noise_threshold and flow_metrics.viscosity > 0:
+                    # Use full viscosity factor for stronger dissipation
+                    viscosity_factor = flow_metrics.viscosity
                     metrics.coherence *= (1.0 - viscosity_factor)
                     metrics.energy_state *= (1.0 - viscosity_factor)
                     
-                    # Stronger dissipation for very weak patterns
-                    if metrics.coherence < 0.2:
-                        metrics.coherence *= 0.5
-                        metrics.energy_state *= 0.5
+                    # Apply stronger dissipation at noise threshold
+                    metrics.coherence *= 0.3
+                    metrics.energy_state *= 0.3
             
             # Determine pattern state
             current_state = PatternState.EMERGING if pattern.get("state") == "emerging" else PatternState.ACTIVE
