@@ -1,80 +1,47 @@
 """
-Learning Windows Interface for Natural Knowledge Integration.
+Learning Windows Interface for Habitat System.
 
-This module provides mechanisms for managing learning windows that form
-naturally around areas of high knowledge density and pattern emergence.
-
-Key Components:
-    - LearningWindowInterface: Main interface for natural window management
-    - DensityAnalysis: Natural density calculation and field analysis
-    - DomainAlignments: Natural cross-domain path identification
-
-The system focuses on:
-    - Natural window formation
-    - Organic density emergence
-    - Light pattern observation
-    - Unforced domain alignment
-
-Typical usage:
-    1. Initialize LearningWindowInterface
-    2. Allow windows to form naturally
-    3. Observe density patterns
-    4. Track natural alignments
-    5. Maintain light coherence
+This module provides the interface for managing and analyzing learning windows,
+which represent optimal periods for knowledge integration and relationship formation.
 """
 
-from typing import Dict, Any, List, Optional, Set
-from dataclasses import dataclass
-from datetime import datetime
-import logging
-
-logger = logging.getLogger(__name__)
-
-@dataclass
-class DensityMetrics:
-    """Natural density metrics for learning windows."""
-    local: float = 0.0           # Natural local density
-    cross_domain: float = 0.0    # Natural cross-domain density
-    gradient: float = 0.0        # Natural density gradient
-    alignments: List[Dict] = None  # Natural domain alignments
-    
-    def __post_init__(self):
-        self.alignments = [] if self.alignments is None else self.alignments
-
 class LearningWindowInterface:
-    """Interface for natural learning window management."""
+    """Interface for managing and analyzing learning windows while maintaining coherence."""
     
     def __init__(self):
         self.window_registry = {}
         self.pattern_cache = {}
         self.density_cache = {}
-        self.coherence_threshold = 0.85  # Natural threshold
+        self.coherence_threshold = 0.85
         
     def register_window(self, window_data: dict) -> str:
-        """Register a naturally forming learning window."""
+        """Register a learning window with coherence validation and density analysis."""
         window_id = str(len(self.window_registry))
         
-        # Calculate natural density metrics
+        if not self._validate_coherence(window_data):
+            return None
+            
+        # Calculate density metrics
         density_metrics = self._calculate_density_metrics(window_data)
         
-        # Track natural pattern evolution
+        # Track pattern evolution with density
         self._update_pattern_cache(window_data, density_metrics)
         
-        # Store with natural metadata
+        # Store with coherence and density metadata
         self.window_registry[window_id] = {
             "state": {
                 **window_data,
                 "density": density_metrics
             },
             "coherence": {
-                "timestamp": datetime.now().isoformat(),
+                "timestamp": "2025-01-01T15:25:18-05:00",
                 "structural_integrity": self._calculate_structural_integrity(window_data),
                 "semantic_stability": self._calculate_semantic_stability(window_data),
                 "propagation_potential": window_data.get("potential", 0)
             }
         }
         
-        # Update density cache naturally
+        # Update density cache
         self.density_cache[window_id] = {
             "metrics": density_metrics,
             "gradients": self._calculate_density_gradients(density_metrics)
@@ -83,7 +50,7 @@ class LearningWindowInterface:
         return window_id
         
     def get_window(self, window_id: str) -> dict:
-        """Retrieve natural window state."""
+        """Retrieve window data with coherence context."""
         if window_id not in self.window_registry:
             return None
             
@@ -95,11 +62,11 @@ class LearningWindowInterface:
         }
         
     def get_density_analysis(self, window_id: str = None) -> dict:
-        """Get natural density analysis."""
+        """Get density analysis for specific window or entire field."""
         if window_id and window_id in self.density_cache:
             return self.density_cache[window_id]
             
-        # Analyze natural field density
+        # Analyze entire field density
         field_density = {
             "global_density": self._calculate_field_density(),
             "density_centers": self._identify_density_centers(),
@@ -109,26 +76,26 @@ class LearningWindowInterface:
         return field_density
         
     def _calculate_density_metrics(self, window_data: dict) -> dict:
-        """Calculate natural density metrics."""
+        """Calculate density metrics using existing measures."""
         channels = window_data.get("channels", {})
         structural = channels.get("structural", {})
         semantic = channels.get("semantic", {})
         
-        # Calculate natural local density
+        # Calculate local density as weighted average of structural and semantic metrics
         local_density = (
-            structural.get("strength", 0.5) * 0.4 +  # Natural structural weight
-            semantic.get("sustainability", 0.5) * 0.3 +  # Natural semantic weight
-            window_data.get("score", 0.5) * 0.3  # Natural overall weight
+            structural.get("strength", 0.5) * 0.4 +  # 40% weight on structural strength
+            semantic.get("sustainability", 0.5) * 0.3 +  # 30% weight on semantic sustainability
+            window_data.get("score", 0.5) * 0.3  # 30% weight on overall score
         )
         
-        # Calculate natural cross-domain potential
+        # Calculate cross-domain potential as weighted combination
         cross_domain = (
-            semantic.get("strength", 0.5) * 0.4 +  # Natural semantic weight
-            window_data.get("potential", 0.5) * 0.4 +  # Natural potential weight
-            window_data.get("horizon", 0.5) * 0.2  # Natural horizon weight
+            semantic.get("strength", 0.5) * 0.4 +  # 40% weight on semantic strength
+            window_data.get("potential", 0.5) * 0.4 +  # 40% weight on potential
+            window_data.get("horizon", 0.5) * 0.2  # 20% weight on horizon
         )
         
-        # Identify natural domain alignments
+        # Identify domain alignments based on meaning patterns
         alignments = self._identify_domain_alignments(window_data)
         
         return {
@@ -139,7 +106,7 @@ class LearningWindowInterface:
         }
         
     def _calculate_density_gradients(self, density_metrics: dict) -> dict:
-        """Calculate natural density gradients."""
+        """Calculate density gradients across the field."""
         return {
             "local_to_cross": density_metrics["gradient"],
             "alignment_strength": sum(a["strength"] for a in density_metrics["alignments"]) / 
@@ -148,12 +115,12 @@ class LearningWindowInterface:
         }
         
     def _identify_domain_alignments(self, window_data: dict) -> list:
-        """Identify natural domain alignments."""
+        """Identify domain alignments from meaning patterns."""
         semantic_patterns = window_data.get("semantic_patterns", [])
         alignments = []
         
         if semantic_patterns:
-            # Group by natural domains
+            # Group by domain and calculate alignment strength
             domain_strengths = {}
             domain_counts = {}
             for pattern in semantic_patterns:
@@ -162,19 +129,19 @@ class LearningWindowInterface:
                 domain_strengths[domain] = domain_strengths.get(domain, 0) + strength
                 domain_counts[domain] = domain_counts.get(domain, 0) + 1
             
-            # Convert to natural alignment vectors
+            # Convert to alignment vectors with average strength per domain
             alignments = [
                 {"domain": domain, "strength": strength / domain_counts[domain]}
                 for domain, strength in domain_strengths.items()
             ]
             
-            # Sort by natural strength
+            # Sort by strength for consistent ordering
             alignments.sort(key=lambda x: (-x["strength"], x["domain"]))
         
         return alignments
         
     def _calculate_field_density(self) -> float:
-        """Calculate natural field density."""
+        """Calculate overall field density."""
         if not self.density_cache:
             return 0.0
             
@@ -185,31 +152,31 @@ class LearningWindowInterface:
         return sum(densities) / len(densities)
         
     def _identify_density_centers(self) -> list:
-        """Identify natural high-density centers."""
+        """Identify high-density centers in the field."""
         centers = []
         
-        # Calculate natural averages
+        # Calculate average metrics across windows
         avg_local = sum(cache["metrics"]["local"] for cache in self.density_cache.values()) / len(self.density_cache) if self.density_cache else 0
         avg_cross = sum(cache["metrics"]["cross_domain"] for cache in self.density_cache.values()) / len(self.density_cache) if self.density_cache else 0
         
-        # Identify natural centers
+        # Identify windows with high density in either local or cross-domain metrics
         for window_id, cache in self.density_cache.items():
             metrics = cache["metrics"]
             local = metrics["local"]
             cross = metrics["cross_domain"]
             
-            # Calculate natural density
-            density = (local * 0.4 + cross * 0.6)  # Natural weighting
+            # Calculate combined density score
+            density = (local * 0.4 + cross * 0.6)  # Weight cross-domain higher
             
-            # Natural density center formation
-            if density > 0.8:  # Natural threshold
+            # Window is a density center if it has high combined density
+            if density > 0.8:  # Direct threshold for high density
                 centers.append({
                     "window_id": window_id,
                     "density": density,
                     "alignments": metrics["alignments"],
                     "type": "local" if local > cross else "cross_domain"
                 })
-            # Natural emergence detection
+            # Or if it significantly exceeds averages
             elif (local > avg_local * 1.2 and cross > avg_cross * 1.2):
                 centers.append({
                     "window_id": window_id,
@@ -221,7 +188,7 @@ class LearningWindowInterface:
         return sorted(centers, key=lambda x: x["density"], reverse=True)
         
     def _analyze_cross_domain_paths(self) -> list:
-        """Analyze natural cross-domain paths."""
+        """Analyze potential paths between domains."""
         paths = []
         windows = sorted(self.density_cache.items(), key=lambda x: x[0])
         
@@ -229,73 +196,88 @@ class LearningWindowInterface:
             current = windows[i][1]
             next_window = windows[i + 1][1]
             
-            # Natural path formation
             if current["metrics"]["cross_domain"] > self.coherence_threshold:
                 paths.append({
                     "start": windows[i][0],
                     "end": windows[i + 1][0],
                     "strength": (current["metrics"]["cross_domain"] + 
-                                next_window["metrics"]["cross_domain"]) / 2,
-                    "alignments": current["metrics"]["alignments"]
+                               next_window["metrics"]["cross_domain"]) / 2,
+                    "stability": current["gradients"]["field_potential"]
                 })
         
         return sorted(paths, key=lambda x: x["strength"], reverse=True)
         
-    def _update_pattern_cache(self, window_data: dict, density_metrics: dict):
-        """Update pattern cache with natural evolution."""
-        window_patterns = window_data.get("patterns", [])
-        
-        for pattern in window_patterns:
-            pattern_id = pattern.get("id")
-            if pattern_id:
-                self.pattern_cache[pattern_id] = {
-                    "pattern": pattern,
-                    "density": density_metrics,
-                    "timestamp": datetime.now().isoformat()
-                }
-                
-    def _get_relevant_patterns(self, window_id: str) -> list:
-        """Get naturally relevant patterns."""
-        if window_id not in self.window_registry:
-            return []
+    def _validate_coherence(self, window_data: dict) -> bool:
+        """Validate window maintains minimum coherence requirements."""
+        if not window_data:
+            return False
             
-        window = self.window_registry[window_id]
-        window_patterns = window["state"].get("patterns", [])
-        
-        return [
-            self.pattern_cache.get(pattern.get("id"), {})
-            for pattern in window_patterns
-            if pattern.get("id") in self.pattern_cache
-        ]
-        
-    def _assess_coherence_status(self, window: dict) -> str:
-        """Assess natural coherence status."""
-        coherence = window.get("coherence", {})
-        
-        structural = coherence.get("structural_integrity", 0)
-        semantic = coherence.get("semantic_stability", 0)
-        potential = coherence.get("propagation_potential", 0)
-        
-        # Natural coherence assessment
-        if all(x > 0.8 for x in [structural, semantic, potential]):
-            return "highly_coherent"
-        elif all(x > 0.6 for x in [structural, semantic, potential]):
-            return "moderately_coherent"
-        elif all(x > 0.4 for x in [structural, semantic, potential]):
-            return "emerging_coherence"
-        else:
-            return "forming"
-        
+        required_fields = ["score", "potential", "horizon"]
+        if not all(field in window_data for field in required_fields):
+            return False
+            
+        return (window_data["score"] >= self.coherence_threshold and 
+                window_data["potential"] > 0 and 
+                window_data["horizon"] > 0)
+                
     def _calculate_structural_integrity(self, window_data: dict) -> float:
-        """Calculate natural structural integrity."""
+        """Calculate structural integrity score."""
         channels = window_data.get("channels", {})
         structural = channels.get("structural", {})
         
-        return structural.get("integrity", 0.5)
+        # Weighted combination of structural metrics
+        return (
+            structural.get("strength", 0) * 0.6 +  # 60% weight on strength
+            structural.get("sustainability", 0) * 0.4  # 40% weight on sustainability
+        )
         
     def _calculate_semantic_stability(self, window_data: dict) -> float:
-        """Calculate natural semantic stability."""
+        """Calculate semantic stability score."""
         channels = window_data.get("channels", {})
         semantic = channels.get("semantic", {})
         
-        return semantic.get("stability", 0.5)
+        # Weighted combination of semantic metrics
+        return (
+            semantic.get("strength", 0) * 0.6 +  # 60% weight on strength
+            semantic.get("sustainability", 0) * 0.4  # 40% weight on sustainability
+        )
+        
+    def _update_pattern_cache(self, window_data: dict, density_metrics: dict):
+        """Update pattern cache with new window data."""
+        pattern_key = f"{len(self.window_registry)}"
+        
+        self.pattern_cache[pattern_key] = {
+            "structural": self._calculate_structural_integrity(window_data),
+            "semantic": self._calculate_semantic_stability(window_data),
+            "density": density_metrics
+        }
+        
+    def _get_relevant_patterns(self, window_id: str) -> list:
+        """Get patterns relevant to specific window."""
+        window_patterns = []
+        for pattern_key, pattern in self.pattern_cache.items():
+            if pattern_key == window_id:
+                window_patterns.append(pattern)
+        return window_patterns
+        
+    def _assess_coherence_status(self, window: dict) -> dict:
+        """Assess current coherence status of window."""
+        coherence = window["coherence"]
+        structural = coherence["structural_integrity"]
+        semantic = coherence["semantic_stability"]
+        propagation = coherence["propagation_potential"]
+        
+        # Window is coherent if either structural or semantic coherence is high
+        # and propagation potential is sufficient
+        is_coherent = (
+            (structural >= self.coherence_threshold or 
+             semantic >= self.coherence_threshold) and
+            propagation >= self.coherence_threshold * 0.8  # Allow slightly lower propagation threshold
+        )
+        
+        return {
+            "is_coherent": is_coherent,
+            "structural_status": "stable" if structural >= self.coherence_threshold else "evolving",
+            "semantic_status": "stable" if semantic >= self.coherence_threshold else "evolving",
+            "propagation_status": "active" if propagation >= self.coherence_threshold else "passive"
+        }

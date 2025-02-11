@@ -4,6 +4,13 @@ A hands-on workshop for learning visualization component development using the W
 
 ## Features
 
+### Core Modules (Ported)
+- `coherence_tracking.py`: Light coherence assessment for structure-meaning alignment
+- `emergence_flow.py`: Pattern emergence and evolution tracking system
+- `pattern_flow.py`: Pattern flow types and analysis
+- `learning_windows.py`: Learning windows interface for knowledge integration
+- `pattern_aware_rag.py`: Pattern-aware RAG controller with coherence tracking
+
 ### Pattern Evolution and Coherence Analysis
 - Dynamic pattern learning from climate risk data
 - Semantic relationship tracking with emphasis detection

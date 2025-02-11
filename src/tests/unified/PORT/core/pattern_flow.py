@@ -1,99 +1,79 @@
-"""
-Pattern flow types and analysis for structure-meaning evolution.
-
-This module implements pattern flow analysis with a focus on natural emergence.
-It provides mechanisms for analyzing how patterns naturally emerge, merge,
-transform, and maintain over time.
-
-Key Components:
-    - FlowType: Core flow types aligned with natural emergence
-    - FlowState: Natural state of pattern flow
-    - PatternFlow: Main class managing natural pattern flows
-    - PatternMatcher: Natural pattern recognition
-
-The system focuses on:
-    - Light observation of pattern flow
-    - Natural interface recognition
-    - Organic pattern matching
-    - Unforced pattern evolution
-
-Typical usage:
-    1. Initialize PatternFlow
-    2. Register natural flows
-    3. Allow patterns to emerge
-    4. Observe interface recognition
-    5. Track natural adherence
-"""
+"""Pattern flow types and analysis for structure-meaning evolution."""
 
 from enum import Enum
-from typing import Dict, Any, List, Optional, Set, Tuple
+from typing import Dict, Any, List, Optional, Set
 from dataclasses import dataclass
-from datetime import datetime
 import logging
 import re
 import uuid
 
+from .graph_schema import RelationType as GraphRelationType
+
 logger = logging.getLogger(__name__)
 
 class FlowType(Enum):
-    """Core flow types for natural pattern evolution."""
+    """Core flow types for pattern evolution aligned with graph schema."""
     
-    # Natural emergence patterns
-    EMERGES_FROM = "emerges_from"  # Natural pattern emergence
-    ADAPTS_TO = "adapts_to"      # Natural adaptation
-    EVOLVES_TO = "evolves_to"    # Natural evolution
+    # Primed patterns (from graph schema)
+    MEASURED_BY = GraphRelationType.MEASURED_BY.value
+    IMPACTS = GraphRelationType.IMPACTS.value
+    EVOLVES_TO = GraphRelationType.EVOLVES_TO.value
     
-    # Natural relationship patterns
-    CONTAINS = "contains"        # Natural containment
-    RELATED_TO = "related_to"    # Natural relationship
-    DERIVED_FROM = "derived_from"  # Natural derivation
+    # Essential patterns (from graph schema)
+    ADAPTS_TO = GraphRelationType.ADAPTS_TO.value
+    EMERGES_FROM = GraphRelationType.EMERGES_FROM.value
     
-    # Natural interface patterns
-    ADHERES_TO = "adheres_to"    # Natural adherence
-    RECOGNIZES = "recognizes"    # Natural recognition
+    # Natural patterns (emergent flow)
+    CONTAINS = GraphRelationType.CONTAINS.value
+    RELATED_TO = GraphRelationType.RELATED_TO.value
+    DERIVED_FROM = GraphRelationType.DERIVED_FROM.value
+    
+    # Interface recognition and adherence
+    ADHERES_TO = GraphRelationType.ADHERES_TO.value
+    RECOGNIZES = GraphRelationType.RECOGNIZES.value
 
 @dataclass
 class FlowState:
-    """Natural state of pattern flow."""
-    strength: float = 0.0            # Natural flow strength
-    velocity: float = 0.0            # Natural evolution rate
-    coherence: float = 0.0           # Natural consistency
-    emergence_potential: float = 0.0  # Natural emergence potential
-    confidence: float = 0.0          # Natural confidence
-    temporal_context: str = ""       # Natural temporal context
+    """State of a pattern flow with climate-specific attributes."""
+    strength: float = 0.0            # Current flow strength
+    velocity: float = 0.0            # Rate of pattern evolution
+    coherence: float = 0.0           # Flow consistency
+    emergence_potential: float = 0.0  # Potential for new patterns
+    temporal_scope: str = ""         # e.g., "mid-century", "late-century"
+    confidence_interval: Optional[tuple] = None  # For measurement uncertainties
 
-class PatternMatcher:
-    """Matches natural patterns in content."""
+class ClimatePatternMatcher:
+    """Matches climate-specific patterns in text."""
     
     def __init__(self):
-        # Natural emergence patterns
-        self.emergence_patterns = [
-            (r"naturally\s+emerges?\s+from\s+(.+?)(?=\s*[,.])", 0.9),
-            (r"(?:forms?|appears?)\s+naturally\s+(?:in|within)\s+(.+?)(?=\s*[,.])", 0.85),
-            (r"emerges?\s+organically\s+through\s+(.+?)(?=\s*[,.])", 0.8)
+        # Measurement patterns from climate assessment
+        self.measurement_patterns = [
+            (r"(\d+(?:\.\d+)?%?)(?:\s*[-–]\s*(\d+(?:\.\d+)?%?))?\s*(?:increase|decrease|change)\s+in\s+(.+?)(?=\s*[,.])", 0.9),
+            (r"(\w+)\s+(?:is|are)\s+measured\s+(?:at|by)\s+(\d+(?:\.\d+)?%?)", 0.85),
+            (r"between\s+(\d+(?:\.\d+)?%?)\s+and\s+(\d+(?:\.\d+)?%?)\s+of\s+(?:the|all)\s+(.+?)(?=\s*[,.])", 0.8)
         ]
         
-        # Natural adaptation patterns
-        self.adaptation_patterns = [
-            (r"naturally\s+adapts?\s+to\s+(.+?)(?=\s*[,.])", 0.9),
-            (r"(?:changes?|evolves?)\s+with\s+(.+?)(?=\s*[,.])", 0.85),
-            (r"responds?\s+to\s+(.+?)\s+by\s+(.+?)(?=\s*[,.])", 0.8)
+        # Impact patterns from climate assessment
+        self.impact_patterns = [
+            (r"(putting|puts|put)\s+(.+?)\s+at\s+risk", 0.9),
+            (r"(impacts?|affects?|influences?)\s+(.+?)\s+(?:through|by|via)\s+(.+?)(?=\s*[,.])", 0.85),
+            (r"(leads?|leading)\s+to\s+(.+?)(?=\s*[,.])", 0.8)
         ]
         
-        # Natural evolution patterns
+        # Evolution patterns from climate assessment
         self.evolution_patterns = [
-            (r"gradually\s+(?:becomes?|transforms?)\s+(.+?)(?=\s*[,.])", 0.9),
-            (r"naturally\s+develops?\s+into\s+(.+?)(?=\s*[,.])", 0.85),
-            (r"evolves?\s+through\s+(.+?)\s+into\s+(.+?)(?=\s*[,.])", 0.8)
+            (r"(?:increase|decrease)\s+(\d+(?:\.\d+)?%?)\s+by\s+(mid|late)-century", 0.9),
+            (r"(?:from|between)\s+(.+?)\s+to\s+(.+?)\s+by\s+(mid|late)-century", 0.85),
+            (r"expected\s+to\s+(?:increase|decrease)\s+(.+?)\s+by\s+(.+?)(?=\s*[,.])", 0.8)
         ]
 
 class PatternFlow:
-    """Manages natural pattern flows."""
+    """Manages pattern flows in structure-meaning space."""
     
     def __init__(self):
         self.active_flows: Dict[str, FlowState] = {}
         self.emerging_flows: Dict[str, FlowState] = {}
-        self.pattern_matcher = PatternMatcher()
+        self.pattern_matcher = ClimatePatternMatcher()
         self.interface_recognitions: Dict[str, Set[str]] = {}
         self.adherence_patterns: Dict[str, Dict[str, float]] = {}
         
@@ -103,13 +83,13 @@ class PatternFlow:
         initial_state: Optional[FlowState] = None,
         interface_recognitions: Optional[Dict[str, float]] = None
     ) -> str:
-        """Register a new natural pattern flow."""
+        """Register a new pattern flow with interface recognition."""
         flow_id = str(uuid.uuid4())
         state = initial_state or FlowState()
         
         self.active_flows[flow_id] = state
         
-        # Register natural interface recognitions
+        # Register interface recognitions if provided
         if interface_recognitions:
             for interface, strength in interface_recognitions.items():
                 self.register_interface_recognition(
@@ -126,13 +106,13 @@ class PatternFlow:
         target_interface: str,
         recognition_strength: float = 0.0
     ):
-        """Register natural interface recognition."""
+        """Register interface recognition with adherence tracking."""
         if source_pattern not in self.interface_recognitions:
             self.interface_recognitions[source_pattern] = set()
             
         self.interface_recognitions[source_pattern].add(target_interface)
         
-        # Track natural adherence
+        # Track adherence pattern
         if source_pattern not in self.adherence_patterns:
             self.adherence_patterns[source_pattern] = {}
             
@@ -143,7 +123,7 @@ class PatternFlow:
         pattern: str,
         interface: str
     ) -> float:
-        """Get natural interface adherence strength."""
+        """Get interface adherence strength."""
         return self.adherence_patterns.get(pattern, {}).get(interface, 0.0)
         
     def update_adherence(
@@ -152,13 +132,13 @@ class PatternFlow:
         interface: str,
         new_strength: float
     ):
-        """Update natural interface adherence strength."""
+        """Update interface adherence strength."""
         if pattern not in self.adherence_patterns:
             self.adherence_patterns[pattern] = {}
         self.adherence_patterns[pattern][interface] = new_strength
         
     def get_recognized_interfaces(self, pattern: str) -> Set[str]:
-        """Get naturally recognized interfaces."""
+        """Get all interfaces recognized by a pattern."""
         return self.interface_recognitions.get(pattern, set())
         
     def update_flow(
@@ -166,7 +146,7 @@ class PatternFlow:
         flow_type: FlowType,
         state_updates: Dict[str, Any]
     ) -> None:
-        """Update natural flow state."""
+        """Update flow state with new measurements."""
         if flow_type.name not in self.active_flows:
             logger.warning(f"Flow {flow_type.name} not registered")
             return
@@ -181,44 +161,44 @@ class PatternFlow:
         pattern_type: str,
         initial_state: Optional[FlowState] = None
     ) -> None:
-        """Register a naturally emerging pattern flow."""
+        """Register a newly emerging pattern flow."""
         if pattern_type in self.emerging_flows:
             logger.warning(f"Emerging flow {pattern_type} already registered")
             return
             
         self.emerging_flows[pattern_type] = initial_state or FlowState()
         
-    def extract_patterns(self, content: str) -> Dict[str, List[Dict[str, Any]]]:
-        """Extract natural patterns from content."""
+    def extract_climate_patterns(self, content: str) -> Dict[str, List[Dict[str, Any]]]:
+        """Extract climate-specific patterns from content."""
         patterns = {
-            "emergence": [],
-            "adaptation": [],
+            "measurements": [],
+            "impacts": [],
             "evolution": []
         }
         
-        # Extract natural emergence
-        for pattern, confidence in self.pattern_matcher.emergence_patterns:
+        # Extract measurements
+        for pattern, confidence in self.pattern_matcher.measurement_patterns:
             matches = re.finditer(pattern, content, re.IGNORECASE)
             for match in matches:
-                patterns["emergence"].append({
-                    "type": FlowType.EMERGES_FROM.value,
+                patterns["measurements"].append({
+                    "type": FlowType.MEASURED_BY.value,
                     "groups": match.groups(),
                     "confidence": confidence,
                     "text": match.group(0)
                 })
         
-        # Extract natural adaptation
-        for pattern, confidence in self.pattern_matcher.adaptation_patterns:
+        # Extract impacts
+        for pattern, confidence in self.pattern_matcher.impact_patterns:
             matches = re.finditer(pattern, content, re.IGNORECASE)
             for match in matches:
-                patterns["adaptation"].append({
-                    "type": FlowType.ADAPTS_TO.value,
+                patterns["impacts"].append({
+                    "type": FlowType.IMPACTS.value,
                     "groups": match.groups(),
                     "confidence": confidence,
                     "text": match.group(0)
                 })
         
-        # Extract natural evolution
+        # Extract evolution
         for pattern, confidence in self.pattern_matcher.evolution_patterns:
             matches = re.finditer(pattern, content, re.IGNORECASE)
             for match in matches:
@@ -228,5 +208,58 @@ class PatternFlow:
                     "confidence": confidence,
                     "text": match.group(0)
                 })
-                
+        
         return patterns
+        
+    def get_flow_dynamics(self) -> Dict[str, Any]:
+        """Get current flow dynamics."""
+        return {
+            "active_flows": [
+                {
+                    "type": flow_type,
+                    "state": dataclasses.asdict(state)
+                }
+                for flow_type, state in self.active_flows.items()
+            ],
+            "emerging_flows": [
+                {
+                    "type": flow_type,
+                    "state": dataclasses.asdict(state)
+                }
+                for flow_type, state in self.emerging_flows.items()
+            ]
+        }
+        
+    def calculate_flow_scores(self) -> Dict[str, Any]:
+        """Calculate overall flow scores."""
+        active_strengths = [
+            state.strength for state in self.active_flows.values()
+        ]
+        emerging_strengths = [
+            state.strength for state in self.emerging_flows.values()
+        ]
+        
+        return {
+            "coherence": sum(active_strengths) / len(active_strengths) if active_strengths else 0.0,
+            "emergence": sum(emerging_strengths) / len(emerging_strengths) if emerging_strengths else 0.0,
+            "dynamics": {
+                "primed_flow": max(active_strengths) if active_strengths else 0.0,
+                "natural_flow": max(emerging_strengths) if emerging_strengths else 0.0,
+                "flow_integration": self._calculate_integration()
+            }
+        }
+        
+    def _calculate_integration(self) -> float:
+        """Calculate how well primed and emerging flows are integrated."""
+        if not self.active_flows or not self.emerging_flows:
+            return 0.0
+            
+        active_coherence = sum(
+            state.coherence for state in self.active_flows.values()
+        ) / len(self.active_flows)
+        
+        emerging_coherence = sum(
+            state.coherence for state in self.emerging_flows.values()
+        ) / len(self.emerging_flows)
+        
+        return (active_coherence + emerging_coherence) / 2.0

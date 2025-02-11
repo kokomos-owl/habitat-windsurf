@@ -1,6 +1,25 @@
 # Habitat Windsurf UI Course Testing Results
 
-**Document Date**: 2025-02-06T12:21:13-05:00
+**Document Date**: 2025-02-11T00:00:08-05:00
+
+## Core Module Tests (Ported)
+
+### Core Tests
+- `test_flow_emergence.py`: Tests for pattern emergence flow
+- `test_learning_windows.py`: Tests for learning window interface
+- `test_pattern_evolution.py`: Tests for pattern evolution
+- `test_streaming.py`: Tests for streaming functionality
+- `test_structure_meaning_cycle.py`: Tests for structure-meaning cycles
+
+### RAG Tests
+- `test_pattern_aware_rag.py`: Tests for pattern-aware RAG controller
+
+### Pattern Tests
+- `test_pattern_detection.py`: Tests for pattern detection
+
+### Meta Tests
+- `test_meta_learning.py`: Tests for meta-learning capabilities
+- `test_poly_agentic.py`: Tests for poly-agentic systems
 
 ## Visualization Service Testing Results
 

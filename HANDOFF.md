@@ -1,6 +1,49 @@
 # Habitat Windsurf UI Course Handoff
 
-**Document Date**: 2025-02-06T19:23:23-05:00
+**Document Date**: 2025-02-11T00:00:08-05:00
+
+## Recently Ported Core Modules
+
+### Core Components
+The following modules have been ported from the habitat_poc repository:
+
+1. **Coherence Tracking**
+   - File: `coherence_tracking.py`
+   - Purpose: Light coherence assessment for structure-meaning alignment
+   - Key features: Coherence metrics, assessment levels, warning flags
+
+2. **Emergence Flow**
+   - File: `emergence_flow.py`
+   - Purpose: Pattern emergence and evolution tracking
+   - Key features: Flow dynamics, pattern intersection analysis, coherence flow
+
+3. **Pattern Flow**
+   - File: `pattern_flow.py`
+   - Purpose: Pattern flow types and analysis
+   - Key features: Flow types, pattern matching, interface recognition
+
+4. **Learning Windows**
+   - File: `learning_windows.py`
+   - Purpose: Learning windows interface for knowledge integration
+   - Key features: Window registration, density analysis, coherence validation
+
+5. **Pattern-Aware RAG**
+   - File: `pattern_aware_rag.py`
+   - Purpose: Pattern-aware RAG controller
+   - Key features: Pattern extraction, coherence tracking, RAG enhancement
+
+### Test Files
+Corresponding test files have been ported and organized into:
+- Core Tests: Flow emergence, learning windows, pattern evolution
+- RAG Tests: Pattern-aware functionality
+- Pattern Tests: Detection capabilities
+- Meta Tests: Meta-learning and poly-agentic systems
+
+### Important Notes
+1. Tests follow interface-dependent flow dynamics
+2. Coherence-adherence principles are key
+3. LLM RAG interfaces require proper tuning
+4. Pattern recognition uses dynamic thresholds
 
 ## Project Overview
 
