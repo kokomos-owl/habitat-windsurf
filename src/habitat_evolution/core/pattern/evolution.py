@@ -10,6 +10,7 @@ from dataclasses import dataclass
 from typing import Dict, Any, List, Optional, Set, Tuple
 from datetime import datetime
 import uuid
+import math
 
 from .quality import (
     PatternQualityAnalyzer,
@@ -310,11 +311,24 @@ class PatternEvolutionManager:
             # Calculate new metrics
             metrics = await self._calculate_metrics(pattern, related_patterns)
             
-            # Calculate emergence rate based on propagation speed and group velocity
+            # Calculate emergence rate and phase evolution in wave mode
             if "context" in pattern and self.config.is_mode_active(AnalysisMode.WAVE):
                 group_velocity = pattern["context"].get("group_velocity", 0.5)
                 propagation_speed = self.config.propagation_speed
                 metrics.emergence_rate = group_velocity * propagation_speed
+                
+                # Update phase based on wave parameters
+                current_phase = pattern["context"].get("phase", 0.0)
+                wavelength = self.config.wavelength
+                phase_velocity = self.config.phase_velocity
+                
+                # Calculate phase change based on wave equation
+                phase_change = (2 * math.pi * phase_velocity) / wavelength
+                new_phase = current_phase + phase_change
+                
+                # Update pattern context with new phase
+                pattern["context"]["phase"] = new_phase % (2 * math.pi)  # Keep phase in [0, 2π]
+                pattern["context"]["phase_change"] = phase_change
             
             # Update coherence based on pattern position, strength, and phase relationships
             if "context" in pattern:
