@@ -99,6 +99,49 @@ Habitat Evolution integrates multiple specialized systems for pattern evolution,
      * Pattern relationships
      * Evolution tracking
      * Bidirectional links
+
+## Next Steps (Updated 2025-02-11)
+
+### 1. Temporal Context Integration
+
+1. **Threshold Implementation**
+   - Implement water-state detection (volume > 0.5, coherence > 0.3)
+   - Implement air-state detection (viscosity < 0.4, flow potential > 0.7)
+   - Add threshold crossing event system
+
+2. **Gradient Analysis Tools**
+   - Create gradient relationship analyzer
+   - Implement equilibrium detection
+   - Add pattern cluster analysis
+
+3. **Practice Tool Development**
+   - Build threshold monitoring interface
+   - Create gradient visualization tools
+   - Implement pattern evolution dashboard
+
+### 2. Testing Framework Enhancement
+
+1. **Observable Tests**
+   - Add temporal context test suite
+   - Implement gradient equilibrium tests
+   - Create threshold transition tests
+
+2. **Visualization Tests**
+   - Add flow visualization tests
+   - Implement gradient map tests
+   - Create equilibrium state tests
+
+### 3. Documentation Updates
+
+1. **Practice Guidelines**
+   - Document temporal context usage
+   - Create gradient analysis guide
+   - Write pattern evolution practices
+
+2. **API Documentation**
+   - Update threshold API docs
+   - Document gradient analysis tools
+   - Add practice tool examples
    - Document Store (MongoDB)
      * Field states
      * Pattern persistence

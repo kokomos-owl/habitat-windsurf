@@ -189,35 +189,37 @@ class PatternQualityAnalyzer:
         
         else:
             # Coherent patterns (0.3 < coherence < 0.8)
-            # Calculate base noise from coherence
+            # Calculate base noise from coherence and adaptation
             coherence_factor = (coherence - 0.3) / 0.5  # Normalized coherence (0-1)
-            base_noise = 0.5 * (1.0 - coherence_factor)  # Start with lower base noise
+            adaptation_factor = metrics.get("adaptation_rate", 0.0)
+            base_noise = 0.6 * (1.0 - coherence_factor) + 0.4 * adaptation_factor
             
-            # Apply cubic reduction for stronger coherence effects
-            noise_reduction = coherence_factor * coherence_factor * coherence_factor
+            # Calculate volatility from history
+            volatility = self._calculate_volatility(history)
             
-            # Apply stability bonus (up to 40% reduction)
+            # Amplify noise for volatile patterns
+            volatility_boost = volatility * volatility  # Quadratic scaling
+            noise_boost = volatility_boost * 0.8  # Up to 80% boost from volatility
+            
+            # Apply stability dampening (up to 40% reduction)
             if stability > 0.5:
-                noise_reduction += (stability - 0.5) * 0.4
+                noise_boost *= (1.0 - (stability - 0.5) * 0.8)
             
-            # Apply energy bonus (up to 30% reduction)
-            if energy > 0.3:
-                noise_reduction += (energy - 0.3) * 0.3
+            # Apply energy influence
+            energy_factor = 1.0 - (energy * 0.3)  # Up to 30% reduction
             
-            # Strengthen reduction for coherent satellite patterns
-            if coherence > 0.35:
-                noise_reduction *= 1.5  # 50% stronger reduction
-            
-            # Calculate final noise with phase impact
-            phase_impact = min(0.1, phase / (2 * math.pi * wavelength))  # Small increase based on phase
-            noise_ratio = min(0.5, max(0.1, base_noise * (1.0 - noise_reduction) + phase_impact))
+            # Calculate final noise with all factors
+            phase_impact = min(0.2, phase / (2 * math.pi * wavelength))  # Increased phase impact
+            noise_ratio = min(0.9, base_noise * (1.0 + noise_boost) * energy_factor + phase_impact)
             
             # Calculate signal strength based on coherence and initial strength
             signal_strength = max(coherence, initial_strength * 0.8)
             
-            # Scale persistence and reproducibility with coherence
-            persistence = min(0.8, max(0.3, persistence * coherence))
-            reproducibility = min(0.8, max(0.3, reproducibility * coherence))
+            # Scale persistence and reproducibility with coherence and volatility
+            volatility_impact = volatility * volatility  # Quadratic scaling
+            persistence_factor = coherence * (1.0 - volatility_impact * 0.8)  # Up to 80% reduction from volatility
+            persistence = min(0.8, max(0.2, persistence * persistence_factor))
+            reproducibility = min(0.8, max(0.2, reproducibility * persistence_factor))
         
         # Update and maintain history
         if hasattr(self, '_signal_history'):
