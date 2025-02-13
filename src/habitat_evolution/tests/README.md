@@ -42,6 +42,16 @@ Validates core pattern regulation functionality:
 - Coherence stability
 - Adaptive regulation
 
+#### Pattern Observation (`test_gradient_regulation.py`)
+Validates natural emergence of observation modes:
+- Back pressure from energy differentials
+- Phase relationship effects
+- Cross-pattern flow dynamics
+- Turbulence impact on observation
+- Volume modulation under field conditions
+
+Key insight: Pattern observation emerges naturally from field conditions (turbulence, energy differentials, phase relationships) rather than requiring explicit rules.
+
 ### Service Tests (`services/`)
 
 1. **Event Bus** (`test_event_bus.py`)

@@ -8,30 +8,36 @@ from habitat_evolution.core.pattern.evolution import PatternEvolutionManager, Pa
 from habitat_evolution.core.storage.memory import InMemoryPatternStore, InMemoryRelationshipStore
 from habitat_evolution.core.services.event_bus import LocalEventBus, Event
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 async def event_bus():
     """Create fresh event bus."""
     return LocalEventBus()
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 async def pattern_store():
     """Create fresh pattern store."""
     return InMemoryPatternStore()
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 async def relationship_store():
     """Create fresh relationship store."""
     return InMemoryRelationshipStore()
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 async def evolution_manager(pattern_store, relationship_store, event_bus):
     """Create evolution manager with test dependencies."""
-    return PatternEvolutionManager(pattern_store, relationship_store, event_bus)
+    ps = await pattern_store
+    rs = await relationship_store
+    eb = await event_bus
+    return PatternEvolutionManager(ps, rs, eb)
 
 class TestPatternEvolution:
     """Tests for pattern evolution functionality."""
     
+    @pytest.mark.asyncio
+    @pytest.mark.asyncio
     async def test_register_pattern(self, evolution_manager):
+        manager = await evolution_manager
         """Test pattern registration."""
         pattern_type = "test"
         content = {"value": 42}
@@ -59,7 +65,10 @@ class TestPatternEvolution:
         assert metrics.coherence == 0.0
         assert metrics.stability == 0.0
     
+    @pytest.mark.asyncio
+    @pytest.mark.asyncio
     async def test_update_pattern(self, evolution_manager):
+        manager = await evolution_manager
         """Test pattern updates."""
         # Create pattern
         create_result = await evolution_manager.register_pattern(
@@ -98,7 +107,10 @@ class TestPatternEvolution:
         metrics = PatternMetrics.from_dict(pattern["metrics"])
         assert metrics.coherence == 0.5
     
+    @pytest.mark.asyncio
+    @pytest.mark.asyncio
     async def test_pattern_relationships(self, evolution_manager):
+        manager = await evolution_manager
         """Test pattern relationship management."""
         # Create two patterns
         p1_result = await evolution_manager.register_pattern(
@@ -126,7 +138,10 @@ class TestPatternEvolution:
         assert len(related_result.data) == 1
         assert related_result.data[0]["content"]["id"] == 2
     
+    @pytest.mark.asyncio
+    @pytest.mark.asyncio
     async def test_metric_propagation(self, evolution_manager):
+        manager = await evolution_manager
         """Test metric updates through relationships."""
         # Create two patterns
         p1_result = await evolution_manager.register_pattern(
@@ -170,7 +185,11 @@ class TestPatternEvolution:
         assert p2_metrics.coherence == 0.5
         assert p2_metrics.stability == 0.5
     
+    @pytest.mark.asyncio
+    @pytest.mark.asyncio
     async def test_event_handling(self, evolution_manager, event_bus):
+        manager = await evolution_manager
+        bus = await event_bus
         """Test event handling and notifications."""
         events: List[Event] = []
         

@@ -152,3 +152,38 @@ class TestGradientRegulation:
         assert all(v1 <= v2 for v1, v2 in zip(viscosities, viscosities[1:]))
         assert all(v1 >= v2 for v1, v2 in zip(volumes, volumes[1:]))
         assert all(c1 >= c2 for c1, c2 in zip(currents, currents[1:]))
+
+    def test_pattern_interference(self, quality_analyzer):
+        """Test how patterns affect each other's flow."""
+        # Create two patterns with different energy states
+        p1 = self.create_test_pattern(coherence=0.8, energy=0.4)
+        p2 = self.create_test_pattern(coherence=0.4, energy=0.8)
+        
+        # Set energy states in metrics
+        p1["metrics"]["energy_state"] = 0.4
+        p2["metrics"]["energy_state"] = 0.8
+        
+        # Set phase relationship and cross-flow
+        p1["context"]["phase"] = 0.0
+        p2["context"]["phase"] = math.pi/4
+        p1["metrics"]["cross_pattern_flow"] = 0.6
+        p2["metrics"]["cross_pattern_flow"] = 0.4
+        
+        # First observation with low turbulence
+        p1["context"]["field_gradients"] = {"turbulence": 0.2}
+        p2["context"]["field_gradients"] = {"turbulence": 0.2}
+        flow1 = quality_analyzer.analyze_flow(p1, [p2])
+        
+        # Second observation with high turbulence
+        p1["context"]["field_gradients"] = {"turbulence": 0.8}
+        p2["context"]["field_gradients"] = {"turbulence": 0.8}
+        p2["metrics"]["energy_state"] = 0.9
+        
+        # Second observation with higher energy difference
+        flow2 = quality_analyzer.analyze_flow(p1, [p2])
+        
+        # Back pressure increases with energy difference
+        assert flow2.back_pressure > flow1.back_pressure
+        
+        # Higher back pressure affects the observed volume
+        assert flow2.volume < flow1.volume

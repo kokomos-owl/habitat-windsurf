@@ -1,7 +1,80 @@
 # Adaptive Core Services Architecture
 
 ## Overview
-The Adaptive Core system provides a comprehensive framework for managing evolving patterns, their relationships, and coherence in a distributed knowledge system. This document outlines the service architecture and integration points.
+The Adaptive Core system provides a comprehensive framework for managing evolving patterns, their relationships, and coherence in a distributed knowledge system. It integrates with field dynamics and gradient systems to create a complete pattern evolution environment. This document outlines the service architecture and integration points.
+
+## System Components
+
+### 1. Field Management System
+The field management system provides the foundation for pattern evolution through three key services, each with event-driven monitoring and Neo4j persistence:
+
+#### Field State Service
+```python
+class ConcreteFieldStateService:
+    """Manages field state and stability with event emission."""
+    def __init__(self, field_repository: FieldRepository, event_bus: EventBus):
+        self.repository = field_repository
+        self.event_bus = event_bus
+
+    async def get_field_state(self, field_id: str) -> Optional[FieldState]:
+        """Get current field state with metadata."""
+        state = await self.repository.get_field_state(field_id)
+        await self.event_bus.emit("field.state.retrieved", {"field_id": field_id})
+        return state
+
+    async def calculate_field_stability(self, field_id: str) -> float:
+        """Calculate stability with coherence validation."""
+        state = await self.get_field_state(field_id)
+        stability = calculate_field_stability(
+            potential=state.potential,
+            gradient=state.gradient,
+            metadata=state.metadata
+        )
+        await self.event_bus.emit("field.stability.calculated", {"stability": stability})
+        return stability
+```
+
+#### Gradient Service
+```python
+class ConcreteGradientService:
+    """Handles gradient calculations with position tracking."""
+    async def calculate_gradient(self, field_id: str, position: Dict[str, float]) -> GradientVector:
+        """Calculate gradient vector with stability metrics."""
+        field_state = await self.repository.get_field_state(field_id)
+        gradient_components = self._calculate_components(field_state, position)
+        stability = self._calculate_gradient_stability(gradient_components, field_state.stability)
+        await self.event_bus.emit("field.gradient.calculated", {"gradient": gradient_components})
+        return GradientVector(direction=gradient_components, magnitude=magnitude, stability=stability)
+
+    async def get_flow_direction(self, field_id: str, position: Dict[str, float]) -> Dict[str, float]:
+        """Get flow direction with coherence validation."""
+        gradient = await self.calculate_gradient(field_id, position)
+        direction = normalize_vector(gradient.direction)
+        await self.event_bus.emit("field.flow.direction.calculated", {"direction": direction})
+        return direction
+```
+
+#### Flow Dynamics Service
+```python
+class ConcreteFlowDynamicsService:
+    """Handles flow dynamics with pattern awareness."""
+    async def calculate_turbulence(self, field_id: str, position: Dict[str, float]) -> float:
+        """Calculate turbulence based on Reynolds number."""
+        gradient = await self.gradient_service.calculate_gradient(field_id, position)
+        viscosity = await self.calculate_viscosity(field_id, position)
+        reynolds = velocity * characteristic_length / viscosity
+        turbulence = 1.0 - (1.0 / (1.0 + reynolds/5000))
+        await self.event_bus.emit("field.turbulence.calculated", {"turbulence": turbulence})
+        return turbulence
+
+    async def calculate_viscosity(self, field_id: str, position: Dict[str, float]) -> float:
+        """Calculate viscosity based on pattern coherence."""
+        pattern = await self.pattern_service.get_pattern_at_position(field_id, position)
+        coherence = pattern.coherence if pattern else 0.5
+        viscosity = self._calculate_viscosity_from_coherence(coherence)
+        await self.event_bus.emit("field.viscosity.calculated", {"viscosity": viscosity})
+        return viscosity
+```
 
 ## Core Service Interfaces
 
@@ -154,18 +227,26 @@ adaptive_core/
 - Core versioning system
 - Basic relationship tracking
 - Event system foundation
+- Field management services
+  * Field state management
+  * Gradient calculations
+  * Flow dynamics
 
 ### In Progress
 - Pattern evolution service
 - Metrics calculation
 - Quality assessment
 - Advanced relationship tracking
+- Field-pattern integration
+- Flow dynamics validation
 
 ### Planned
 - Advanced coherence detection
-- Flow dynamics integration
 - Pattern stability analysis
 - Full Neo4j integration
+- Advanced flow dynamics
+- Field visualization
+- Real-time monitoring
 
 ## Testing Requirements
 
