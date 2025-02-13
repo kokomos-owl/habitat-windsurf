@@ -44,11 +44,25 @@ async def calculate_gradient(self, field_id: str, position: Dict[str, float]) ->
 
 ### 2. Field Theory
 ```python
-# Field State representation
+# Field State representation with Neo4j persistence
 class FieldState:
     field_id: str
     timestamp: datetime
     potential: float
+    dimensions: Tuple[int, int]
+    mean_intensity: float
+    max_intensity: float
+    min_intensity: float
+
+    def to_neo4j(self) -> Dict[str, Any]:
+        """Export field state to Neo4j compatible format"""
+        return {
+            'timestamp': self.timestamp.isoformat(),
+            'dimensions': self.dimensions,
+            'mean_intensity': float(self.mean_intensity),
+            'max_intensity': float(self.max_intensity),
+            'min_intensity': float(self.min_intensity)
+        }
     gradient: Dict[str, float]
     stability: float
     metadata: Dict[str, any]

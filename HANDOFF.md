@@ -41,7 +41,21 @@ We've achieved a fundamental breakthrough in pattern analysis by implementing a 
    - Rich data embedding in nodes
    - Relationship capture in edges
    - Dual-view visualization system
-   - Neo4j integration for persistence
+   - Neo4j integration for persistence:
+     ```cypher
+     # View all patterns and relationships
+     MATCH (p:Pattern)-[r]->(f:FieldState)
+     RETURN p, r, f
+
+     # Query pattern evolution
+     MATCH (p1:Pattern)-[r:EVOLVES_TO]->(p2:Pattern)
+     WHERE p1.hazard_type = 'precipitation'
+     RETURN p1, r, p2
+     ```
+   - Connection Details:
+     - URL: bolt://localhost:7687
+     - Browser: http://localhost:7474
+     - Auth: neo4j/password
 
 3. **Impact**
    - Enhanced pattern analysis through graph structures

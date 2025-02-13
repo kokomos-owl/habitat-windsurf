@@ -11,6 +11,8 @@ from matplotlib.axes import Axes
 from datetime import datetime
 from neo4j import GraphDatabase
 
+from .pattern_id import PatternAdaptiveID
+
 @dataclass
 class TestVisualizationConfig:
     """Enhanced configuration for test visualization with Neo4j bridge."""
@@ -23,7 +25,7 @@ class TestVisualizationConfig:
     
     # Neo4j settings
     neo4j_uri: str = "bolt://localhost:7687"
-    neo4j_container: str = "cc7b03d4b96692134a32a67b1324fc9ec3d2319630de47e3e3af6d7e2da11e3f"
+    neo4j_container: str = "33e58c02bb2d"
     
     # Climate-specific settings
     hazard_types: List[str] = field(default_factory=lambda: ['precipitation', 'drought', 'wildfire'])
@@ -167,7 +169,7 @@ class TestPatternVisualizer:
         plt.tight_layout()
         return fig, metrics
     
-    def visualize_pattern_graph(self, nodes: List[Dict[str, Any]], edges: List[Dict[str, Any]], field: np.ndarray) -> Figure:
+    def visualize_pattern_graph(self, patterns: List[PatternAdaptiveID], field: np.ndarray) -> Figure:
         """Create graph visualization of pattern relationships.
         
         Args:
@@ -181,11 +183,26 @@ class TestPatternVisualizer:
         fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(20, 10))
         
         # Plot 1: Graph representation
-        pos = {node['id']: node['position'] for node in nodes}
+        pos = {}
+        node_colors = []
+        node_sizes = []
+        edge_list = []
+        edge_weights = []
+        
+        # Process patterns for visualization
+        for pattern in patterns:
+            data = pattern.to_dict()
+            pos[pattern.id] = data['position']
+            node_colors.append(data['coherence'])
+            node_sizes.append(data['energy_state'] * 1000)
+            
+            # Process relationships
+            for target_id, relationships in pattern.relationships.items():
+                latest = sorted(relationships, key=lambda x: x['timestamp'])[-1]
+                edge_list.append((pattern.id, target_id))
+                edge_weights.append(latest['metrics']['combined_strength'] * 2)
         
         # Draw nodes
-        node_colors = [node['metrics']['coherence'] for node in nodes]
-        node_sizes = [node['metrics']['energy_state'] * 1000 for node in nodes]
         nx.draw_networkx_nodes(G=nx.Graph(),
                              pos=pos,
                              node_color=node_colors,
@@ -194,8 +211,6 @@ class TestPatternVisualizer:
                              ax=ax1)
         
         # Draw edges
-        edge_weights = [edge['metrics']['combined_strength'] * 2 for edge in edges]
-        edge_list = [(edge['source'], edge['target']) for edge in edges]
         nx.draw_networkx_edges(G=nx.Graph(edge_list),
                              pos=pos,
                              width=edge_weights,
@@ -203,8 +218,10 @@ class TestPatternVisualizer:
                              ax=ax1)
         
         # Add node labels
-        labels = {node['id']: f"{node['embedded_data']['hazard_type']}\n{node['metrics']['energy_state']:.2f}"
-                 for node in nodes}
+        labels = {}
+        for pattern in patterns:
+            data = pattern.to_dict()
+            labels[pattern.id] = f"{data['hazard_type']}\n{data['energy_state']:.2f}"
         nx.draw_networkx_labels(G=nx.Graph(),
                               pos=pos,
                               labels=labels,
@@ -217,30 +234,161 @@ class TestPatternVisualizer:
         im = ax2.imshow(field, cmap=self.config.density_cmap, origin='lower')
         plt.colorbar(im, ax=ax2, label='Field intensity')
         
-        # Overlay patterns
-        for node in nodes:
-            pos = node['position']
-            energy = node['metrics']['energy_state']
-            coherence = node['metrics']['coherence']
+        # Overlay patterns with AdaptiveID data
+        for pattern in patterns:
+            node_data = pattern.to_dict()
+            pos = node_data['position']
+            energy = node_data['energy_state']
+            coherence = node_data['coherence']
             ax2.scatter(pos[0], pos[1],
                        s=energy * 500,
                        c=[coherence],
                        cmap=self.config.coherence_cmap,
                        alpha=0.6)
             
-        # Draw edges as lines
-        for edge in edges:
-            node1 = next(n for n in nodes if n['id'] == edge['source'])
-            node2 = next(n for n in nodes if n['id'] == edge['target'])
-            ax2.plot([node1['position'][0], node2['position'][0]],
-                     [node1['position'][1], node2['position'][1]],
-                     'w--', alpha=0.3,
-                     linewidth=edge['metrics']['combined_strength'])
+        # Draw edges from AdaptiveID relationships
+        for pattern in patterns:
+            for target_id, relationships in pattern.relationships.items():
+                # Use the latest relationship
+                latest = sorted(relationships, key=lambda x: x['timestamp'])[-1]
+                source_pos = pattern.spatial_context['position']
+                target_pattern = next(p for p in patterns if p.id == target_id)
+                target_pos = target_pattern.spatial_context['position']
+                ax2.plot([source_pos[0], target_pos[0]],
+                         [source_pos[1], target_pos[1]],
+                         'w--', alpha=0.3,
+                         linewidth=latest['metrics']['combined_strength'])
         
         ax2.set_title('Field State with Pattern Overlay')
         
         plt.tight_layout()
         return fig
+    
+    def create_pattern_id(self, pattern_type: str, hazard_type: str, position: tuple,
+                         field_state: float, coherence: float, energy_state: float) -> PatternAdaptiveID:
+        """Create a new PatternAdaptiveID instance for a pattern.
+        
+        Args:
+            pattern_type: Type of pattern (core, satellite)
+            hazard_type: Type of hazard (precipitation, drought, etc)
+            position: (x, y) position in field
+            field_state: Current field state value
+            coherence: Pattern coherence value
+            energy_state: Pattern energy state
+            
+        Returns:
+            PatternAdaptiveID instance
+        """
+        pattern_id = PatternAdaptiveID(pattern_type, hazard_type)
+        pattern_id.update_metrics(position, field_state, coherence, energy_state)
+        return pattern_id
+    
+    def export_pattern_graph_to_neo4j(self, patterns: List[PatternAdaptiveID], field: np.ndarray) -> None:
+        """Export pattern graph to Neo4j with rich data embedding using AdaptiveIDs.
+        
+        Args:
+            patterns: List of PatternAdaptiveID instances
+            field: The underlying field state
+        """
+        if not self._neo4j_driver:
+            self._connect_to_neo4j()
+            
+        with self._neo4j_driver.session() as session:
+            # Clear existing pattern graph
+            session.run("""
+                MATCH (n:Pattern)
+                DETACH DELETE n
+            """)
+            
+            # Create pattern nodes with embedded data
+            for pattern in patterns:
+                node_data = pattern.to_dict()
+                session.run("""
+                    CREATE (p:Pattern {
+                        id: $id,
+                        pattern_type: $pattern_type,
+                        hazard_type: $hazard_type,
+                        position_x: $pos_x,
+                        position_y: $pos_y,
+                        field_state: $field_state,
+                        coherence: $coherence,
+                        energy_state: $energy_state,
+                        weight: $weight,
+                        confidence: $confidence,
+                        version_id: $version_id,
+                        created_at: $created_at,
+                        last_modified: $last_modified
+                    })
+                """, {
+                    'id': node_data['id'],
+                    'pattern_type': node_data['pattern_type'],
+                    'hazard_type': node_data['hazard_type'],
+                    'pos_x': float(node_data['position'][0]),
+                    'pos_y': float(node_data['position'][1]),
+                    'field_state': float(node_data['field_state']),
+                    'coherence': float(node_data['coherence']),
+                    'energy_state': float(node_data['energy_state']),
+                    'weight': float(node_data['weight']),
+                    'confidence': float(node_data['confidence']),
+                    'version_id': node_data['version_id'],
+                    'created_at': node_data['created_at'],
+                    'last_modified': node_data['last_modified']
+                })
+            
+            # Create pattern relationships from AdaptiveID relationships
+            processed_pairs = set()
+            for pattern in patterns:
+                for target_id, relationships in pattern.relationships.items():
+                    # Skip if we've already processed this pair
+                    pair = tuple(sorted([pattern.id, target_id]))
+                    if pair in processed_pairs:
+                        continue
+                    processed_pairs.add(pair)
+                    
+                    # Use the latest relationship
+                    latest = sorted(relationships, key=lambda x: x['timestamp'])[-1]
+                    session.run("""
+                        MATCH (p1:Pattern {id: $source}), (p2:Pattern {id: $target})
+                        CREATE (p1)-[:INTERACTS_WITH {
+                            type: $type,
+                            spatial_distance: $distance,
+                            coherence_similarity: $similarity,
+                            combined_strength: $strength,
+                            timestamp: $timestamp
+                        }]->(p2)
+                    """, {
+                        'source': pattern.id,
+                        'target': target_id,
+                        'type': latest['type'],
+                        'distance': float(latest['metrics']['spatial_distance']),
+                        'similarity': float(latest['metrics']['coherence_similarity']),
+                        'strength': float(latest['metrics']['combined_strength']),
+                        'timestamp': latest['timestamp']
+                    })
+            
+            # Add field context with fixed timestamp
+            timestamp = datetime.now().isoformat()
+            session.run("""
+                CREATE (f:FieldState {
+                    timestamp: $timestamp,
+                    dimensions: $dimensions,
+                    mean_intensity: $mean_intensity,
+                    max_intensity: $max_intensity,
+                    min_intensity: $min_intensity
+                })
+            """, {
+                'timestamp': timestamp,
+                'dimensions': field.shape,
+                'mean_intensity': float(np.mean(field)),
+                'max_intensity': float(np.max(field)),
+                'min_intensity': float(np.min(field))
+            })
+            
+            # Link patterns to field state
+            session.run("""
+                MATCH (p:Pattern), (f:FieldState)
+                CREATE (p)-[:EXISTS_IN]->(f)
+            """)
     
     def export_to_neo4j(self, test_name: str) -> None:
         """Export test results to Neo4j for further analysis."""

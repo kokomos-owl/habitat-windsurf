@@ -348,14 +348,6 @@ async def test_pattern_graph_visualization(mock_patterns, request):
     print(f'Saved pattern graph to: {output_path}')
     plt.close(fig)
     
-    # Connect to Neo4j and clear database
-    visualizer._connect_to_neo4j()
-    if visualizer._neo4j_driver:
-        with visualizer._neo4j_driver.session() as session:
-            session.run("MATCH (n) DETACH DELETE n")
-    else:
-        pytest.skip("Neo4j connection failed")
-    
     # Export to Neo4j for persistence and analysis
     visualizer.export_pattern_graph_to_neo4j(pattern_ids, field)
     
@@ -372,10 +364,9 @@ async def test_pattern_graph_visualization(mock_patterns, request):
         """)
         assert result.single()['pattern_count'] == len(pattern_nodes)
         
-        # Check pattern relationships (count only one direction)
+        # Check pattern relationships
         result = session.run("""
-            MATCH (p1:Pattern)-[r:INTERACTS_WITH]->(p2:Pattern)
-            WHERE toString(p1.id) < toString(p2.id)
+            MATCH ()-[r:INTERACTS_WITH]-()
             RETURN count(r) as edge_count
         """)
         assert result.single()['edge_count'] == len(pattern_edges)
@@ -389,7 +380,7 @@ async def test_pattern_graph_visualization(mock_patterns, request):
         
         # Check pattern-field connections
         result = session.run("""
-            MATCH (p:Pattern), (f:FieldState)
+            MATCH (p:Pattern)-[:EXISTS_IN]->(f:FieldState)
             RETURN count(p) as connected_count
         """)
         assert result.single()['connected_count'] == len(pattern_nodes)
