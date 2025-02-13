@@ -1,10 +1,11 @@
 """Test-focused visualization toolset with Neo4j export capabilities."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict, Any, List, Optional, Tuple, Protocol
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+import networkx as nx
 from matplotlib.figure import Figure
 from matplotlib.axes import Axes
 from datetime import datetime
@@ -25,12 +26,40 @@ class TestVisualizationConfig:
     neo4j_container: str = "cc7b03d4b96692134a32a67b1324fc9ec3d2319630de47e3e3af6d7e2da11e3f"
     
     # Climate-specific settings
-    hazard_types: List[str] = ['precipitation', 'drought', 'wildfire']
-    hazard_thresholds: Dict[str, float] = {
-        'precipitation': 7.34,  # inches
-        'drought': 0.26,       # probability
-        'wildfire': 0.94       # increase factor
-    }
+    hazard_types: List[str] = field(default_factory=lambda: ['precipitation', 'drought', 'wildfire'])
+    
+    # Time periods and risk factors
+    time_periods: Dict[str, int] = field(default_factory=lambda: {
+        'current': 2025,
+        'mid_century': 2050,
+        'late_century': 2100
+    })
+    
+    # Risk evolution factors by time period
+    risk_factors: Dict[str, Dict[str, float]] = field(default_factory=lambda: {
+        'precipitation': {
+            'current': 1.0,     # baseline
+            'mid_century': 1.2,  # slight increase
+            'late_century': 5.0  # 5x more likely
+        },
+        'drought': {
+            'current': 0.085,   # 8.5% baseline
+            'mid_century': 0.13, # 13% probability
+            'late_century': 0.26 # 26% probability
+        },
+        'wildfire': {
+            'current': 1.0,     # baseline
+            'mid_century': 1.44, # 44% increase
+            'late_century': 1.94 # 94% increase
+        }
+    })
+    
+    # Late-century thresholds for visualization
+    hazard_thresholds: Dict[str, float] = field(default_factory=lambda: {
+        'precipitation': 7.34,  # inches (historical 100-year event * 5.0)
+        'drought': 0.26,       # probability (late-century)
+        'wildfire': 0.94       # increase factor (94% increase)
+    })
     
     # Visualization parameters
     contour_levels: int = 20
@@ -69,6 +98,39 @@ class TestPatternVisualizer:
         }
         self.test_results.append(state)
     
+    def visualize_field_state(self, field: np.ndarray, patterns: List[Dict[str, Any]]) -> Figure:
+        """Create visualization for field state with patterns.
+        
+        Args:
+            field (np.ndarray): Field state
+            patterns (list): List of pattern dictionaries
+            
+        Returns:
+            matplotlib.figure.Figure: The generated figure
+        """
+        fig, ax = plt.subplots(figsize=self.config.plot_size)
+        
+        # Plot field as heatmap
+        im = ax.imshow(field, cmap=self.config.density_cmap, origin='lower')
+        plt.colorbar(im, ax=ax, label='Field intensity')
+        
+        # Plot pattern positions
+        for pattern in patterns:
+            pos = pattern['position']
+            energy = pattern['metrics']['energy_state']
+            hazard_type = pattern.get('hazard_type', 'unknown')
+            ax.scatter(pos[0], pos[1], 
+                      s=self.config.pattern_marker_scale * energy,
+                      alpha=0.6,
+                      label=f'{hazard_type} (E={energy:.2f})')
+            
+        ax.legend()
+        ax.set_xlabel('X')
+        ax.set_ylabel('Y')
+        plt.tight_layout()
+        
+        return fig
+        
     def visualize_climate_patterns(self,
                                  field: np.ndarray,
                                  patterns: List[Dict[str, Any]],
@@ -104,6 +166,81 @@ class TestPatternVisualizer:
         
         plt.tight_layout()
         return fig, metrics
+    
+    def visualize_pattern_graph(self, nodes: List[Dict[str, Any]], edges: List[Dict[str, Any]], field: np.ndarray) -> Figure:
+        """Create graph visualization of pattern relationships.
+        
+        Args:
+            nodes (List[Dict]): List of pattern nodes with embedded data
+            edges (List[Dict]): List of edges representing pattern relationships
+            field (np.ndarray): Underlying field state for reference
+            
+        Returns:
+            matplotlib.figure.Figure: The generated figure
+        """
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(20, 10))
+        
+        # Plot 1: Graph representation
+        pos = {node['id']: node['position'] for node in nodes}
+        
+        # Draw nodes
+        node_colors = [node['metrics']['coherence'] for node in nodes]
+        node_sizes = [node['metrics']['energy_state'] * 1000 for node in nodes]
+        nx.draw_networkx_nodes(G=nx.Graph(),
+                             pos=pos,
+                             node_color=node_colors,
+                             node_size=node_sizes,
+                             cmap=self.config.coherence_cmap,
+                             ax=ax1)
+        
+        # Draw edges
+        edge_weights = [edge['metrics']['combined_strength'] * 2 for edge in edges]
+        edge_list = [(edge['source'], edge['target']) for edge in edges]
+        nx.draw_networkx_edges(G=nx.Graph(edge_list),
+                             pos=pos,
+                             width=edge_weights,
+                             alpha=0.6,
+                             ax=ax1)
+        
+        # Add node labels
+        labels = {node['id']: f"{node['embedded_data']['hazard_type']}\n{node['metrics']['energy_state']:.2f}"
+                 for node in nodes}
+        nx.draw_networkx_labels(G=nx.Graph(),
+                              pos=pos,
+                              labels=labels,
+                              font_size=8,
+                              ax=ax1)
+        
+        ax1.set_title('Pattern Interaction Graph')
+        
+        # Plot 2: Field state with pattern overlay
+        im = ax2.imshow(field, cmap=self.config.density_cmap, origin='lower')
+        plt.colorbar(im, ax=ax2, label='Field intensity')
+        
+        # Overlay patterns
+        for node in nodes:
+            pos = node['position']
+            energy = node['metrics']['energy_state']
+            coherence = node['metrics']['coherence']
+            ax2.scatter(pos[0], pos[1],
+                       s=energy * 500,
+                       c=[coherence],
+                       cmap=self.config.coherence_cmap,
+                       alpha=0.6)
+            
+        # Draw edges as lines
+        for edge in edges:
+            node1 = next(n for n in nodes if n['id'] == edge['source'])
+            node2 = next(n for n in nodes if n['id'] == edge['target'])
+            ax2.plot([node1['position'][0], node2['position'][0]],
+                     [node1['position'][1], node2['position'][1]],
+                     'w--', alpha=0.3,
+                     linewidth=edge['metrics']['combined_strength'])
+        
+        ax2.set_title('Field State with Pattern Overlay')
+        
+        plt.tight_layout()
+        return fig
     
     def export_to_neo4j(self, test_name: str) -> None:
         """Export test results to Neo4j for further analysis."""

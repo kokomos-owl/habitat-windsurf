@@ -1,6 +1,27 @@
 # Tests Package
 
-Comprehensive test suite validating pattern evolution, coherence detection, and field dynamics.
+Comprehensive test suite validating pattern evolution, coherence detection, field dynamics, and our latest breakthrough: Pattern-Aware RAG transformation.
+
+## Latest Addition: Pattern-Aware RAG Tests
+
+### Visualization Tests (`visualization/`)
+
+1. **Pattern Graph Tests** (`test_pattern_visualization.py`)
+   - Field-to-graph transformation
+   - Pattern node data embedding
+   - Relationship edge mapping
+   - Cross-hazard tracking
+   - Dual-view visualization
+   - Neo4j integration
+
+2. **Test Visualization** (`test_visualization.py`)
+   - Network graph rendering
+   - Field overlay display
+   - Interactive exploration
+   - Real-time updates
+   - Pattern state persistence
+
+Key breakthrough: Successfully transformed continuous field patterns into discrete graph structures with rich data embedding and relationship tracking.
 
 ## Test Structure
 
