@@ -1,4 +1,4 @@
-Metadata-Version: 2.1
+Metadata-Version: 2.2
 Name: habitat-windsurf
 Version: 0.1.0
 Summary: Visualization components for the Habitat ecosystem
@@ -11,25 +11,91 @@ Description-Content-Type: text/markdown
 Provides-Extra: rag
 Provides-Extra: test
 Provides-Extra: dev
+Dynamic: author
+Dynamic: classifier
+Dynamic: description
+Dynamic: description-content-type
+Dynamic: provides-extra
+Dynamic: requires-python
+Dynamic: summary
 
 # Habitat Windsurf UI Workshop
 
+**Document Date**: 2025-02-13T07:44:17-05:00
+
+## 🎯 Latest Breakthrough: Climate-Aware Pattern Observation
+
+We've achieved a significant breakthrough in pattern observation with climate risk focus. The system now enables:
+
+1. **Multi-Modal Pattern Observation**
+   - Wave mechanics for phase tracking
+   - Field theory for gradient analysis
+   - Flow dynamics for pattern interaction
+   - Climate-specific attention filters
+
+2. **Neighbor-Aware Analysis**
+   - 8-direction spatial sampling
+   - Distance-weighted observations
+   - Gradient alignment detection
+   - Pattern coherence tracking
+
+3. **Martha's Vineyard Climate Integration**
+   - Extreme precipitation tracking (7.34" rainfall)
+   - Drought condition monitoring (26% likelihood)
+   - Wildfire danger assessment (94% increase)
+   - Cross-hazard interaction analysis
+
+See [PATTERN_REGULATION_BREAKTHROUGH.md](src/tests/unified/PORT/adaptive_core/pattern/PATTERN_REGULATION_BREAKTHROUGH.md) for detailed technical documentation.
+
 A hands-on workshop for learning visualization component development using the Windsurf IDE. This workshop implements a balanced approach between user-driven learning and agent-assisted development, ensuring optimal skill development and understanding.
+
+## Features
+
+### Core Modules
+- `field_navigation.py`: Neighbor-aware pattern observation with climate risk focus
+- `attention.py`: Enhanced attention system with neighbor context support
+- `observation.py`: Multi-modal observation strategy implementation
+- `mock_services.py`: Realistic climate data simulation for Martha's Vineyard
+- `pattern_aware_rag.py`: Pattern-aware RAG controller with climate risk tracking
+
+### Pattern Evolution and Coherence Analysis
+- Dynamic pattern learning from climate risk data
+- Semantic relationship tracking with emphasis detection
+- Temporal coherence analysis
+- Real-time pattern evolution visualization
+- Cross-document pattern analysis
+
+### Advanced Visualization and Analysis
+- Interactive pattern relationship graphs
+- Temporal evolution tracking
+- Coherence strength indicators
+- Pattern density visualization
+- Real-time evolution metrics
+
+### Pattern-Aware Architecture
+- Semantic pattern extraction engine
+- Coherence calculation service
+- Evolution tracking system
+- Pattern relationship storage
+- Comprehensive documentation in `docs/PATTERN_EVOLUTION.md`
 
 ## Innovation and Value Proposition
 
 This approach is genuinely innovative and powerful for several key reasons:
 
-### Learning Evolution 🌱
-- Traditional workshops: Fixed pace, one-size-fits-all
-- This approach: Adaptive learning that respects individual rhythms
-- Users can deeply explore areas of interest while maintaining forward momentum
+### Pattern Learning Evolution 🌱
+- Dynamic pattern recognition from climate risk data
+- Adaptive coherence analysis based on context
+- Temporal relationship learning
+- Cross-document pattern discovery
+- Semantic emphasis detection
 
-### Agent-Human Partnership 🤝
-- Not just automation, but true collaboration
-- Agents provide scaffolding without taking over
-- Users maintain agency while having support exactly when needed
-- Creates a "learning conversation" rather than just following instructions
+### Pattern-Aware Development 🤝
+- Pattern evolution tracking and visualization
+- Coherence-based relationship analysis
+- Temporal context preservation
+- Dynamic pattern learning
+- Real-time evolution monitoring
 
 ### Habitat-Windsurf Synergy ⚡
 - Habitat's strength: Knowledge evolution and coherence
@@ -114,20 +180,27 @@ jupyter notebook notebooks/jumpstart/habitat_windsurf_jumpstart.ipynb
 - Basic concepts
 
 ### 2. Core Components
-- GraphVisualizer
-- LayoutEngine
-- WebSocket integration
+- GraphVisualizer with Plotly integration
+- MongoDB for data persistence
+- Neo4j for graph operations (optional)
+- WebSocket for real-time updates
+- FastAPI REST endpoints
 
 ### 3. Advanced Topics
-- Custom layouts
-- Real-time updates
+- Custom graph layouts
+- Real-time visualization updates
+- MongoDB and Neo4j integration
 - Performance optimization
+- Containerized deployment
 
 ## 🛠 Development
 
 ### Prerequisites
-- Python 3.8+
-- Jupyter Notebook
+- Python 3.11+
+- Docker and Docker Compose
+- MongoDB
+- Neo4j (optional)
+- FastAPI
 - NetworkX
 - Plotly
 
@@ -136,12 +209,18 @@ jupyter notebook notebooks/jumpstart/habitat_windsurf_jumpstart.ipynb
 habitat-windsurf/
 ├── notebooks/           # Interactive lessons
 │   ├── jumpstart/      # Getting started
-│   └── lesson_01/      # Basic visualization
+│   ├── lesson_01/      # Basic visualization
+│   └── lesson_02/      # Advanced features
 ├── scripts/
 │   └── agentic/        # Automation tools
 ├── src/
-│   └── core/           # Core components
-└── tests/              # Test suite
+│   ├── core/           # Core components
+│   ├── visualization/  # Visualization service
+│   │   ├── api/       # FastAPI endpoints
+│   │   ├── core/      # Core visualization logic
+│   │   └── websocket/ # Real-time updates
+│   └── tests/         # Test suite
+└── docker/            # Container configurations
 ```
 
 ## 🤝 Contributing
@@ -152,24 +231,51 @@ habitat-windsurf/
 
 ## 📖 Documentation
 
-- [State](STATE.md) - Current project state
-- [Handoff](HANDOFF.md) - Development handoff notes
-- [POC](habitat_windsurf_ui_poc.md) - Proof of concept details
+This repository is documented through several key files:
+
+### Core Documentation
+- [State](STATE.md) - Current project state, development status, and next steps
+- [Handoff](HANDOFF.md) - Development handoff notes, setup instructions, and component status
+- [POC](habitat_windsurf_ui_poc.md) - Proof of concept details and requirements
+
+### Additional Resources
+- [API Documentation](src/visualization/api/README.md) - REST API endpoints and WebSocket interface
+- [Component Guide](src/visualization/core/README.md) - Core visualization components
+- [Testing Guide](src/tests/README.md) - Test suite organization and execution
+
+### Important Notes
+1. MongoDB document IDs (_id and doc_id) are currently removed from responses for workshop compatibility
+2. These fields will be preserved in future versions for habitat_evolution integration
+3. Neo4j integration is optional and can be disabled if not needed
 
 ## 🧪 Testing
 
 ```bash
-# Run test suite
-python -m pytest tests/
+# Start required services
+docker-compose up -d mongodb neo4j
 
-# Run specific test
-python -m pytest tests/test_graph_visualization.py
+# Run test suite
+python -m pytest
+
+# Run specific test category
+python -m pytest src/tests/unit/
+python -m pytest src/tests/integration/
 ```
+
+The test suite includes:
+- Unit tests for core components
+- Integration tests for API endpoints
+- WebSocket connection tests
+- Database client tests
 
 ## 🧹 Cleanup
 
 To reset workshop environment:
 ```bash
+# Stop and remove containers
+docker-compose down
+
+# Clean workshop environment
 python scripts/agentic/workshop_builder.py clean
 ```
 

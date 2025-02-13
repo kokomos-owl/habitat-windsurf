@@ -1,4 +1,6 @@
 core
+habitat_evolution
+habitat_evolution_old
 lessons
 tests
 visualization
