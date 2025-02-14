@@ -1,8 +1,8 @@
-# Pattern-Aware RAG: Field-to-Graph Transformation System
+# Habitat: Field-to-Graph Transformation System
 
 ## Overview
 
-The Pattern-Aware RAG system represents a fundamental breakthrough in Habitat's evolution, enabling the transformation of field-based pattern observations into rich, data-embedded graph representations. This system bridges the gap between continuous field dynamics and discrete graph structures, allowing for sophisticated pattern analysis and evolution tracking.
+Habitat's field-to-graph transformation system represents a fundamental capability, enabling the transformation of field-based pattern observations into rich, data-embedded graph representations. This system bridges the gap between continuous field dynamics and discrete graph structures, allowing for sophisticated pattern analysis and evolution tracking.
 
 ## Core Components
 
