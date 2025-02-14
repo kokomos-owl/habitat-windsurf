@@ -63,18 +63,33 @@ def patterns(test_case):
             "pattern_type": "vital_deterioration",
             "coherence": 0.8,
             "energy_state": 0.7,
+            "clinical_markers": {
+                "systolic_bp": "90 mmHg (↓)",
+                "heart_rate": "115 bpm (↑)",
+                "respiratory_rate": "22/min (↑)"
+            },
             "timestamp": test_case["onset_time"] - timedelta(hours=2)
         },
         {
             "pattern_type": "lab_abnormality",
             "coherence": 0.75,
             "energy_state": 0.8,
+            "clinical_markers": {
+                "lactate": "4.2 mmol/L (↑)",
+                "wbc": "15.5 K/µL (↑)",
+                "creatinine": "1.8 mg/dL (↑)"
+            },
             "timestamp": test_case["onset_time"]
         },
         {
             "pattern_type": "organ_dysfunction",
             "coherence": 0.9,
             "energy_state": 0.85,
+            "clinical_markers": {
+                "kidney_function": "AKI Stage 2",
+                "liver_function": "ALT 250 U/L (↑)",
+                "coagulation": "Platelets 80K (↓)"
+            },
             "timestamp": test_case["onset_time"] + timedelta(hours=2)
         }
     ]
@@ -143,7 +158,7 @@ def test_neo4j_export(test_case, patterns):
         from neo4j import GraphDatabase
         # Connect to Neo4j medical container (HTTP: 7475, Bolt: 7476)
         driver = GraphDatabase.driver(
-            "bolt://localhost:7476",  # Bolt port mapped to container's 7687
+            "neo4j://localhost:7476",  # Same URL as browser connection
             auth=("neo4j", "medical_test")
         )
         

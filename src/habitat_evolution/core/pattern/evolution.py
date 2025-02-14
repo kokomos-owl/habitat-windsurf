@@ -138,6 +138,17 @@ class PatternEvolutionManager:
         except Exception as e:
             return StorageResult(False, error=str(e))
     
+    async def get_pattern(self, pattern_id: str) -> StorageResult:
+        """Get pattern by ID.
+        
+        Args:
+            pattern_id: ID of pattern to get
+            
+        Returns:
+            StorageResult with pattern data
+        """
+        return await self._pattern_store.get_pattern(pattern_id)
+    
     async def update_pattern(self,
                            pattern_id: str,
                            updates: Dict[str, Any]) -> StorageResult[bool]:
@@ -205,12 +216,12 @@ class PatternEvolutionManager:
                     return StorageResult(False, error=f"Pattern {pattern_id} not found")
             
             # Create relationship
-            result = await self._relationship_store.save_relationship(
-                source_id,
-                target_id,
-                relationship_type,
-                properties or {}
-            )
+            result = await self._relationship_store.save_relationship({
+                "source_id": source_id,
+                "target_id": target_id,
+                "type": relationship_type,
+                "properties": properties or {}
+            })
             
             if result.success:
                 # Notify relationship creation

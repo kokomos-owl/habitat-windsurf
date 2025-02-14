@@ -24,7 +24,7 @@ class TestVisualizationConfig:
     dpi: int = 100
     
     # Neo4j settings
-    neo4j_uri: str = "bolt://localhost:7687"
+    neo4j_uri: str = "bolt://localhost:7476"
     neo4j_container: str = "33e58c02bb2d"
     
     # Climate-specific settings
