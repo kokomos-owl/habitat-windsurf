@@ -543,7 +543,7 @@ class TestPatternVisualizer:
         try:
             self._neo4j_driver = GraphDatabase.driver(
                 self.config.neo4j_uri,
-                auth=("neo4j", "password")  # Should be configured securely
+                auth=("neo4j", "habitat123")  # Using configured password
             )
         except Exception as e:
             print(f"Failed to connect to Neo4j: {e}")

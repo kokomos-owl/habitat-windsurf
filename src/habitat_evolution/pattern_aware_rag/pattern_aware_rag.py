@@ -35,6 +35,7 @@ from .emergence_flow import EmergenceFlow, StateSpaceCondition
 from .coherence_embeddings import CoherenceEmbeddings, EmbeddingContext
 from .pattern_evolution import EvolutionMetrics
 from .coherence_flow import FlowDynamics, FlowState
+from .graph_service import PatternGraphService
 
 logger = logging.getLogger(__name__)
 
@@ -93,7 +94,8 @@ class PatternAwareRAG:
         rag_controller: RAGController,
         coherence_analyzer: Any,
         emergence_flow: EmergenceFlow,
-        settings: Any
+        settings: Any,
+        graph_service: Optional[PatternGraphService] = None
     ):
         # Core services
         self.pattern_evolution = pattern_evolution_service
@@ -135,6 +137,9 @@ class PatternAwareRAG:
             back_pressure=0.0,
             flow_stability=0.0
         )
+        
+        # Graph integration
+        self.graph = graph_service or PatternGraphService()
         
         # Pattern-specific prompts
         self._initialize_pattern_prompts()
@@ -353,7 +358,7 @@ class PatternAwareRAG:
         return LearningWindowState.CLOSED
 
     async def _update_pattern_evolution(self, query: str, rag_output: Dict[str, Any], window_metrics: WindowMetrics) -> str:
-        """Update pattern evolution system."""
+        """Update pattern evolution system and sync with graph."""
         # Create pattern from RAG output
         pattern = Pattern(
             type="query_pattern",
@@ -381,7 +386,36 @@ class PatternAwareRAG:
             }
         )
         
+        # Sync with graph
+        await self._sync_with_graph(pattern_id, pattern)
+        
         return pattern_id
+        
+    async def _sync_with_graph(self, pattern_id: str, pattern: Pattern) -> None:
+        """Bidirectional sync with graph database."""
+        # Store pattern in graph
+        await self.graph.store_pattern(pattern)
+        
+        # Track relationships
+        if pattern.metrics.cross_pattern_flow > 0:
+            related_patterns = await self.pattern_evolution.get_related_patterns(pattern_id)
+            await self.graph.track_relationships(
+                pattern_id,
+                [p.id for p in related_patterns]
+            )
+            
+        # Map density centers if coherence is high
+        if pattern.metrics.coherence >= self.config["thresholds"]["coherence"]:
+            centers = await self.graph.map_density_centers(
+                coherence_threshold=self.config["thresholds"]["coherence"]
+            )
+            
+            # Update pattern evolution with density insights
+            if centers:
+                await self.pattern_evolution.update_pattern_context(
+                    pattern_id,
+                    {"density_centers": centers}
+                )
 
     async def _handle_pattern_evolution(self, event: Any) -> None:
         """Handle pattern evolution events."""
