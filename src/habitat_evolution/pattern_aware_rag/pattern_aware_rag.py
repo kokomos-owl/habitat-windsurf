@@ -1,7 +1,8 @@
-"""Pattern-aware RAG controller with coherence tracking."""
+"""Pattern-aware RAG controller with integrated service management."""
 
 from typing import Dict, Any, List, Optional, Tuple
 from dataclasses import dataclass
+from enum import Enum
 import logging
 from datetime import datetime
 
@@ -9,6 +10,25 @@ from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
 from langchain_community.vectorstores import Chroma
 from langchain.memory import ConversationBufferMemory
+
+from habitat_evolution.core.pattern import (
+    FieldDrivenPatternManager,
+    PatternQualityAnalyzer,
+    SignalMetrics,
+    FlowMetrics,
+    PatternState
+)
+from habitat_evolution.core.services import (
+    PatternEvolutionService,
+    FieldStateService,
+    GradientService,
+    FlowDynamicsService,
+    MetricsService,
+    QualityMetricsService,
+    EventManagementService
+)
+from habitat_evolution.adaptive_core.id import AdaptiveID
+from habitat_evolution.adaptive_core.models import Pattern, Relationship
 
 from .rag_controller import RAGController
 from .emergence_flow import EmergenceFlow, StateSpaceCondition
@@ -32,16 +52,59 @@ class RAGPatternContext:
     cross_domain_paths: Optional[List[Dict[str, Any]]] = None
     global_density: Optional[float] = None
 
+class LearningWindowState(Enum):
+    """Learning window states with OPENING for potential emergence."""
+    CLOSED = "CLOSED"
+    OPENING = "OPENING"
+    OPEN = "OPEN"
+
+@dataclass
+class WindowMetrics:
+    """Metrics for learning window state determination."""
+    local_density: float
+    global_density: float
+    coherence: float
+    cross_paths: List[str]
+    back_pressure: float
+    flow_stability: float
+
+@dataclass
+class PatternMetrics:
+    """Core pattern metrics."""
+    coherence: float
+    emergence_rate: float
+    cross_pattern_flow: float
+    energy_state: float
+    adaptation_rate: float
+    stability: float
+
 class PatternAwareRAG:
-    """RAG controller with pattern awareness and coherence tracking."""
+    """RAG controller with integrated service management and pattern awareness."""
     
     def __init__(
         self,
+        pattern_evolution_service: PatternEvolutionService,
+        field_state_service: FieldStateService,
+        gradient_service: GradientService,
+        flow_dynamics_service: FlowDynamicsService,
+        metrics_service: MetricsService,
+        quality_metrics_service: QualityMetricsService,
+        event_service: EventManagementService,
         rag_controller: RAGController,
         coherence_analyzer: Any,
         emergence_flow: EmergenceFlow,
         settings: Any
     ):
+        # Core services
+        self.pattern_evolution = pattern_evolution_service
+        self.field_state = field_state_service
+        self.gradient = gradient_service
+        self.flow_dynamics = flow_dynamics_service
+        self.metrics = metrics_service
+        self.quality = quality_metrics_service
+        self.events = event_service
+        
+        # RAG components
         self.rag = rag_controller
         self.coherence_analyzer = coherence_analyzer
         self.emergence_flow = emergence_flow
@@ -54,24 +117,70 @@ class PatternAwareRAG:
             persist_directory=settings.VECTOR_STORE_DIR
         )
         
+        # Pattern management
+        self.pattern_manager = FieldDrivenPatternManager(
+            pattern_store=self.pattern_evolution.pattern_store,
+            relationship_store=self.pattern_evolution.relationship_store,
+            event_bus=self.events,
+            quality_analyzer=PatternQualityAnalyzer()
+        )
+        
+        # State tracking
+        self.current_window_state = LearningWindowState.CLOSED
+        self.window_metrics = WindowMetrics(
+            local_density=0.0,
+            global_density=0.0,
+            coherence=0.0,
+            cross_paths=[],
+            back_pressure=0.0,
+            flow_stability=0.0
+        )
+        
         # Pattern-specific prompts
         self._initialize_pattern_prompts()
         
+        # Subscribe to events
+        self._setup_event_subscriptions()
+        
+    def _setup_event_subscriptions(self) -> None:
+        """Setup event subscriptions for pattern and state changes."""
+        self.events.subscribe(
+            "pattern.evolution",
+            self._handle_pattern_evolution
+        )
+        self.events.subscribe(
+            "pattern.quality",
+            self._handle_quality_update
+        )
+        self.events.subscribe(
+            "field.state.updated",
+            self._handle_field_state_update
+        )
+
     async def process_with_patterns(
         self,
         query: str,
         context: Optional[Dict[str, Any]] = None
     ) -> Tuple[Dict[str, Any], RAGPatternContext]:
-        """Process query with pattern awareness."""
+        """Process query with pattern awareness and service integration."""
+        # Get field state and window metrics
+        field_state = await self._get_current_field_state(context)
+        window_metrics = await self._calculate_window_metrics(field_state)
+        window_state = await self._determine_window_state(window_metrics)
+        
         # Let emergence flow guide pattern extraction
         state_space = self.emergence_flow.context.state_space
         query_patterns = await self._extract_query_patterns(query)
         
-        # Create embedding context
+        # Create embedding context with window awareness
         embedding_context = EmbeddingContext(
             flow_state=self.emergence_flow.get_flow_state(),
-            evolution_metrics=EvolutionMetrics(),  # Initialize with defaults
-            pattern_context={"patterns": query_patterns}
+            evolution_metrics=EvolutionMetrics(),
+            pattern_context={
+                "patterns": query_patterns,
+                "window_state": window_state.value,
+                "window_metrics": window_metrics.__dict__
+            }
         )
         
         # Retrieve with coherence-aware embeddings
@@ -99,6 +208,16 @@ class PatternAwareRAG:
             retrieval_patterns,
             embedding_context
         )
+        
+        # Update pattern evolution
+        pattern_id = await self._update_pattern_evolution(
+            query=query,
+            rag_output=result,
+            window_metrics=window_metrics
+        )
+        
+        # Update result with pattern ID
+        result["pattern_id"] = pattern_id
         
         # Create pattern context
         pattern_context = RAGPatternContext(
@@ -168,24 +287,194 @@ class PatternAwareRAG:
             )
         }
         
+    async def _get_current_field_state(self, context: Optional[Dict[str, Any]]) -> Any:
+        """Get current field state with context."""
+        if not context or "field_id" not in context:
+            # Create new field state
+            field_id = AdaptiveID.generate()
+            return await self.field_state.create_field_state(field_id)
+        
+        return await self.field_state.get_field_state(context["field_id"])
+
+    async def _calculate_window_metrics(self, field_state: Any) -> WindowMetrics:
+        """Calculate comprehensive window metrics."""
+        # Get local density
+        local_density = await self.field_state.calculate_local_density(
+            field_state.id,
+            field_state.position
+        )
+        
+        # Get global density
+        global_density = await self.metrics.calculate_global_density()
+        
+        # Calculate coherence
+        coherence = await self.quality.calculate_coherence(field_state.id)
+        
+        # Get cross paths
+        cross_paths = await self.pattern_evolution.get_cross_pattern_paths(
+            field_state.id
+        )
+        
+        # Calculate back pressure
+        back_pressure = await self.flow_dynamics.calculate_back_pressure(
+            field_state.id
+        )
+        
+        # Get flow stability
+        flow_stability = await self.flow_dynamics.calculate_flow_stability(
+            field_state.id
+        )
+        
+        return WindowMetrics(
+            local_density=local_density,
+            global_density=global_density,
+            coherence=coherence,
+            cross_paths=cross_paths,
+            back_pressure=back_pressure,
+            flow_stability=flow_stability
+        )
+
+    async def _determine_window_state(self, metrics: WindowMetrics) -> LearningWindowState:
+        """Determine learning window state based on metrics."""
+        # Check if window should be CLOSED
+        if metrics.local_density < self.config["thresholds"]["density"]:
+            return LearningWindowState.CLOSED
+            
+        # Check for OPENING state
+        if metrics.coherence < self.config["thresholds"]["coherence"] and \
+           metrics.back_pressure < self.config["thresholds"]["back_pressure"] and \
+           len(metrics.cross_paths) >= self.config["thresholds"]["cross_paths"]:
+            return LearningWindowState.OPENING
+            
+        # Default to OPEN if conditions are met
+        if metrics.coherence >= self.config["thresholds"]["coherence"]:
+            return LearningWindowState.OPEN
+            
+        return LearningWindowState.CLOSED
+
+    async def _update_pattern_evolution(self, query: str, rag_output: Dict[str, Any], window_metrics: WindowMetrics) -> str:
+        """Update pattern evolution system."""
+        # Create pattern from RAG output
+        pattern = Pattern(
+            type="query_pattern",
+            content={
+                "query": query,
+                "output": rag_output
+            },
+            metrics=PatternMetrics(
+                coherence=window_metrics.coherence,
+                emergence_rate=0.0,
+                cross_pattern_flow=len(window_metrics.cross_paths),
+                energy_state=window_metrics.local_density,
+                adaptation_rate=0.0,
+                stability=window_metrics.flow_stability
+            )
+        )
+        
+        # Register pattern
+        pattern_id = await self.pattern_evolution.register_pattern(
+            pattern_type="query_pattern",
+            content=pattern.content,
+            context={
+                "window_state": self.current_window_state.value,
+                "metrics": window_metrics.__dict__
+            }
+        )
+        
+        return pattern_id
+
+    async def _handle_pattern_evolution(self, event: Any) -> None:
+        """Handle pattern evolution events."""
+        pattern_id = event.get("pattern_id")
+        if not pattern_id:
+            return
+            
+        # Update pattern metrics
+        metrics = await self.pattern_evolution.get_pattern_metrics(pattern_id)
+        
+        # Update window metrics if needed
+        if metrics.coherence > self.window_metrics.coherence:
+            self.window_metrics.coherence = metrics.coherence
+            
+        # Emit metric update event
+        await self.events.emit("pattern.metrics.updated", {
+            "pattern_id": pattern_id,
+            "metrics": metrics.__dict__,
+            "timestamp": datetime.now().isoformat()
+        })
+
+    async def _handle_quality_update(self, event: Any) -> None:
+        """Handle quality metric updates."""
+        quality_metrics = event.get("metrics")
+        if not quality_metrics:
+            return
+            
+        # Update window metrics
+        self.window_metrics.coherence = quality_metrics.get(
+            "coherence",
+            self.window_metrics.coherence
+        )
+        
+        # Check for state transition
+        new_state = await self._determine_window_state(self.window_metrics)
+        if new_state != self.current_window_state:
+            self.current_window_state = new_state
+            await self.events.emit("window.state.changed", {
+                "old_state": self.current_window_state.value,
+                "new_state": new_state.value,
+                "metrics": self.window_metrics.__dict__,
+                "timestamp": datetime.now().isoformat()
+            })
+
+    async def _handle_field_state_update(self, event: Any) -> None:
+        """Handle field state updates."""
+        field_id = event.get("field_id")
+        if not field_id:
+            return
+            
+        # Update window metrics
+        field_state = await self.field_state.get_field_state(field_id)
+        if field_state:
+            self.window_metrics = await self._calculate_window_metrics(field_state)
+            
+        # Check for state transition
+        new_state = await self._determine_window_state(self.window_metrics)
+        if new_state != self.current_window_state:
+            self.current_window_state = new_state
+            await self.events.emit("window.state.changed", {
+                "field_id": field_id,
+                "old_state": self.current_window_state.value,
+                "new_state": new_state.value,
+                "metrics": self.window_metrics.__dict__,
+                "timestamp": datetime.now().isoformat()
+            })
+
     async def process_document(self, doc: str, context: RAGPatternContext) -> Dict[str, Any]:
         """Process document with density-aware pattern evolution."""
         # Extract initial patterns
         patterns = await self.coherence_analyzer.extract_patterns(doc)
         
-        # Get density analysis
-        density = self.evolution_manager.learning_window_interface.get_density_analysis()
+        # Get density analysis from window metrics
+        density = {
+            "density_centers": context.density_centers or [],
+            "cross_domain_paths": context.cross_domain_paths or [],
+            "global_density": context.global_density or 0
+        }
         
         # Update context with density insights
-        context.density_centers = density.get("density_centers", [])
-        context.cross_domain_paths = density.get("cross_domain_paths", [])
-        context.global_density = density.get("global_density", 0)
+        context.density_centers = density["density_centers"]
+        context.cross_domain_paths = density["cross_domain_paths"]
+        context.global_density = density["global_density"]
         
-        # Process through evolution pipeline
-        evolution_state = await self.evolution_manager.observe_evolution(
-            patterns["id"],
-            patterns["evidence"]
+        # Process through pattern evolution
+        pattern_id = await self._update_pattern_evolution(
+            doc,
+            {"content": doc},
+            self.window_metrics
         )
+        
+        # Get evolution state
+        evolution_state = await self.pattern_evolution.get_pattern_state(pattern_id)
         
         # Register evolution in learning window
         window_data = {
