@@ -1,5 +1,87 @@
 # Next Development Tasks
 
+# Neo4j to Pattern-Aware RAG Integration
+
+## Phase 1: Neo4j Data Export & Transformation
+
+1. **Neo4j Pattern Graph Export**
+- [ ] Create `PatternGraphExporter` in `src/habitat_evolution/visualization/graph_export.py`
+  - Export pattern nodes with all properties
+  - Export pattern relationships with metrics
+  - Export field state context
+  - Add timestamp and version tracking
+
+2. **Graph to RAG Transformation**
+- [ ] Implement `GraphToRAGTransformer` in `src/habitat_evolution/rag/graph_transformer.py`
+  - Convert Neo4j nodes to RAG document format
+  - Transform relationships into context metadata
+  - Map field states to temporal context
+  - Generate coherence embeddings
+
+## Phase 2: Pattern-Aware RAG Integration
+
+1. **RAG Controller Enhancement**
+- [ ] Update `PatternAwareRAG` in `src/tests/unified/PORT/core/pattern_aware_rag.py`
+  - Add graph-aware context handling
+  - Implement pattern extraction from Neo4j data
+  - Enhance coherence tracking with graph metrics
+  - Add cross-pattern relationship analysis
+
+2. **Embedding Enhancement**
+- [ ] Enhance `CoherenceEmbeddings` in `src/tests/unified/PORT/core/coherence_embeddings.py`
+  - Add graph structure awareness
+  - Incorporate relationship metrics
+  - Update embedding context with graph data
+  - Implement graph-based similarity metrics
+
+## Phase 3: Graph Enhancement Pipeline
+
+1. **Pattern Enhancement**
+- [ ] Create `PatternEnhancer` in `src/habitat_evolution/rag/pattern_enhancer.py`
+  - Generate enhancement prompts from graph data
+  - Identify potential new relationships
+  - Suggest pattern refinements
+  - Update coherence metrics
+
+2. **Graph Update Pipeline**
+- [ ] Implement `GraphUpdatePipeline` in `src/habitat_evolution/rag/graph_pipeline.py`
+  - Process RAG enhancement suggestions
+  - Validate proposed changes
+  - Apply updates to Neo4j graph
+  - Track enhancement history
+
+## Phase 4: Testing & Validation
+
+1. **Integration Tests**
+- [ ] Create `test_graph_rag_integration.py`
+  - Test full pipeline from Neo4j to RAG
+  - Validate pattern enhancement quality
+  - Test coherence preservation
+  - Measure enhancement impact
+
+2. **Performance Optimization**
+- [ ] Implement benchmarking and optimization
+  - Measure query performance
+  - Optimize graph operations
+  - Cache frequently used patterns
+  - Profile memory usage
+
+## Phase 5: Documentation & Monitoring
+
+1. **Documentation**
+- [ ] Update system documentation
+  - Document integration architecture
+  - Add usage examples
+  - Document configuration options
+  - Create troubleshooting guide
+
+2. **Monitoring**
+- [ ] Implement monitoring system
+  - Track pattern evolution
+  - Monitor enhancement quality
+  - Alert on coherence changes
+  - Log system performance
+
 # Architectural Integration Plan
 
 ## Core Architecture Updates 🏗️

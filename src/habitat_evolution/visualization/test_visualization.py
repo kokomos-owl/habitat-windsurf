@@ -24,8 +24,8 @@ class TestVisualizationConfig:
     dpi: int = 100
     
     # Neo4j settings
-    neo4j_uri: str = "bolt://localhost:7476"
-    neo4j_container: str = "33e58c02bb2d"
+    neo4j_uri: str = "bolt://localhost:7687"
+    neo4j_container: str = "habitat-e2e"
     
     # Climate-specific settings
     hazard_types: List[str] = field(default_factory=lambda: ['precipitation', 'drought', 'wildfire'])

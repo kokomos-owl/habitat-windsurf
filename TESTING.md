@@ -95,6 +95,32 @@ All tests are passing, validating both the climate pattern observation system an
 
 ## Core Module Tests (Ported)
 
+### Neo4j to RAG Integration Tests 🚧
+
+1. **Graph Export Tests** (`test_graph_export.py`)
+   - [ ] Pattern node export validation
+   - [ ] Relationship export verification
+   - [ ] Field state context persistence
+   - [ ] Version tracking tests
+
+2. **RAG Integration Tests** (`test_graph_rag_integration.py`)
+   - [ ] Graph to RAG transformation
+   - [ ] Pattern extraction accuracy
+   - [ ] Coherence preservation
+   - [ ] Context handling validation
+
+3. **Enhancement Pipeline Tests** (`test_pattern_enhancement.py`)
+   - [ ] Enhancement prompt generation
+   - [ ] Pattern refinement validation
+   - [ ] Relationship discovery accuracy
+   - [ ] Graph update verification
+
+4. **Performance Tests** (`test_integration_performance.py`)
+   - [ ] Query response time
+   - [ ] Memory usage profiling
+   - [ ] Cache effectiveness
+   - [ ] Concurrent operation handling
+
 ### Core Tests
 - `test_flow_emergence.py`: Tests for pattern emergence flow
 - `test_learning_windows.py`: Tests for learning window interface

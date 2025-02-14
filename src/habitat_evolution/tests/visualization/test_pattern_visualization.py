@@ -375,8 +375,12 @@ async def test_pattern_graph_visualization(mock_patterns, request):
         # Check pattern relationships (count only one direction)
         result = session.run("""
             MATCH (p1:Pattern)-[r:INTERACTS_WITH]->(p2:Pattern)
-            WHERE toString(p1.id) < toString(p2.id)
-            RETURN count(r) as edge_count
+            WITH DISTINCT
+              CASE
+                WHEN p1.id < p2.id THEN {source: p1.id, target: p2.id}
+                ELSE {source: p2.id, target: p1.id}
+              END as pair
+            RETURN count(pair) as edge_count
         """)
         assert result.single()['edge_count'] == len(pattern_edges)
         
