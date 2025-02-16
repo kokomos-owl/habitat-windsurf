@@ -1,34 +1,60 @@
 # Habitat Evolution Handoff Document
 
-Last Updated: 2025-02-11 21:13:40 EST
+Last Updated: 2025-02-16 12:39:36 EST
 
 ## System Overview
 Habitat Evolution integrates multiple specialized systems for pattern evolution, document processing, and visualization. The system combines graph databases, document stores, and pattern-aware processing to create a cohesive framework for pattern detection and evolution.
 
 ## System Components Analysis
 
+### Pattern-Aware RAG System
+
+1. **Core Components** (`pattern_aware_rag/core/`)
+   - Pattern extraction and processing
+   - Coherence interface management
+   - State evolution tracking
+   - Adaptive ID integration
+
+2. **State Management** (`pattern_aware_rag/state/`)
+   - Graph state management
+   - Evolution tracking
+   - State transactions
+   - Coherence metrics
+
+3. **Integration Layer** (`pattern_aware_rag/bridges/`)
+   - Adaptive state bridge
+   - External system integration
+   - State synchronization
+   - Event coordination
+
+4. **Learning Control** (`pattern_aware_rag/learning/`)
+   - Learning window management
+   - Back pressure controls
+   - Stability thresholds
+   - Evolution rate control
+
 ### Storage Layer
 
-1. **MongoDB Interface** (`habitat_evolution_old/interfaces/external/mongodb_interface.py`)
-   - Field state storage
-   - Pattern persistence
-   - Gradient tracking
+1. **MongoDB Interface** (`pattern_aware_rag/services/mongo_service.py`)
+   - State history storage
+   - Evolution tracking
+   - Transaction logs
    - Temporal state management
    ```python
-   class MongoDBFieldStore:
-       async def store_field_state(self, field_state: FieldState) -> str
-       async def get_field_state(self, field_id: str) -> Optional[FieldState]
+   class MongoStateStore:
+       async def store_state_history(self, state: GraphState) -> str
+       async def get_state_evolution(self, state_id: str) -> List[StateTransaction]
    ```
 
-2. **Neo4j Interface** (`habitat_evolution_old/interfaces/external/neo4j_interface.py`)
-   - Pattern relationship storage
-   - Graph-based pattern tracking
-   - Relationship evolution
-   - Pattern node management
+2. **Neo4j Interface** (`pattern_aware_rag/services/neo4j_service.py`)
+   - Pattern graph storage
+   - State relationship tracking
+   - Coherence management
+   - Evolution pathways
    ```python
-   class Neo4jPatternStore:
-       async def store_pattern(self, pattern: Pattern) -> str
-       async def get_pattern(self, pattern_id: str) -> Optional[Pattern]
+   class Neo4jStateStore:
+       async def store_graph_state(self, state: GraphState) -> str
+       async def get_coherent_states(self, query: StateQuery) -> List[GraphState]
    ```
 
 ### Visualization System
