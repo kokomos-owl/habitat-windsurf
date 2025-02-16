@@ -1,7 +1,7 @@
 """State Management for Pattern-Aware RAG.
 
-This module provides components for managing system state and evolution.
-"""
+This module provides components for managing system state and evolution:
+
 - StateEvolutionTracker: Evolution tracking
 - ClaudeStateHandler: Claude integration
 - GraphService: Graph operations

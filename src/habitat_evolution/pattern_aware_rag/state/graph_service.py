@@ -7,7 +7,7 @@ from habitat_evolution.adaptive_core.persistence.neo4j.connection import Neo4jCo
 from habitat_evolution.adaptive_core.persistence.neo4j.pattern_repository import Neo4jPatternRepository
 from habitat_evolution.adaptive_core.models import Pattern
 
-class PatternGraphService:
+class GraphService:
     """
     Graph service for pattern-aware RAG integration with Neo4j.
     Provides bidirectional sync between patterns and graph database.

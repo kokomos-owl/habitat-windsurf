@@ -2,12 +2,11 @@
 
 This package provides a coherence interface for RAG operations.
 """
-GraphService = _GraphService
-ClaudeLangChainIntegration = _ClaudeLangChainIntegration
-AdaptiveStateManager = _AdaptiveStateManager
-EventCoordinator = _EventCoordinator
-LearningWindow = _LearningWindow
-BackPressureController = _BackPressureController
+from .state.graph_service import GraphService
+from .state.langchain_config import ClaudeLangChainIntegration
+from .state.state_handler import GraphStateHandler
+from .state.state_evolution import StateEvolutionTracker
+from .learning.learning_control import EventCoordinator, LearningWindow, BackPressureController
 
 __all__ = [
     'GraphStateHandler',
