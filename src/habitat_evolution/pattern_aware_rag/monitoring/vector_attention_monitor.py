@@ -301,14 +301,41 @@ class VectorAttentionMonitor:
         return stability
     
     def _calculate_density(self, vector: np.ndarray) -> float:
-        """Calculate density for pattern identification."""
+        """Calculate density for pattern identification using adaptive radius.
+        
+        Uses three key components:
+        1. Adaptive radius based on local statistics
+        2. Attention-weighted neighbor contributions
+        3. Temporal decay for recent relevance
+        
+        Returns:
+            Float between 0 and 1 indicating local pattern density
+        """
         if len(self.vector_history) < 2:
             return 0.0
         
-        # Count close neighbors - sufficient for basic clustering
         vectors = np.array(self.vector_history)
         distances = np.linalg.norm(vectors - vector, axis=1)
-        return np.mean(distances < self.density_radius)
+        
+        # Adaptive radius based on local statistics
+        local_std = np.std(distances)
+        adaptive_radius = max(self.density_radius, 0.5 * local_std)
+        
+        # Get attention weights and temporal weights
+        attention_weights = np.array([m.attention_weight for m in self.metrics_history])
+        time_deltas = [(datetime.now() - m.timestamp).total_seconds() 
+                      for m in self.metrics_history]
+        temporal_weights = np.exp(-np.array(time_deltas) / 3600)  # 1-hour half-life
+        
+        # Combined weights
+        weights = attention_weights * temporal_weights
+        weights = weights / np.sum(weights)  # Normalize
+        
+        # Weighted density calculation
+        density_contributions = np.exp(-distances / adaptive_radius)
+        weighted_density = np.sum(density_contributions * weights)
+        
+        return weighted_density
     
     def _detect_turbulence(self) -> float:
         """Detect turbulence for back pressure adjustment."""
