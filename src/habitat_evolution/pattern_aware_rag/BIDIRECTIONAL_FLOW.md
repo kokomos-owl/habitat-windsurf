@@ -7,96 +7,97 @@ The Pattern-Aware RAG system implements a bidirectional flow architecture that e
 ## Core Architecture
 
 ```
-Document → Pattern Extraction → RAG Enhancement → Pattern Evolution → Neo4j
-   ↑             ↓                    ↓                  ↓             ↓
-   └─────── Feedback Loop ──── State Updates ── Evolution Metrics ─────┘
-```
+Document → Pattern+ID → Graph-Ready → Evolution → Neo4j
+                  Pattern-Aware RAG
+                    (Learning Windows)
+                  Pattern-Coherence
+                    Co-Evolution
 
 ## 1. Processing Layers
 
-### A. Field State Layer
-- Risk probabilities → field potentials
-- Hazard intensities → energy levels
-- Position-dependent states
-- Stability metrics calculation
+### A. Pattern Foundation Layer
+- Pattern extraction with ID assignment
+- Initial state assessment
+- Graph-ready preparation
+- Foundational provenance
 
-### B. Pattern Layer
-- Pattern extraction and categorization
-- Coherence calculation
-- Evolution tracking
-- Cross-hazard relationships
+### B. Pattern-Aware RAG Layer
+- Learning window initialization
+- State agreement formation
+- Back pressure regulation
+- Evolution guidance
 
-### C. RAG Enhancement Layer
-- Coherence-aware embeddings
-- Context-enhanced retrieval
-- Pattern-guided augmentation
-- Window state awareness
+### C. Pattern-Coherence Layer
+- Relationship development
+- State alignment tracking
+- Evolution path monitoring
+- Coherence measurement
 
-### D. Graph Integration Layer
-- Pattern storage and relationships
-- Cross-pattern path tracking
-- Density center mapping
+### D. Integration Layer
 - Evolution history recording
+- State transition verification
+- Pattern relationship persistence
+- System stability tracking
 
 ## 2. State Management
 
-### Learning Window States
-- **CLOSED**: Low density, awaiting emergence
-- **OPENING**: Potential emergence detected
-- **OPEN**: High coherence achieved
+### Pattern-Aware RAG States
+- **CLOSED**: Initial pattern identified, learning window awaiting activation
+- **OPENING**: Pattern-coherence emerging through learning window
+- **OPEN**: Pattern-coherence co-evolution active through window
 
-### Window Metrics
-- Local/Global density
-- Pattern coherence
-- Cross-pattern paths
-- Back pressure
-- Flow stability
+### State Agreement Metrics
+- Pattern formation progress
+- Learning window activity
+- Back pressure levels
+- Coherence strength
+- Evolution stability
 
-### Pattern Metrics
-- Emergence rate
-- Cross-pattern flow
-- Energy state
-- Adaptation rate
-- Stability
+### Co-Evolution Metrics
+- Pattern relationship density
+- Coherence development rate
+- State alignment progress
+- Evolution path stability
+- System equilibrium
 
-## 3. Data Flow Pipeline
+## 3. Evolution Pipeline
 
-### Forward Flow
-1. **Document Processing**
-   - Extract structural patterns
-   - Identify semantic patterns
-   - Calculate initial metrics
+### Foundation Flow
+1. **Pattern Identification**
+   - Extract pattern from document
+   - Assign adaptive ID
+   - Establish provenance
 
-2. **RAG Enhancement**
-   - Create embedding context
-   - Retrieve similar patterns
-   - Augment with pattern context
+2. **Pattern-Aware RAG**
+   - Initialize learning window
+   - Monitor pattern formation
+   - Guide state agreement
 
-3. **Pattern Evolution**
-   - Calculate window metrics
-   - Determine window state
-   - Track pattern evolution
+3. **Pattern-Coherence**
+   - Develop relationships
+   - Track state alignment
+   - Measure coherence
 
-4. **Graph Integration**
-   - Store patterns
-   - Update relationships
-   - Sync state changes
+4. **System Integration**
+   - Record evolution history
+   - Verify state transitions
+   - Maintain stability
 
-### Feedback Flow
-1. **Graph → Evolution**
-   - Pattern relationship updates
-   - Density center tracking
-   - Evolution path recording
+### State Flow
+1. **Foundation → RAG**
+   - Pattern readiness signals
+   - ID verification
+   - Initial state assessment
 
-2. **Evolution → RAG**
-   - Window state updates
-   - Pattern metrics
-   - Coherence levels
+2. **RAG → Coherence**
+   - Learning window states
+   - Agreement progress
+   - Evolution guidance
 
-3. **RAG → Processing**
-   - Enhanced context
-   - Pattern guidance
-   - Adaptation signals
+3. **Coherence → System**
+   - Relationship updates
+   - State verifications
+   - Stability measures
 
 ## 4. Integration Points
 
