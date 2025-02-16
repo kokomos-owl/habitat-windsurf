@@ -25,6 +25,20 @@
 - ✅ Pattern coherence validation
 - ✅ Climate risk integration
 
+### Pattern-Aware RAG Tests 🔄
+- 🟡 Graph state foundation tests
+  - Initial state loading
+  - Prompt formation
+  - State agreement process
+- 🟡 Learning window tests
+  - State transitions (CLOSED → OPENING → OPEN)
+  - Back pressure control
+  - Coherence maintenance
+- 🟡 Integration tests
+  - Claude interaction
+  - Full state cycle verification
+  - System stability
+
 ### Key Test Metrics
 1. **Observation Quality**
    - Multi-modal observation accuracy
