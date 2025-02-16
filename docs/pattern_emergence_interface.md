@@ -45,10 +45,29 @@ def get_emerging_patterns() -> List[EmergentPattern]:
 
 #### Feedback Channel
 ```python
-def process_agent_feedback(feedback: AgentFeedback):
-    """Processes agent feedback to adjust pattern detection"""
+async def process_feedback(pattern_id: str, feedback: PatternFeedback) -> bool:
+    """Processes agent feedback to adjust pattern metrics and behavior"""
     pass
 ```
+
+The feedback system implements sophisticated smoothing and decay mechanisms to ensure stable pattern evolution:
+
+1. **Attention Updates**
+   - Uses stability-based smoothing to prevent sudden changes
+   - Formula: `new_attention = stability * target + (1-stability) * current`
+   - Ensures smooth transitions in attention weights
+   - Clips values between 0.1 and 1.0
+
+2. **Confidence Updates**
+   - Combines temporal decay with stability-based smoothing
+   - 10% confidence decay per update
+   - Formula: `confidence = clip(stability * override + (1-stability) * (current * decay), 0, 1)`
+   - Prevents pattern confidence from becoming stale
+
+3. **Context Updates**
+   - Allows arbitrary metadata updates
+   - Enables pattern enrichment with agent-specific context
+   - Preserves pattern provenance and semantic relationships
 
 ## Use Cases
 

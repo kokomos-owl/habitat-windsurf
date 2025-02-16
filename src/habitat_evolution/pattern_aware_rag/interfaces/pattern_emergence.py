@@ -12,6 +12,7 @@ from typing import List, Dict, Optional, AsyncIterator
 import numpy as np
 import asyncio
 from ..monitoring.vector_attention_monitor import VectorAttentionMonitor, VectorSpaceMetrics
+from ...adaptive_core.id.adaptive_id import AdaptiveID
 
 class PatternState(Enum):
     """States in the pattern lifecycle."""
@@ -94,13 +95,25 @@ class PatternEmergenceInterface:
     async def stop(self):
         """Stop pattern monitoring and event processing."""
         self._running = False
-        # Cleanup tasks
+        # Clear event queue
+        while not self._event_queue.empty():
+            try:
+                _ = self._event_queue.get_nowait()
+            except asyncio.QueueEmpty:
+                break
+        # Clear patterns
+        self._patterns.clear()
     
     async def observe_patterns(self) -> AsyncIterator[EmergentPattern]:
         """Stream of pattern observations as they occur."""
         while self._running:
-            event = await self._event_queue.get()
-            yield event.pattern
+            try:
+                event = await self._event_queue.get()
+                yield event.pattern
+            except asyncio.CancelledError:
+                # Clean up on cancellation
+                self._running = False
+                raise
     
     def get_active_patterns(self) -> List[EmergentPattern]:
         """Get currently active (stable) patterns."""
@@ -136,9 +149,16 @@ class PatternEmergenceInterface:
     async def _process_metrics(self):
         """Process incoming metrics and detect patterns."""
         while self._running:
-            metrics = await self._get_next_metrics()
-            await self._update_patterns(metrics)
-            await self._emit_events()
+            try:
+                metrics = await self._get_next_metrics()
+                await self._update_patterns(metrics)
+                await self._emit_events()
+            except asyncio.CancelledError:
+                self._running = False
+                raise
+            except Exception as e:
+                # Log error but continue processing
+                continue
     
     async def _update_patterns(self, metrics: VectorSpaceMetrics):
         """Update pattern states based on new metrics.
@@ -149,37 +169,43 @@ class PatternEmergenceInterface:
         3. Handles pattern dissolution
         4. Manages pattern state transitions
         """
-        vector = metrics.current_vector
-        density = metrics.local_density
-        stability = metrics.stability_score
-        attention = metrics.attention_weight
-        
-        # Calculate pattern confidence
-        confidence = (0.4 * density + 
-                     0.4 * stability + 
-                     0.2 * attention)  # Weighted combination
-        
-        # Update existing patterns
-        for pattern_id, pattern in list(self._patterns.items()):
-            distance = np.linalg.norm(pattern.center - vector)
+        try:
+            vector = metrics.current_vector
+            density = metrics.local_density
+            stability = metrics.stability_score
+            attention = metrics.attention_weight
             
-            if distance <= pattern.radius:
-                # Vector belongs to this pattern
-                await self._update_pattern_metrics(pattern, metrics)
-                continue
+            # Calculate pattern confidence
+            confidence = (0.4 * density + 
+                         0.4 * stability + 
+                         0.2 * attention)  # Weighted combination
+            
+            # Update existing patterns
+            for pattern_id, pattern in list(self._patterns.items()):
+                distance = np.linalg.norm(pattern.center - vector)
                 
-            # Check for pattern dissolution
-            if pattern.metrics.confidence < 0.3:
-                await self._dissolve_pattern(pattern_id)
-        
-        # Detect new pattern formation
-        if confidence > self.min_confidence:
-            # Check if this could be a new pattern
-            is_new = all(np.linalg.norm(p.center - vector) > p.radius 
-                        for p in self._patterns.values())
+                if distance <= pattern.radius:
+                    # Vector belongs to this pattern
+                    await self._update_pattern_metrics(pattern, metrics)
+                    continue
+                    
+                # Check for pattern dissolution
+                if pattern.metrics.confidence < 0.3:
+                    await self._dissolve_pattern(pattern_id)
             
-            if is_new:
-                await self._create_new_pattern(vector, metrics)
+            # Detect new pattern formation
+            if confidence > self.min_confidence:
+                # Check if this could be a new pattern
+                is_new = all(np.linalg.norm(p.center - vector) > p.radius 
+                            for p in self._patterns.values())
+                
+                if is_new:
+                    await self._create_new_pattern(vector, metrics)
+        except asyncio.CancelledError:
+            raise
+        except Exception as e:
+            # Log error but continue processing
+            pass
     
     async def _update_pattern_metrics(self, 
                                     pattern: EmergentPattern, 
@@ -193,6 +219,12 @@ class PatternEmergenceInterface:
             confidence=pattern.metrics.confidence,
             timestamp=datetime.now()
         )
+        
+        # Update adaptive ID metrics
+        adaptive_id = pattern.context["adaptive_id"]
+        adaptive_id.weight = metrics.local_density
+        adaptive_id.confidence = metrics.stability_score
+        adaptive_id.uncertainty = 1.0 - metrics.attention_weight
         
         # Update pattern state based on metrics
         old_state = pattern.state
@@ -219,13 +251,32 @@ class PatternEmergenceInterface:
                                 vector: np.ndarray, 
                                 metrics: VectorSpaceMetrics):
         """Create and initialize a new pattern."""
-        pattern_id = f"pattern_{len(self._patterns)}"
+        # Create adaptive ID for pattern provenance tracking
+        base_concept = f"pattern_v{len(self._patterns)}"
+        adaptive_id = AdaptiveID(
+            base_concept=base_concept,
+            creator_id="pattern_emergence",
+            weight=metrics.local_density,
+            confidence=metrics.stability_score,
+            uncertainty=1.0 - metrics.attention_weight
+        )
+        
+        # Calculate adaptive radius based on local density
+        # For dense regions (density > 0.5), decrease radius
+        # For sparse regions (density < 0.5), increase radius
+        base_radius = self.monitor.density_radius
+        if metrics.local_density > 0.5:
+            # Dense regions get smaller radius proportional to density
+            adaptive_radius = base_radius * metrics.local_density ** 0.5
+        else:
+            # Sparse regions get larger radius inversely proportional to density
+            adaptive_radius = base_radius * (1.0 / metrics.local_density) ** 0.5
         
         pattern = EmergentPattern(
-            id=pattern_id,
+            id=adaptive_id.id,
             state=PatternState.FORMING,
             center=vector.copy(),
-            radius=self.monitor.density_radius,
+            radius=adaptive_radius,
             metrics=PatternMetrics(
                 density=metrics.local_density,
                 stability=metrics.stability_score,
@@ -233,10 +284,14 @@ class PatternEmergenceInterface:
                 confidence=0.0,  # Start with zero confidence
                 timestamp=datetime.now()
             ),
-            context={}
+            context={
+                "adaptive_id": adaptive_id,
+                "base_concept": base_concept,
+                "creator": "pattern_emergence"
+            }
         )
         
-        self._patterns[pattern_id] = pattern
+        self._patterns[adaptive_id.id] = pattern
         await self._queue_event(PatternEventType.PATTERN_FORMING, pattern)
     
     async def _dissolve_pattern(self, pattern_id: str):
@@ -261,12 +316,17 @@ class PatternEmergenceInterface:
         alpha = pattern.metrics.stability  # Use stability as smoothing factor
         smoothed_attention = alpha * new_attention + (1 - alpha) * current
         
-        # Update pattern metrics
-        pattern.metrics = PatternMetrics(
-            **pattern.metrics.__dict__,
+        # Create new metrics object with updated attention
+        new_metrics = PatternMetrics(
+            density=pattern.metrics.density,
+            stability=pattern.metrics.stability,
             attention=smoothed_attention,
+            confidence=pattern.metrics.confidence,
             timestamp=datetime.now()
         )
+        
+        # Update pattern metrics
+        pattern.metrics = new_metrics
     
     async def _update_confidence(self, 
                                pattern: EmergentPattern,
@@ -288,12 +348,17 @@ class PatternEmergenceInterface:
             0.0, 1.0
         )
         
-        # Update pattern metrics
-        pattern.metrics = PatternMetrics(
-            **pattern.metrics.__dict__,
+        # Create new metrics object with updated confidence
+        new_metrics = PatternMetrics(
+            density=pattern.metrics.density,
+            stability=pattern.metrics.stability,
+            attention=pattern.metrics.attention,
             confidence=new_confidence,
             timestamp=datetime.now()
         )
+        
+        # Update pattern metrics
+        pattern.metrics = new_metrics
     
     async def _queue_event(self, 
                           event_type: PatternEventType,
@@ -359,8 +424,8 @@ class PatternEmergenceInterface:
             # Implement actual metrics retrieval from monitor
             # This is a placeholder until we implement the metrics stream
             await asyncio.sleep(0.1)  # Simulate processing time
-            return self.monitor.get_latest_metrics()
+            metrics = await self.monitor.get_latest_metrics()
+            return metrics
         except Exception as e:
-            self.logger.error(f"Error getting metrics: {e}")
             # Return safe default metrics
             return VectorSpaceMetrics()
