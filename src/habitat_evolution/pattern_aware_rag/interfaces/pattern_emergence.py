@@ -80,12 +80,26 @@ class PatternEmergenceInterface:
     def __init__(self, 
                  monitor: VectorAttentionMonitor,
                  min_confidence: float = 0.5,
-                 event_buffer_size: int = 1000):
+                 event_buffer_size: int = 1000,
+                 agent_id: Optional[str] = None,
+                 mcp_role: Optional[str] = None):
         self.monitor = monitor
         self.min_confidence = min_confidence
         self._patterns: Dict[str, EmergentPattern] = {}
         self._event_queue = asyncio.Queue(maxsize=event_buffer_size)
         self._subscribers = []
+        
+        # MCP support
+        if agent_id and mcp_role:
+            from .mcp_protocol import MCPCoordinator, MCPRole
+            self.agent_id = agent_id
+            self.mcp_coordinator = MCPCoordinator(
+                agent_id=agent_id,
+                role=MCPRole[mcp_role.upper()]
+            )
+            self._enable_mcp = True
+        else:
+            self._enable_mcp = False
     
     async def start(self):
         """Start pattern monitoring and event processing."""
@@ -233,6 +247,10 @@ class PatternEmergenceInterface:
         if new_state != old_state:
             pattern.state = new_state
             await self._queue_state_transition_event(pattern, old_state)
+            
+            # If MCP is enabled and pattern is becoming stable, initiate validation
+            if self._enable_mcp and new_state == PatternState.STABLE:
+                await self.mcp_coordinator.validate_pattern(pattern.id, True)
         
         pattern.metrics = new_metrics
     
@@ -255,7 +273,7 @@ class PatternEmergenceInterface:
         base_concept = f"pattern_v{len(self._patterns)}"
         adaptive_id = AdaptiveID(
             base_concept=base_concept,
-            creator_id="pattern_emergence",
+            creator_id=self.agent_id if self._enable_mcp else "pattern_emergence",
             weight=metrics.local_density,
             confidence=metrics.stability_score,
             uncertainty=1.0 - metrics.attention_weight
@@ -285,6 +303,8 @@ class PatternEmergenceInterface:
                 timestamp=datetime.now()
             ),
             context={
+                "mcp_enabled": self._enable_mcp,
+                "creator_id": self.agent_id if self._enable_mcp else "pattern_emergence",
                 "adaptive_id": adaptive_id,
                 "base_concept": base_concept,
                 "creator": "pattern_emergence"
