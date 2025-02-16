@@ -1,0 +1,30 @@
+# Pattern-Aware RAG Test Environment Configuration
+
+# Claude API Configuration
+CLAUDE_API_KEY=your_claude_api_key
+CLAUDE_MODEL=claude-2
+
+# LangChain Configuration
+LANGCHAIN_CACHE_DIR=./.habitat/cache
+LANGCHAIN_EMBEDDING_DIR=./.habitat/embeddings
+
+# Graph Database Configuration
+NEO4J_URI=bolt://localhost:7687
+NEO4J_USER=neo4j
+NEO4J_PASSWORD=your_password
+
+# Test Configuration
+TEST_PERSIST_DIR=./.habitat/test_data
+TEST_CACHE_DIR=./.habitat/test_cache
+TEST_TIMEOUT=30  # seconds
+
+# Learning Window Configuration
+TEST_WINDOW_DURATION=5  # minutes
+TEST_MAX_CHANGES=10
+TEST_STABILITY_THRESHOLD=0.7
+TEST_COHERENCE_THRESHOLD=0.6
+
+# Back Pressure Configuration
+TEST_BASE_DELAY=0.1
+TEST_MAX_DELAY=2.0
+TEST_PRESSURE_THRESHOLD=0.8
