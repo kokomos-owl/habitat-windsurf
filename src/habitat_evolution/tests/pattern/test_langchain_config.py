@@ -1,5 +1,4 @@
-"""
-Test suite for LangChain Configuration.
+"""Test suite for LangChain Configuration.
 
 Tests the LangChain integration components, ensuring proper state handling
 and Claude-optimized prompting.
@@ -9,7 +8,7 @@ import pytest
 from datetime import datetime
 from pathlib import Path
 import tempfile
-import shutil
+from unittest.mock import patch
 
 from habitat_evolution.pattern_aware_rag.langchain_config import (
     StatePromptConfig,
@@ -45,12 +44,13 @@ def sample_metrics():
     }
 
 @pytest.fixture
-def integration(config, temp_persist_dir):
+def integration(config, temp_persist_dir, mock_embeddings):
     """Provide configured LangChain integration."""
-    return ClaudeLangChainIntegration(
-        config=config,
-        persist_dir=temp_persist_dir
-    )
+    with patch('habitat_evolution.pattern_aware_rag.langchain_config.ClaudeLangChainIntegration._get_claude_embeddings', return_value=mock_embeddings):
+        return ClaudeLangChainIntegration(
+            config=config,
+            persist_dir=temp_persist_dir
+        )
 
 class TestStatePromptConfig:
     """Test suite for state prompt configuration."""
@@ -73,7 +73,7 @@ class TestStatePromptConfig:
 class TestClaudeLangChainIntegration:
     """Test suite for Claude LangChain integration."""
     
-    def test_embedding_setup(self, integration, temp_persist_dir):
+    def test_embedding_setup(self, integration, temp_persist_dir, mock_embeddings):
         """Test embedding configuration."""
         # Verify embedding directory
         embed_dir = Path(temp_persist_dir)
@@ -83,6 +83,9 @@ class TestClaudeLangChainIntegration:
         # Verify vector store
         assert integration.vector_store is not None
         assert integration.vector_store.collection_name == "state_embeddings"
+        
+        # Verify mock embeddings
+        assert mock_embeddings.embed_count == 0
     
     def test_prompt_templates(self, integration):
         """Test Claude-optimized prompt templates."""
@@ -95,20 +98,15 @@ class TestClaudeLangChainIntegration:
         assert "graph_state" in template.input_variables
         assert "concept_relations" in template.input_variables
         assert "temporal_context" in template.input_variables
+        assert "query" in template.input_variables
     
-    def test_state_persistence(self, integration, sample_metrics):
+    def test_state_persistence(self, integration, sample_metrics, mock_embeddings, sample_document):
         """Test state persistence in vector store."""
-        # Create test document
-        doc = Document(
-            page_content="Test state content",
-            metadata={
-                "metrics": sample_metrics,
-                "timestamp": datetime.now().isoformat()
-            }
-        )
-        
         # Add to vector store
-        integration.vector_store.add_documents([doc])
+        integration.vector_store.add_documents([sample_document])
+        
+        # Verify embeddings were created
+        assert mock_embeddings.embed_count > 0
         
         # Verify retrieval
         results = integration.vector_store.similarity_search(
@@ -116,4 +114,30 @@ class TestClaudeLangChainIntegration:
             k=1
         )
         assert len(results) == 1
-        assert results[0].metadata["metrics"] == sample_metrics
+        assert results[0].metadata == sample_document.metadata
+    
+    def test_prepare_state_context(self, integration):
+        """Test state context preparation."""
+        test_state = {
+            "id": "test-123",
+            "timestamp": "2025-02-16T11:20:36-05:00",
+            "concepts": {"concept1": {}, "concept2": {}},
+            "relations": [
+                {"source": "A", "target": "B", "type": "related", "strength": 0.8},
+                {"source": "B", "target": "C", "type": "similar", "strength": 0.6}
+            ],
+            "metrics": {"coherence": 0.9},
+            "temporal": {
+                "stage": "evolving",
+                "stability": 0.85,
+                "recent_changes": ["added_concept", "updated_relation"]
+            }
+        }
+        
+        context = integration.prepare_state_context(test_state)
+        
+        assert "test-123" in context["graph_state"]
+        assert "2025-02-16" in context["graph_state"]
+        assert "A --[related: 0.80]--> B" in context["concept_relations"]
+        assert "evolving" in context["temporal_context"]
+        assert "0.9" in context["coherence_metrics"]

@@ -1,0 +1,6 @@
+langchain>=0.1.0
+cohere-python>=4.37
+chromadb>=0.4.22
+pytest>=7.0.0
+pytest-asyncio>=0.23.0
+pytest-cov>=4.1.0
