@@ -6,6 +6,26 @@ The learning module manages system stability and evolution through temporal wind
 
 ## Key Components
 
+### Window Manager
+
+Centralized learning window management:
+
+```python
+from habitat_evolution.pattern_aware_rag.learning import LearningWindowManager
+```
+
+#### Features
+- Window lifecycle management
+- Constraint application
+- Back pressure coordination
+- State transition control
+
+#### Configuration
+- Default window duration: 30 minutes
+- Stability threshold: 0.7
+- Coherence threshold: 0.6
+- Max changes per window: 50
+
 ### Learning Windows
 
 Temporal control for pattern evolution:
@@ -19,6 +39,7 @@ from habitat_evolution.pattern_aware_rag.learning import LearningWindow
 - Change rate limiting
 - Coherence thresholds
 - Saturation detection
+- Pattern evolution tracking
 
 ### Back Pressure Controller
 

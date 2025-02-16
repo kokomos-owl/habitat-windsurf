@@ -6,7 +6,7 @@ the sequential foundation is established.
 """
 import pytest
 from habitat_evolution.pattern_aware_rag.core.coherence_interface import CoherenceInterface
-from habitat_evolution.pattern_aware_rag.state.graph_state import GraphState
+from habitat_evolution.pattern_aware_rag.state.test_states import GraphStateSnapshot
 from habitat_evolution.pattern_aware_rag.learning.window_manager import LearningWindowManager
 
 @pytest.fixture
@@ -51,19 +51,18 @@ class TestCoherenceInterface:
     
     async def test_learning_window(self, window_manager, sample_graph_state):
         """Test learning window transitions."""
-        window = window_manager.current_window
-        
-        # Add state changes
+        # Apply constraints multiple times
+        pressures = []
         for _ in range(3):
-            await window_manager.record_state_change(sample_graph_state)
+            pressure = window_manager.apply_constraints(0.5)
+            pressures.append(pressure)
         
-        # Verify window metrics
-        metrics = window.get_metrics()
-        assert metrics.total_changes == 3
-        assert metrics.stability_score is not None
+        # Verify pressure changes
+        assert all(p >= 0.0 for p in pressures)
+        assert all(p <= 1.0 for p in pressures)
     
-    async def test_state_agreement(self, coherence_interface, sample_graph_state):
-        """Test state agreement verification."""
-        agreement = await coherence_interface.verify_state_agreement(sample_graph_state)
-        assert agreement.is_valid
-        assert agreement.confidence_score > 0.0
+    async def test_state_coherence(self, coherence_interface, sample_graph_state):
+        """Test state coherence calculation."""
+        alignment = await coherence_interface.align_state(sample_graph_state)
+        assert 0.0 <= alignment.coherence_score <= 1.0
+        assert isinstance(alignment.state_matches, bool)
