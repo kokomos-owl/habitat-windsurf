@@ -111,55 +111,67 @@ Analysis:"""
 
     def prepare_state_context(
         self,
-        graph_state: Dict[str, any],
+        graph_state: GraphStateSnapshot,
         max_concepts: Optional[int] = None,
         max_relations: Optional[int] = None
     ) -> Dict[str, str]:
         """Prepare graph state context for prompt template."""
-        max_concepts = max_concepts or self.config.max_concepts_per_prompt
-        max_relations = max_relations or self.config.max_relations_per_prompt
+        from .state_handler import GraphStateHandler
         
-        # Format graph state overview
-        state_overview = (
-            f"ID: {graph_state['id']}\n"
-            f"Timestamp: {graph_state['timestamp']}\n"
-            f"Total Concepts: {len(graph_state['concepts'])}\n"
-            f"Total Relations: {len(graph_state['relations'])}\n"
-            f"Overall Coherence: {graph_state['metrics']['coherence']:.2f}"
+        handler = GraphStateHandler()
+        context = handler.prepare_prompt_context(
+            state=graph_state,
+            max_concepts=max_concepts or self.config.max_concepts_per_prompt,
+            max_relations=max_relations or self.config.max_relations_per_prompt
         )
         
-        # Format concept relations (sorted by strength)
-        relations = sorted(
-            graph_state['relations'],
-            key=lambda x: x['strength'],
-            reverse=True
-        )[:max_relations]
+        # Validate state coherence
+        metrics = handler.validate_state_coherence(graph_state)
+        if not self.config.validate_state_metrics({
+            'coherence': metrics.overall_coherence,
+            'relationship_strength': metrics.relationship_strength,
+            'concept_confidence': metrics.concept_confidence
+        }):
+            raise ValueError(
+                "Graph state does not meet minimum coherence requirements"
+            )
         
-        relation_str = "\n".join(
-            f"- {r['source']} --[{r['type']}: {r['strength']:.2f}]--> {r['target']}"
-            for r in relations
-        )
-        
-        # Format temporal context
-        temporal = (
-            f"Evolution Stage: {graph_state['temporal']['stage']}\n"
-            f"Stability Index: {graph_state['temporal']['stability']:.2f}\n"
-            f"Recent Changes: {', '.join(graph_state['temporal']['recent_changes'])}"
-        )
-        
-        return {
-            "graph_state": state_overview,
-            "concept_relations": relation_str,
-            "temporal_context": temporal,
-            "coherence_metrics": str(graph_state['metrics'])
-        }
+        return context
     
     def store_state_embedding(
         self,
-        state: Dict[str, any],
+        state: GraphStateSnapshot,
+        previous_state: Optional[GraphStateSnapshot] = None,
         metadata: Optional[Dict[str, any]] = None
     ) -> None:
-        """Store state embedding in vector store."""
+        """Store state embedding in vector store with evolution tracking."""
+        from .state_evolution import StateEvolutionTracker
+        
+        # Initialize evolution tracker if needed
+        if not hasattr(self, '_evolution_tracker'):
+            self._evolution_tracker = StateEvolutionTracker()
+        
+        # Create transaction if we have a previous state
+        if previous_state:
+            transaction = self._evolution_tracker.create_transaction(
+                from_state=previous_state,
+                to_state=state,
+                changes=metadata or {},
+                emergence_type="NATURAL"  # Default to natural emergence
+            )
+            # Add transaction to metadata
+            metadata = metadata or {}
+            metadata.update({
+                'transaction_id': transaction.transaction_id,
+                'coherence_delta': {
+                    'concept_confidence': transaction.coherence_delta.concept_confidence,
+                    'relationship_strength': transaction.coherence_delta.relationship_strength,
+                    'pattern_stability': transaction.coherence_delta.pattern_stability,
+                    'overall_coherence': transaction.coherence_delta.overall_coherence
+                }
+            })
+        
+        # Prepare and store embedding
         context = self.prepare_state_context(state)
         doc = Document(
             page_content=self.state_template.format(
@@ -172,10 +184,28 @@ Analysis:"""
     
     def find_similar_states(
         self,
-        query_state: Dict[str, any],
-        k: int = 5
+        query_state: GraphStateSnapshot,
+        k: int = 5,
+        start_time: Optional[datetime] = None,
+        end_time: Optional[datetime] = None
     ) -> List[Document]:
-        """Find similar states from vector store."""
+        """Find similar states from vector store with temporal filtering."""
+        # Get evolution history if needed
+        if hasattr(self, '_evolution_tracker') and (start_time or end_time):
+            history = self._evolution_tracker.get_state_history(start_time, end_time)
+            if history:
+                # Use historical context for search
+                context = self.prepare_state_context(query_state)
+                context['temporal_context'] = f"{context['temporal_context']}\n\nEvolution History:\n" + \
+                    '\n'.join(f"- {tx.timestamp}: {tx.emergence_type}" for tx in history[-5:])
+                
+                query_doc = self.state_template.format(
+                    **context,
+                    query="SIMILARITY_SEARCH"
+                )
+                return self.vector_store.similarity_search(query_doc, k=k)
+        
+        # Default search without history
         context = self.prepare_state_context(query_state)
         query_doc = self.state_template.format(
             **context,

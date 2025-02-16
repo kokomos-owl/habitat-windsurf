@@ -4,6 +4,60 @@
 
 Pattern-Aware RAG serves as a coherence interface in the Habitat system, managing the alignment between external and internal coherence states through controlled state agreement. It is not a traditional RAG system - instead, it focuses on maintaining and evolving pattern coherence through careful state management.
 
+## Module Structure
+
+The system is organized into focused modules, each with specific responsibilities:
+
+```
+pattern_aware_rag/
+├── core/               # Core system components
+│   └── __init__.py    # Exports core functionality
+├── bridges/           # Integration bridges
+│   ├── __init__.py
+│   └── adaptive_state_bridge.py
+├── learning/          # Learning and control systems
+│   ├── __init__.py
+│   └── learning_control.py
+├── state/             # State management
+│   ├── __init__.py
+│   ├── state_handler.py
+│   ├── state_evolution.py
+│   ├── claude_state_handler.py
+│   ├── graph_service.py
+│   └── langchain_config.py
+├── services/          # Service layer
+│   └── __init__.py    # Exports service interfaces
+└── __init__.py        # Main package interface
+```
+
+### Module Descriptions
+
+#### Core (`core/`)
+- Essential system components
+- State management foundations
+- Evolution tracking interfaces
+
+#### Bridges (`bridges/`)
+- Adaptive state management
+- Pattern evolution tracking
+- Version history maintenance
+
+#### Learning (`learning/`)
+- Learning window control
+- Back pressure mechanisms
+- Event coordination
+
+#### State (`state/`)
+- Graph state management
+- State transitions
+- Claude integration
+- LangChain configuration
+
+#### Services (`services/`)
+- High-level interfaces
+- Integration services
+- Operation coordination
+
 ## Core Architecture
 
 ```
@@ -32,9 +86,22 @@ Graph State → Prompt Formation → Query → Claude → Response → Pattern-A
 
 ## Implementation
 
-### Core Files
-- `pattern_aware_rag.py`: Main implementation
-- `graph_service.py`: Graph state management
+### Key Files
+
+#### State Management
+- `state/state_handler.py`: Core state management
+- `state/state_evolution.py`: Evolution tracking
+- `state/graph_service.py`: Graph operations
+
+#### Integration
+- `bridges/adaptive_state_bridge.py`: Adaptive ID integration
+- `state/claude_state_handler.py`: Claude integration
+- `state/langchain_config.py`: LangChain configuration
+
+#### Learning Control
+- `learning/learning_control.py`: Learning windows and back pressure
+
+#### Documentation
 - `BIDIRECTIONAL_FLOW.md`: Architecture documentation
 - `TEST_PATTERN_AWARE_RAG_OVERVIEW.md`: Testing documentation
 
