@@ -70,11 +70,34 @@ visualizations/*.json
 .docker/
 docker-compose.override.yml
 
-# Neo4j
-data/neo4j/
+# Database files and directories
+.habitat/test_*/
+.habitat/test_mongo/
+.habitat/test_neo4j/
+.habitat/test_chroma/
+*.wt
+*.turtle
+*.lock
+*_log
+*.bson
+diagnostic.data/
+journal/
+WiredTiger*
+metrics.*
+collection-*
+index-*
+storage.*
+_mdb_catalog.wt
 
-# MongoDB
-data/mongodb/
+# Neo4j specific
+neostore*
+database.lock
+id-buffer.tmp
+
+# MongoDB specific
+mongod.lock
+diagnostic.data/
+journal/
 
 # Node modules (if any frontend components)
 node_modules/
