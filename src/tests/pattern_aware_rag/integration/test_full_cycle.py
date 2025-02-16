@@ -4,10 +4,11 @@ Full Cycle Integration Tests for Pattern-Aware RAG.
 These tests verify the complete state cycle and integration
 with external systems.
 """
+import asyncio
 import pytest
 from habitat_evolution.pattern_aware_rag.core.pattern_processor import PatternProcessor
 from habitat_evolution.pattern_aware_rag.core.coherence_interface import CoherenceInterface
-from habitat_evolution.pattern_aware_rag.state.graph_state import GraphState
+from habitat_evolution.pattern_aware_rag.state.test_states import GraphStateSnapshot
 from habitat_evolution.pattern_aware_rag.bridges.adaptive_state_bridge import AdaptiveStateBridge
 from habitat_evolution.pattern_aware_rag.services.neo4j_service import Neo4jStateStore
 from habitat_evolution.pattern_aware_rag.services.mongo_service import MongoStateStore

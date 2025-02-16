@@ -14,9 +14,9 @@ Key Responsibilities:
 - Version history tracking
 
 Usage:
-    from habitat_evolution.pattern_aware_rag.bridges import AdaptiveStateManager
+    from habitat_evolution.pattern_aware_rag.bridges import AdaptiveStateBridge
 """
 
-from .adaptive_state_bridge import AdaptiveStateManager
+from .adaptive_state_bridge import AdaptiveStateBridge
 
-__all__ = ['AdaptiveStateManager']
+__all__ = ['AdaptiveStateBridge']

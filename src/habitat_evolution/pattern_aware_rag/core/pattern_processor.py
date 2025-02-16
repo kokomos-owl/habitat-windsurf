@@ -48,36 +48,36 @@ class PatternProcessor:
             confidence=1.0,
             uncertainty=0.0
         )
-    
-    async def prepare_graph_state(self, pattern: PatternState, 
-                                adaptive_id: Optional[AdaptiveID] = None) -> GraphStateSnapshot:
-        """Prepare pattern for graph integration."""
+        
+    async def prepare_graph_state(self, pattern: PatternState, adaptive_id: AdaptiveID) -> GraphStateSnapshot:
+        """Prepare graph-ready state from pattern and adaptive ID.
+        
+        Args:
+            pattern: Pattern to prepare state for
+            adaptive_id: Assigned adaptive ID
+            
+        Returns:
+            Graph-ready state
+        """
         # Create concept node from pattern
-        node = ConceptNode(
-            id=pattern.id,
+        concept = ConceptNode(
+            id=str(adaptive_id),
             name=pattern.content[:50],  # Use first 50 chars as name
             attributes={
                 "source": pattern.metadata.get("source", ""),
                 "timestamp": pattern.metadata.get("timestamp", "")
             }
         )
-        if not adaptive_id:
-            raise ValueError("Adaptive ID required for graph state preparation")
-            
-        # Create graph state with node and pattern
+        
+        # Create initial state
         return GraphStateSnapshot(
             id=f"state_{pattern.id}",
-            nodes=[node],
+            nodes=[concept],
             relations=[],
             patterns=[pattern],
-            timestamp=pattern.timestamp
+            timestamp=pattern.timestamp,
+            version=1
         )
-        # Create graph state with pattern
-        state = GraphStateSnapshot(
-            id=f"state_{adaptive_id.id}",
-            nodes=[],
-            relations=[],
-            patterns=[pattern],
-            timestamp=pattern.timestamp
-        )
-        return state
+    
+
+
