@@ -12,6 +12,11 @@
      - Attention smoothing with stability factors
      - Confidence decay and temporal evolution
      - Context updates and metadata handling
+   - Multi-agent Coordination Protocol
+     - Role-based coordination
+     - Protocol phase transitions
+     - Consensus mechanisms
+     - Future compatibility
 
 2. **In Progress** 🚧
    - Learning Window Controls

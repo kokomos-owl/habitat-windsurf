@@ -45,6 +45,14 @@ All tests focus on essential functionality without over-engineering.
   - Floating point comparison handling (rtol=1e-2)
   - Isolated component testing strategy
 
+### Multi-agent Coordination Tests
+- ✅ `test_mcp_protocol`: Tests MCP integration
+  - Role-based pattern coordination
+  - Protocol phase transitions
+  - Consensus mechanism validation
+  - Message protocol verification
+  - Backward compatibility checks
+
 ### Pattern-Aware RAG Tests 🔄
 - 🟡 Graph state foundation tests
   - Initial state loading

@@ -69,6 +69,92 @@ The feedback system implements sophisticated smoothing and decay mechanisms to e
    - Enables pattern enrichment with agent-specific context
    - Preserves pattern provenance and semantic relationships
 
+## Multi-agent Coordination Protocol (MCP) Support
+
+The Pattern Emergence Interface implements support for the emerging Multi-agent Coordination Protocol standards, enabling coordinated pattern detection and refinement across multiple agents.
+
+### 1. MCP Roles
+
+Agents can participate in pattern emergence with different roles:
+
+```python
+class MCPRole(Enum):
+    OBSERVER = "observer"      # Passive pattern observer
+    CONTRIBUTOR = "contributor"  # Active pattern contributor
+    COORDINATOR = "coordinator"  # Pattern coordination leader
+    VALIDATOR = "validator"     # Pattern validation authority
+```
+
+### 2. Protocol Phases
+
+Pattern emergence follows a coordinated lifecycle:
+
+```python
+class MCPPhase(Enum):
+    PROPOSAL = "proposal"       # Initial pattern proposal
+    VALIDATION = "validation"   # Pattern validation
+    CONSENSUS = "consensus"     # Reaching agreement
+    COMMITMENT = "commitment"   # Final pattern commitment
+```
+
+### 3. Integration Points
+
+1. **Pattern Creation**
+   ```python
+   interface = PatternEmergenceInterface(
+       monitor=vector_monitor,
+       agent_id="agent_1",
+       mcp_role="COORDINATOR"
+   )
+   ```
+
+2. **Pattern Validation**
+   - Patterns require validation before stabilization
+   - Consensus threshold: 67% (2/3 majority)
+   - Validation includes stability and coherence checks
+
+3. **State Transitions**
+   - FORMING → EMERGING: Local validation
+   - EMERGING → STABLE: MCP consensus required
+   - STABLE → DISSOLVING: Coordinated decision
+
+4. **Context Enrichment**
+   ```python
+   pattern.context.update({
+       "mcp_enabled": True,
+       "creator_id": "agent_1",
+       "validation_votes": {...},
+       "consensus_timestamp": ...
+   })
+   ```
+
+### 4. Implementation Notes
+
+1. **Configuration**
+   - Optional MCP support via constructor parameters
+   - Graceful fallback when MCP is disabled
+   - Runtime role switching supported
+
+2. **Message Protocol**
+   ```python
+   class MCPMessage:
+       phase: MCPPhase
+       sender_id: str
+       pattern_id: str
+       timestamp: datetime
+       payload: Dict
+   ```
+
+3. **Consensus Management**
+   - Asynchronous voting mechanism
+   - Configurable consensus thresholds
+   - Automatic conflict resolution
+
+4. **Future Compatibility**
+   - Extensible message format
+   - Version-aware protocol handling
+   - Backward compatibility support
+
 ## Use Cases
 
 ### 1. Agent Integration
