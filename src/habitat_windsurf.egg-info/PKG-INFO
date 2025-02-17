@@ -1,4 +1,4 @@
-Metadata-Version: 2.2
+Metadata-Version: 2.1
 Name: habitat-windsurf
 Version: 0.1.0
 Summary: Visualization components for the Habitat ecosystem
@@ -11,84 +11,143 @@ Description-Content-Type: text/markdown
 Provides-Extra: rag
 Provides-Extra: test
 Provides-Extra: dev
-Dynamic: author
-Dynamic: classifier
-Dynamic: description
-Dynamic: description-content-type
-Dynamic: provides-extra
-Dynamic: requires-python
-Dynamic: summary
 
 # Habitat Windsurf UI Workshop
 
-**Document Date**: 2025-02-13T07:44:17-05:00
+**Document Date**: 2025-02-13T23:22:22-05:00
 
-## 🎯 Latest Breakthrough: Climate-Aware Pattern Observation
+## 🎯 Latest Breakthroughs
 
-We've achieved a significant breakthrough in pattern observation with climate risk focus. The system now enables:
+### Social Pattern Evolution Integration
+We've achieved significant progress in social pattern evolution tracking, enabling sophisticated analysis of how individual actions evolve into stable community practices.
 
-1. **Multi-Modal Pattern Observation**
-   - Wave mechanics for phase tracking
-   - Field theory for gradient analysis
-   - Flow dynamics for pattern interaction
-   - Climate-specific attention filters
+### Climate-Aware Pattern Observation
+We've achieved a breakthrough in climate risk pattern observation, providing advanced capabilities for tracking and analyzing climate-related patterns.
 
-2. **Neighbor-Aware Analysis**
-   - 8-direction spatial sampling
-   - Distance-weighted observations
-   - Gradient alignment detection
-   - Pattern coherence tracking
+### Key Capabilities
 
-3. **Martha's Vineyard Climate Integration**
+1. **Social Pattern Analysis**
+   - Field dynamics (energy, coherence, flow)
+   - Social dynamics (adoption, influence, stability)
+   - Practice formation (maturity, institutionalization)
+   - Real-time metric tracking
+
+2. **Climate Risk Assessment**
    - Extreme precipitation tracking (7.34" rainfall)
    - Drought condition monitoring (26% likelihood)
    - Wildfire danger assessment (94% increase)
    - Cross-hazard interaction analysis
 
+3. **Pattern Evolution Management**
+   - Event-driven architecture
+   - Multi-modal pattern observation
+   - Wave mechanics for phase tracking
+   - Field theory for gradient analysis
+
+4. **Core System Integration**
+   - Adaptive core implementation
+   - Pattern evolution service
+   - Event bus integration
+   - Storage layer management
+
 See [PATTERN_REGULATION_BREAKTHROUGH.md](src/tests/unified/PORT/adaptive_core/pattern/PATTERN_REGULATION_BREAKTHROUGH.md) for detailed technical documentation.
 
-A hands-on workshop for learning visualization component development using the Windsurf IDE. This workshop implements a balanced approach between user-driven learning and agent-assisted development, ensuring optimal skill development and understanding.
+## Core Modules
 
-## Features
-
-### Core Modules
+### Pattern Evolution
 - `field_navigation.py`: Neighbor-aware pattern observation with climate risk focus
+- `social_pattern_service.py`: Social pattern evolution and practice tracking
 - `attention.py`: Enhanced attention system with neighbor context support
 - `observation.py`: Multi-modal observation strategy implementation
+
+### Data Management
 - `mock_services.py`: Realistic climate data simulation for Martha's Vineyard
 - `pattern_aware_rag.py`: Pattern-aware RAG controller with climate risk tracking
+- `metrics_store.py`: Social and climate pattern metrics storage
 
-### Pattern Evolution and Coherence Analysis
-- Dynamic pattern learning from climate risk data
+### Analysis Tools
+- Dynamic pattern learning from climate and social data
 - Semantic relationship tracking with emphasis detection
 - Temporal coherence analysis
-- Real-time pattern evolution visualization
-- Cross-document pattern analysis
+- Cross-domain pattern analysis
 
-### Advanced Visualization and Analysis
+### Visualization
 - Interactive pattern relationship graphs
 - Temporal evolution tracking
 - Coherence strength indicators
 - Pattern density visualization
+
+This workshop implements a balanced approach between user-driven learning and agent-assisted development, ensuring optimal skill development and understanding across both climate and social pattern domains.
+
+## Features
+
+### Pattern Evolution
+- Field-based pattern detection and tracking
+- Social practice emergence analysis
+- Climate risk pattern identification
+- Cross-domain pattern relationships
+- Real-time evolution monitoring
+
+### Field Dynamics
+- Energy and coherence calculations
+- Flow dynamics and turbulence modeling
+- Gradient-based pattern analysis
+- Multi-dimensional field interactions
+
+### Social Pattern Analysis
+- Community practice tracking
+- Resource sharing networks
+- Knowledge transmission mapping
+- Institutionalization metrics
+
+### Climate Risk Assessment
+- Hazard pattern detection
+- Cross-hazard interactions
+- Adaptation tracking
+- Risk propagation analysis
+
+### Advanced Visualization
+- Interactive relationship graphs
+- Field state visualization
+- Temporal evolution tracking
+- Pattern density mapping
+- Real-time metric updates
 - Real-time evolution metrics
 
 ### Pattern-Aware Architecture
-- Semantic pattern extraction engine
-- Coherence calculation service
-- Evolution tracking system
-- Pattern relationship storage
-- Comprehensive documentation in `docs/PATTERN_EVOLUTION.md`
+
+#### Core Components
+- Pattern-aware RAG system with climate and social context
+- Field-based pattern regulation across domains
+- Multi-modal coherence tracking
+- Real-time pattern evolution system
+
+#### Integration Points
+- Climate risk pattern detection
+- Social practice evolution tracking
+- Cross-domain pattern relationships
+- Field dynamics visualization
+
+#### Key Benefits
+- Natural pattern evolution in both social and climate domains
+- Reduced noise through field-based regulation
+- Enhanced stability through multi-dimensional coherence
+- Rich pattern relationships across domains
+- Real-time adaptation to changing conditions
+
+Comprehensive documentation available in `docs/PATTERN_EVOLUTION.md`
 
 ## Innovation and Value Proposition
 
 This approach is genuinely innovative and powerful for several key reasons:
 
 ### Pattern Learning Evolution 🌱
-- Dynamic pattern recognition from climate risk data
-- Adaptive coherence analysis based on context
-- Temporal relationship learning
-- Cross-document pattern discovery
-- Semantic emphasis detection
+- Dynamic pattern recognition across climate and social domains
+- Adaptive coherence analysis with field dynamics
+- Temporal relationship learning and practice evolution
+- Cross-domain pattern discovery and integration
+- Multi-modal semantic emphasis detection
+- Community practice formation tracking
 
 ### Pattern-Aware Development 🤝
 - Pattern evolution tracking and visualization
