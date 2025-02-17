@@ -62,6 +62,7 @@ src/habitat_evolution/pattern_aware_rag/bridges/adaptive_state_bridge 2.py
 src/habitat_evolution/pattern_aware_rag/bridges/adaptive_state_bridge.py
 src/habitat_evolution/pattern_aware_rag/core/__init__.py
 src/habitat_evolution/pattern_aware_rag/core/coherence_interface.py
+src/habitat_evolution/pattern_aware_rag/core/exceptions.py
 src/habitat_evolution/pattern_aware_rag/core/pattern_processor.py
 src/habitat_evolution/pattern_aware_rag/interfaces/__init__.py
 src/habitat_evolution/pattern_aware_rag/interfaces/mcp_protocol.py
