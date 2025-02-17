@@ -199,6 +199,64 @@ class TestSequentialFoundation:
             )
     
     # Prompt Formation Tests
+    async def test_prompt_formation(self, pattern_processor):
+        """Test dynamic prompt construction and template validation."""
+        timestamp = datetime.now()
+        test_node = ConceptNode(
+            id="test_node",
+            name="Test Node",
+            attributes={"type": "concept"},
+            created_at=timestamp
+        )
+        test_pattern = PatternState(
+            id="test_pattern",
+            content="Test pattern content",
+            metadata={"type": "observation"},
+            timestamp=timestamp
+        )
+        
+        # Test 1: Basic variable substitution
+        state = GraphStateSnapshot(
+            id="test_state",
+            nodes=[test_node],
+            patterns=[test_pattern],
+            relations=[],
+            timestamp=timestamp,
+            version=1
+        )
+        template_key = "basic_template"
+        result = await pattern_processor.construct_prompt(state, template_key)
+        assert test_pattern.content in result
+        assert test_node.name in result
+        
+        # Test 2: Nested variable substitution
+        nested_template_key = "nested_template"
+        result = await pattern_processor.construct_prompt(state, nested_template_key)
+        assert test_pattern.metadata["type"] in result
+        assert test_node.attributes["type"] in result
+        
+        # Test 3: Error handling - Invalid template key
+        with pytest.raises(ValueError, match="Invalid template key"):
+            await pattern_processor.construct_prompt(state, "invalid_key")
+        
+        # Test 4: Error handling - Missing required variables
+        incomplete_node = ConceptNode(
+            id="incomplete_node",
+            name="Incomplete Node",
+            attributes={},  # Missing required type
+            created_at=timestamp
+        )
+        incomplete_state = GraphStateSnapshot(
+            id="incomplete_state",
+            nodes=[incomplete_node],
+            patterns=[test_pattern],
+            relations=[],
+            timestamp=timestamp,
+            version=1
+        )
+        with pytest.raises(ValueError, match="Missing required variable"):
+            await pattern_processor.construct_prompt(incomplete_state, template_key)
+
     async def test_prompt_template_validation(self, pattern_processor, sample_document):
         """Test prompt template validation."""
         pattern = await pattern_processor.extract_pattern(sample_document)

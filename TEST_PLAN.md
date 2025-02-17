@@ -33,14 +33,14 @@ This separation of concerns allows partial states during construction while main
   - Verify correct initialization of graph state
   - Validate state persistence
   - Test error handling for invalid states
-- [ ] Prompt formation
+- [x] Prompt formation
   - Test dynamic prompt construction
   - Verify context integration
   - Validate prompt templates
-- [ ] State agreement process
-  - Test consensus mechanisms
-  - Verify state synchronization
-  - Validate conflict resolution
+- [x] State agreement process
+  - Test consensus mechanisms with temporal decay
+  - Verify state synchronization with version control
+  - Validate conflict resolution with multi-state merging
 
 ### Learning Window Control (`test_learning_window_control.py`)
 - [ ] State transitions

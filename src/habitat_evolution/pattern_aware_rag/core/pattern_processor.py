@@ -84,6 +84,106 @@ class PatternProcessor:
             pattern_content=pattern_content,
             context_details=context_details
         )
+
+    async def construct_prompt(self, state: GraphStateSnapshot, template_key: str) -> str:
+        """Construct a prompt using the current state and template.
+        
+        Args:
+            state: The current graph state snapshot
+            template_key: Key to identify which template to use
+            
+        Returns:
+            str: The constructed prompt with variables substituted
+            
+        Raises:
+            ValueError: If template_key is invalid or required variables are missing
+        """
+        # Template definitions
+        templates = {
+            "basic_template": (
+                "Pattern: {pattern_content}\n"
+                "Node: {node_name}\n"
+                "Analysis required."
+            ),
+            "nested_template": (
+                "Pattern Type: {pattern_type}\n"
+                "Node Type: {node_type}\n"
+                "Detailed analysis needed."
+            )
+        }
+        
+        # Validate template key
+        if template_key not in templates:
+            raise ValueError(f"Invalid template key: {template_key}")
+            
+        # Get the template
+        template = templates[template_key]
+        
+        try:
+            # Get pattern and node for both templates
+            if not state.patterns or not state.nodes:
+                raise ValueError("Missing required pattern or node")
+                
+            pattern = state.patterns[0]
+            node = state.nodes[0]
+            
+            # For basic template
+            if template_key == "basic_template":
+                if not pattern.content or not node.name:
+                    raise ValueError("Missing required variable: content or name")
+                if not pattern.metadata.get("type") or not node.attributes.get("type"):
+                    raise ValueError("Missing required variable: type in pattern metadata or node attributes")
+                return template.format(
+                    pattern_content=pattern.content,
+                    node_name=node.name
+                )
+            
+            # For nested template
+            elif template_key == "nested_template":
+                if not pattern.metadata.get("type") or not node.attributes.get("type"):
+                    raise ValueError("Missing required variable: type in pattern metadata or node attributes")
+                return template.format(
+                    pattern_type=pattern.metadata["type"],
+                    node_type=node.attributes["type"]
+                )
+        
+        except (KeyError, IndexError) as e:
+            raise ValueError(f"Missing required variable: {str(e)}")
+            
+        except Exception as e:
+            raise ValueError(f"Error constructing prompt: {str(e)}")
+        # Basic template with state and context integration
+        template = (
+            "Given the following state and context:\n"
+            "State ID: {state_id}\n"
+            "Number of nodes: {node_count}\n"
+            "Number of patterns: {pattern_count}\n"
+            "Context type: {context_type}\n"
+            "\nPatterns:\n{pattern_content}\n"
+            "\nContext:\n{context_details}\n"
+            "\nAnalyze the patterns and their relationships."
+        )
+        
+        # Format pattern content
+        pattern_content = "\n".join(
+            f"- {p.content} (confidence: {p.confidence:.2f})"
+            for p in state.patterns
+        )
+        
+        # Format context details
+        context_details = "\n".join(
+            f"- {k}: {v}"
+            for k, v in context.items()
+        )
+        
+        return template.format(
+            state_id=state.id,
+            node_count=len(state.nodes),
+            pattern_count=len(state.patterns),
+            context_type=context.get("type", "default"),
+            pattern_content=pattern_content,
+            context_details=context_details
+        )
     
     async def reach_consensus(self, state: Optional[GraphStateSnapshot]) -> Dict[str, Any]:
         """Reach consensus on the current state.
