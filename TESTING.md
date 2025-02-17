@@ -181,11 +181,28 @@ All tests are passing, validating both the climate pattern observation system an
 
 ## Pattern-Aware RAG System Tests 🚧
 
+### State Validation Architecture
+The system implements a two-level validation hierarchy:
+
+1. **Semantic Validation** (Initialization-time)
+   - Validates individual data elements
+   - Runs during object creation
+   - Catches invalid data early
+   - Example: relations must have valid types and weights
+
+2. **Structural Validation** (Runtime)
+   - Validates component relationships
+   - Runs when needed
+   - Ensures state completeness
+   - Example: relations must reference valid nodes
+
+This pattern ensures data integrity while allowing flexible state construction.
+
 ### Integration Test Progress
 1. **Sequential Foundation** ✅
    - Pattern extraction with provenance
    - Adaptive ID assignment
-   - Graph state preparation
+   - Graph state preparation and validation
    - Coherence alignment
    - State evolution
 
