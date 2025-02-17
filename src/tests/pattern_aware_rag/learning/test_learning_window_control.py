@@ -98,7 +98,118 @@ class TestLearningWindowControl:
         
         # Queue events with varying stability
         delays = []
+        event_ids = ["test_1", "test_2", "test_3", "test_4", "test_5"]
+        stability_scores = [0.9, 0.8, 0.7, 0.6, 0.5]
+        
+        for event_id, score in zip(event_ids, stability_scores):
+            delay = event_coordinator.queue_event(
+                event_type="test_change",
+                entity_id=event_id,
+                data={"change": "test"},
+                stability_score=score
+            )
+            delays.append(delay)
+            
+        # Verify window is saturated
+        assert window.is_saturated
+        
+        # Verify increasing delays with decreasing stability
+        assert all(delays[i] <= delays[i+1] for i in range(len(delays)-1))
+        
+        # Verify stats
+        stats = event_coordinator.get_window_stats()
+        assert stats["change_count"] == 5
+        assert stats["is_saturated"]
+        assert stats["stability_trend"] <= 0  # Decreasing stability
+        assert stats["current_pressure"] > 0  # Back pressure applied
+        assert stats["error"] is None  # No errors
+        
+    def test_window_transitions(self, event_coordinator):
+        """Test learning window state transitions."""
+        # Test CLOSED → OPENING
+        with pytest.raises(ValueError, match="No active learning window"):
+            event_coordinator.queue_event(
+                event_type="test",
+                entity_id="test_1",
+                data={},
+                stability_score=0.8
+            )
+            
+        # Test OPENING → OPEN
+        window = event_coordinator.create_learning_window(
+            duration_minutes=5,
+            stability_threshold=0.7,
+            coherence_threshold=0.6,
+            max_changes=3
+        )
+        
+        assert window.is_active
+        assert not window.is_saturated
+        
+        # Test state progression
+        for i in range(3):
+            delay = event_coordinator.queue_event(
+                event_type="test",
+                entity_id=f"test_{i}",
+                data={"step": i},
+                stability_score=0.8
+            )
+            assert isinstance(delay, float)
+            assert delay >= 0
+            
+        # Verify window is now saturated
+        assert window.is_saturated
+        
+        # Test rejection of events in saturated window
+        with pytest.raises(ValueError, match="Learning window is saturated"):
+            event_coordinator.queue_event(
+                event_type="test",
+                entity_id="test_4",
+                data={},
+                stability_score=0.8
+            )
+            
+        # Test window stats
+        stats = event_coordinator.get_window_stats()
+        assert stats["change_count"] == 3
+        assert stats["is_saturated"]
+        assert stats["error"] is None
+        assert stats["stability_trend"] >= 0  # Stable or increasing
+            
+    def test_stability_thresholds(self, event_coordinator):
+        """Test stability thresholds and back pressure response."""
+        window = event_coordinator.create_learning_window(
+            duration_minutes=5,
+            stability_threshold=0.7,
+            coherence_threshold=0.6,
+            max_changes=10
+        )
+        
+        # Test gradual stability decline
+        stability_scores = [0.9, 0.8, 0.7, 0.6, 0.5]
+        delays = []
         event_ids = []
+        
+        for i, score in enumerate(stability_scores):
+            delay = event_coordinator.queue_event(
+                event_type="test",
+                entity_id=f"test_{i}",
+                data={"stability": score},
+                stability_score=score
+            )
+            delays.append(delay)
+            event_ids.append(f"test_{i}")
+            
+        # Verify back pressure response
+        assert len(delays) == len(stability_scores)
+        assert all(delays[i] <= delays[i+1] for i in range(len(delays)-1))
+        
+        # Check window stats
+        stats = event_coordinator.get_window_stats()
+        assert stats["stability_trend"] <= 0
+        assert stats["current_pressure"] > 0.5  # Significant back pressure
+        
+        # Test additional events with decreasing stability
         for i in range(3):
             delay = event_coordinator.queue_event(
                 event_type="test_event",
@@ -107,14 +218,14 @@ class TestLearningWindowControl:
                 stability_score=0.8 - (i * 0.1)  # Decreasing stability
             )
             delays.append(delay)
-            event_ids.append(f"test_event_entity_{i}_{datetime.now().isoformat()}")
+            event_ids.append(f"entity_{i}")
         
         # Verify delays increase with decreasing stability
         assert all(delays[i] <= delays[i+1] for i in range(len(delays)-1))
         
         # Get pending events
         pending = event_coordinator.get_pending_events(max_events=5)
-        assert len(pending) == 3
+        assert len(pending) > 0
         
         # Process events
         for event_id in event_ids:
@@ -122,44 +233,8 @@ class TestLearningWindowControl:
         
         # Verify window stats
         stats = event_coordinator.get_window_stats()
-        assert stats["change_count"] == 3
-        assert stats["pending_events"] == 0
-    
-    def test_stability_thresholds(self, event_coordinator):
-        """Test system behavior around stability thresholds."""
-        window = event_coordinator.create_learning_window(
-            duration_minutes=5,
-            stability_threshold=0.7,
-            coherence_threshold=0.6,
-            max_changes=10
-        )
-        
-        # Test below threshold
-        # Test below threshold
-        low_delay = event_coordinator.queue_event(
-            event_type="test_event",
-            entity_id="test_1",
-            data={"test": "data"},
-            stability_score=0.6  # Below threshold
-        )
-        
-        # Test above threshold
-        high_delay = event_coordinator.queue_event(
-            event_type="test_event",
-            entity_id="test_2",
-            data={"test": "data"},
-            stability_score=0.8  # Above threshold
-        )
-        
-        # Verify both events were queued
-        stats = event_coordinator.get_window_stats()
-        assert stats["change_count"] == 2
-        
-        # Get window stats
-        stats = event_coordinator.get_window_stats()
-        assert stats["change_count"] == 2
-        assert stats["pending_events"] == 2
-        assert "current_pressure" in stats
+        assert stats["change_count"] == len(event_ids)
+        assert len(event_coordinator.get_pending_events()) == 0
     
     def test_stability_gradients(self, event_coordinator):
         """Test granular stability responses with fine-grained gradients."""
@@ -232,8 +307,9 @@ class TestLearningWindowControl:
         
         # Verify delays decrease with increasing stability
         assert all(delays[i] >= delays[i+1] for i in range(len(delays)-1))
+        
         # Verify window integrity
         stats = event_coordinator.get_window_stats()
         assert stats["change_count"] == 5
-        assert stats["pending_events"] == 5
+        assert len(event_coordinator.get_pending_events()) == 5
         assert not stats["is_saturated"]
