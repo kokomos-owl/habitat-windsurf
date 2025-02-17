@@ -10,7 +10,26 @@ This document outlines the remaining test implementation plan for Habitat, focus
 ## 1. Pattern-Aware RAG Tests 🟡
 
 ### Graph State Foundation (`test_pattern_processing.py`)
-- [ ] Initial state loading
+
+#### Validation Patterns
+The Pattern-Aware RAG system implements a two-level validation hierarchy to ensure data integrity:
+
+1. **Semantic Validation** (During Initialization)
+   - Relations must have non-empty types and non-negative weights
+   - Pattern confidence must be above threshold (0.5)
+   - Node IDs must be non-empty
+   - Ensures invalid data is caught immediately during object creation
+
+2. **Structural Validation** (During `validate_relations`)
+   - State cannot be empty (no nodes, patterns, or relations)
+   - Required components must exist (nodes and patterns)
+   - Relations must reference valid nodes or patterns
+   - Allows flexibility in when to check structural requirements
+
+This separation of concerns allows partial states during construction while maintaining data integrity.
+
+#### Test Coverage
+- [x] Initial state loading
   - Verify correct initialization of graph state
   - Validate state persistence
   - Test error handling for invalid states
