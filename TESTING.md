@@ -49,6 +49,35 @@ All tests focus on essential functionality without over-engineering.
   - Role-based pattern coordination
   - Protocol phase transitions
   - Consensus mechanism validation
+
+### 🌟 Natural System Tests
+- ✅ `test_learning_window_control`: Natural learning window tests
+  - Window lifecycle (CLOSED → OPENING → OPEN → SATURATED)
+  - Natural flow control with back pressure
+  - Pattern memory formation
+  - Stress response adaptation
+  - System stability maintenance
+
+- 🟡 `test_pattern_aware_rag_integration`: Integration tests
+  - Pattern flow control through windows
+  - Natural evolution with stability
+  - Back pressure under load
+  - System coherence maintenance
+  - Cross-component resonance
+
+- ⏳ `test_pei_integration`: Pattern Emergence Interface tests
+  - Natural pattern observation
+  - Event emission and flow
+  - State management and evolution
+  - Service integration patterns
+  - System protection mechanisms
+
+- ⏳ `test_natural_e2e`: End-to-end natural flow tests
+  - Complete query processing flow
+  - Pattern evolution cycles
+  - System stability under load
+  - Natural adaptation patterns
+  - Cross-service resonance
   - Message protocol verification
   - Backward compatibility checks
 
