@@ -19,7 +19,6 @@ from habitat_evolution.core.pattern import (
     PatternState
 )
 from habitat_evolution.core.services import (
-    PatternEvolutionService,
     FieldStateService,
     GradientService,
     FlowDynamicsService,
@@ -27,6 +26,7 @@ from habitat_evolution.core.services import (
     QualityMetricsService,
     EventManagementService
 )
+from habitat_evolution.adaptive_core.services.interfaces import PatternEvolutionService
 from habitat_evolution.adaptive_core.id import AdaptiveID
 from habitat_evolution.adaptive_core.models import Pattern, Relationship
 
