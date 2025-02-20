@@ -18,24 +18,32 @@ from habitat_evolution.core.pattern import (
     FlowMetrics,
     PatternState
 )
-from habitat_evolution.core.services import (
+from habitat_evolution.core.services.field.interfaces import (
     FieldStateService,
     GradientService,
-    FlowDynamicsService,
+    FlowDynamicsService
+)
+from habitat_evolution.adaptive_core.persistence.interfaces import (
+    MetricsRepository,
+    EventRepository
+)
+from habitat_evolution.core.services.event_bus import LocalEventBus
+from habitat_evolution.adaptive_core.services.interfaces import (
+    PatternEvolutionService,
     MetricsService,
     QualityMetricsService,
     EventManagementService
 )
-from habitat_evolution.adaptive_core.services.interfaces import PatternEvolutionService
-from habitat_evolution.adaptive_core.id import AdaptiveID
+from habitat_evolution.adaptive_core.id.adaptive_id import AdaptiveID
 from habitat_evolution.adaptive_core.models import Pattern, Relationship
 
-from .rag_controller import RAGController
-from .emergence_flow import EmergenceFlow, StateSpaceCondition
-from .coherence_embeddings import CoherenceEmbeddings, EmbeddingContext
-from .pattern_evolution import EvolutionMetrics
-from .coherence_flow import FlowDynamics, FlowState
-from .graph_service import PatternGraphService
+from .interfaces.pattern_emergence import PatternEmergenceInterface as EmergenceFlow
+from .learning.learning_control import WindowState as StateSpaceCondition
+from .interfaces.pattern_emergence import PatternMetrics as EvolutionMetrics
+from .monitoring.vector_attention_monitor import VectorAttentionMonitor
+from .core.coherence_interface import CoherenceInterface as FlowDynamics, StateAlignment as FlowState
+from .state.test_states import GraphStateSnapshot as PatternGraphService
+from .superceeded.coherence_embeddings import EmbeddingContext, CoherenceEmbeddings
 
 logger = logging.getLogger(__name__)
 
@@ -91,7 +99,6 @@ class PatternAwareRAG:
         metrics_service: MetricsService,
         quality_metrics_service: QualityMetricsService,
         event_service: EventManagementService,
-        rag_controller: RAGController,
         coherence_analyzer: Any,
         emergence_flow: EmergenceFlow,
         settings: Any,
@@ -107,7 +114,6 @@ class PatternAwareRAG:
         self.events = event_service
         
         # RAG components
-        self.rag = rag_controller
         self.coherence_analyzer = coherence_analyzer
         self.emergence_flow = emergence_flow
         self.settings = settings

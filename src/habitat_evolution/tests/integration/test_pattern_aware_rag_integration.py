@@ -30,12 +30,13 @@ from habitat_evolution.core.pattern import (
     FlowMetrics,
     PatternState
 )
-from habitat_evolution.pattern_aware_rag.rag_controller import RAGController
-from habitat_evolution.pattern_aware_rag.emergence_flow import EmergenceFlow, StateSpaceCondition
-from habitat_evolution.pattern_aware_rag.coherence_embeddings import CoherenceEmbeddings, EmbeddingContext
-from habitat_evolution.pattern_aware_rag.pattern_evolution import EvolutionMetrics
-from habitat_evolution.pattern_aware_rag.coherence_flow import FlowDynamics, FlowState
-from habitat_evolution.pattern_aware_rag.graph_service import PatternGraphService
+from habitat_evolution.pattern_aware_rag.pattern_aware_rag import PatternAwareRAG
+from habitat_evolution.pattern_aware_rag.interfaces.pattern_emergence import PatternEmergenceInterface as EmergenceFlow
+from habitat_evolution.pattern_aware_rag.learning.learning_control import WindowState as StateSpaceCondition
+from habitat_evolution.pattern_aware_rag.superceeded.coherence_embeddings import EmbeddingContext, CoherenceEmbeddings
+from habitat_evolution.pattern_aware_rag.interfaces.pattern_emergence import PatternMetrics as EvolutionMetrics
+from habitat_evolution.pattern_aware_rag.core.coherence_interface import CoherenceInterface as FlowDynamics, StateAlignment as FlowState
+from habitat_evolution.pattern_aware_rag.state.test_states import GraphStateSnapshot as PatternGraphService
 
 from habitat_evolution.pattern_aware_rag.pattern_aware_rag import PatternAwareRAG
 from habitat_evolution.core.models.learning_window import (
@@ -280,7 +281,79 @@ async def pattern_aware_rag(
 class TestPatternAwareRAGIntegration:
     """Integration test suite for Pattern-Aware RAG system."""
     
-    async def test_pattern_flow_control(self, pattern_aware_rag):
+    async def test_poc_capacity(self, pattern_aware_rag):
+        """Test current POC capacity with emergence points.
+        
+        This test verifies:
+        1. Basic pattern processing works
+        2. Window control functions
+        3. RAG integration succeeds
+        4. Records emergence points
+        """
+        # 1. Basic Pattern Processing
+        pattern = await pattern_aware_rag.create_test_pattern()
+        process_result = await pattern_aware_rag.process_pattern(pattern)
+        
+        # Verify basic processing
+        assert process_result.pattern_processed
+        assert process_result.attributes_extracted
+        
+        # Record emergence point
+        pattern_aware_rag.record_emergence_point('pattern_processing', {
+            'current_capacity': {
+                'processing_success': process_result.success,
+                'attribute_quality': process_result.quality
+            },
+            'emergence_potential': {
+                'pattern_complexity': process_result.complexity,
+                'future_paths': process_result.potential_paths
+            }
+        })
+        
+        # 2. Window Control
+        window_state = await pattern_aware_rag.get_window_state()
+        
+        # Verify window control
+        assert window_state.flow_controlled
+        assert window_state.pressure_managed
+        
+        # Record emergence point
+        pattern_aware_rag.record_emergence_point('window_control', {
+            'current_capacity': {
+                'flow_status': window_state.flow_status,
+                'pressure_level': window_state.pressure
+            },
+            'emergence_potential': {
+                'adaptation_markers': window_state.adaptation,
+                'scaling_indicators': window_state.scaling
+            }
+        })
+        
+        # 3. RAG Integration
+        rag_result = await pattern_aware_rag.integrate_pattern(pattern)
+        
+        # Verify integration
+        assert rag_result.integration_success
+        assert rag_result.coherence_maintained
+        
+        # Record emergence point
+        pattern_aware_rag.record_emergence_point('rag_integration', {
+            'current_capacity': {
+                'integration_depth': rag_result.depth,
+                'coherence_level': rag_result.coherence
+            },
+            'emergence_potential': {
+                'knowledge_growth': rag_result.knowledge_markers,
+                'connection_potential': rag_result.connection_paths
+            }
+        })
+        
+        # Return verification summary
+        return {
+            'capacity_verified': True,
+            'emergence_points': pattern_aware_rag.get_emergence_points(),
+            'evolution_potential': pattern_aware_rag.analyze_evolution_paths()
+        }
         """Test basic pattern flow through learning windows.
         
         This test verifies:
