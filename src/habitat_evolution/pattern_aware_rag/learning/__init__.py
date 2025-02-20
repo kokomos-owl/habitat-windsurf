@@ -19,6 +19,16 @@ This module provides components for managing learning windows and system stabili
 
 Key Features:
 - Temporal learning management
+"""
+
+from .window_manager import LearningWindowManager
+from .learning_control import LearningWindow, BackPressureController
+
+__all__ = [
+    'LearningWindowManager',
+    'LearningWindow',
+    'BackPressureController'
+]
 - Stability control
 - Event processing
 - Change rate limiting
