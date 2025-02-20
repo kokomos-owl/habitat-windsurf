@@ -19,6 +19,16 @@ This module provides components for managing learning windows and system stabili
 
 Key Features:
 - Temporal learning management
+- Stability control
+- Event processing
+- Change rate limiting
+
+Usage:
+    from habitat_evolution.pattern_aware_rag.learning import (
+        LearningWindowManager,
+        LearningWindow,
+        BackPressureController
+    )
 """
 
 from .window_manager import LearningWindowManager
@@ -26,29 +36,6 @@ from .learning_control import LearningWindow, BackPressureController
 
 __all__ = [
     'LearningWindowManager',
-    'LearningWindow',
-    'BackPressureController'
-]
-- Stability control
-- Event processing
-- Change rate limiting
-
-Usage:
-    from habitat_evolution.pattern_aware_rag.learning import (
-        EventCoordinator,
-        LearningWindow,
-        BackPressureController
-    )
-"""
-
-from .learning_control import (
-    EventCoordinator,
-    LearningWindow,
-    BackPressureController
-)
-
-__all__ = [
-    'EventCoordinator',
     'LearningWindow',
     'BackPressureController'
 ]
