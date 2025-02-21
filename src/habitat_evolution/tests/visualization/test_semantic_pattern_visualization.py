@@ -106,8 +106,11 @@ class AdaptiveId:
         elif self._window_state == WindowState.CLOSING:
             gradient_strength *= 0.5  # Fading connections
         
-        # Record in all transitions to track potential
-        for transition in self._transitions.get(self._window_state, []):
+        # Record gradient once per window state
+        current_transitions = self._transitions.get(self._window_state, [])
+        if current_transitions:
+            # Use the first transition for gradient recording
+            transition = current_transitions[0]
             if pattern_type:
                 transition.semantic_potential.suggest_pattern(pattern_type, gradient_strength)
             
@@ -116,6 +119,11 @@ class AdaptiveId:
                 to_pattern=pattern_id,
                 strength=gradient_strength
             )
+            
+            # Share pattern suggestions with other transitions
+            for other_transition in current_transitions[1:]:
+                if pattern_type:
+                    other_transition.semantic_potential.suggest_pattern(pattern_type, gradient_strength)
         
         # Generate Neo4j relationship properties with potential structure hints
         return {
@@ -197,7 +205,7 @@ def test_semantic_potential_evolution():
     # Observe natural pattern emergence
     observations = []
     
-    # Phase 1: Initial Pattern Suggestion
+    # Phase 1: Initial Pattern Suggestion (CLOSED state)
     drought_props = drought.connect_pattern(
         pattern_id=rainfall.current_id,
         relationship_strength=0.4,
@@ -205,8 +213,23 @@ def test_semantic_potential_evolution():
     )
     observations.append({
         "phase": "suggestion",
+        "window_state": drought._window_state.value,
         "potentials": drought_props["potential_patterns"],
         "gradients": drought_props["semantic_gradients"]
+    })
+    
+    # Phase 2: Initial Evolution (OPENING state)
+    drought.evolve(pressure=0.35, stability=0.85)
+    props = drought.connect_pattern(
+        pattern_id=rainfall.current_id,
+        relationship_strength=0.6,
+        pattern_type="precipitation_impact"
+    )
+    observations.append({
+        "phase": "evolution",
+        "window_state": drought._window_state.value,
+        "potentials": props["potential_patterns"],
+        "gradients": props["semantic_gradients"]
     })
     
     # Phase 2: Pattern Evolution
