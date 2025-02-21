@@ -50,11 +50,62 @@ class TestLiveCycle:
         # Remove test patterns from Neo4j
         pass
 
+    async def test_pattern_retrieval(self):
+        """Test pattern retrieval from Neo4j with relationship reconstruction."""
+        # 1. Setup test query and context
+        query = "test domain knowledge"
+        context = {
+            "domain": "test",
+            "relevance_threshold": 0.7,
+            "relationship_depth": 2
+        }
+        
+        # 2. Retrieve patterns with relationships
+        patterns = await self.neo4j.get_relevant_patterns(
+            query=query,
+            context=context,
+            limit=5
+        )
+        
+        # 3. Validate basic pattern structure
+        assert len(patterns) > 0
+        for pattern in patterns:
+            assert pattern.id is not None
+            assert pattern.coherence_score >= 0.7
+            assert pattern.stability_score >= 0.7
+            
+        # 4. Verify relationship reconstruction
+        for pattern in patterns:
+            relationships = await self.neo4j.get_pattern_relationships(pattern.id)
+            assert len(relationships) > 0
+            for rel in relationships:
+                assert rel.source_id is not None
+                assert rel.target_id is not None
+                assert rel.relationship_type is not None
+                assert rel.confidence_score >= 0.7
+                
+        # 5. Test relevance scoring
+        relevance_scores = await self.neo4j.get_pattern_relevance(
+            patterns=patterns,
+            query=query
+        )
+        assert len(relevance_scores) == len(patterns)
+        assert all(score >= 0.5 for score in relevance_scores.values())
+        
+        # 6. Validate pattern integrity
+        for pattern in patterns:
+            validation = await self.neo4j.validate_pattern_integrity(pattern)
+            assert validation.is_valid
+            assert validation.coherence_valid
+            assert validation.relationships_valid
+            assert len(validation.errors) == 0
+
     async def test_live_cycle(self):
         """Test complete live cycle with Claude integration."""
         # 1. Retrieve Existing Patterns from Neo4j
         patterns = await self.neo4j.get_relevant_patterns(
             query="test domain knowledge",
+            context={"domain": "test"},
             limit=5
         )
         assert len(patterns) > 0
