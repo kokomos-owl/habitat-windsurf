@@ -229,8 +229,40 @@ def test_semantic_potential_evolution():
             "gradients": props["semantic_gradients"]
         })
     
-    # Validate semantic potential
+    # Validate and display semantic potential
     assert len(observations) > 0, "Should record observations"
+    
+    print("\nSemantic Evolution Timeline:")
+    print("-" * 50)
+    
+    for i, obs in enumerate(observations):
+        print(f"\nStep {i + 1}: {obs['phase'].upper()}")
+        if 'window_state' in obs:
+            print(f"Window State: {obs['window_state']}")
+        
+        print("\nPotential Patterns:")
+        for pattern in obs['potentials']:
+            print(f"  - {pattern}")
+        
+        print("\nSemantic Gradients:")
+        for gradient in obs['gradients']:
+            strength = gradient['strength']
+            strength_bar = "█" * int(strength * 10)
+            print(f"  {gradient['from']} → {gradient['to']}")
+            print(f"    Strength: {strength:.2f} [{strength_bar:<10}]")
+            print(f"    Timestamp: {gradient['timestamp'].strftime('%H:%M:%S')}")
+            
+        # Show relationship evolution
+        if i > 0:
+            prev_gradients = {(g['from'], g['to']): g['strength'] 
+                            for g in observations[i-1]['gradients']}
+            for gradient in obs['gradients']:
+                key = (gradient['from'], gradient['to'])
+                if key in prev_gradients:
+                    prev_strength = prev_gradients[key]
+                    delta = gradient['strength'] - prev_strength
+                    if abs(delta) > 0.01:
+                        print(f"    Δ: {delta:+.2f} {'↑' if delta > 0 else '↓'}")
     
     # Check for natural emergence
     evolution_phases = [obs["phase"] for obs in observations]

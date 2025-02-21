@@ -4,11 +4,20 @@
 
 ## Implementation Status
 
+## Major Milestones
+
+### 2025-02-21: Learning Window and Semantic Pattern Evolution
+- Established light-touch semantic pattern evolution framework
+- Implemented AdaptiveId for pattern identification and tracking
+- Created natural meaning-structure discovery through window states
+- Integrated Neo4j-ready relationship properties
+
 ### Currently Implemented Flow
 ```
-1. Document → Pattern Extraction
-   - Document is ingested
-   - Patterns are extracted from document
+1. Document → Pattern Extraction (with Learning Window)
+   - Document is ingested through adaptive window states
+   - Patterns emerge naturally with varying strengths
+   - Semantic relationships evolve based on pressure and stability
    - Initial validation occurs
 
 2. Pattern Extraction → Graph Services
