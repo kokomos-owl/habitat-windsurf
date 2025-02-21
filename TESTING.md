@@ -8,7 +8,13 @@ This document outlines our comprehensive testing framework for the Pattern-Aware
 
 ### Core Components
 
-1. **Sequential Testing Architecture**
+1. **Intuitive Resonance Framework**
+   - Pattern resonance state progression (glimpse → resonance → attunement)
+   - Resonance network formation and evolution
+   - Individual intuition path tracking
+   - Natural pattern suggestion validation
+
+2. **Sequential Testing Architecture**
    - Natural pattern emergence validation
    - Window state transition monitoring (CLOSED → OPENING → OPEN → CLOSED)
    - Emergence point tracking
@@ -117,6 +123,29 @@ All tests focus on essential functionality without over-engineering.
 - ✅ Pattern coherence validation
 - ✅ Climate risk integration
 
+### Pattern Resonance Tests
+- ✅ `test_pattern_and_user_intuition`: Tests intuitive resonance framework
+  - Initial pattern glimpse validation
+  - Natural resonance progression
+  - Resonance network formation
+  - Intuitive hint propagation
+  - Cross-pattern resonance alignment
+  - Individual intuition paths
+  
+- ✅ `test_resonance_network_evolution`: Tests resonance network dynamics
+  - Network coherence under load
+  - Natural suggestion emergence
+  - Resonance strength stability
+  - Multi-user resonance patterns
+
+- ✅ `test_pattern_lifecycle_with_feedback`: Tests pattern lifecycle
+  - Natural state transitions (CLOSED → OPENING → OPEN)
+  - Semantic pressure validation (> 0.3 for OPENING)
+  - Stability metrics (> 0.7 for OPEN)
+  - Feedback at each transition
+  - Relationship coherence tracking
+  - Pattern emergence validation
+
 ### Pattern Feedback Tests
 - ✅ `test_pattern_feedback`: Tests pattern feedback processing
   - Attention smoothing with stability factors
@@ -198,6 +227,15 @@ All tests focus on essential functionality without over-engineering.
   - Resonance maintenance
   - Phase synchronization
   - Adaptive pressure response
+
+#### 6. Intuitive Resonance Evolution
+- ✅ **Pattern Resonance Tests**
+  - Natural progression through resonance states
+  - Resonance network formation and stability
+  - Individual intuition path validation
+  - Cross-pattern resonance coherence
+  - Intuitive hint propagation patterns
+  - Resonance strength evolution curves
 
 #### 6. Integration Tests
 - ✅ **System Coherence**

@@ -12,6 +12,12 @@
 - Created natural meaning-structure discovery through window states
 - Integrated Neo4j-ready relationship properties
 
+### 2025-02-21: Pattern Intuitive Resonance Framework
+- Introduced intuitive resonance for pattern connections
+- Implemented natural progression: glimpse → resonance → attunement
+- Created resonance networks for organic pattern discovery
+- Enabled individual intuition paths through pattern space
+
 ### Currently Implemented Flow
 ```
 1. Document → Pattern Extraction (with Learning Window)
@@ -173,16 +179,20 @@ prompt = await prompt_engine.generate_prompt(
 - Window state influences prompt structure
 - Pattern relationships are incorporated
 
-### 4. RAG Processing
+### 4. Intuitive RAG Processing
 ```python
-result = await pattern_aware_rag.process_with_patterns(
+result = await pattern_aware_rag.process_with_resonance(
     query="test query",
-    context={"pattern": pattern}
+    context={
+        "pattern": pattern,
+        "resonance_frame": user.get_intuition_frame(pattern.id)
+    }
 )
 ```
-- Retrieved patterns augment query processing
-- Pattern relationships guide context selection
-- Window state influences processing priority
+- Retrieved patterns resonate with query context
+- Pattern resonance networks guide exploration
+- Intuition state influences processing depth
+- Natural pattern suggestions emerge
 
 ### 5. Pattern Evolution
 ```python
@@ -195,7 +205,12 @@ assert evolved_pattern.version > pattern.version
 
 ### Key Components
 
-1. **State Management**
+1. **Intuition Management**
+   - Resonance state tracking (glimpse → resonance → attunement)
+   - Natural pattern network formation
+   - Individual intuition paths
+
+2. **State Management**
    - Version control for patterns
    - State synchronization
    - Coherence maintenance

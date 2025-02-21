@@ -108,12 +108,24 @@ class PatternLineage:
     observer_hash: str  # Condensed hash of observer sequence
     parent_hash: Optional[str] = None  # Condensed hash of parent pattern
 
+@dataclass
+class PatternIntuition:
+    """Represents evolving intuitive resonance with a pattern."""
+    pattern_id: str
+    resonance_strength: float   # How strongly pattern resonates
+    encounter_count: int       # Number of pattern encounters
+    last_resonance: datetime
+    intuition_state: str       # glimpse, resonance, attunement
+    hints: List[Dict]         # Intuitive hints about pattern connections
+
 class UserContext:
-    """User context with consistent, longer-term identity tracking."""
+    """User context with pattern intuition tracking."""
     def __init__(self, user_id: str):
         self._hasher = blake2b(digest_size=8)  # 8-byte hash for users
         self._user_id = user_id
-        self._pattern_history: List[str] = []
+        self._pattern_intuitions: Dict[str, PatternIntuition] = {}
+        self._resonance_networks: Dict[str, List[str]] = {}
+        self._intuition_flow: List[Dict] = []
     
     @property
     def hash(self) -> str:
@@ -121,14 +133,74 @@ class UserContext:
         self._hasher.update(self._user_id.encode())
         return self._hasher.hexdigest()[:16]  # 16 chars = 8 bytes
     
-    def track_pattern(self, pattern_id: str):
-        """Track user interaction with a pattern."""
-        self._pattern_history.append(pattern_id)
+    def resonate_with_pattern(self, pattern_id: str, hint: Dict = None) -> PatternIntuition:
+        """Create or deepen intuitive resonance with a pattern."""
+        if pattern_id not in self._pattern_intuitions:
+            # Initial glimpse
+            intuition = PatternIntuition(
+                pattern_id=pattern_id,
+                resonance_strength=0.1,
+                encounter_count=1,
+                last_resonance=datetime.now(),
+                intuition_state="glimpse",
+                hints=[hint] if hint else []
+            )
+            self._pattern_intuitions[pattern_id] = intuition
+        else:
+            # Deepen existing resonance
+            intuition = self._pattern_intuitions[pattern_id]
+            intuition.encounter_count += 1
+            intuition.last_resonance = datetime.now()
+            
+            # Evolve resonance naturally
+            if intuition.encounter_count > 10:
+                intuition.intuition_state = "attunement"
+                intuition.resonance_strength = min(1.0, intuition.resonance_strength + 0.1)
+            elif intuition.encounter_count > 5:
+                intuition.intuition_state = "resonance"
+                intuition.resonance_strength = min(0.8, intuition.resonance_strength + 0.15)
+            
+            if hint:
+                intuition.hints.append(hint)
+        
+        # Record intuition flow
+        self._intuition_flow.append({
+            "timestamp": datetime.now(),
+            "pattern_id": pattern_id,
+            "intuition": intuition,
+            "hint": hint
+        })
+        
+        return intuition
     
-    @property
-    def recent_patterns(self) -> List[str]:
-        """Get recently interacted patterns."""
-        return self._pattern_history[-5:]  # Last 5 patterns
+    def find_resonant_patterns(self, pattern_id: str) -> List[str]:
+        """Find patterns with similar resonance signatures."""
+        resonant = []
+        if pattern_id in self._pattern_intuitions:
+            # Find patterns with similar intuition states
+            current = self._pattern_intuitions[pattern_id]
+            for pid, intuit in self._pattern_intuitions.items():
+                if pid != pattern_id:
+                    # Check for resonance alignment
+                    state_match = intuit.intuition_state == current.intuition_state
+                    strength_diff = abs(intuit.resonance_strength - current.resonance_strength)
+                    if state_match and strength_diff < 0.3:  # Allow for natural variation
+                        resonant.append(pid)
+        return resonant
+    
+    def get_intuition_frame(self, pattern_id: str) -> Dict:
+        """Get current intuitive resonance frame for a pattern."""
+        if pattern_id in self._pattern_intuitions:
+            intuit = self._pattern_intuitions[pattern_id]
+            return {
+                "pattern_id": pattern_id,
+                "resonance_state": intuit.intuition_state,
+                "resonance": intuit.resonance_strength,
+                "attunement": intuit.encounter_count / 10.0,  # Natural progression
+                "recent_hints": intuit.hints[-3:],  # Recent intuitive hints
+                "resonant_patterns": self.find_resonant_patterns(pattern_id)
+            }
+        return None
 
 class AdaptiveId:
     """Base class for adaptive pattern identification with window state management."""
@@ -312,8 +384,8 @@ class AdaptiveId:
             "evolution_step": len(self._evolution_history)
         }
 
-def test_pattern_and_user_evolution():
-    """Test pattern ID evolution and user context tracking."""
+def test_pattern_and_user_intuition():
+    """Test pattern ID evolution and user-pattern intuitive resonance."""
     # Create user context
     user = UserContext("researcher_1")
     print(f"\nUser Hash: {user.hash}")
@@ -321,8 +393,16 @@ def test_pattern_and_user_evolution():
     # Create initial pattern with user as observer
     drought = AdaptiveId("drought_risk", observer_id=user.hash)
     initial_id = drought.current_id
-    user.track_pattern(initial_id)
-    print(f"\nInitial Pattern ID: {initial_id}")
+    
+    # Initial glimpse of pattern
+    intuition = user.resonate_with_pattern(
+        initial_id,
+        hint={"feeling": "Seems connected to seasonal cycles"}
+    )
+    print(f"\nInitial Pattern Glimpse:")
+    print(f"Pattern: {initial_id}")
+    print(f"State: {intuition.intuition_state}")
+    print(f"Resonance: {intuition.resonance_strength:.2f}")
     
     # Parse and verify components
     lineage = AdaptiveId.parse_pattern_id(initial_id)
@@ -332,30 +412,55 @@ def test_pattern_and_user_evolution():
     print(f"Step: {lineage.evolution_step}")
     print(f"Observer: {lineage.observer_hash}")
     
-    # Evolve pattern
-    drought.evolve(
-        pressure=0.4,
-        stability=0.8,
-        observer_insight={"confidence": 0.9, "impact": "high"}
-    )
-    evolved_id = drought.current_id
-    print(f"\nEvolved Pattern ID: {evolved_id}")
+    # Deepen resonance through encounters
+    for i in range(6):  # Progress through resonance states
+        hint = {
+            "feeling": f"Intuitive hint {i+1}",
+            "certainty": 0.5 + i*0.1,
+            "connections": ["weather", "climate"]
+        }
+        drought.evolve(
+            pressure=0.4 + i*0.1,
+            stability=0.8,
+            observer_insight=hint
+        )
+        evolved_id = drought.current_id
+        intuition = user.resonate_with_pattern(evolved_id, hint)
     
-    # Create derived pattern
-    drought_severity = AdaptiveId(
-        "drought_severity",
-        observer_id="agent_2",
-        parent_pattern_id=drought.current_id
-    )
-    derived_id = drought_severity.current_id
-    print(f"\nDerived Pattern ID: {derived_id}")
+    print(f"\nDeepened Resonance:")
+    frame = user.get_intuition_frame(evolved_id)
+    print(f"Pattern: {evolved_id}")
+    print(f"State: {frame['resonance_state']}")
+    print(f"Attunement: {frame['attunement']:.2f}")
+    print(f"Recent Hints: {len(frame['recent_hints'])}")
     
-    # Parse derived pattern
-    derived = AdaptiveId.parse_pattern_id(derived_id)
-    print("\nDerived Pattern Lineage:")
-    print(f"Base: {derived.base_id}")
-    print(f"Parent: {derived.parent_hash}")
-    print(f"Observer: {derived.observer_hash}")
+    # Create and explore resonant patterns
+    rainfall = AdaptiveId("rainfall_pattern", observer_id=user.hash)
+    temperature = AdaptiveId("temperature_pattern", observer_id=user.hash)
+    
+    # Build resonance network
+    for pattern in [rainfall, temperature]:
+        for i in range(4):
+            pattern_id = pattern.current_id
+            hint = {
+                "feeling": f"Network resonance {i+1}",
+                "connection_type": "harmony",
+                "intensity": 0.6 + i*0.1
+            }
+            pattern.evolve(pressure=0.5, stability=0.7, observer_insight=hint)
+            user.resonate_with_pattern(pattern_id, hint)
+    
+    print("\nResonance Network:")
+    resonant = user.find_resonant_patterns(evolved_id)
+    print(f"Patterns resonating with {evolved_id}:")
+    for rel in resonant:
+        rel_frame = user.get_intuition_frame(rel)
+        print(f"  - {rel} ({rel_frame['resonance_state']})")
+    
+    # Demonstrate natural resonance progression
+    print(f"\nResonance Journey:")
+    for entry in user._intuition_flow[-3:]:
+        print(f"  {entry['timestamp']}: {entry['hint']['feeling']} ({entry['intuition'].intuition_state})")
 
 def test_semantic_potential_evolution():
     """Test the natural evolution of semantic potential in pattern discovery."""

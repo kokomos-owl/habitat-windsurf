@@ -81,19 +81,21 @@ This separation of concerns allows partial states during construction while main
   - Validate conflict resolution with multi-state merging
 
 ### Learning Window Control (`test_learning_window_control.py`)
-- [ ] State transitions
-  - Test CLOSED → OPENING transition
-  - Test OPENING → OPEN transition
-  - Verify state persistence
-  - Validate transition conditions
-- [ ] Back pressure control
-  - Test overload detection
-  - Verify throttling mechanisms
-  - Validate recovery procedures
-- [ ] Coherence maintenance
-  - Test stability metrics
-  - Verify coherence thresholds
-  - Validate adaptation mechanisms
+- [✅] State transitions
+  - Test CLOSED → OPENING transition (pressure > 0.3)
+  - Test OPENING → OPEN transition (pressure > 0.5, stability > 0.7)
+  - Verify state persistence with feedback
+  - Validate natural transition conditions
+- [✅] Pattern Evolution
+  - Track semantic pressure metrics
+  - Monitor stability progression
+  - Validate relationship coherence
+  - Test pattern emergence
+- [✅] Feedback Mechanisms
+  - Validate pressure metrics
+  - Track stability measurements
+  - Monitor relationship formation
+  - Verify temporal progression
 
 ### Integration Tests (`test_full_cycle.py`)
 - [ ] Claude interaction
