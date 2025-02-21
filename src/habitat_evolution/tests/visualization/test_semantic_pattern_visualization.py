@@ -3,7 +3,7 @@
 import pytest
 import numpy as np
 from datetime import datetime
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Any
 from dataclasses import dataclass, field
 
 from habitat_evolution.visualization.semantic_validation import (
@@ -33,6 +33,44 @@ class SemanticPotential:
         self.attraction_points: Dict[str, float] = {}
         self.semantic_gradients: List[Dict] = []
         self.boundary_tension: float = 0.0
+        self.concept_resonance: Dict[str, Dict] = {}
+        self.pattern_correlations: Dict[tuple, List[float]] = {}
+        
+    def observe_semantic_potential(self, observation: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """Observe semantic potential without enforcing relationships."""
+        suggestions = []
+        
+        # Extract concepts from observation
+        concepts = set()
+        for key, value in observation.items():
+            if isinstance(value, (str, float)):
+                concepts.add(key)
+                if value and isinstance(value, str):
+                    concepts.add(value)
+        
+        # Look for semantic alignments
+        for concept in concepts:
+            # Record observation frequency
+            if concept not in self.attraction_points:
+                self.attraction_points[concept] = 0.0
+            self.attraction_points[concept] += 0.1
+            
+            # Suggest potential relationships based on context proximity
+            related = [c for c in concepts if c != concept]
+            if related:
+                suggestion = {
+                    'concept': concept,
+                    'potential_alignments': related,
+                    'context_strength': self.attraction_points[concept],
+                    'timestamp': datetime.now()
+                }
+                suggestions.append(suggestion)
+                
+                # Update boundary tension based on relationship potential
+                self.boundary_tension = max(0.0, 
+                    self.boundary_tension + (0.05 * len(related)))
+        
+        return suggestions
     
     def suggest_pattern(self, pattern_type: str, confidence: float):
         """Suggest a potential pattern without forcing it."""
@@ -57,14 +95,55 @@ class WindowTransition:
         self.last_transition = None
         self.semantic_potential = SemanticPotential()
 
+from dataclasses import dataclass
+from typing import List, Optional
+from hashlib import blake2b
+
+@dataclass
+class PatternLineage:
+    """Compact representation of pattern evolution history."""
+    base_id: str
+    state: str
+    evolution_step: int
+    observer_hash: str  # Condensed hash of observer sequence
+    parent_hash: Optional[str] = None  # Condensed hash of parent pattern
+
+class UserContext:
+    """User context with consistent, longer-term identity tracking."""
+    def __init__(self, user_id: str):
+        self._hasher = blake2b(digest_size=8)  # 8-byte hash for users
+        self._user_id = user_id
+        self._pattern_history: List[str] = []
+    
+    @property
+    def hash(self) -> str:
+        """Generate consistent 8-byte hash for user identity."""
+        self._hasher.update(self._user_id.encode())
+        return self._hasher.hexdigest()[:16]  # 16 chars = 8 bytes
+    
+    def track_pattern(self, pattern_id: str):
+        """Track user interaction with a pattern."""
+        self._pattern_history.append(pattern_id)
+    
+    @property
+    def recent_patterns(self) -> List[str]:
+        """Get recently interacted patterns."""
+        return self._pattern_history[-5:]  # Last 5 patterns
+
 class AdaptiveId:
     """Base class for adaptive pattern identification with window state management."""
-    def __init__(self, base_id: str, initial_state: WindowState = WindowState.CLOSED):
+    def __init__(self, base_id: str, initial_state: WindowState = WindowState.CLOSED, 
+                 observer_id: str = None, parent_pattern_id: str = None):
+        from hashlib import blake2b
+        self._hasher = blake2b(digest_size=4)  # Small, efficient hash
         self._base_id = base_id
         self._window_state = initial_state
         self._evolution_history = []
         self._stability_score = 1.0
         self._pressure_level = 0.0
+        self._observer_id = observer_id  # Track who's observing/modifying
+        self._parent_pattern_id = parent_pattern_id  # Track pattern lineage
+        self._child_patterns: Set[str] = set()  # Track derived patterns
         
         # Define valid transitions and thresholds
         self._transitions = {
@@ -88,9 +167,33 @@ class AdaptiveId:
         self._connected_patterns: Set[str] = set()
         self._relationship_strengths: Dict[str, float] = {}
     
+    def _generate_hash(self, value: str) -> str:
+        """Generate short, consistent hash for observers/patterns."""
+        self._hasher.update(value.encode())
+        return self._hasher.hexdigest()[:8]
+    
     @property
     def current_id(self) -> str:
-        return f"{self._base_id}_{len(self._evolution_history)}"
+        state_abbrev = self._window_state.value[:3].lower()
+        obs_hash = self._generate_hash(self._observer_id) if self._observer_id else ""
+        parent_hash = self._generate_hash(self._parent_pattern_id) if self._parent_pattern_id else ""
+        
+        # Compact format: base_state_step#obs#parent
+        return f"{self._base_id}_{state_abbrev}_{len(self._evolution_history)}#{obs_hash}#{parent_hash}"
+    
+    @staticmethod
+    def parse_pattern_id(pattern_id: str) -> PatternLineage:
+        """Deconstruct pattern ID into its components."""
+        base_state_step, obs_hash, parent_hash = pattern_id.split('#')
+        base, state, step = base_state_step.rsplit('_', 2)
+        
+        return PatternLineage(
+            base_id=base,
+            state=state,
+            evolution_step=int(step),
+            observer_hash=obs_hash,
+            parent_hash=parent_hash if parent_hash else None
+        )
     
     def connect_pattern(self, pattern_id: str, relationship_strength: float, pattern_type: str = None):
         """Establish semantic relationship with another pattern."""
@@ -167,15 +270,29 @@ class AdaptiveId:
                 return transition.to_state
         return None
     
-    def evolve(self, pressure: float, stability: float):
-        """Record evolution step with pressure and stability metrics."""
-        self._evolution_history.append({
+    def evolve(self, pressure: float, stability: float, observer_insight: Dict = None):
+        """Record evolution step with pressure and stability metrics.
+        
+        Args:
+            pressure: Current pressure level
+            stability: Current stability score
+            observer_insight: Optional insights from observer, should be concise
+        """
+        evolution_step = {
             "timestamp": datetime.now(),
             "pressure": pressure,
             "stability": stability,
             "window_state": self._window_state.value,
-            "connected_patterns": list(self._connected_patterns)
-        })
+            "connected_patterns": list(self._connected_patterns),
+            "observer_id": self._observer_id,
+            "parent_pattern": self._parent_pattern_id,
+            "child_patterns": list(self._child_patterns)
+        }
+        
+        if observer_insight:
+            evolution_step["observer_insight"] = observer_insight
+            
+        self._evolution_history.append(evolution_step)
         
         self._stability_score = stability
         self._pressure_level = pressure
@@ -195,27 +312,116 @@ class AdaptiveId:
             "evolution_step": len(self._evolution_history)
         }
 
+def test_pattern_and_user_evolution():
+    """Test pattern ID evolution and user context tracking."""
+    # Create user context
+    user = UserContext("researcher_1")
+    print(f"\nUser Hash: {user.hash}")
+    
+    # Create initial pattern with user as observer
+    drought = AdaptiveId("drought_risk", observer_id=user.hash)
+    initial_id = drought.current_id
+    user.track_pattern(initial_id)
+    print(f"\nInitial Pattern ID: {initial_id}")
+    
+    # Parse and verify components
+    lineage = AdaptiveId.parse_pattern_id(initial_id)
+    print("\nPattern Lineage:")
+    print(f"Base: {lineage.base_id}")
+    print(f"State: {lineage.state}")
+    print(f"Step: {lineage.evolution_step}")
+    print(f"Observer: {lineage.observer_hash}")
+    
+    # Evolve pattern
+    drought.evolve(
+        pressure=0.4,
+        stability=0.8,
+        observer_insight={"confidence": 0.9, "impact": "high"}
+    )
+    evolved_id = drought.current_id
+    print(f"\nEvolved Pattern ID: {evolved_id}")
+    
+    # Create derived pattern
+    drought_severity = AdaptiveId(
+        "drought_severity",
+        observer_id="agent_2",
+        parent_pattern_id=drought.current_id
+    )
+    derived_id = drought_severity.current_id
+    print(f"\nDerived Pattern ID: {derived_id}")
+    
+    # Parse derived pattern
+    derived = AdaptiveId.parse_pattern_id(derived_id)
+    print("\nDerived Pattern Lineage:")
+    print(f"Base: {derived.base_id}")
+    print(f"Parent: {derived.parent_hash}")
+    print(f"Observer: {derived.observer_hash}")
+
 def test_semantic_potential_evolution():
     """Test the natural evolution of semantic potential in pattern discovery."""
-    # Initialize test nodes
-    drought = AdaptiveId("drought_risk")
-    rainfall = AdaptiveId("rainfall_pattern")
+    # Initialize test nodes with semantic context and observers
+    drought = AdaptiveId("drought_risk", observer_id="agent_1")
+    rainfall = AdaptiveId("rainfall_pattern", observer_id="agent_2")
+    
+    # Create a derived pattern from drought
+    drought_severity = AdaptiveId(
+        "drought_severity",
+        observer_id="agent_3",
+        parent_pattern_id=drought.current_id
+    )
     wildfire = AdaptiveId("wildfire_risk")
+    
+    # Define initial concept relationships
+    climate_concepts = {
+        "drought": {
+            "precipitation": 0.8,  # Strong direct relationship
+            "soil_moisture": 0.7,
+            "temperature": 0.6,
+            "wildfire": 0.5   # Initial moderate relationship
+        },
+        "precipitation": {
+            "drought": 0.8,
+            "flood_risk": 0.6,
+            "vegetation": 0.5
+        },
+        "wildfire": {
+            "temperature": 0.7,
+            "drought": 0.5,
+            "wind_pattern": 0.4
+        }
+    }
     
     # Observe natural pattern emergence
     observations = []
     
     # Phase 1: Initial Pattern Suggestion (CLOSED state)
+    # Observe initial context without enforcing relationships
+    initial_observation = {
+        "pattern_type": "climate_risk",
+        "risk_factor": "drought",
+        "related_measure": "rainfall",
+        "confidence": 0.4
+    }
+    
+    # Let semantic potential emerge from observation
+    semantic_suggestions = drought._transitions[WindowState.CLOSED][0].semantic_potential.observe_semantic_potential(
+        initial_observation
+    )
+    
+    # Connect patterns based on observed potential
     drought_props = drought.connect_pattern(
         pattern_id=rainfall.current_id,
         relationship_strength=0.4,
         pattern_type="precipitation_impact"
     )
+    
     observations.append({
         "phase": "suggestion",
+        "pattern_id": drought.current_id,
         "window_state": drought._window_state.value,
-        "potentials": drought_props["potential_patterns"],
-        "gradients": drought_props["semantic_gradients"]
+        "semantic_suggestions": semantic_suggestions,
+        "gradients": drought_props["semantic_gradients"],
+        "boundary_tension": drought._transitions[drought._window_state][0].semantic_potential.boundary_tension
     })
     
     # Phase 2: Initial Evolution (OPENING state)
@@ -228,7 +434,10 @@ def test_semantic_potential_evolution():
     observations.append({
         "phase": "evolution",
         "window_state": drought._window_state.value,
-        "potentials": props["potential_patterns"],
+        "pattern_ids": {
+            "drought": drought.current_id,
+            "rainfall": rainfall.current_id
+        },
         "gradients": props["semantic_gradients"]
     })
     
@@ -260,12 +469,46 @@ def test_semantic_potential_evolution():
     
     for i, obs in enumerate(observations):
         print(f"\nStep {i + 1}: {obs['phase'].upper()}")
+        if 'pattern_ids' in obs:
+            print("Pattern IDs:")
+            for name, pid in obs['pattern_ids'].items():
+                print(f"  {name}: {pid}")
+        elif 'pattern_id' in obs:
+            print(f"Pattern ID: {obs['pattern_id']}")
+            
         if 'window_state' in obs:
             print(f"Window State: {obs['window_state']}")
         
-        print("\nPotential Patterns:")
-        for pattern in obs['potentials']:
-            print(f"  - {pattern}")
+        if obs.get('semantic_suggestions'):
+            print("\nSemantic Potential:")
+            # Group by concept type
+            risk_concepts = [s for s in obs['semantic_suggestions'] 
+                           if 'risk' in s['concept']]
+            measure_concepts = [s for s in obs['semantic_suggestions']
+                              if 'measure' in s['concept'] or 'pattern' in s['concept']]
+            
+            if risk_concepts:
+                print("  Risk Factors:")
+                for suggestion in risk_concepts:
+                    strength_bar = "█" * int(suggestion['context_strength'] * 10)
+                    print(f"    {suggestion['concept']}: {suggestion['context_strength']:.2f} [{strength_bar:<10}]")
+                    if suggestion['potential_alignments']:
+                        measures = [a for a in suggestion['potential_alignments'] 
+                                  if 'measure' in a or 'pattern' in a]
+                        if measures:
+                            print("      Related Measures:")
+                            for measure in measures:
+                                print(f"        • {measure}")
+            
+            if measure_concepts:
+                print("  Measurements:")
+                for suggestion in measure_concepts:
+                    strength_bar = "█" * int(suggestion['context_strength'] * 10)
+                    print(f"    {suggestion['concept']}: {suggestion['context_strength']:.2f} [{strength_bar:<10}]")
+        
+        if 'boundary_tension' in obs:
+            tension_bar = "█" * int(obs['boundary_tension'] * 10)
+            print(f"\nBoundary Tension: {obs['boundary_tension']:.2f} [{tension_bar:<10}]")
         
         print("\nSemantic Gradients:")
         for gradient in obs['gradients']:
