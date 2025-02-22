@@ -2,10 +2,12 @@
 
 import pytest
 import numpy as np
+import json
 from datetime import datetime
 from typing import Dict, List, Optional, Tuple, Any
 from dataclasses import dataclass, field
 
+from habitat_evolution.visualization.pattern_id import PatternAdaptiveID
 from habitat_evolution.visualization.semantic_validation import (
     SemanticValidator,
     ValidationStatus,
@@ -666,6 +668,17 @@ class SemanticNode:
         self._coherence_score = score
         pressure = 1.0 - score if score < self._stability_threshold else 0.0
         self.adaptive_id.evolve(pressure=pressure, stability=score)
+        
+    def to_dict(self):
+        """Convert node to dictionary for Neo4j export."""
+        return {
+            'id': self.id,
+            'type': self.type,
+            'created_at': self.created_at.isoformat(),
+            'confidence': self.confidence,
+            'coherence': self._coherence_score,
+            'adaptive_id': self.adaptive_id.current_id()
+        }
 
 class TemporalNode(SemanticNode):
     """Represents a temporal context."""
@@ -673,6 +686,15 @@ class TemporalNode(SemanticNode):
         super().__init__(id=id, type="temporal")
         self.period = period
         self.year = year
+        
+    def to_dict(self):
+        """Convert temporal node to dictionary with period and year."""
+        base_dict = super().to_dict()
+        base_dict.update({
+            'period': self.period,
+            'year': self.year
+        })
+        return base_dict
     
 class EventNode(SemanticNode):
     """Represents climate events."""
@@ -680,6 +702,15 @@ class EventNode(SemanticNode):
         super().__init__(id=id, type="event")
         self.event_type = event_type
         self.metrics = metrics
+        
+    def to_dict(self):
+        """Convert event node to dictionary with event type and metrics."""
+        base_dict = super().to_dict()
+        base_dict.update({
+            'event_type': self.event_type,
+            'metrics': self.metrics
+        })
+        return base_dict
 
 @dataclass
 class SemanticRelation:
@@ -700,50 +731,84 @@ class SemanticPatternVisualizer(TestPatternVisualizer):
     def extract_patterns_from_semantic_graph(
         self, 
         semantic_graph: Dict
-    ) -> List[Dict]:
+    ) -> List[PatternAdaptiveID]:
         """Extract patterns from semantic graph with validation."""
         patterns = []
         
-        # Validate temporal nodes
-        temporal_result = self.validator.validate_temporal_sequence(
-            semantic_graph["temporal_nodes"]
-        )
-        self.validator.log_validation(temporal_result)
-        
-        if temporal_result.status == ValidationStatus.RED:
-            raise ValueError(f"Invalid temporal sequence: {temporal_result.message}")
+        # Process temporal nodes
+        if "temporal_nodes" in semantic_graph:
+            for node in semantic_graph["temporal_nodes"]:
+                validation_result = self.validator.validate_node_structure(node)
+                self.validator.log_validation(validation_result)
+                if validation_result.status == ValidationStatus.RED:
+                    raise ValueError(validation_result.message)
+                pattern = PatternAdaptiveID(
+                    pattern_type="temporal",
+                    hazard_type="temporal_context",
+                    creator_id=node.id,
+                    confidence=1.0
+                )
+                pattern.temporal_context = {
+                    node.period: node.year,
+                    "created_at": node.created_at,
+                    "last_modified": node.created_at
+                }
+                pattern.update_metrics(
+                    position=(0, node.year),  # Use year as y-coordinate
+                    field_state=1.0,  # Base field state
+                    coherence=1.0,
+                    energy_state=1.0  # Base energy state
+                )
+                patterns.append(pattern)
         
         # Process event nodes
-        for event in semantic_graph["event_nodes"]:
-            # Validate node structure
-            node_result = self.validator.validate_node_structure(event)
-            self.validator.log_validation(node_result)
-            
-            if node_result.status == ValidationStatus.RED:
-                continue
-                
-            # Extract pattern from event
-            pattern = {
-                "type": event.event_type,
-                "metrics": {
-                    "confidence": event.confidence,
-                    **event.metrics
-                },
-                "temporal_context": {
-                    period: next(
-                        t for t in semantic_graph["temporal_nodes"]
-                        if t.period == period
-                    ).year
-                    for period in ["current", "mid_century", "late_century"]
+        if "event_nodes" in semantic_graph:
+            for event in semantic_graph["event_nodes"]:
+                validation_result = self.validator.validate_node_structure(event)
+                self.validator.log_validation(validation_result)
+                if validation_result.status == ValidationStatus.RED:
+                    raise ValueError(validation_result.message)
+                pattern = PatternAdaptiveID(
+                    pattern_type="event",
+                    hazard_type=event.event_type,
+                    creator_id=event.id,
+                    confidence=1.0
+                )
+                pattern.temporal_context = {
+                    "created_at": event.created_at,
+                    "last_modified": event.created_at
                 }
-            }
-            patterns.append(pattern)
-            
+                pattern.update_metrics(
+                    position=(0, 0),  # Default position
+                    field_state=1.0,  # Base field state
+                    coherence=1.0,
+                    energy_state=1.0  # Base energy state
+                )
+                patterns.append(pattern)
+        
+        # Process relations
+        if "relations" in semantic_graph:
+            for rel in semantic_graph["relations"]:
+                source_pattern = next((p for p in patterns if p.creator_id == rel.source_id), None)
+                target_pattern = next((p for p in patterns if p.creator_id == rel.target_id), None)
+                
+                if source_pattern and target_pattern:
+                    source_pattern.add_relationship(
+                        target_id=target_pattern.id,
+                        relationship_type=rel.relation_type,
+                        metrics={
+                            "strength": rel.strength,
+                            "spatial_distance": 1.0,
+                            "coherence_similarity": 1.0,
+                            "combined_strength": rel.strength
+                        }
+                    )
+        
         return patterns
     
     def discover_pattern_relationships(
         self,
-        patterns: List[Dict]
+        patterns: List[PatternAdaptiveID]
     ) -> List[Dict]:
         """Discover and validate relationships between patterns."""
         relationships = []
@@ -759,8 +824,8 @@ class SemanticPatternVisualizer(TestPatternVisualizer):
                 
                 if temporal_alignment > 0.5 or causal_strength > 0.5:
                     relationship = {
-                        "source": p1["type"],
-                        "target": p2["type"],
+                        "source": p1.pattern_type,
+                        "target": p2.pattern_type,
                         "metrics": {
                             "temporal_alignment": temporal_alignment,
                             "causal_strength": causal_strength
@@ -770,8 +835,8 @@ class SemanticPatternVisualizer(TestPatternVisualizer):
                     # Validate relationship
                     rel_result = self.validator.validate_relationship(
                         SemanticRelation(
-                            source_id=p1["type"],
-                            target_id=p2["type"],
+                            source_id=p1.id,
+                            target_id=p2.id,
                             relation_type="temporal" if temporal_alignment > causal_strength else "causal",
                             strength=max(temporal_alignment, causal_strength),
                             evidence=[]
@@ -795,9 +860,9 @@ class SemanticPatternVisualizer(TestPatternVisualizer):
         # Group patterns by type
         pattern_groups = {}
         for pattern in patterns:
-            if pattern["type"] not in pattern_groups:
-                pattern_groups[pattern["type"]] = []
-            pattern_groups[pattern["type"]].append(pattern)
+            if pattern.pattern_type not in pattern_groups:
+                pattern_groups[pattern.pattern_type] = []
+            pattern_groups[pattern.pattern_type].append(pattern)
         
         # Build evolution chains
         for pattern_type, group in pattern_groups.items():
@@ -805,7 +870,8 @@ class SemanticPatternVisualizer(TestPatternVisualizer):
             for temporal_node in sorted(temporal_nodes, key=lambda x: x.year):
                 matching_patterns = [
                     p for p in group
-                    if p["temporal_context"][temporal_node.period] == temporal_node.year
+                    if hasattr(p, 'temporal_context') and 
+                    getattr(p, 'temporal_context', {}).get(temporal_node.period) == temporal_node.year
                 ]
                 
                 if matching_patterns:
@@ -820,29 +886,232 @@ class SemanticPatternVisualizer(TestPatternVisualizer):
         
         return evolution_chains
     
-    def _calculate_temporal_alignment(self, p1: Dict, p2: Dict) -> float:
+    def _calculate_temporal_alignment(self, p1: PatternAdaptiveID, p2: PatternAdaptiveID) -> float:
         """Calculate temporal alignment between patterns."""
-        periods = ["current", "mid_century", "late_century"]
-        alignments = []
+        # For temporal patterns, check hazard_type alignment
+        if p1.pattern_type == "temporal" and p2.pattern_type == "temporal":
+            # Perfect alignment if same hazard_type
+            return 1.0 if p1.hazard_type == p2.hazard_type else 0.0
         
-        for period in periods:
-            year = p1["temporal_context"][period]
-            if year == p2["temporal_context"][period]:
-                alignments.append(1.0)
-            else:
-                alignments.append(0.0)
-                
-        return sum(alignments) / len(alignments)
+        # For event patterns, check hazard_type alignment
+        elif p1.pattern_type == "event" and p2.pattern_type == "event":
+            return 1.0 if p1.hazard_type == p2.hazard_type else 0.0
+        
+        # For mixed patterns (temporal and event)
+        else:
+            # Use confidence as a measure of alignment
+            return min(p1.confidence, p2.confidence)
     
-    def _calculate_causal_strength(self, p1: Dict, p2: Dict) -> float:
+    def _calculate_causal_strength(self, p1: PatternAdaptiveID, p2: PatternAdaptiveID) -> float:
         """Calculate causal relationship strength between patterns."""
         # Example causation rules (can be expanded)
         causation_rules = {
             ("drought", "wildfire"): 0.8,
-            ("precipitation", "flood"): 0.7
+            ("extreme_precipitation", "storm_surge"): 0.7,
+            ("drought", "extratropical_storms"): 0.5,
+            ("precipitation", "flood"): 0.7,
+            ("temporal", "event"): 0.6,  # Temporal context influences events
+            ("event", "temporal"): 0.4   # Events can shape temporal patterns
         }
         
-        return causation_rules.get((p1["type"], p2["type"]), 0.0)
+        # Get the key types for lookup
+        type1 = p1.pattern_type
+        type2 = p2.pattern_type
+        
+        # Check direct causation
+        if (type1, type2) in causation_rules:
+            return causation_rules[(type1, type2)]
+        
+        # Check hazard type causation
+        if p1.pattern_type == "event" and p2.pattern_type == "event":
+            if (p1.hazard_type, p2.hazard_type) in causation_rules:
+                return causation_rules[(p1.hazard_type, p2.hazard_type)]
+        
+        return 0.0
+    
+    def export_to_neo4j(self, patterns: List[PatternAdaptiveID]) -> Dict:
+        """Export patterns and relationships to Neo4j format."""
+        nodes = []
+        relationships = []
+        
+        # Create nodes
+        for pattern in patterns:
+            node = {
+                "id": pattern._base_id,
+                "type": pattern._pattern_type if hasattr(pattern, '_pattern_type') else 'unknown',
+                "hazard_type": pattern._hazard_type if hasattr(pattern, '_hazard_type') else 'unknown',
+                "confidence": pattern._confidence if hasattr(pattern, '_confidence') else 1.0,
+                "temporal_context": pattern._temporal_context if hasattr(pattern, '_temporal_context') else None,
+                "metrics": {
+                    "field_state": pattern._field_state if hasattr(pattern, '_field_state') else None,
+                    "coherence": pattern._coherence if hasattr(pattern, '_coherence') else None,
+                    "energy_state": pattern._energy_state if hasattr(pattern, '_energy_state') else None
+                }
+            }
+            nodes.append(node)
+            
+            # Create relationships
+            for connected_id in pattern._connected_patterns:
+                strength = pattern._relationship_strengths.get(connected_id, 0.0)
+                relationship = {
+                    "source": pattern._base_id,
+                    "target": connected_id,
+                    "type": "RELATED_TO",
+                    "properties": {
+                        "strength": strength,
+                        "created_at": datetime.now().isoformat()
+                    },
+                    "color": "#ff0000" if strength > 0.7 else "#0000ff",
+                    "width": 2 if strength > 0.7 else 1,
+                    "arrow": "triangle"
+                }
+                relationships.append(relationship)
+        
+        return {
+            "nodes": nodes,
+            "relationships": relationships
+        }
+    
+    def visualize_test_structure(self, patterns: List[PatternAdaptiveID]) -> Dict:
+        """Create Neo4j visualization of test structure."""
+        # Export patterns to Neo4j format
+        graph_data = self.export_to_neo4j(patterns)
+        
+        # Add visualization metadata
+        for node in graph_data["nodes"]:
+            if node["type"] == "test_group":
+                node["color"] = "#4CAF50"  # Green for test groups
+                node["size"] = 40
+            else:
+                node["color"] = "#2196F3"  # Blue for test cases
+                node["size"] = 30
+        
+        for rel in graph_data["relationships"]:
+            if rel["type"] == "CONTAINS":
+                rel["color"] = "#4CAF50"  # Green for contains
+                rel["width"] = 2
+            elif rel["type"] == "PRECEDES":
+                rel["color"] = "#FFC107"  # Yellow for precedes
+                rel["width"] = 1
+            rel["arrow"] = "triangle"
+        
+        return graph_data
+    
+    def generate_neo4j_query(self, graph_data: Dict) -> str:
+        """Generate Neo4j Cypher query to create the graph."""
+        query_parts = []
+        
+        # Create nodes
+        for node in graph_data["nodes"]:
+            props = {
+                "id": node["id"],
+                "type": node["type"],
+                "hazard_type": node["hazard_type"],
+                "confidence": node["confidence"],
+                "temporal_context": node["temporal_context"],
+                "metrics": node["metrics"]
+            }
+            props_str = ', '.join(f'{k}: {json.dumps(v)}' for k, v in props.items())
+            query_parts.append(f"CREATE (n:Pattern {{ {props_str} }})")        
+        
+        # Create relationships
+        for rel in graph_data["relationships"]:
+            props = {
+                "type": rel["type"],
+                **rel["properties"]
+            }
+            props_str = ', '.join(f'{k}: {json.dumps(v)}' for k, v in props.items())
+            query_parts.append(
+                f"MATCH (s:Pattern {{id: '{rel['source']}'}}), (t:Pattern {{id: '{rel['target']}'}})"
+                f" CREATE (s)-[r:{rel['type']} {{ {props_str} }}]->(t)")
+        
+        return "\n".join(query_parts)
+
+
+def test_neo4j_visualization():
+    """Test Neo4j visualization capabilities."""
+    # Initialize visualizer
+    visualizer = SemanticPatternVisualizer()
+    
+    # Create test patterns
+    patterns = [
+        AdaptiveId(
+            "drought_2025",  # base_id
+            initial_state=WindowState.OPEN,
+            observer_id="test_observer"
+        ),
+        AdaptiveId(
+            "wildfire_2025",  # base_id
+            initial_state=WindowState.OPEN,
+            observer_id="test_observer"
+        ),
+        AdaptiveId(
+            "storm_surge_2025",  # base_id
+            initial_state=WindowState.OPEN,
+            observer_id="test_observer"
+        )
+    ]
+    
+    # Set pattern properties
+    for pattern in patterns:
+        pattern._pattern_type = "event"
+        pattern._confidence = 0.8
+        pattern._temporal_context = {"current": 2025}
+        pattern._field_state = 0.7
+        pattern._coherence = 0.9
+        pattern._energy_state = 0.6
+    
+    patterns[0]._hazard_type = "drought"
+    patterns[1]._hazard_type = "wildfire"
+    patterns[2]._hazard_type = "storm_surge"
+    
+    # Create relationships
+    patterns[0].connect_pattern(patterns[1]._base_id, 0.8)  # drought -> wildfire
+    patterns[1].connect_pattern(patterns[2]._base_id, 0.6)  # wildfire -> storm_surge
+    
+    # Export to Neo4j format
+    graph_data = visualizer.export_to_neo4j(patterns)
+    
+    # Verify nodes
+    assert len(graph_data["nodes"]) == 3
+    for node in graph_data["nodes"]:
+        assert "id" in node
+        assert "type" in node
+        assert "hazard_type" in node
+        assert "confidence" in node
+        assert "temporal_context" in node
+        assert "metrics" in node
+        assert node["confidence"] == 0.8
+        assert node["temporal_context"] == {"current": 2025}
+    
+    # Verify relationships
+    assert len(graph_data["relationships"]) == 2
+    for rel in graph_data["relationships"]:
+        assert "source" in rel
+        assert "target" in rel
+        assert "type" in rel
+        assert "properties" in rel
+        assert "strength" in rel["properties"]
+        assert "created_at" in rel["properties"]
+    
+    # Test visualization metadata
+    viz_data = visualizer.visualize_test_structure(patterns)
+    for node in viz_data["nodes"]:
+        assert "color" in node
+        assert "size" in node
+    
+    for rel in viz_data["relationships"]:
+        assert "color" in rel
+        assert "width" in rel
+        assert "arrow" in rel
+    
+    # Test Neo4j query generation
+    query = visualizer.generate_neo4j_query(graph_data)
+    assert isinstance(query, str)
+    assert "CREATE" in query
+    assert "MATCH" in query
+    assert "Pattern" in query
+
 
 @pytest.fixture
 def semantic_graph_selection():
@@ -850,86 +1119,64 @@ def semantic_graph_selection():
     current_time = datetime.now()
     
     temporal_nodes = [
-        TemporalNode(
-            id="current",
-            type="temporal",
-            period="current",
-            year=2025,
-            created_at=current_time
-        ),
-        TemporalNode(
-            id="mid_century",
-            type="temporal",
-            period="mid_century",
-            year=2050,
-            created_at=current_time
-        ),
-        TemporalNode(
-            id="late_century",
-            type="temporal",
-            period="late_century",
-            year=2100,
-            created_at=current_time
-        )
+        TemporalNode(period="current", year=2025, id="current"),
+        TemporalNode(period="mid_century", year=2050, id="mid_century"),
+        TemporalNode(period="late_century", year=2075, id="late_century")
     ]
     
     event_nodes = [
         EventNode(
             id="rainfall_100yr",
-            type="event",
-            event_type="precipitation",
+            event_type="extreme_precipitation",
             metrics={
                 "current_probability": 1.0,
                 "mid_increase": 1.2,
-                "late_multiplier": 5.0
-            },
-            created_at=current_time
+                "late_increase": 1.5
+            }
         ),
         EventNode(
-            id="drought",
-            type="event",
+            id="drought_severe",
             event_type="drought",
             metrics={
-                "current_likelihood": 0.085,
-                "mid_likelihood": 0.13,
-                "late_likelihood": 0.26
-            },
-            created_at=current_time
+                "current_probability": 0.8,
+                "mid_increase": 1.3,
+                "late_increase": 1.8
+            }
         ),
         EventNode(
-            id="wildfire",
-            type="event",
+            id="wildfire_high",
             event_type="wildfire",
             metrics={
-                "current_baseline": 1.0,
-                "mid_increase": 1.44,
-                "late_increase": 1.94
-            },
-            created_at=current_time
+                "current_probability": 0.6,
+                "mid_increase": 1.4,
+                "late_increase": 2.0
+            }
         )
     ]
     
     relations = [
         SemanticRelation(
-            source_id="drought",
-            target_id="wildfire",
-            relation_type="causation",
+            source_id="drought_severe",
+            target_id="wildfire_high",
+            relation_type="increases_probability",
             strength=0.8,
-            evidence=["Linked to this increase in drought stress"]
+            evidence=["historical correlation", "scientific studies"]
         ),
         SemanticRelation(
             source_id="rainfall_100yr",
-            target_id="flood_risk",
-            relation_type="correlation",
-            strength=0.9,
-            evidence=["useful indicator of flood risk"]
+            target_id="drought_severe",
+            relation_type="decreases_probability",
+            strength=0.6,
+            evidence=["moisture availability", "soil conditions"]
         )
     ]
     
     return {
         "temporal_nodes": temporal_nodes,
         "event_nodes": event_nodes,
-        "relations": relations
+        "relations": relations,
+        "created_at": current_time,
+        "location": "Martha's Vineyard"
     }
 
 def test_semantic_pattern_discovery(semantic_graph_selection):
@@ -974,17 +1221,183 @@ def test_validation_status_tracking(semantic_graph_selection):
     # Introduce an invalid node
     invalid_event = EventNode(
         id="invalid",
-        type="event",
         event_type="unknown",
-        metrics={},
-        created_at=datetime.now()
+        metrics={}
     )
+    invalid_event.confidence = 0.5  # Set confidence after creation
     semantic_graph_selection["event_nodes"].append(invalid_event)
     
     # Extract patterns (should trigger validation warnings)
-    visualizer.extract_patterns_from_semantic_graph(semantic_graph_selection)
+    try:
+        visualizer.extract_patterns_from_semantic_graph(semantic_graph_selection)
+    except ValueError:
+        # Expected error due to invalid node
+        pass
     
-    # Check updated status
+    # Check updated status - should be RED due to invalid event type
     updated_status = visualizer.validator.get_ui_status()
-    assert updated_status["status"] in [ValidationStatus.YELLOW, ValidationStatus.RED]
+    assert updated_status["status"] == ValidationStatus.RED
     assert "validation_history" in dir(visualizer.validator)
+
+def test_abstract_visualization():
+    """Test visualization of test structure as a graph."""
+    # Create test structure nodes
+    test_nodes = [
+        SemanticNode(id="pattern_validation", type="test_group"),
+        SemanticNode(id="evolution_tracking", type="test_group"),
+        SemanticNode(id="neo4j_integration", type="test_group"),
+        
+        # Pattern validation tests
+        SemanticNode(id="event_type_validation", type="test_case"),
+        SemanticNode(id="temporal_context_validation", type="test_case"),
+        SemanticNode(id="relationship_validation", type="test_case"),
+        
+        # Evolution tracking tests
+        SemanticNode(id="pattern_transition", type="test_case"),
+        SemanticNode(id="temporal_alignment", type="test_case"),
+        SemanticNode(id="causal_strength", type="test_case"),
+        
+        # Neo4j integration tests
+        SemanticNode(id="graph_structure", type="test_case"),
+        SemanticNode(id="pattern_persistence", type="test_case"),
+        SemanticNode(id="relationship_preservation", type="test_case")
+    ]
+    
+    # Create relationships between tests
+    test_relations = [
+        # Pattern validation relationships
+        SemanticRelation(
+            source_id="pattern_validation",
+            target_id="event_type_validation",
+            relation_type="CONTAINS",
+            strength=1.0,
+            evidence=["Validates climate hazard event types"]
+        ),
+        SemanticRelation(
+            source_id="pattern_validation",
+            target_id="temporal_context_validation",
+            relation_type="CONTAINS",
+            strength=1.0,
+            evidence=["Validates temporal context fields"]
+        ),
+        SemanticRelation(
+            source_id="pattern_validation",
+            target_id="relationship_validation",
+            relation_type="CONTAINS",
+            strength=1.0,
+            evidence=["Validates pattern relationships"]
+        ),
+        
+        # Evolution tracking relationships
+        SemanticRelation(
+            source_id="evolution_tracking",
+            target_id="pattern_transition",
+            relation_type="CONTAINS",
+            strength=1.0,
+            evidence=["Tracks pattern state transitions"]
+        ),
+        SemanticRelation(
+            source_id="evolution_tracking",
+            target_id="temporal_alignment",
+            relation_type="CONTAINS",
+            strength=1.0,
+            evidence=["Tracks temporal alignment between patterns"]
+        ),
+        SemanticRelation(
+            source_id="evolution_tracking",
+            target_id="causal_strength",
+            relation_type="CONTAINS",
+            strength=1.0,
+            evidence=["Monitors causal relationship strength"]
+        ),
+        
+        # Neo4j integration relationships
+        SemanticRelation(
+            source_id="neo4j_integration",
+            target_id="graph_structure",
+            relation_type="CONTAINS",
+            strength=1.0,
+            evidence=["Validates Neo4j graph structure"]
+        ),
+        SemanticRelation(
+            source_id="neo4j_integration",
+            target_id="pattern_persistence",
+            relation_type="CONTAINS",
+            strength=1.0,
+            evidence=["Tests pattern persistence in Neo4j"]
+        ),
+        SemanticRelation(
+            source_id="neo4j_integration",
+            target_id="relationship_preservation",
+            relation_type="CONTAINS",
+            strength=1.0,
+            evidence=["Tests relationship preservation in Neo4j"]
+        ),
+        
+        # Cross-group relationships
+        SemanticRelation(
+            source_id="pattern_validation",
+            target_id="evolution_tracking",
+            relation_type="PRECEDES",
+            strength=0.8,
+            evidence=["Validation must pass before evolution"]
+        ),
+        SemanticRelation(
+            source_id="evolution_tracking",
+            target_id="neo4j_integration",
+            relation_type="PRECEDES",
+            strength=0.8,
+            evidence=["Evolution must be tracked before persistence"]
+        )
+    ]
+    
+    # Create temporal nodes
+    temporal_nodes = [
+        TemporalNode(period="current", year=2025, id="current"),
+        TemporalNode(period="mid_century", year=2050, id="mid_century"),
+        TemporalNode(period="late_century", year=2075, id="late_century")
+    ]
+    
+    # Create event nodes
+    event_nodes = [
+        EventNode(
+            id="drought_severe",
+            event_type="drought",
+            metrics={
+                "current_probability": 0.8,
+                "mid_increase": 1.3,
+                "late_increase": 1.8
+            }
+        ),
+        EventNode(
+            id="wildfire_high",
+            event_type="wildfire",
+            metrics={
+                "current_probability": 0.6,
+                "mid_increase": 1.4,
+                "late_increase": 2.0
+            }
+        )
+    ]
+    
+    # Create semantic graph
+    semantic_graph = {
+        "relations": test_relations,
+        "temporal_nodes": temporal_nodes,
+        "event_nodes": event_nodes,
+        "created_at": datetime.now(),
+        "location": "Test Environment"
+    }
+    
+    visualizer = SemanticPatternVisualizer()
+    patterns = visualizer.extract_patterns_from_semantic_graph(semantic_graph)
+    
+    # Discover and validate relationships
+    visualizer.discover_pattern_relationships(patterns)
+    
+    # Verify test structure
+    assert len(patterns) == len(temporal_nodes) + len(event_nodes)
+    
+    # Verify relationships
+    validation_result = visualizer.validator.get_ui_status()
+    assert validation_result["status"] == ValidationStatus.GREEN

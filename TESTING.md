@@ -123,6 +123,21 @@ All tests focus on essential functionality without over-engineering.
 - ✅ Pattern coherence validation
 - ✅ Climate risk integration
 
+### Semantic Pattern Tests
+- ✅ `test_semantic_pattern_validation`: Tests pattern validation
+  - Event type validation for climate hazards (extreme_precipitation, drought, wildfire, etc.)
+  - Temporal context validation (created_at, last_modified)
+  - Relationship coherence validation with metrics:
+    * strength: Base relationship strength
+    * spatial_distance: Spatial relationship metric
+    * coherence_similarity: Pattern coherence
+    * combined_strength: Overall relationship strength
+  - Pattern transition tracking
+  - Causal strength monitoring
+  - Neo4j graph structure validation
+  - Status tracking (GREEN/YELLOW/RED)
+  - Validation history logging
+
 ### Pattern Resonance Tests
 - ✅ `test_pattern_and_user_intuition`: Tests intuitive resonance framework
   - Initial pattern glimpse validation

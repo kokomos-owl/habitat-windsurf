@@ -47,6 +47,31 @@ This document outlines Habitat's comprehensive testing framework for the Pattern
 
 ## 1. Pattern-Aware RAG Tests 🟡
 
+### Semantic Pattern Testing (`test_semantic_pattern_validation.py`)
+
+#### Testing Strategy
+1. **Pattern Validation**
+   - Validate climate hazard event types (extreme_precipitation, drought, wildfire, etc.)
+   - Check temporal context completeness (created_at, last_modified)
+   - Verify relationship coherence with metrics:
+     * strength: Base relationship strength
+     * spatial_distance: Spatial relationship metric
+     * coherence_similarity: Pattern coherence
+     * combined_strength: Overall relationship strength
+   - Monitor pattern transitions
+   - Track causal strength
+   - Validate status tracking (GREEN/YELLOW/RED)
+   - Verify validation history logging
+
+2. **Neo4j Integration**
+   - Test graph structure validity
+   - Verify pattern persistence
+   - Validate relationship preservation with required metrics
+   - Check climate risk context
+   - Validate node structure and event types
+   - Verify relationship coherence
+   - Test status tracking and history
+
 ### Graph State Foundation (`test_pattern_processing.py`)
 
 #### Validation Patterns

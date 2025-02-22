@@ -62,6 +62,16 @@ class SemanticValidator:
                     context={"node_type": getattr(node, "type", "unknown")}
                 )
             
+            # Validate event type if it's an event node
+            if node.type == "event":
+                valid_event_types = ["extreme_precipitation", "drought", "wildfire", "extratropical_storms", "storm_surge"]
+                if not hasattr(node, "event_type") or node.event_type not in valid_event_types:
+                    return ValidationResult(
+                        status=ValidationStatus.RED,
+                        message=f"Invalid event type: {getattr(node, 'event_type', 'missing')}",
+                        context={"valid_types": valid_event_types}
+                    )
+            
             return ValidationResult(
                 status=ValidationStatus.GREEN,
                 message="Node structure valid",
