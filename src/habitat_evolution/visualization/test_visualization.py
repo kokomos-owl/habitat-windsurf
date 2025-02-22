@@ -317,7 +317,10 @@ class TestPatternVisualizer:
                         confidence: $confidence,
                         version_id: $version_id,
                         created_at: $created_at,
-                        last_modified: $last_modified
+                        last_modified: $last_modified,
+                        temporal_horizon: $temporal_horizon,
+                        spatial_context: $spatial_context,
+                        probability: $probability
                     })
                 """, {
                     'id': node_data['id'],
@@ -332,7 +335,10 @@ class TestPatternVisualizer:
                     'confidence': float(node_data['confidence']),
                     'version_id': node_data['version_id'],
                     'created_at': node_data['created_at'],
-                    'last_modified': node_data['last_modified']
+                    'last_modified': node_data['last_modified'],
+                    'temporal_horizon': node_data.get('temporal_horizon'),
+                    'spatial_context': node_data.get('spatial_context'),
+                    'probability': node_data.get('probability')
                 })
             
             # Create pattern relationships from AdaptiveID relationships
