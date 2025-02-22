@@ -24,6 +24,7 @@ class DimensionalWindow:
         self.attraction_points = {}  # Track concept attraction like SemanticPotential
         self.semantic_gradients = []  # Track relationships between concepts
         self.boundary_tension = 0.0
+        self.transcendence_score = 0.0  # Track how much pattern transcends dimension
         self.last_update = datetime.now()
     
     def observe(self, observation: Dict[str, Any]) -> Dict[str, Any]:
@@ -180,27 +181,43 @@ class DimensionalContext:
         """Process new pattern observation and track dimensional transcendence."""
         potential_dimensions = self._detect_dimensions(observation)
         
+        results = {}
         for dim in potential_dimensions:
             window = self.dimensions[dim]
-            window.update(observation)
+            result = window.observe(observation)
+            
+            if result['suggestions']:
+                results[dim.value] = result
+                self._update_dimension_weights(dim)
             
             if self._detect_transcendence(dim, observation):
                 self._record_evolution(dim, observation)
                 self._update_dimension_weights(dim)
+        
+        return results
 
     def _detect_dimensions(self, observation: Dict[str, Any]) -> List[DimensionType]:
         """Detect which dimensions are relevant to this observation."""
         dimensions = []
         
-        # Spatial indicators
-        spatial_indicators = {"location", "boundary", "region", "area", "coordinates"}
-        if any(ind in observation for ind in spatial_indicators):
+        # Spatial dimension - location-based patterns
+        if any(key in observation for key in ['location', 'position', 'area', 'region']):
             dimensions.append(DimensionType.SPATIAL)
         
-        # Temporal indicators
-        temporal_indicators = {"timestamp", "frequency", "period", "duration", "rate"}
-        if any(ind in observation for ind in temporal_indicators):
+        # Temporal dimension - time-based patterns
+        if any(key in observation for key in ['time', 'date', 'period', 'duration']):
             dimensions.append(DimensionType.TEMPORAL)
+        
+        # Systemic dimension - system-wide patterns
+        if any(key in observation for key in ['system', 'network', 'process', 'flow']):
+            dimensions.append(DimensionType.SYSTEMIC)
+        
+        # Reference dimension - external reference points
+        if any(key in observation for key in ['reference', 'baseline', 'benchmark']):
+            dimensions.append(DimensionType.REFERENCE)
+        
+        # If no specific dimensions detected, observe in all dimensions
+        return dimensions if dimensions else list(DimensionType)
         
         # Systemic indicators
         systemic_indicators = {"ecosystem", "interaction", "relationship", "coupling", "feedback"}
@@ -217,15 +234,36 @@ class DimensionalContext:
         """Detect if a pattern is transcending its original dimension."""
         window = self.dimensions[dimension]
         
-        if len(window.observations) < 2:
-            return False
-            
-        # Check transcendence score against adaptive threshold
-        base_threshold = 0.3
-        weighted_threshold = base_threshold * (1 + self.dimension_weights[dimension])
+        # Check if pattern shows significant boundary tension
+        if window.boundary_tension > 0.3:
+            # Look for cross-dimensional relationships
+            for other_dim, other_window in self.dimensions.items():
+                if other_dim != dimension and other_window.boundary_tension > 0:
+                    return True
         
-        return window.transcendence_score > weighted_threshold
-    
+        return False
+        
+    def _record_evolution(self, dimension: DimensionType, observation: Dict[str, Any]) -> None:
+        """Record pattern evolution event."""
+        self.evolution_history.append({
+            'timestamp': datetime.now(),
+            'dimension': dimension.value,
+            'observation': observation,
+            'boundary_tension': self.dimensions[dimension].boundary_tension,
+            'window_state': self.dimensions[dimension].state.value
+        })
+        
+    def _update_dimension_weights(self, dimension: DimensionType) -> None:
+        """Update dimension weights based on observed pattern evolution."""
+        window = self.dimensions[dimension]
+        self.dimension_weights[dimension] = (
+            len(window.observations) * window.boundary_tension
+        )
+        
+    def get_active_dimensions(self) -> List[DimensionType]:
+        """Get dimensions currently showing pattern activity."""
+        return [dim_type for dim_type, window in self.dimensions.items()
+                if window.state in (WindowState.OPENING, WindowState.OPEN)]
     def _record_evolution(self, dimension: DimensionType, observation: Dict[str, Any]) -> None:
         """Record pattern evolution event."""
         self.evolution_history.append({

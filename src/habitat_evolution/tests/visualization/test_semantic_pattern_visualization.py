@@ -1460,6 +1460,7 @@ def test_dimensional_pattern_emergence():
             "impact": "infrastructure_damage",
             "severity": 0.6
         }
+        # Use observe() instead of update()
         results = context.observe_pattern(new_observation)
     
     # Get evolution summary
