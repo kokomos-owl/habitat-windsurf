@@ -9,5 +9,14 @@ This package provides visualization tools for:
 """
 
 from .test_visualization import TestVisualizationConfig, TestPatternVisualizer
+from .pattern_id import PatternAdaptiveID
+from .semantic_validation import SemanticValidator, ValidationStatus, ValidationResult
 
-__all__ = ['TestVisualizationConfig', 'TestPatternVisualizer']
+__all__ = [
+    'TestVisualizationConfig',
+    'TestPatternVisualizer',
+    'PatternAdaptiveID',
+    'SemanticValidator',
+    'ValidationStatus',
+    'ValidationResult'
+]

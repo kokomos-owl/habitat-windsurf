@@ -16,11 +16,19 @@ def create_sample_graph():
         period="current",
         year=2025
     )
+    current.node_type = "temporal"
+    current.temporal_horizon = "current"
+    current.probability = 1.0
+    
     mid_century = TemporalNode(
         id="mid_2050",
         period="mid_century",
         year=2050
     )
+    mid_century.node_type = "temporal"
+    mid_century.temporal_horizon = "mid_century"
+    mid_century.probability = 1.0
+    
     temporal_nodes = [current, mid_century]
 
     # Create event nodes
@@ -33,6 +41,10 @@ def create_sample_graph():
             "late_increase": 5.0
         }
     )
+    rainfall.node_type = "event"
+    rainfall.temporal_horizon = "current"
+    rainfall.probability = 1.0
+    
     drought = EventNode(
         id="drought_severe",
         event_type="drought",
@@ -42,6 +54,10 @@ def create_sample_graph():
             "late_probability": 0.26
         }
     )
+    drought.node_type = "event"
+    drought.temporal_horizon = "mid_century"
+    drought.probability = 0.13
+    
     event_nodes = [rainfall, drought]
 
     # Create relationships using object references

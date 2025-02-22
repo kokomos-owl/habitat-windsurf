@@ -7,17 +7,13 @@ from datetime import datetime
 from typing import Dict, List, Optional, Tuple, Any
 from dataclasses import dataclass, field
 
-from habitat_evolution.visualization.pattern_id import PatternAdaptiveID
-from habitat_evolution.visualization.semantic_validation import (
-    SemanticValidator,
-    ValidationStatus,
-    ValidationResult
-)
-
-from habitat_evolution.visualization.test_visualization import (
+# Use visualization test classes
+from ...visualization.test_visualization import (
     TestVisualizationConfig,
     TestPatternVisualizer
 )
+from ...visualization.pattern_id import PatternAdaptiveID
+from ...visualization.semantic_validation import SemanticValidator, ValidationStatus
 
 from enum import Enum
 from typing import Optional, List, Dict, Set
@@ -205,8 +201,26 @@ class UserContext:
         return None
 
 class AdaptiveId:
-    """Base class for adaptive pattern identification with window state management."""
-    def __init__(self, base_id: str, initial_state: WindowState = WindowState.CLOSED, 
+    """Base class for adaptive pattern identification with window state management.
+    
+    This class implements a consistent pattern for handling contextual information:
+    - temporal_context: Stored as a JSON string to ensure consistent serialization/deserialization
+      across the system. This pattern should be followed for any future context types
+      (e.g., spatial_context) that need to store structured data.
+      
+    The context pattern follows these rules:
+    1. Initialize as a JSON string containing an empty dict
+    2. Always serialize when setting
+    3. Always deserialize when reading
+    4. Use json.loads/dumps for consistency
+    
+    This approach ensures:
+    - Consistent data representation across the system
+    - Safe serialization for database storage
+    - Clear contract for context handling in derived classes
+    """
+    def __init__(self, base_id: str, pattern_type: str = None, hazard_type: str = None,
+                 initial_state: WindowState = WindowState.CLOSED, 
                  observer_id: str = None, parent_pattern_id: str = None):
         from hashlib import blake2b
         self._hasher = blake2b(digest_size=4)  # Small, efficient hash
@@ -218,6 +232,16 @@ class AdaptiveId:
         self._observer_id = observer_id  # Track who's observing/modifying
         self._parent_pattern_id = parent_pattern_id  # Track pattern lineage
         self._child_patterns: Set[str] = set()  # Track derived patterns
+        # Initialize contexts following the standard pattern
+        # temporal_context: JSON string for structured temporal data
+        self.temporal_context = json.dumps({})  # Initialize as empty JSON dict
+        self.temporal_horizon = None  # Current temporal scope
+        self.probability = None       # Event probability
+        # spatial_context: Currently a simple string, but could be extended to use
+        # the same JSON pattern as temporal_context if needed in the future
+        self.spatial_context = None
+        self.pattern_type = pattern_type
+        self.hazard_type = hazard_type
         
         # Define valid transitions and thresholds
         self._transitions = {
@@ -652,7 +676,14 @@ def test_semantic_potential_evolution():
 
 @dataclass
 class SemanticNode:
-    """Base class for semantic graph nodes with adaptive identification."""
+    """Base class for semantic graph nodes with adaptive identification.
+    
+    Establishes the standard context handling pattern:
+    - All context fields (temporal, spatial, etc.) are stored as JSON strings
+    - Contexts are always serialized when setting
+    - Contexts are always deserialized when accessing
+    - Uses json.loads/dumps for consistency
+    """
     id: str
     type: str
     created_at: datetime = field(default_factory=datetime.now)
@@ -662,6 +693,13 @@ class SemanticNode:
         self.adaptive_id = AdaptiveId(self.id)
         self._coherence_score = 0.0
         self._stability_threshold = 0.8  # From success criteria
+        # Initialize base contexts using the datetime from top-level import
+        now = datetime.now()
+        self.temporal_context = json.dumps({
+            "created_at": self.created_at.isoformat(),
+            "last_modified": now.isoformat()
+        })
+        self.spatial_context = json.dumps({})
     
     def update_coherence(self, score: float):
         """Update coherence score and evolve adaptive ID if needed."""
@@ -669,57 +707,188 @@ class SemanticNode:
         pressure = 1.0 - score if score < self._stability_threshold else 0.0
         self.adaptive_id.evolve(pressure=pressure, stability=score)
         
+    def update_temporal_context(self, updates: Dict[str, Any]) -> None:
+        """Safely update temporal context by deserializing, updating, and reserializing.
+        
+        Args:
+            updates: Dictionary of updates to apply to temporal context
+        """
+        current = json.loads(self.temporal_context) if isinstance(self.temporal_context, str) else {}
+        current.update(updates)
+        current['last_modified'] = datetime.now().isoformat()
+        self.temporal_context = json.dumps(current)
+    
+    def update_spatial_context(self, updates: Dict[str, Any]) -> None:
+        """Safely update spatial context by deserializing, updating, and reserializing.
+        
+        Args:
+            updates: Dictionary of updates to apply to spatial context
+        """
+        current = json.loads(self.spatial_context) if isinstance(self.spatial_context, str) else {}
+        current.update(updates)
+        current['last_modified'] = datetime.now().isoformat()
+        self.spatial_context = json.dumps(current)
+        
     def to_dict(self):
-        """Convert node to dictionary for Neo4j export."""
+        """Convert node to dictionary for Neo4j export.
+        
+        Returns:
+            dict: Node representation with properly deserialized contexts:
+                - temporal_context: JSON string -> dict
+                - spatial_context: JSON string -> dict
+                - Other fields: Direct property access
+        """
         return {
             'id': self.id,
             'type': self.type,
             'created_at': self.created_at.isoformat(),
             'confidence': self.confidence,
             'coherence': self._coherence_score,
-            'adaptive_id': self.adaptive_id.current_id()
+            'adaptive_id': self.adaptive_id.current_id(),
+            'node_type': getattr(self, 'node_type', None),
+            'temporal_horizon': getattr(self, 'temporal_horizon', None),
+            'temporal_context': json.loads(self.temporal_context) if isinstance(self.temporal_context, str) else {},
+            'spatial_context': json.loads(self.spatial_context) if isinstance(self.spatial_context, str) else {},
+            'probability': getattr(self, 'probability', None)
         }
 
 class TemporalNode(SemanticNode):
-    """Represents a temporal context."""
+    """Represents a temporal context.
+    
+    Follows the standard context handling pattern defined in AdaptiveId:
+    - temporal_context is stored as a JSON string
+    - Handles serialization/deserialization consistently
+    - Maintains the contract for Neo4j export
+    """
     def __init__(self, period: str, year: int, id: str):
         super().__init__(id=id, type="temporal")
         self.period = period
         self.year = year
+        # Initialize temporal_context using helper method
+        self.update_temporal_context({
+            "period": period,
+            "year": year
+        })
         
     def to_dict(self):
-        """Convert temporal node to dictionary with period and year."""
+        """Convert temporal node to dictionary with period and year.
+        
+        Returns:
+            dict: Node representation with properly deserialized contexts:
+                - temporal_context: Deserialized from JSON string
+                - period, year: Direct property access
+        """
         base_dict = super().to_dict()
         base_dict.update({
             'period': self.period,
-            'year': self.year
+            'year': self.year,
+            'hazard_type': 'temporal_context',
+            'temporal_horizon': self.period,
+            'probability': 1.0,
+            'spatial_context': 'MarthasVineyard'
         })
         return base_dict
     
 class EventNode(SemanticNode):
-    """Represents climate events."""
+    """Represents climate events.
+    
+    Follows the standard context handling pattern defined in AdaptiveId:
+    - temporal_context is stored as a JSON string
+    - Handles serialization/deserialization consistently
+    - Maintains the contract for Neo4j export
+    """
     def __init__(self, id: str, event_type: str, metrics: Dict[str, float]):
         super().__init__(id=id, type="event")
         self.event_type = event_type
         self.metrics = metrics
         
     def to_dict(self):
-        """Convert event node to dictionary with event type and metrics."""
+        """Convert event node to dictionary with event type and metrics.
+        
+        Returns:
+            dict: Node representation with properly deserialized contexts:
+                - temporal_context: Deserialized from JSON string
+                - metrics: Raw metrics dictionary
+                - Other fields: Direct property access
+        """
         base_dict = super().to_dict()
         base_dict.update({
             'event_type': self.event_type,
-            'metrics': self.metrics
+            'metrics': self.metrics,
+            'hazard_type': self.event_type,
+            'temporal_horizon': getattr(self, 'temporal_horizon', 'current'),
+            'probability': self.metrics.get(f'{getattr(self, "temporal_horizon", "current")}_probability', 1.0),
+            'increase_percent': self.metrics.get(f'{getattr(self, "temporal_horizon", "current")}_increase', None),
+            'spatial_context': 'MarthasVineyard',
+            'temporal_context': json.loads(self.temporal_context) if isinstance(self.temporal_context, str) else {}
         })
         return base_dict
 
-@dataclass
-class SemanticRelation:
-    """Represents relationships between nodes."""
-    source_id: str
-    target_id: str
-    relation_type: str
-    strength: float
-    evidence: List[str]
+class SemanticRelation(SemanticNode):
+    """Represents evolving relationships between semantic patterns.
+    
+    As part of the Unified Adaptive Pattern Evolution Framework, relationships are
+    treated as first-class evolution points alongside nodes. This enables:
+    
+    1. Learning Windows:
+       - Inherits window state management from SemanticNode
+       - Enables gradual relationship pattern emergence
+       - Transitions: CLOSED -> OPENING -> OPEN -> CLOSING
+    
+    2. Adaptive Identity:
+       - Composite ID structure: source_relation_target
+       - Evolves with connected patterns
+       - Maintains semantic continuity
+    
+    3. Context Management:
+       - temporal_context: JSON string tracking evolution history
+       - spatial_context: JSON string for geographical relevance
+       - Consistent serialization/deserialization
+    
+    4. Pattern Recognition:
+       - Relationship patterns emerge independently
+       - Contributes to graph-level meaning structures
+       - Adapts with connected node evolution
+    
+    This approach ensures that meaning structures evolve cohesively at both
+    node and relationship levels, enabling organic pattern emergence across
+    the entire semantic graph.
+    """
+    
+    def __init__(self, source_id: str, target_id: str, relation_type: str, strength: float = 1.0, evidence: List[str] = None):
+        # Create adaptive ID from relationship components
+        relation_id = f"{source_id}_{relation_type}_{target_id}"
+        super().__init__(id=relation_id, type="relation")
+        
+        # Set relationship properties
+        self.source_id = source_id
+        self.target_id = target_id
+        self.relation_type = relation_type
+        self.strength = strength
+        self.evidence = evidence or []
+        
+        # Initialize contexts
+        self.update_temporal_context({"created_at": self.created_at.isoformat()})
+        self.update_spatial_context({})  # Initialize empty but following pattern
+        
+    def to_dict(self):
+        """Convert relationship to dictionary for Neo4j export.
+        
+        Returns:
+            dict: Relationship representation with properly deserialized contexts:
+                - temporal_context: JSON string -> dict
+                - spatial_context: JSON string -> dict
+                - Other fields: Direct property access
+        """
+        return {
+            'source_id': self.source_id,
+            'target_id': self.target_id,
+            'type': self.relation_type,
+            'strength': self.strength,
+            'evidence': self.evidence,
+            'temporal_context': json.loads(self.temporal_context) if isinstance(self.temporal_context, str) else {},
+            'spatial_context': json.loads(self.spatial_context) if isinstance(self.spatial_context, str) else {}
+        }
 
 class SemanticPatternVisualizer(TestPatternVisualizer):
     """Enhanced visualizer with semantic pattern capabilities."""
@@ -748,11 +917,14 @@ class SemanticPatternVisualizer(TestPatternVisualizer):
                     creator_id=node.id,
                     confidence=1.0
                 )
-                pattern.temporal_context = {
+                pattern.temporal_context = json.dumps({
                     node.period: node.year,
-                    "created_at": node.created_at,
-                    "last_modified": node.created_at
-                }
+                    "created_at": str(node.created_at),
+                    "last_modified": str(node.created_at)
+                })
+                pattern.temporal_horizon = node.period
+                pattern.probability = 1.0
+                pattern.spatial_context = json.dumps({"location": "MarthasVineyard"})
                 pattern.update_metrics(
                     position=(0, node.year),  # Use year as y-coordinate
                     field_state=1.0,  # Base field state
@@ -774,10 +946,14 @@ class SemanticPatternVisualizer(TestPatternVisualizer):
                     creator_id=event.id,
                     confidence=1.0
                 )
-                pattern.temporal_context = {
-                    "created_at": event.created_at,
-                    "last_modified": event.created_at
-                }
+                pattern.temporal_context = json.dumps({
+                    "created_at": str(event.created_at),
+                    "last_modified": str(event.created_at)
+                })
+                pattern.temporal_horizon = getattr(event, 'temporal_horizon', 'current')
+                pattern.probability = event.metrics.get(f'{pattern.temporal_horizon}_probability', 1.0)
+                pattern.increase_percent = event.metrics.get(f'{pattern.temporal_horizon}_increase')
+                pattern.spatial_context = "MarthasVineyard"
                 pattern.update_metrics(
                     position=(0, 0),  # Default position
                     field_state=1.0,  # Base field state
@@ -871,7 +1047,7 @@ class SemanticPatternVisualizer(TestPatternVisualizer):
                 matching_patterns = [
                     p for p in group
                     if hasattr(p, 'temporal_context') and 
-                    getattr(p, 'temporal_context', {}).get(temporal_node.period) == temporal_node.year
+                    json.loads(p.temporal_context).get(temporal_node.period) == temporal_node.year
                 ]
                 
                 if matching_patterns:
@@ -938,14 +1114,16 @@ class SemanticPatternVisualizer(TestPatternVisualizer):
         for pattern in patterns:
             node = {
                 "id": pattern._base_id,
-                "type": pattern._pattern_type if hasattr(pattern, '_pattern_type') else 'unknown',
-                "hazard_type": pattern._hazard_type if hasattr(pattern, '_hazard_type') else 'unknown',
-                "confidence": pattern._confidence if hasattr(pattern, '_confidence') else 1.0,
-                "temporal_context": pattern._temporal_context if hasattr(pattern, '_temporal_context') else None,
+                "type": getattr(pattern, 'pattern_type', 'unknown'),
+                "hazard_type": getattr(pattern, 'hazard_type', 'unknown'),
+                "confidence": pattern._stability_score,
+                "temporal_horizon": getattr(pattern, 'temporal_horizon', 'current'),
+                "probability": getattr(pattern, 'probability', 1.0),
+                "spatial_context": getattr(pattern, 'spatial_context', 'MarthasVineyard'),
+                "temporal_context": json.loads(pattern.temporal_context) if isinstance(pattern.temporal_context, str) else pattern.temporal_context,
                 "metrics": {
-                    "field_state": pattern._field_state if hasattr(pattern, '_field_state') else None,
-                    "coherence": pattern._coherence if hasattr(pattern, '_coherence') else None,
-                    "energy_state": pattern._energy_state if hasattr(pattern, '_energy_state') else None
+                    "stability": pattern._stability_score,
+                    "pressure": pattern._pressure_level
                 }
             }
             nodes.append(node)
@@ -1238,6 +1416,59 @@ def test_validation_status_tracking(semantic_graph_selection):
     updated_status = visualizer.validator.get_ui_status()
     assert updated_status["status"] == ValidationStatus.RED
     assert "validation_history" in dir(visualizer.validator)
+
+def test_dimensional_pattern_emergence():
+    """Test natural pattern emergence through dimensional context."""
+    from ...adaptive_core.dimensional_context import DimensionalContext, DimensionType, WindowState
+    
+    # Initialize dimensional context
+    context = DimensionalContext()
+    
+    # Test pattern emergence across dimensions
+    observation = {
+        "location": "coastal_zone",
+        "time": "2024-02",
+        "system": "climate",
+        "event": "storm_surge",
+        "impact": "flooding",
+        "severity": 0.8
+    }
+    
+    # Observe pattern and check results
+    results = context.observe_pattern(observation)
+    
+    # Verify dimensional activation
+    assert len(results) > 0, "Should detect patterns in at least one dimension"
+    
+    # Check that spatial dimension recognized location-based patterns
+    spatial_result = results.get(DimensionType.SPATIAL.value)
+    assert spatial_result is not None, "Should detect spatial patterns"
+    assert spatial_result['suggestions'][0]['concept'] == 'location'
+    assert 'coastal_zone' in spatial_result['suggestions'][0]['potential_alignments']
+    
+    # Check boundary tension and window state
+    assert spatial_result['boundary_tension'] > 0, "Should have non-zero boundary tension"
+    assert spatial_result['window_state'] == WindowState.OPENING.value
+    
+    # Test pattern evolution over time
+    for _ in range(3):
+        new_observation = {
+            "location": "coastal_zone",
+            "time": "2024-03",
+            "system": "climate",
+            "event": "erosion",
+            "impact": "infrastructure_damage",
+            "severity": 0.6
+        }
+        results = context.observe_pattern(new_observation)
+    
+    # Get evolution summary
+    summary = context.get_evolution_summary()
+    
+    # Verify pattern evolution
+    assert len(summary['active_dimensions']) > 0, "Should have active dimensions"
+    assert summary['total_observations'] == 4, "Should have recorded all observations"
+    assert any(tension > 0.3 for tension in summary['boundary_tensions'].values()), "At least one dimension should have significant boundary tension"
 
 def test_abstract_visualization():
     """Test visualization of test structure as a graph."""
