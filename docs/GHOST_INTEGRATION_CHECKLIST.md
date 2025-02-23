@@ -1,102 +1,85 @@
 # Ghost Integration Implementation Checklist
 
-## 1. 🔄 Pattern Evolution System
-- [x] Window state management (CLOSED → OPENING → OPEN → CLOSING)
-- [x] Adaptive pattern identification
-- [ ] Semantic potential tracking
-- [ ] Pattern lineage management
-- [ ] User context and intuition system
-- [ ] Pattern relationship evolution
-- [ ] Context serialization standard
+## 1. ✅ Ghost Editor Button
+- [x] Basic button structure with Ghost classes
+- [x] SVG graph icon
+- [x] Dark mode support
+- [x] Tooltip implementation
+- [ ] Button state management (active/inactive)
+- [ ] Multiple toolbar instance handling
+- [ ] Cleanup on editor reset
 
-## 2. 🔄 Ghost Editor Integration
+## 2. 🔄 Text Selection Handler
 - [x] Basic text selection capture
-- [ ] Selection to semantic graph conversion
-  - [ ] Text structure analysis
-  - [ ] Metadata extraction
-  - [ ] Context preservation
-- [ ] Pattern discovery pipeline
-  - [ ] Semantic potential analysis
-  - [ ] Pattern emergence tracking
-  - [ ] Relationship discovery
-- [ ] User interaction flow
-  - [ ] Selection handling
-  - [ ] Pattern visualization
-  - [ ] Intuition feedback
+- [ ] Selection metadata
+  - [ ] Text content
+  - [ ] Position markers
+  - [ ] Card boundaries
+- [ ] Selection state management
+  - [ ] Preserve selection
+  - [ ] Handle multi-paragraph
+  - [ ] Track active selection
 
-## 3. 🔄 Pattern Visualization System
-- [x] Neo4j integration
-- [ ] Graph Structure (NetworkX)
-  - [ ] Node and relationship modeling
-  - [ ] Layout calculation
-  - [ ] Graph algorithms
-- [ ] Interactive Visualization (D3.js)
+## 3. 🔄 Graph Visualization
+- [x] Neo4j Query Integration
+  - [x] Fetch existing patterns
+  - [x] Get relationships
+  - [ ] Error handling
+- [ ] D3.js Viewer Component
+  - [ ] Graph rendering
   - [ ] Force-directed layout
-  - [ ] Zoom and pan controls
-  - [ ] Node/edge interactions
-- [ ] Pattern Features
-  - [ ] Semantic validation
-  - [ ] Temporal evolution
-  - [ ] Real-time updates
+  - [ ] Zoom/pan controls
+- [ ] Interactive Features
+  - [ ] Node selection
+  - [ ] Edge highlighting
+  - [ ] Pattern details view
 
-## 4. 📊 Context Management
-- [ ] Temporal context handling
-  - [ ] Period tracking
-  - [ ] Evolution history
-  - [ ] State transitions
-- [ ] Spatial context integration
-  - [ ] Location awareness
-  - [ ] Boundary handling
-  - [ ] Scale management
-- [ ] Semantic context processing
-  - [ ] Concept relationships
-  - [ ] Pattern correlations
-  - [ ] Intuition mapping
+## 4. 📊 Settings Panel
+- [ ] Panel UI
+  - [ ] Ghost theme compliance
+  - [ ] Position handling
+  - [ ] Dark mode support
+- [ ] Pattern Display
+  - [ ] List view of patterns
+  - [ ] Graph preview
+  - [ ] Pattern details
+- [ ] User Controls
+  - [ ] View options
+  - [ ] Graph controls
+  - [ ] Export options
 
-## 5. 🎨 UI Components
-- [x] Toolbar button
-  - [x] Ghost-compliant styling
-  - [x] Dark mode support
+## 5. 🧪 Testing Framework
+- [x] Button tests
+  - [x] Creation/mounting
   - [x] Event handling
-- [ ] Pattern explorer
-  - [ ] Pattern list
-  - [ ] Graph viewer
-  - [ ] Evolution timeline
-- [ ] Settings panel
-  - [ ] Configuration options
-  - [ ] Export controls
-  - [ ] View preferences
-
-## 6. 🧪 Testing Framework
-- [x] Pattern evolution tests
-  - [x] Window state transitions
-  - [x] Pattern emergence
-  - [x] Relationship evolution
+  - [x] Dark mode
+- [ ] Selection tests
+  - [ ] Text capture
+  - [ ] Metadata handling
+  - [ ] State management
 - [ ] Visualization tests
-  - [ ] Graph generation
-  - [ ] Layout algorithms
-  - [ ] Interactive features
-- [ ] Integration tests
-  - [ ] Selection to visualization
-  - [ ] Context preservation
-  - [ ] User interaction flow
+  - [ ] Graph rendering
+  - [ ] Interaction handling
+  - [ ] Performance metrics
 
-## 7. 🔧 Validation System
-- [ ] Pattern validation
-  - [ ] Semantic coherence
-  - [ ] Context validity
-  - [ ] Evolution consistency
-- [ ] Relationship validation
-  - [ ] Temporal alignment
-  - [ ] Causal strength
-  - [ ] Evidence tracking
-- [ ] User feedback
-  - [ ] Validation status
-  - [ ] Improvement suggestions
-  - [ ] Error recovery
+## 6. 🔧 Error Handling
+- [ ] Selection errors
+  - [ ] Invalid selections
+  - [ ] Lost selections
+  - [ ] Recovery options
+- [ ] API errors
+  - [ ] Connection issues
+  - [ ] Query failures
+  - [ ] Timeout handling
+- [ ] UI feedback
+  - [ ] Error messages
+  - [ ] Loading states
+  - [ ] Fallback views
 
-## 8. 📚 Documentation
+## 7. 📚 Documentation
 - [ ] Integration guide
+- [ ] API documentation
+- [ ] Testing guide
   - [ ] Setup instructions
   - [ ] API reference
   - [ ] Event system
