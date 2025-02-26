@@ -361,9 +361,15 @@ class BackPressureController:
         return np.clip(delay, min_delay, max_delay)
 
 class EventCoordinator:
-    """Coordinates events between state evolution and adaptive IDs."""
+    """Coordinates events between state evolution and adaptive IDs.
     
-    def __init__(self, max_queue_size: int = 1000):
+    Supports both Neo4j persistence and direct LLM modes through:
+    1. Flexible pattern tracking
+    2. Mode-aware event processing
+    3. Adaptive state management
+    """
+    
+    def __init__(self, max_queue_size: int = 1000, persistence_mode: bool = True):
         self.event_queue = deque(maxlen=max_queue_size)
         self.processed_events: Dict[str, datetime] = {}
         self.current_window: Optional[LearningWindow] = None
@@ -374,7 +380,41 @@ class EventCoordinator:
         self.window_phase = 0.0  # Track window's learning phase (0 to 1)
         self.stability_trend = 0.0  # Current stability direction
         self.adaptation_rate = 0.1  # How quickly we adapt to window state
+        
+        # Mode tracking with memory management
+        self.persistence_mode = persistence_mode
+        self.pattern_cache: Dict[str, Dict] = {}  # In-memory pattern cache
+        self.max_cache_age = timedelta(minutes=5)  # Clear entries older than 5 min
+        self.max_cache_size = max_queue_size  # Match queue size limit
         self._reset_state()
+        
+    def _cleanup_pattern_cache(self) -> None:
+        """Minimal cleanup of pattern cache to manage memory."""
+        now = datetime.now()
+        # Clear old entries and respect size limit
+        self.pattern_cache = {
+            k: v for k, v in self.pattern_cache.items()
+            if (now - v["last_update"]) <= self.max_cache_age
+        }
+        if len(self.pattern_cache) > self.max_cache_size:
+            # Sort by last_update and keep newest
+            sorted_items = sorted(
+                self.pattern_cache.items(),
+                key=lambda x: x[1]["last_update"],
+                reverse=True
+            )
+            self.pattern_cache = dict(sorted_items[:self.max_cache_size])
+    
+    def get_cache_stats(self) -> Dict:
+        """Get current cache statistics."""
+        return {
+            "size": len(self.pattern_cache),
+            "max_size": self.max_cache_size,
+            "oldest_entry": min(
+                (v["last_update"] for v in self.pattern_cache.values()),
+                default=None
+            )
+        }
     
     def _reset_state(self, clear_window: bool = True):
         """Reset internal state.
@@ -386,6 +426,7 @@ class EventCoordinator:
         self.event_queue.clear()
         self.stability_scores.clear()
         self.processed_events.clear()
+        self.pattern_cache.clear()  # Clear pattern cache on reset
         
         # Optionally clear window
         if clear_window:
