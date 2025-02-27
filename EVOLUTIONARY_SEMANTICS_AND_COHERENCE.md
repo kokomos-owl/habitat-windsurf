@@ -1,9 +1,9 @@
-Coherence Framework as a Model for Evolutionary Semantics
-Foundational Principles
+# Coherence Framework as a Model for Evolutionary Semantics
+
+## Foundational Principles
 The coherence framework represents a significant paradigm shift in how we model the evolution of meaning, knowledge, and semantic relationships. Rather than imposing structure, it creates conditions where meaning naturally emerges through relationship visibility.
 
-python
-CopyInsert
+```python
 # Example from CoherenceInterface - observing rather than enforcing
 def _calculate_coherence(self, state: GraphStateSnapshot) -> float:
     """Calculate coherence score for a state based on natural relationships."""
@@ -16,13 +16,14 @@ def _calculate_coherence(self, state: GraphStateSnapshot) -> float:
     
     # Coherence emerges from the relationship between nodes and patterns
     return 0.7 * node_coherence + 0.3 * relation_coherence
-Key Evolutionary Mechanisms
-Natural Emergence vs. Enforcement
+```
+## Key Evolutionary Mechanisms
+
+### Natural Emergence vs. Enforcement
 Traditional semantic models often enforce relationships through explicit rules
 The coherence framework instead creates field conditions where relationships become naturally visible
 This mirrors how meaning evolves in natural language and human cognition—through usage patterns rather than explicit definition
-python
-CopyInsert
+```python
 # From BackPressureController - allowing natural rhythms to emerge
 # Natural rhythm detection through harmonic analysis
 diffs = np.diff(window_array)
@@ -35,12 +36,12 @@ if len(zero_crossings) >= 2:
     rhythm_period = np.mean(intervals)
     rhythm_stability = 1.0 - np.std(intervals) / np.mean(intervals)
     phase = (len(diffs) - zero_crossings[-1]) / rhythm_period
-Field State as Semantic Context
+```
+### Field State as Semantic Context
 The field state concept provides a dynamic context for meaning to evolve
 Patterns become visible through their natural relationships, similar to how words gain meaning through contextual usage
 This approach aligns with distributional semantics theories where meaning emerges from usage patterns
-python
-CopyInsert
+```python
 # From COHERENCE.md - field state as context for pattern visibility
 pattern_context = RAGPatternContext(
     query_patterns=query_patterns,
@@ -57,12 +58,12 @@ coherence_insight = await coherence_analyzer.analyze_coherence(
     pattern_context,
     content
 )
-Pattern Visibility as Semantic Relevance
+```
+### Pattern Visibility as Semantic Relevance
 Patterns that become visible represent semantically relevant concepts
 The strength of visibility correlates with semantic significance
 This models how certain concepts become more salient in different contexts
-python
-CopyInsert
+```python
 # From LearningWindowManager - tracking pattern visibility through metrics
 async def get_stability_metrics(self) -> Dict[str, float]:
     """Get current stability metrics that indicate pattern visibility."""
@@ -74,16 +75,17 @@ async def get_stability_metrics(self) -> Dict[str, float]:
         'variance': np.var(self._stability_scores[-30:]) 
                   if len(self._stability_scores) >= 30 else 0.0
     }
-Evolutionary Dynamics
-Temporal Evolution
+```
+## Evolutionary Dynamics
+
+### Temporal Evolution
 The coherence framework models semantic evolution through several key mechanisms:
 
-Learning Windows as Evolutionary Timeframes
+#### Learning Windows as Evolutionary Timeframes
 Learning windows provide temporal boundaries for semantic evolution
 CLOSED → OPENING → OPEN → CLOSED cycle models how concepts emerge, stabilize, and potentially fade
 This mirrors how meanings evolve, stabilize, and sometimes become obsolete in natural language
-python
-CopyInsert
+```python
 # From LearningWindow - implementing evolutionary timeframes
 @property
 def state(self) -> WindowState:
@@ -109,12 +111,12 @@ def state(self) -> WindowState:
         if self.is_saturated:
             return WindowState.CLOSED
         return WindowState.OPEN
-Back Pressure as Evolutionary Constraint
+```
+#### Back Pressure as Evolutionary Constraint
 Back pressure mechanisms model natural constraints on semantic evolution
 Rapid changes face increasing resistance, similar to how language resists abrupt semantic shifts
 This creates a natural balance between stability and innovation in meaning
-python
-CopyInsert
+```python
 # From BackPressureController - modeling evolutionary constraints
 def calculate_delay(self, stability_score: float) -> float:
     """Calculate delay based on stability score using a tree-like stress response model.
@@ -133,12 +135,12 @@ def calculate_delay(self, stability_score: float) -> float:
     else:
         # Above threshold: allow natural rhythm with linear scaling
         base_delay = (0.7 * rhythm_delay + 0.3 * pressure_delay) * (1.0 - 0.1 * coherence_factor)
-Coherence Thresholds as Semantic Viability
+```
+#### Coherence Thresholds as Semantic Viability
 Coherence thresholds determine when patterns become semantically viable
 Low coherence patterns remain in an exploratory state (OPENING)
 High coherence patterns stabilize into established meanings (OPEN)
-python
-CopyInsert
+```python
 # From EventCoordinator - implementing coherence thresholds
 def queue_event(self, event_type: str, entity_id: str, data: Dict, stability_score: float) -> float:
     """Queue an event and return the calculated delay."""
@@ -157,15 +159,15 @@ def queue_event(self, event_type: str, entity_id: str, data: Dict, stability_sco
         if self.current_window.state == WindowState.OPENING:
             # Accelerate transition to OPEN for high coherence patterns
             self.window_phase = min(0.9, self.window_phase + 0.2)
-Spatial Evolution
+```
+### Spatial Evolution
 The framework also models spatial aspects of semantic evolution:
 
-Relationship Strength as Semantic Distance
+#### Relationship Strength as Semantic Distance
 Relationship strength between patterns models semantic proximity
 Strongly related patterns form semantic clusters
 This mirrors how related concepts cluster in semantic space
-python
-CopyInsert
+```python
 # From test_window_evolution.py - observing relationship formation
 async def test_pattern_relationship_formation(self, window_manager, pattern_recorder):
     """Observe natural formation of pattern relationships."""
@@ -190,12 +192,12 @@ async def test_pattern_relationship_formation(self, window_manager, pattern_reco
         })
         
         await asyncio.sleep(30)  # Allow time for natural emergence
-Field Density as Conceptual Richness
+```
+#### Field Density as Conceptual Richness
 Field density measures the richness of semantic relationships in a given context
 High density areas represent semantically rich domains
 Low density areas represent semantic boundaries or novel territories
-python
-CopyInsert
+```python
 # From LearningWindowManager - tracking field density
 async def get_boundary_metrics(self) -> Dict[str, float]:
     """Get boundary formation metrics that indicate conceptual territories."""
@@ -219,12 +221,12 @@ def _calculate_field_density(self) -> float:
     
     # Rich domains have high density
     return (pattern_count / max(1, window_count)) * coherence_level
-Cross-Pattern Influence as Semantic Drift
+```
+#### Cross-Pattern Influence as Semantic Drift
 Cross-pattern influence models how meanings influence each other
 This captures semantic drift and conceptual blending
 It allows for modeling how meanings evolve through interaction
-python
-CopyInsert
+```python
 # From test_window_evolution.py - observing cross-pattern influence
 async def test_cross_pattern_influence(self, window_manager):
     """Observe natural cross-pattern influence and semantic drift."""
@@ -256,14 +258,14 @@ async def test_cross_pattern_influence(self, window_manager):
             "drift_b": drift_b,
             "cross_influence": min(drift_a, drift_b) / max(0.001, max(drift_a, drift_b))
         })
-Comparative Analysis with Traditional Models
-Advantages over Traditional Semantic Models
-Emergent vs. Prescriptive
+```
+## Comparative Analysis with Traditional Models
+### Advantages over Traditional Semantic Models
+#### Emergent vs. Prescriptive
 Traditional models: Often prescribe relationships based on predefined rules
 Coherence framework: Allows relationships to emerge naturally
 Result: More authentic representation of how meaning evolves
-python
-CopyInsert
+```python
 # Traditional approach (prescriptive)
 def validate_relationship(entity1, entity2, relationship_type):
     """Enforce predefined relationship rules."""
@@ -281,12 +283,12 @@ def observe_relationship(entity1, entity2, field_state):
     if coherence > field_state.visibility_threshold:
         return {"entities": [entity1, entity2], "strength": coherence}
     return None
-Dynamic vs. Static
+```
+#### Dynamic vs. Static
 Traditional models: Often represent meaning as static relationships
 Coherence framework: Models meaning as dynamic field states
 Result: Better captures the fluid nature of semantic evolution
-python
-CopyInsert
+```python
 # From EventCoordinator - supporting dynamic evolution
 class EventCoordinator:
     """Coordinates events between state evolution and adaptive IDs.
@@ -302,12 +304,12 @@ class EventCoordinator:
         self.persistence_mode = persistence_mode
         self.pattern_cache: Dict[str, Dict] = {}  # In-memory pattern cache
         self.max_cache_age = timedelta(minutes=5)  # Clear entries older than 5 min
-Contextual vs. Absolute
+```
+#### Contextual vs. Absolute
 Traditional models: Often treat meaning as context-independent
 Coherence framework: Inherently contextual through field state
 Result: More accurate representation of contextual meaning
-python
-CopyInsert
+```python
 # From COHERENCE.md - contextual meaning through field state
 embedding_context = EmbeddingContext(
     flow_state=emergence_flow.get_flow_state(),
@@ -318,12 +320,12 @@ embedding_context = EmbeddingContext(
         "window_metrics": window_metrics.__dict__
     }
 )
-Multi-modal vs. Single-mode
+```
+#### Multi-modal vs. Single-mode
 Traditional models: Often limited to a single representation mode
 Coherence framework: Supports both Neo4j persistence and Direct LLM modes
 Result: More flexible representation of meaning across different contexts
-python
-CopyInsert
+```python
 # From EventCoordinator - dual-mode implementation
 def queue_event(self, event_type: str, entity_id: str, data: Dict, stability_score: float) -> float:
     """Queue an event and return the calculated delay."""
@@ -338,7 +340,8 @@ def queue_event(self, event_type: str, entity_id: str, data: Dict, stability_sco
             "data": data,
             "timestamp": datetime.now(),
             "stability": stability_score
-        })
+        }
+```)
     else:
         # Direct LLM mode - maintain in-memory state
         self.pattern_cache[entity_id] = {
@@ -346,12 +349,12 @@ def queue_event(self, event_type: str, entity_id: str, data: Dict, stability_sco
             "last_update": datetime.now(),
             "stability": stability_score
         }
-Limitations and Challenges
-Computational Complexity
+```
+## Limitations and Challenges
+### Computational Complexity
 Tracking field states and pattern visibility requires significant computation
 May be challenging to scale to very large semantic domains
-python
-CopyInsert
+```python
 # Complex field state calculations in BackPressureController
 # Emergent wave behavior with multiple interacting components
 base_freq = self.natural_frequency if hasattr(self, 'natural_frequency') else \
@@ -365,11 +368,11 @@ if current_score < self.stability_threshold:
     # Add recovery harmonics when needed
     if recovery_pattern > 0.6:
         base_pressure *= (1.0 - 0.3 * np.sin(2 * base_freq * phase))
-Validation Challenges
+```
+### Validation Challenges
 Emergent properties are harder to validate than prescriptive rules
 Requires new approaches to testing semantic coherence
-python
-CopyInsert
+```python
 # From test_window_evolution.py - observational testing approach
 @pytest.mark.timeout(24 * 60 * 60)  # 24-hour observation
 async def test_natural_state_transitions(self, window_manager, state_recorder):
@@ -385,11 +388,11 @@ async def test_natural_state_transitions(self, window_manager, state_recorder):
     4. Transition thresholds
     """
     # Long-running observation rather than simple assertions
-Interpretability
+```
+### Interpretability
 Field states and coherence metrics may be less immediately interpretable
 Requires new visualization and explanation methods
-python
-CopyInsert
+```python
 # Complex metrics requiring interpretation
 # From LearningWindowManager
 async def get_coordination_metrics(self) -> Dict[str, float]:
@@ -399,14 +402,14 @@ async def get_coordination_metrics(self) -> Dict[str, float]:
                           if other.state == w.state) / len(self._windows)
         for w in self._windows
     }
-Applications to Knowledge Evolution
+```
+## Applications to Knowledge Evolution
 The coherence framework offers powerful applications for modeling knowledge evolution:
 
-Concept Formation
+### Concept Formation
 Models how new concepts form through natural relationship visibility
 Captures the gradual emergence of new knowledge domains
-python
-CopyInsert
+```python
 # From test_window_evolution.py - observing concept formation
 async def test_concept_formation(self, window_manager):
     """Observe natural concept formation through field state."""
@@ -436,11 +439,11 @@ async def test_concept_formation(self, window_manager):
             "concepts": concepts,
             "field_coherence": window_manager.get_field_coherence()
         })
-Knowledge Integration
+```
+### Knowledge Integration
 Models how disparate knowledge areas become integrated
 Represents cross-domain fertilization through field state alignment
-python
-CopyInsert
+```python
 # From test_coherence_interface.py - knowledge integration
 async def test_cross_domain_integration(self, coherence_interface):
     """Test natural integration of knowledge across domains."""
@@ -472,11 +475,11 @@ async def test_cross_domain_integration(self, coherence_interface):
     # Observe integrated knowledge without forcing specific structure
     integrated_state = await coherence_interface.get_current_state()
     assert integrated_state is not None
-Semantic Innovation
+```
+### Semantic Innovation
 Provides mechanisms for modeling how new meanings emerge
 Captures the conditions under which semantic innovation occurs
-python
-CopyInsert
+```python
 # From test_window_evolution.py - semantic innovation
 async def test_semantic_innovation(self, window_manager):
     """Observe conditions for semantic innovation."""
@@ -513,11 +516,11 @@ async def test_semantic_innovation(self, window_manager):
             "field_turbulence": window_manager.get_field_turbulence(),
             "integration_level": window_manager.get_pattern_integration("novel_concept")
         })
-Evolutionary Epistemology
+```
+### Evolutionary Epistemology
 Aligns with theories of how knowledge evolves through natural selection of ideas
 Models knowledge as an evolving ecosystem rather than a static structure
-python
-CopyInsert
+```python
 # From test_window_evolution.py - knowledge ecosystem evolution
 async def test_knowledge_ecosystem(self, window_manager):
     """Observe knowledge evolution as ecosystem."""
@@ -553,14 +556,14 @@ async def test_knowledge_ecosystem(self, window_manager):
             "avg_coherence": np.mean([c["coherence"] for c in current_concepts.values() if c is not None]),
             "ecosystem_diversity": len(set(c["cluster"] for c in current_concepts.values() if c is not None))
         })
-Future Directions
+```
+## Future Directions
 The coherence framework opens several promising directions for modeling evolutionary semantics:
 
-Quantum-Inspired Semantics
+### Quantum-Inspired Semantics
 Field state concepts align with quantum probability fields
 Potential to model semantic superposition and entanglement
-python
-CopyInsert
+```python
 # Conceptual implementation of quantum-inspired semantics
 class QuantumFieldState:
     """Models semantic field as quantum probability field."""
@@ -585,17 +588,19 @@ class QuantumFieldState:
             
             return observed_state
         return None
-Complex Adaptive Systems
+```
+
+### Complex Adaptive Systems
 Coherence as an emergent property of complex semantic networks
 Modeling tipping points and phase transitions in meaning
-python
-CopyInsert
+```python
 # From BackPressureController - complex adaptive behavior
 # Natural pressure evolution with momentum
 if target_pressure > self.current_pressure:
     # Increasing pressure with rhythm-aware acceleration
     step = step_size * (1.0 + 0.3 * stress_pattern)
     self.current_pressure = min(target_pressure, self.current_pressure + step)
+```
 else:
     # Decreasing pressure with recovery-aware deceleration
     step = step_size * (1.0 + 0.3 * recovery_pattern)
