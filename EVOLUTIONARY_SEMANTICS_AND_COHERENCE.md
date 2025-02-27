@@ -591,8 +591,9 @@ class QuantumFieldState:
 ```
 
 ### Complex Adaptive Systems
-Coherence as an emergent property of complex semantic networks
-Modeling tipping points and phase transitions in meaning
+
+Coherence as an emergent property of complex semantic networks. Modeling tipping points and phase transitions in meaning.
+
 ```python
 # From BackPressureController - complex adaptive behavior
 # Natural pressure evolution with momentum
@@ -600,16 +601,16 @@ if target_pressure > self.current_pressure:
     # Increasing pressure with rhythm-aware acceleration
     step = step_size * (1.0 + 0.3 * stress_pattern)
     self.current_pressure = min(target_pressure, self.current_pressure + step)
-```
 else:
     # Decreasing pressure with recovery-aware deceleration
     step = step_size * (1.0 + 0.3 * recovery_pattern)
     self.current_pressure = max(target_pressure, self.current_pressure - step)
-Cognitive Alignment
-Coherence framework aligns with theories of how human cognition constructs meaning
-Potential to model semantic alignment between different cognitive agents
-python
-CopyInsert
+```
+
+### Cognitive Alignment
+
+Coherence framework aligns with theories of how human cognition constructs meaning. Potential to model semantic alignment between different cognitive agents.
+
 # Conceptual implementation of cognitive alignment
 async def test_cognitive_alignment(self, coherence_interface):
     """Test alignment between different cognitive agents."""
@@ -638,11 +639,10 @@ async def test_cognitive_alignment(self, coherence_interface):
     
     # Alignment emerges naturally rather than being enforced
     assert 0.0 <= alignment_score <= 1.0
-Evolutionary Algorithms
-Framework provides basis for evolutionary algorithms that optimize for coherence
-Could lead to more natural language generation and understanding
-python
-CopyInsert
+### Evolutionary Algorithms
+
+Framework provides basis for evolutionary algorithms that optimize for coherence. Could lead to more natural language generation and understanding.
+```python
 # Conceptual implementation of coherence-based evolutionary algorithm
 class CoherenceEvolutionaryAlgorithm:
     """Evolutionary algorithm that optimizes for semantic coherence."""
@@ -683,15 +683,15 @@ class CoherenceEvolutionaryAlgorithm:
         best_idx = np.argmax([await self.coherence_interface.align_state(state) 
                              for state in self.population])
         return self.population[best_idx]
-Conclusion
+### Conclusion
+
 The coherence framework represents a significant advancement in modeling evolutionary semantics. By focusing on natural emergence rather than enforcement, it creates a more authentic model of how meaning, knowledge, and semantic relationships evolve over time. The framework's emphasis on field states, pattern visibility, and relationship formation through natural alignment provides a powerful conceptual toolkit for understanding the dynamic nature of semantic evolution.
 
 Its dual-mode implementation further enhances its flexibility, allowing it to model both persistent semantic structures (Neo4j mode) and dynamic, contextual meanings (Direct LLM mode). This duality mirrors the way human knowledge operates across both stable, shared meanings and fluid, contextual interpretations.
 
 As a model for evolutionary semantics, the coherence framework offers not just a technical implementation but a philosophical shift in how we conceptualize the nature of meaning itself—as something that emerges naturally through relationship visibility rather than something imposed through explicit rules.
 
-python
-CopyInsert
+```python
 # The essence of the coherence framework
 class CoherenceFramework:
     """Core implementation of evolutionary semantics through coherence."""
