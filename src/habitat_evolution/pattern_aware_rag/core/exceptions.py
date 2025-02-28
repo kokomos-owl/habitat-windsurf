@@ -13,3 +13,7 @@ class InvalidStateError(PatternAwareRAGError):
 class StateValidationError(PatternAwareRAGError):
     """Raised when state validation fails."""
     pass
+
+class WindowStateError(PatternAwareRAGError):
+    """Raised when a learning window operation fails due to invalid state."""
+    pass

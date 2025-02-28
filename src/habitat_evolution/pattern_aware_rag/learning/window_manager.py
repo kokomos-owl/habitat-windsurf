@@ -90,6 +90,8 @@ class LearningWindowManager:
             'pressure': self.back_pressure.current_pressure
         }
         return boundaries
+    
+    def apply_pressure(self, pressure: float) -> float:
         """Apply window constraints to pressure value.
         
         Args:

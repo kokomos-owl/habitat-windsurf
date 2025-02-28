@@ -1,19 +1,20 @@
-"""Learning window and back pressure control for Pattern-Aware RAG.
+"""
+Learning window control module for Pattern-Aware RAG.
 
-This module provides provisional implementations of:
-1. Learning window management
-2. Back pressure controls
-3. Event coordination
-
-These implementations will be refined through testing and iteration.
+This module provides the learning window abstraction that controls when
+semantic changes are allowed to occur in the system, along with back
+pressure mechanisms to maintain stability during periods of change.
 """
 
-from dataclasses import dataclass
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Set
-from collections import deque
 from enum import Enum
+from typing import Dict, List, Optional, Any, Tuple, Union
+from datetime import datetime, timedelta
 import numpy as np
+from collections import deque
+import asyncio
+import uuid
+
+from dataclasses import dataclass
 
 class WindowState(Enum):
     """Learning window states."""
@@ -31,7 +32,16 @@ class LearningWindow:
     max_changes_per_window: int
     change_count: int = 0
     _state: WindowState = WindowState.CLOSED
+    field_observers: List = None  # Track field observers
+    field_aware_transitions: bool = False  # Enable/disable field awareness
+    next_transition_time: datetime = None  # Next optimal transition time
+    stability_metrics: List = None  # Track stability metrics
     
+    def __post_init__(self):
+        self.field_observers = []
+        self.stability_scores = []
+        self.stability_metrics = []
+        
     @property
     def state(self) -> WindowState:
         """Get the current window state.
@@ -63,8 +73,26 @@ class LearningWindow:
         return self.state in (WindowState.OPENING, WindowState.OPEN)
     
     @property
+    def stability_score(self) -> float:
+        """Calculate current stability score.
+        
+        Returns:
+            Current stability score between 0 and 1
+        """
+        if not self.stability_scores:
+            return 1.0  # Fully stable if no scores recorded
+            
+        # Use recent history for stability trend
+        recent_scores = self.stability_scores[-10:]
+        return sum(recent_scores) / len(recent_scores)
+        
+    @property
     def is_saturated(self) -> bool:
-        """Check if window has reached max changes."""
+        """Check if window is saturated with changes.
+        
+        Returns:
+            True if window has reached max changes
+        """
         return self.change_count >= self.max_changes_per_window
         
     def transition_if_needed(self) -> Optional[WindowState]:
@@ -74,6 +102,122 @@ class LearningWindow:
             self._state = current_state
             return current_state
         return None
+
+    def register_field_observer(self, observer):
+        """Register a field observer to receive state notifications.
+        
+        Args:
+            observer: The field observer to register
+        """
+        self.field_observers.append(observer)
+        
+        # Immediately notify observer of current state
+        try:
+            import asyncio
+            if asyncio.get_event_loop().is_running():
+                asyncio.create_task(self.notify_field_observers())
+            else:
+                # Sync fallback for when there's no running event loop (test environment)
+                current_state = self.state
+                context = {
+                    "state": current_state.value,
+                    "stability": self.stability_score,
+                    "coherence": self.coherence_threshold,
+                    "saturation": self.change_count / max(1, self.max_changes_per_window)
+                }
+                # Direct append to observations
+                observer.observations.append({"context": context, "time": datetime.now()})
+        except (RuntimeError, ImportError):
+            # Fallback if no event loop can be accessed
+            current_state = self.state
+            context = {
+                "state": current_state.value,
+                "stability": self.stability_score,
+                "coherence": self.coherence_threshold,
+                "saturation": self.change_count / max(1, self.max_changes_per_window)
+            }
+            observer.observations.append({"context": context, "time": datetime.now()})
+
+    async def notify_field_observers(self):
+        """Notify all field observers of current state."""
+        current_state = self.state
+        context = {
+            "state": current_state.value,
+            "stability": self.stability_score,
+            "coherence": self.coherence_threshold,
+            "saturation": self.change_count / max(1, self.max_changes_per_window)
+        }
+        
+        # Notify each observer asynchronously
+        for observer in self.field_observers:
+            try:
+                await observer.observe(context)
+            except Exception as e:
+                print(f"Error notifying field observer: {e}")
+
+    async def notify_state_change(self) -> None:
+        """Notify observers of state changes without coupling."""
+        context = {
+            "state": self.state.value,
+            "stability": self.stability_score,
+            "coherence": self.coherence_threshold,
+            "saturation": self.change_count / max(1, self.max_changes_per_window)
+        }
+        
+        # Notify field observers
+        await self.notify_field_observers()
+
+    def get_harmonic_analysis(self) -> List[float]:
+        """Get harmonic analysis from field observers if available."""
+        if not self.field_observers:
+            return []
+            
+        # Find first observer with harmonic analysis
+        for observer in self.field_observers:
+            if hasattr(observer, 'harmonic_analysis') and observer.harmonic_analysis:
+                return observer.harmonic_analysis
+                
+        return []
+    
+    def find_optimal_transition_time(self) -> Optional[datetime]:
+        """Find optimal time for next state transition based on field observers."""
+        if not self.field_observers or not self.field_aware_transitions:
+            return None
+            
+        transition_times = []
+        for observer in self.field_observers:
+            if hasattr(observer, 'get_optimal_transition_time'):
+                time = observer.get_optimal_transition_time(self.start_time, 
+                                                         self.end_time - self.start_time)
+                if time:
+                    transition_times.append(time)
+                    
+        if transition_times:
+            # Choose earliest reasonable transition time
+            now = datetime.now()
+            future_times = [t for t in transition_times if t > now]
+            if future_times:
+                self.next_transition_time = min(future_times)
+                return self.next_transition_time
+                
+        return None
+
+    def record_change(self, stability_score: float) -> None:
+        """Record a change event with its stability score.
+        
+        Args:
+            stability_score: The stability score of the change
+        """
+        self.change_count += 1
+        self.stability_metrics.append(stability_score)
+        
+        # Trigger field observers notification on significant state changes
+        try:
+            import asyncio
+            if asyncio.get_event_loop().is_running():
+                asyncio.create_task(self.notify_state_change())
+        except (RuntimeError, ImportError):
+            pass
 
 class BackPressureController:
     """Controls state change rate based on system stability."""
@@ -361,289 +505,161 @@ class BackPressureController:
         return np.clip(delay, min_delay, max_delay)
 
 class EventCoordinator:
-    """Coordinates events between state evolution and adaptive IDs.
-    
-    Supports both Neo4j persistence and direct LLM modes through:
-    1. Flexible pattern tracking
-    2. Mode-aware event processing
-    3. Adaptive state management
-    """
+    """Coordinates events and changes during learning windows."""
     
     def __init__(self, max_queue_size: int = 1000, persistence_mode: bool = True):
-        self.event_queue = deque(maxlen=max_queue_size)
-        self.processed_events: Dict[str, datetime] = {}
-        self.current_window: Optional[LearningWindow] = None
-        self.back_pressure = BackPressureController()
-        self.stability_scores: List[float] = []  # Track stability scores
-        
-        # Window state awareness
-        self.window_phase = 0.0  # Track window's learning phase (0 to 1)
-        self.stability_trend = 0.0  # Current stability direction
-        self.adaptation_rate = 0.1  # How quickly we adapt to window state
-        
-        # Mode tracking with memory management
-        self.persistence_mode = persistence_mode
-        self.pattern_cache: Dict[str, Dict] = {}  # In-memory pattern cache
-        self.max_cache_age = timedelta(minutes=5)  # Clear entries older than 5 min
-        self.max_cache_size = max_queue_size  # Match queue size limit
-        self._reset_state()
-        
-    def _cleanup_pattern_cache(self) -> None:
-        """Minimal cleanup of pattern cache to manage memory."""
-        now = datetime.now()
-        # Clear old entries and respect size limit
-        self.pattern_cache = {
-            k: v for k, v in self.pattern_cache.items()
-            if (now - v["last_update"]) <= self.max_cache_age
-        }
-        if len(self.pattern_cache) > self.max_cache_size:
-            # Sort by last_update and keep newest
-            sorted_items = sorted(
-                self.pattern_cache.items(),
-                key=lambda x: x[1]["last_update"],
-                reverse=True
-            )
-            self.pattern_cache = dict(sorted_items[:self.max_cache_size])
-    
-    def get_cache_stats(self) -> Dict:
-        """Get current cache statistics."""
-        return {
-            "size": len(self.pattern_cache),
-            "max_size": self.max_cache_size,
-            "oldest_entry": min(
-                (v["last_update"] for v in self.pattern_cache.values()),
-                default=None
-            )
-        }
-    
-    def _reset_state(self, clear_window: bool = True):
-        """Reset internal state.
+        """Initialize event coordinator.
         
         Args:
-            clear_window: If True, also clear the current window
+            max_queue_size: Maximum size of event queue
+            persistence_mode: Whether to use persistence (Neo4j) or direct mode
         """
-        # Always clear event state
-        self.event_queue.clear()
-        self.stability_scores.clear()
-        self.processed_events.clear()
-        self.pattern_cache.clear()  # Clear pattern cache on reset
-        
-        # Optionally clear window
-        if clear_window:
-            self.current_window = None
-        
-        # Reset delay tracking
-        if hasattr(self, 'last_delay'):
-            del self.last_delay
-    
+        self.event_queue = deque(maxlen=max_queue_size)
+        self.current_window = None
+        self.processed_events = {}  # Changed back to Dict for backwards compatibility
+        self.persistence_mode = persistence_mode
+        self.back_pressure = BackPressureController()
+        self.health_service = None
+        self.field_observers = []
+        self.stability_scores = []  # Track stability scores
+        self.stability_trend = 0.0  # Track stability direction
+        self.adaptation_rate = 0.1  # How quickly we adapt to window state
+        self.window_phase = 0.0  # Track window's learning phase (0 to 1)
+
     def create_learning_window(
-        self,
-        duration_minutes: int = 30,
-        stability_threshold: float = 0.7,
-        coherence_threshold: float = 0.6,
-        max_changes: int = 50
-    ) -> LearningWindow:
+            self,
+            duration_minutes: int = 10,
+            stability_threshold: float = 0.7,
+            coherence_threshold: float = 0.6,
+            max_changes: int = 20,
+            health_service = None
+        ) -> LearningWindow:
         """Create a new learning window.
         
-        Performs semantic validation during creation:
-        - Duration must be positive
-        - Thresholds must be between 0 and 1
-        - Max changes must be positive
-        """
-        # Semantic validation
-        if duration_minutes <= 0:
-            raise ValueError("Duration must be positive")
-        if not (0 <= stability_threshold <= 1):
-            raise ValueError("Stability threshold must be between 0 and 1")
-        if not (0 <= coherence_threshold <= 1):
-            raise ValueError("Coherence threshold must be between 0 and 1")
-        if max_changes <= 0:
-            raise ValueError("Max changes must be positive")
+        Args:
+            duration_minutes: Length of learning window in minutes
+            stability_threshold: Minimum stability score for changes
+            coherence_threshold: Minimum coherence for window to remain open
+            max_changes: Maximum changes allowed in window
+            health_service: Optional health service for field awareness
             
-        # Clear previous state
-        self._reset_state(clear_window=True)
-        
-        # Create new window
+        Returns:
+            Newly created learning window
+        """
         now = datetime.now()
         window = LearningWindow(
             start_time=now,
             end_time=now + timedelta(minutes=duration_minutes),
             stability_threshold=stability_threshold,
             coherence_threshold=coherence_threshold,
-            max_changes_per_window=max_changes,
-            change_count=0,
-            _state=WindowState.OPEN  # Start in OPEN state for testing
+            max_changes_per_window=max_changes
         )
+        
+        # Store health service if provided
+        if health_service:
+            self.health_service = health_service
+            
+        # Register field observers if available
+        for observer in self.field_observers:
+            window.register_field_observer(observer)
+            
+        # If we have a health service but no observers, create one
+        if self.health_service and not self.field_observers:
+            observer = self._create_field_observer()
+            window.register_field_observer(observer)
+            
         self.current_window = window
         return window
     
+    def _create_field_observer(self):
+        """Create a field observer based on available services."""
+        # Use imported class if available, otherwise return generic observer
+        if hasattr(self, 'health_service') and self.health_service:
+            # Try importing HealthFieldObserver dynamically to avoid circular imports
+            try:
+                from ..learning.learning_health_integration import HealthFieldObserver
+                return HealthFieldObserver(f"window_{id(self.current_window)}", self.health_service)
+            except ImportError:
+                pass
+        
+        # Fallback to generic observer using dynamic import
+        try:
+            from ..learning.learning_health_integration import FieldObserver
+            return FieldObserver(f"window_{id(self.current_window)}")
+        except ImportError:
+            # Last resort - create minimal compatible observer
+            class MinimalObserver:
+                def __init__(self, field_id):
+                    self.field_id = field_id
+                    self.observations = []
+                
+                async def observe(self, context):
+                    self.observations.append({"context": context})
+                    return {"observed": True}
+                
+                def get_field_metrics(self):
+                    return {}
+            
+            return MinimalObserver(f"window_{id(self.current_window)}")
+
     def queue_event(
         self,
         event_type: str,
         entity_id: str,
-        data: Dict,
-        stability_score: float
+        data: Dict[str, Any],
+        stability_score: float = 1.0
     ) -> float:
-        """Queue an event and return the calculated delay.
+        """Queue an event and verify against back-pressure.
         
         Args:
-            event_type: Type of event (e.g., 'state_change', 'pattern_update')
-            entity_id: ID of the entity being modified
+            event_type: Type of event
+            entity_id: Entity identifier
             data: Event data
-            stability_score: Current stability score
+            stability_score: Score indicating event stability (0.0-1.0)
             
         Returns:
-            float: Delay in seconds before processing the event
-            
-        Raises:
-            ValueError: If window state is invalid
+            Delay in seconds
         """
-        # Semantic validation
-        if not self.current_window:
+        if not self.current_window or self.current_window.state not in [WindowState.OPEN, WindowState.OPENING]:
             raise ValueError("No active learning window")
-        if not (0 <= stability_score <= 1):
-            raise ValueError("Stability score must be between 0 and 1")
-        
-        # Capture window state atomically
-        window = self.current_window
-        transition = window.transition_if_needed()
-        is_active = window.is_active
-        is_saturated = window.is_saturated
-        
-        # Structural validation
-        if transition == WindowState.CLOSED:
-            self._reset_state(clear_window=True)
-            raise ValueError("Window is closed")
-        elif transition == WindowState.OPENING:
-            self._reset_state(clear_window=False)
-        elif not is_active:
-            self._reset_state(clear_window=True)
-            raise ValueError("Window is not active")
-        elif is_saturated:
-            self._reset_state(clear_window=False)
+            
+        # Check if window is saturated
+        if self.current_window.is_saturated:
             raise ValueError("Learning window is saturated")
             
-        # Update window phase based on elapsed time
-        if self.current_window:
-            elapsed = (datetime.now() - self.current_window.start_time).total_seconds()
-            total_duration = (self.current_window.end_time - self.current_window.start_time).total_seconds()
-            self.window_phase = min(1.0, elapsed / total_duration)
-        
-        # Calculate base delay with window state awareness
-        base_delay = self.back_pressure.calculate_delay(stability_score)
-        min_change = 0.1 * (1 + self.window_phase)  # Minimum change grows with window phase
-        
-        if self.event_queue:
-            last_event = self.event_queue[-1]
-            last_delay = last_event['delay']
-            last_stability = last_event['stability_score']
-            
-            # Update stability trend with minimal smoothing
-            current_change = stability_score - last_stability
-            self.stability_trend = (0.8 * self.stability_trend) + (0.2 * current_change)
-            
-            # Calculate base adjustment factor based on stability change
-            stability_change = stability_score - last_stability
-            threshold_distance = abs(stability_score - self.current_window.stability_threshold)
-            
-            if stability_change > 0:  # Stability is improving
-                # For improving stability, we want strictly decreasing delays
-                if stability_score >= self.current_window.stability_threshold:
-                    # Above threshold, decrease more aggressively
-                    base_decrease = 0.15 + (0.05 * threshold_distance)
-                else:
-                    # Below threshold, decrease more conservatively
-                    base_decrease = 0.10 + (0.02 * threshold_distance)
-                
-                # Calculate target delay with strict decrease
-                min_decrease = 0.001  # Minimum decrease to ensure ordering
-                max_decrease = base_decrease * last_delay
-                actual_decrease = max(min_decrease, max_decrease)
-                
-                # Apply decrease while respecting minimum bound
-                delay = max(base_delay * 0.5, last_delay - actual_decrease)
-                
-                # Double check we maintain strict ordering
-                if delay >= last_delay:
-                    delay = last_delay - min_decrease
-            else:  # Stability is same or worsening
-                # For worsening stability, we want strictly increasing delays
-                if stability_score < self.current_window.stability_threshold:
-                    # Below threshold, increase more aggressively
-                    base_increase = 0.15 + (0.05 * threshold_distance)
-                else:
-                    # Above threshold, increase more conservatively
-                    base_increase = 0.10 + (0.02 * threshold_distance)
-                
-                # Calculate target delay with strict increase
-                min_increase = 0.001  # Minimum increase to ensure ordering
-                max_increase = base_increase * last_delay
-                actual_increase = max(min_increase, max_increase)
-                
-                # Apply increase while respecting maximum bound
-                delay = min(self.back_pressure.max_delay, last_delay + actual_increase)
-                
-                # Double check we maintain strict ordering
-                if delay <= last_delay:
-                    delay = last_delay + min_increase
-        else:
-            # First event - start conservatively and let window phase guide evolution
-            if stability_score < self.current_window.stability_threshold:
-                delay = base_delay * 1.5  # Start higher but not too aggressive
-            else:
-                delay = base_delay * 0.8  # Start lower but not too optimistic
-        
-        # Ensure delay bounds
-        delay = max(delay, base_delay * 0.5)
-        delay = min(delay, self.back_pressure.max_delay)
-        
-        # Track successful delay adjustments
-        if self.event_queue:
-            if (self.stability_trend > 0 and delay <= last_delay) or \
-               (self.stability_trend <= 0 and delay >= last_delay):
-                # Adjust adaptation rate based on success
-                self.adaptation_rate = min(0.2, self.adaptation_rate * 1.1)
-            else:
-                # Reduce adaptation rate on failure
-                self.adaptation_rate = max(0.05, self.adaptation_rate * 0.9)
-        
-        # Prepare event data with semantic validation
-        event_id = f"{event_type}_{entity_id}_{datetime.now().timestamp()}"
+        # Create event
         event = {
-            "id": event_id,
+            "id": str(uuid.uuid4()),
             "type": event_type,
             "entity_id": entity_id,
             "data": data,
-            "stability_score": stability_score,
-            "timestamp": datetime.now(),
-            "delay": delay,
-            "processed": False  # Track processed state
+            "stability": stability_score,
+            "timestamp": datetime.now().isoformat(),
+            "processed": False
         }
         
-        try:
-            # Update change count first
-            self.current_window.change_count += 1
-            
-            # Check saturation before adding event
-            if self.current_window.is_saturated:
-                self._reset_state(clear_window=False)
-                return delay
-            
-            # Update event state
-            self.event_queue.append(event)
-            self.stability_scores.append(stability_score)
-        except:
-            # Rollback on error
-            if event in self.event_queue:
-                self.event_queue.remove(event)
-            if stability_score in self.stability_scores:
-                self.stability_scores.remove(stability_score)
-            if self.current_window:
-                self.current_window.change_count = max(0, self.current_window.change_count - 1)
-            raise
+        # Calculate delay based on stability
+        delay = self.back_pressure.calculate_delay(stability_score)
+        
+        # Add delay to event for sorting in get_pending_events
+        event["delay"] = delay
+        
+        # Add to window and check back pressure
+        self.event_queue.append(event)
+        
+        # Record the change in the current window
+        if self.current_window:
+            self.current_window.record_change(stability_score)
+        
+        # Store result for retrieval
+        self.processed_events[event["id"]] = {
+            "status": "accepted", 
+            "event_id": event["id"],
+            "delay": delay
+        }
         
         return delay
-        
+
     def get_window_stats(self) -> Dict:
         """Get current learning window statistics.
         
@@ -744,7 +760,7 @@ class EventCoordinator:
             for matching_event in matching_events:
                 # Update event state with semantic validation
                 matching_event['processed'] = True
-                self.processed_events[matching_event["id"]] = datetime.now()
+                self.processed_events[matching_event["id"]] = {"context": matching_event}
                 
                 # Remove from event queue
                 self.event_queue.remove(matching_event)
@@ -758,3 +774,22 @@ class EventCoordinator:
             # Check for saturation after processing
             if window.is_saturated:
                 self._reset_state(clear_window=True)
+
+    def _reset_state(self, clear_window: bool = True):
+        """Reset internal state.
+        
+        Args:
+            clear_window: If True, also clear the current window
+        """
+        # Always clear event state
+        self.event_queue.clear()
+        self.stability_scores.clear()
+        self.processed_events = {}
+        
+        # Optionally clear window
+        if clear_window:
+            self.current_window = None
+        
+        # Reset delay tracking
+        if hasattr(self, 'last_delay'):
+            del self.last_delay

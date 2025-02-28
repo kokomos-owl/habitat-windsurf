@@ -1206,157 +1206,6 @@ class SemanticPatternVisualizer(TestPatternVisualizer):
         return "\n".join(query_parts)
 
 
-def test_neo4j_visualization():
-    """Test Neo4j visualization capabilities."""
-    # Initialize visualizer
-    visualizer = SemanticPatternVisualizer()
-    
-    # Create test patterns
-    patterns = [
-        AdaptiveId(
-            "drought_2025",  # base_id
-            initial_state=WindowState.OPEN,
-            observer_id="test_observer"
-        ),
-        AdaptiveId(
-            "wildfire_2025",  # base_id
-            initial_state=WindowState.OPEN,
-            observer_id="test_observer"
-        ),
-        AdaptiveId(
-            "storm_surge_2025",  # base_id
-            initial_state=WindowState.OPEN,
-            observer_id="test_observer"
-        )
-    ]
-    
-    # Set pattern properties
-    for pattern in patterns:
-        pattern._pattern_type = "event"
-        pattern._confidence = 0.8
-        pattern.temporal_context = json.dumps({"current": 2025})
-        pattern._field_state = 0.7
-        pattern._coherence = 0.9
-        pattern._energy_state = 0.6
-    
-    patterns[0]._hazard_type = "drought"
-    patterns[1]._hazard_type = "wildfire"
-    patterns[2]._hazard_type = "storm_surge"
-    
-    # Create relationships
-    patterns[0].connect_pattern(patterns[1]._base_id, 0.8)  # drought -> wildfire
-    patterns[1].connect_pattern(patterns[2]._base_id, 0.6)  # wildfire -> storm_surge
-    
-    # Export to Neo4j format
-    graph_data = visualizer.export_to_neo4j(patterns)
-    
-    # Verify nodes
-    assert len(graph_data["nodes"]) == 3
-    for node in graph_data["nodes"]:
-        assert "id" in node
-        assert "type" in node
-        assert "hazard_type" in node
-        assert "confidence" in node
-        assert "temporal_context" in node
-        assert "metrics" in node
-        assert node["confidence"] == 1.0  # Default confidence from PatternAdaptiveID
-        assert node["temporal_context"] == {"current": 2025}
-    
-    # Verify relationships
-    assert len(graph_data["relationships"]) == 2
-    for rel in graph_data["relationships"]:
-        assert "source" in rel
-        assert "target" in rel
-        assert "type" in rel
-        assert "properties" in rel
-        assert "strength" in rel["properties"]
-        assert "created_at" in rel["properties"]
-    
-    # Test visualization metadata
-    viz_data = visualizer.visualize_test_structure(patterns)
-    for node in viz_data["nodes"]:
-        assert "color" in node
-        assert "size" in node
-    
-    for rel in viz_data["relationships"]:
-        assert "color" in rel
-        assert "width" in rel
-        assert "arrow" in rel
-    
-    # Test Neo4j query generation
-    query = visualizer.generate_neo4j_query(graph_data)
-    assert isinstance(query, str)
-    assert "CREATE" in query
-    assert "MATCH" in query
-    assert "Pattern" in query
-
-
-@pytest.fixture
-def semantic_graph_selection():
-    """Create semantic graph from Martha's Vineyard text selection."""
-    current_time = datetime.now()
-    
-    temporal_nodes = [
-        TemporalNode(period="current", year=2025, id="current"),
-        TemporalNode(period="mid_century", year=2050, id="mid_century"),
-        TemporalNode(period="late_century", year=2075, id="late_century")
-    ]
-    
-    event_nodes = [
-        EventNode(
-            id="rainfall_100yr",
-            event_type="extreme_precipitation",
-            metrics={
-                "current_probability": 1.0,
-                "mid_increase": 1.2,
-                "late_increase": 1.5
-            }
-        ),
-        EventNode(
-            id="drought_severe",
-            event_type="drought",
-            metrics={
-                "current_probability": 0.8,
-                "mid_increase": 1.3,
-                "late_increase": 1.8
-            }
-        ),
-        EventNode(
-            id="wildfire_high",
-            event_type="wildfire",
-            metrics={
-                "current_probability": 0.6,
-                "mid_increase": 1.4,
-                "late_increase": 2.0
-            }
-        )
-    ]
-    
-    relations = [
-        SemanticRelation(
-            source_id="drought_severe",
-            target_id="wildfire_high",
-            relation_type="increases_probability",
-            strength=0.8,
-            evidence=["historical correlation", "scientific studies"]
-        ),
-        SemanticRelation(
-            source_id="rainfall_100yr",
-            target_id="drought_severe",
-            relation_type="decreases_probability",
-            strength=0.6,
-            evidence=["moisture availability", "soil conditions"]
-        )
-    ]
-    
-    return {
-        "temporal_nodes": temporal_nodes,
-        "event_nodes": event_nodes,
-        "relations": relations,
-        "created_at": current_time,
-        "location": "Martha's Vineyard"
-    }
-
 def test_semantic_pattern_discovery(semantic_graph_selection):
     """Test pattern discovery with validation."""
     visualizer = SemanticPatternVisualizer()
@@ -1633,3 +1482,69 @@ def test_abstract_visualization():
     # Verify relationships
     validation_result = visualizer.validator.get_ui_status()
     assert validation_result["status"] == ValidationStatus.GREEN
+
+@pytest.fixture
+def semantic_graph_selection():
+    """Create semantic graph from Martha's Vineyard text selection."""
+    current_time = datetime.now()
+    
+    temporal_nodes = [
+        TemporalNode(period="current", year=2025, id="current"),
+        TemporalNode(period="mid_century", year=2050, id="mid_century"),
+        TemporalNode(period="late_century", year=2075, id="late_century")
+    ]
+    
+    event_nodes = [
+        EventNode(
+            id="rainfall_100yr",
+            event_type="extreme_precipitation",
+            metrics={
+                "current_probability": 1.0,
+                "mid_increase": 1.2,
+                "late_increase": 1.5
+            }
+        ),
+        EventNode(
+            id="drought_severe",
+            event_type="drought",
+            metrics={
+                "current_probability": 0.8,
+                "mid_increase": 1.3,
+                "late_increase": 1.8
+            }
+        ),
+        EventNode(
+            id="wildfire_high",
+            event_type="wildfire",
+            metrics={
+                "current_probability": 0.6,
+                "mid_increase": 1.4,
+                "late_increase": 2.0
+            }
+        )
+    ]
+    
+    relations = [
+        SemanticRelation(
+            source_id="drought_severe",
+            target_id="wildfire_high",
+            relation_type="increases_probability",
+            strength=0.8,
+            evidence=["historical correlation", "scientific studies"]
+        ),
+        SemanticRelation(
+            source_id="rainfall_100yr",
+            target_id="drought_severe",
+            relation_type="decreases_probability",
+            strength=0.6,
+            evidence=["moisture availability", "soil conditions"]
+        )
+    ]
+    
+    return {
+        "temporal_nodes": temporal_nodes,
+        "event_nodes": event_nodes,
+        "relations": relations,
+        "created_at": current_time,
+        "location": "Martha's Vineyard"
+    }

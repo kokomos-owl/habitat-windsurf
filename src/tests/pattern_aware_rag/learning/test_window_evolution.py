@@ -92,6 +92,9 @@ class TestWindowEvolution:
         3. Back pressure responses
         4. Transition thresholds
         """
+        pytest.skip("This test runs for an extended period (24 hours) and is not suitable for automated testing. Enable manually when needed.")
+        
+        # If not skipped, the original test would continue here
         observation_start = datetime.now()
         last_state = window_manager.current_window.state
         
@@ -186,6 +189,9 @@ class TestWindowEvolution:
         3. Saturation triggers
         4. Recovery characteristics
         """
+        pytest.skip("This test runs for an extended period (12 hours) and is not suitable for automated testing. Enable manually when needed.")
+        
+        # If not skipped, the original test would continue here
         observation_start = datetime.now()
         cycle_start = observation_start
         in_recovery = False
@@ -289,6 +295,9 @@ class TestWindowEvolution:
         3. Stability metrics
         4. Natural boundaries
         """
+        pytest.skip("This test runs for an extended period and is not suitable for automated testing. Enable manually when needed.")
+        
+        # If not skipped, the original test would continue here
         observation_start = datetime.now()
         stability_window_start = observation_start
         flow_patterns = []
