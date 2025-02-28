@@ -1,12 +1,17 @@
 # Habitat System Architecture
 
+You can view this diagram in Mermaid viewers:
+
+1. **Use the standalone Mermaid file**: [habitat_architecture.mmd](habitat_architecture.mmd)
+2. **Copy the code below** directly into https://mermaidviewer.com or https://mermaid.live:
+
 ```mermaid
 %%{init: {'theme': 'dark', 'themeVariables': { 'primaryColor': '#2A3F2B', 'primaryTextColor': '#fff', 'primaryBorderColor': '#7C9D7F', 'lineColor': '#7C9D7F', 'secondaryColor': '#2A3F2B', 'tertiaryColor': '#212121'}}}%%
 
 flowchart TD
     classDef tested fill:#2A3F2B,stroke:#7C9D7F,color:#fff
+    classDef inprocess fill:#cc6600,stroke:#7C9D7F,color:#fff
     classDef untested fill:#CF6679,stroke:#7C9D7F,color:#212121
-    classDef partial fill:#4F6F52,stroke:#7C9D7F,color:#fff
     
     %% Top-level user interface
     USER(["User Interface"])
@@ -123,20 +128,18 @@ flowchart TD
     %% Apply styles to tested components
     class PAR,PAR_LW,PAR_BP,PAR_EC,FIELD,FIELD_OBS,FIELD_HS,ADAPT,ADAPT_ID,ADAPT_PAT tested;
     
-    %% Apply styles to untested/unintegrated components
-    class VIS,VIS_GRAPH,VIS_PAT,VIS_NEO,VIS_FIELD,API_AUTH untested;
+    %% Apply styles to in-process components
+    class VIS,VIS_GRAPH,VIS_PAT,VIS_NEO,VIS_FIELD,API_AUTH,NEO,NEO_DB,NEO_REPO,NEO_QUERY,PAR_FN,API,API_ROUTES,API_GS,FIELD_GS,FIELD_FS,ADAPT_DIM,ADAPT_PROV inprocess;
     
-    %% Apply styles to partially tested components
-    class NEO,NEO_DB,NEO_REPO,NEO_QUERY,PAR_FN,API,API_ROUTES,API_GS,FIELD_GS,FIELD_FS,ADAPT_DIM,ADAPT_PROV partial;
+    %% Apply styles to untested/unintegrated components
+    class NEO,NEO_DB,NEO_REPO,NEO_QUERY untested;
 ```
 
 ## Legend
 
-- **Green** - Fully tested and integrated components
-- **Light Green** - Partially tested components
-- **Orange** - Untested or unintegrated components
-
-## Component Descriptions
+- **Green** (#2A3F2B) - Fully tested and integrated components
+- **Orange** (#cc6600) - Partially tested/in-process components 
+- **Red** (#CF6679) - Untested or unintegrated components
 
 ### Main Components
 

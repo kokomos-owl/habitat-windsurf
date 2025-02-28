@@ -1,0 +1,187 @@
+%%{
+  init: {
+    'theme': 'dark',
+    'themeVariables': { 
+      'primaryColor': '#2A3F2B', 
+      'primaryTextColor': '#fff', 
+      'primaryBorderColor': '#7C9D7F', 
+      'lineColor': '#7C9D7F', 
+      'secondaryColor': '#2A3F2B', 
+      'tertiaryColor': '#212121',
+      'fontSize': '16px',
+      'fontFamily': 'arial',
+      
+      /* Remove backgrounds from subgraphs */
+      'clusterBkg': 'transparent',
+      'clusterBorder': '#7C9D7F',
+      'titleColor': '#ffffff',
+      
+      /* Increase spacing for better hierarchy */
+      'ganttFontSize': '16px',
+      'nodeBorder': '#7C9D7F',
+      'mainBkg': '#2A3F2B'
+    },
+    'flowchart': {
+      'htmlLabels': true,
+      'curve': 'basis',
+      'rankSpacing': 120,
+      'nodeSpacing': 80,
+      'rankDir': 'TB',
+      'padding': 20
+    }
+  }
+}%%
+
+flowchart TB
+    %% Custom styling
+    classDef tested fill:#2A3F2B,stroke:#7C9D7F,color:#fff,stroke-width:2px,rx:6px,ry:6px
+    classDef untested fill:#CF6679,stroke:#7C9D7F,color:#212121,stroke-width:2px,rx:6px,ry:6px
+    classDef partial fill:#cc6600,stroke:#7C9D7F,color:#fff,stroke-width:2px,rx:6px,ry:6px
+    
+    %% Subgraph styling for title emphasis
+    classDef subgraphTitle font-size:18px,fill:none,stroke:none,color:#fff,font-weight:bold
+    
+    %% Top-level user interface
+    USER(["User Interface"]):::partial
+    
+    %% Enhanced hierarchy with clearer levels
+    subgraph Z_HIGH["👤 USER LAYER"]
+        direction TB
+        API_Layer
+    end
+    
+    %% API Layer - Entry point to the system
+    subgraph API_Layer["API Layer"]
+        direction TB
+        API["REST API\n(server.py)"]:::partial
+        API_ROUTES["Route Handlers"]:::partial
+        API_AUTH["Authentication"]:::untested
+        API_GS["Graph Service"]:::partial
+        
+        %% Internal API arrangement
+        API --- API_ROUTES
+        API --- API_AUTH
+        API --- API_GS
+    end
+    
+    %% Core Processing Layers
+    subgraph Y_MID["🔄 PROCESSING LAYER"]
+        direction TB
+        Core_Processing
+    end
+    
+    subgraph Core_Processing["Core Processing"]
+        direction TB
+        
+        %% Pattern-Aware RAG - Central processing
+        subgraph Pattern-Aware_RAG["Pattern-Aware RAG"]
+            direction TB
+            PAR["Pattern-Aware RAG"]:::tested
+            PAR_LW["Learning Window"]:::tested
+            PAR_BP["Back Pressure\nController"]:::tested
+            PAR_EC["Event Coordinator"]:::tested
+            PAR_FN["Field-Neo4j Bridge"]:::partial
+            
+            %% Internal PAR arrangement
+            PAR --- PAR_LW
+            PAR --- PAR_BP
+            PAR --- PAR_EC
+            PAR --- PAR_FN
+        end
+        
+        %% Field Theory - Theoretical foundation
+        subgraph Field_Theory["Field Theory"]
+            direction TB
+            FIELD["Field Theory Core"]:::tested
+            FIELD_OBS["Field Observer"]:::tested
+            FIELD_HS["Health Service"]:::tested
+            FIELD_GS["Gradient Service"]:::partial
+            FIELD_FS["Flow Dynamics"]:::partial
+            
+            %% Internal Field arrangement
+            FIELD --- FIELD_OBS
+            FIELD --- FIELD_HS
+            FIELD --- FIELD_GS
+            FIELD --- FIELD_FS
+        end
+        
+        %% Adaptive Core - Identity and evolution
+        subgraph Adaptive_Core["Adaptive Core"]
+            direction TB
+            ADAPT["Adaptive Core"]:::tested
+            ADAPT_ID["AdaptiveID"]:::tested
+            ADAPT_PAT["Pattern ID"]:::tested
+            ADAPT_DIM["Dimensional Context"]:::partial
+            ADAPT_PROV["Provenance Tracker"]:::partial
+            
+            %% Internal Adaptive arrangement
+            ADAPT --- ADAPT_ID
+            ADAPT --- ADAPT_PAT
+            ADAPT --- ADAPT_DIM
+            ADAPT --- ADAPT_PROV
+        end
+        
+        %% Core processing internal arrangement
+        Pattern-Aware_RAG ~~~ Field_Theory
+        Pattern-Aware_RAG ~~~ Adaptive_Core
+        Field_Theory ~~~ Adaptive_Core
+    end
+    
+    %% Persistence and Visualization Layers
+    subgraph X_LOW["💾 DATA LAYER"]
+        direction TB
+        Data_Layers
+    end
+    
+    subgraph Data_Layers["Persistence & Visualization"]
+        direction TB
+        
+        %% Neo4j Persistence - Data storage
+        subgraph Neo4j_Persistence["Neo4j Persistence"]
+            direction TB
+            NEO["Neo4j Persistence"]:::partial
+            NEO_DB["Pattern Database"]:::partial
+            NEO_REPO["Repository Layer"]:::partial
+            NEO_QUERY["Query Engine"]:::partial
+            
+            %% Internal Neo4j arrangement
+            NEO --- NEO_DB
+            NEO --- NEO_REPO
+            NEO --- NEO_QUERY
+        end
+        
+        %% Visualization - Presenting data to users
+        subgraph Visualization["Visualization"]
+            direction TB
+            VIS["Visualization Engine"]:::untested
+            VIS_GRAPH["Graph Renderer"]:::untested
+            VIS_PAT["Pattern Visualizer"]:::untested
+            VIS_NEO["Neo4j Connector"]:::untested
+            VIS_FIELD["Field Visualizer"]:::untested
+            
+            %% Internal Visualization arrangement
+            VIS --- VIS_GRAPH
+            VIS --- VIS_PAT
+            VIS --- VIS_NEO
+            VIS --- VIS_FIELD
+        end
+        
+        %% Data layers internal arrangement
+        Neo4j_Persistence ~~~ Visualization
+    end
+    
+    %% Main vertical flow - enforce top-down structure with clear hierarchy
+    USER ==> Z_HIGH
+    Z_HIGH ==> Y_MID
+    Y_MID ==> X_LOW
+    
+    %% Cross-component connections for critical paths
+    PAR_FN -.-> NEO
+    PAR_LW -.-> FIELD_OBS
+    PAR_BP -.-> FIELD_HS
+    API_GS -.-> NEO
+    VIS_NEO -.-> NEO
+    VIS_FIELD -.-> FIELD
+    
+    %% Apply styles to subgraph titles
+    class Z_HIGH,Y_MID,X_LOW subgraphTitle
