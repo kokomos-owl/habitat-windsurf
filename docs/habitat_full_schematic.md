@@ -1,7 +1,7 @@
 # Full Habitat System Schematic
 
 ```mermaid
-graph TD
+flowchart TD
     %% Color coding
     classDef userLayer fill:#2A3F2B,color:white,stroke:#26A69A,stroke-width:2px
     classDef processingLayer fill:#cc6600,color:white,stroke:#FFA726,stroke-width:2px
@@ -67,6 +67,88 @@ graph TD
     CPE[Claude Prompt Engine]:::core
     LCI[LangChain Integration]:::core
     GSH[Graph State Handler]:::core
+    
+    %% Grouping
+    subgraph UserLayer[1. User Layer]
+        UI
+        API
+        GraphService
+        Router
+        Auth
+    end
+    
+    subgraph ProcessingLayer[2. Processing Layer]
+        subgraph PatternAwareRAG[Pattern-Aware RAG]
+            PAR
+            LW
+            BPC
+            EC
+            FNBRIDGE
+            CI
+            PP
+            WM
+            CPE
+            LCI
+            GSH
+        end
+        
+        subgraph FieldTheory[Field Theory]
+            FTC
+            FO
+            HS
+            GS
+            FD
+            HFO
+        end
+        
+        subgraph AdaptiveCore[Adaptive Core]
+            AC
+            AID
+            PID
+            DC
+            PT
+        end
+    end
+    
+    subgraph DataLayer[3. Data Layer]
+        subgraph Persistence[Neo4j Persistence]
+            NPC
+            PDB
+            RL
+            QE
+        end
+        
+        subgraph Visualization[Visualization]
+            VE
+            GR
+            PV
+            NC
+            FV
+        end
+    end
+    
+    subgraph Interfaces[Interfaces]
+        PEI
+        FSS
+        GSI
+        FDS
+        RPI
+        MCP
+    end
+
+    %% Dual-Mode Operations
+    subgraph DualModeOperation[Dual-Mode Operation]
+        Neo4jMode[Neo4j Persistence Mode]
+        DirectMode[Direct LLM Mode]
+    end
+    
+    %% Field State Flow
+    subgraph FieldState[Field State]
+        Stability[Stability Metrics]
+        Coherence[Coherence Metrics]
+        Density[Field Density]
+        Waves[Wave Mechanics]
+    end
     
     %% System Topology - User Layer
     UI --> API
@@ -136,116 +218,42 @@ graph TD
     GSH --> PAR
     
     %% Dual-Mode Operations
-    subgraph "Dual-Mode Operation"
-        Neo4jMode[Neo4j Persistence Mode]
-        DirectMode[Direct LLM Mode]
-    end
-    
     FNBRIDGE --> Neo4jMode
     FNBRIDGE --> DirectMode
     Neo4jMode --> NPC
     DirectMode --> PAR
     
     %% Field State Flow
-    subgraph "Field State"
-        Stability[Stability Metrics]
-        Coherence[Coherence Metrics]
-        Density[Field Density]
-        Waves[Wave Mechanics]
-    end
-    
     FO --> Stability
     FO --> Coherence
     FO --> Density
     FO --> Waves
     
     %% Data Flow Sequence
-    UI -->|"User Input"| API
-    API -->|"Process Request"| PAR
-    PAR -->|"Extract Patterns"| PP
-    PP -->|"Assign ID"| AID
-    PP -->|"Store Pattern"| NPC
-    PAR -->|"Manage Learning"| EC
-    EC -->|"Create Window"| LW
-    EC -->|"Monitor Field"| FO
-    FO -->|"Field Metrics"| FTC
-    FNBRIDGE -->|"State Transfer"| NPC
-    NPC -->|"Pattern Data"| VE
-    VE -->|"Visualization"| GraphService
-    GraphService -->|"Graph Image"| UI
-    
-    %% Grouping
-    subgraph UserLayer["1. User Layer"]
-        UI
-        API
-        GraphService
-        Router
-        Auth
-    end
-    
-    subgraph ProcessingLayer["2. Processing Layer"]
-        subgraph PatternAwareRAG["Pattern-Aware RAG"]
-            PAR
-            LW
-            BPC
-            EC
-            FNBRIDGE
-            CI
-            PP
-            WM
-            CPE
-            LCI
-            GSH
-        end
-        
-        subgraph FieldTheory["Field Theory"]
-            FTC
-            FO
-            HS
-            GS
-            FD
-            HFO
-        end
-        
-        subgraph AdaptiveCore["Adaptive Core"]
-            AC
-            AID
-            PID
-            DC
-            PT
-        end
-    end
-    
-    subgraph DataLayer["3. Data Layer"]
-        subgraph Persistence["Neo4j Persistence"]
-            NPC
-            PDB
-            RL
-            QE
-        end
-        
-        subgraph Visualization["Visualization"]
-            VE
-            GR
-            PV
-            NC
-            FV
-        end
-    end
-    
-    %% Interface Layer
-    subgraph Interfaces["Interfaces"]
-        PEI
-        FSS
-        GSI
-        FDS
-        RPI
-        MCP
-    end
-    
-    %% Implementation Status Color Coding (Add this legend at the bottom)
-    style UserLayer fill:#2A3F2B,color:white,stroke:#26A69A,stroke-width:2px
-    style ProcessingLayer fill:#cc6600,color:white,stroke:#FFA726,stroke-width:2px
-    style DataLayer fill:#CF6679,color:white,stroke:#F48FB1,stroke-width:2px
-    style Interfaces fill:#5C6BC0,color:white,stroke:#7986CB,stroke-width:2px
+    UI -->|User Input| API
+    API -->|Process Request| PAR
+    PAR -->|Extract Patterns| PP
+    PP -->|Assign ID| AID
+    PP -->|Store Pattern| NPC
+    PAR -->|Manage Learning| EC
+    EC -->|Create Window| LW
+    EC -->|Monitor Field| FO
+    FO -->|Field Metrics| FTC
+    FNBRIDGE -->|State Transfer| NPC
+    NPC -->|Pattern Data| VE
+    VE -->|Visualization| GraphService
+    GraphService -->|Graph Image| UI
+
+    %% Apply CSS classes to subgraphs
+    class UserLayer userLayer
+    class ProcessingLayer processingLayer
+    class DataLayer dataLayer
+    class Interfaces interface
+    class PatternAwareRAG component
+    class FieldTheory component
+    class AdaptiveCore component
+    class Persistence component
+    class Visualization component
+    class DualModeOperation component
+    class FieldState component
 ```
