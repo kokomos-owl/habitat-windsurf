@@ -39,16 +39,15 @@ from habitat_evolution.pattern_aware_rag.core.coherence_interface import Coheren
 from habitat_evolution.pattern_aware_rag.state.test_states import GraphStateSnapshot as PatternGraphService
 
 from habitat_evolution.pattern_aware_rag.pattern_aware_rag import PatternAwareRAG
-from habitat_evolution.core.models.learning_window import (
+from habitat_evolution.pattern_aware_rag.learning.learning_control import (
     LearningWindow,
-    LearningWindowState,
-    WindowStateMetrics
+    WindowState as LearningWindowState
 )
-from habitat_evolution.core.models.pattern import Pattern, PatternMetrics
-from habitat_evolution.pattern_aware_rag.state.states import (
-    StateValidationError,
-    PatternState
-)
+# WindowStateMetrics is not found in learning_control.py, might need to be defined or imported elsewhere
+from habitat_evolution.adaptive_core.models.pattern import Pattern
+from habitat_evolution.pattern_aware_rag.interfaces.pattern_emergence import PatternMetrics
+from habitat_evolution.pattern_aware_rag.state.test_states import PatternState
+from habitat_evolution.pattern_aware_rag.core.exceptions import StateValidationError
 from habitat_evolution.adaptive_core.services.interfaces import PatternEvolutionService
 
 # Test Data Models
@@ -91,12 +90,50 @@ class TestStabilityMetrics:
 @pytest.fixture
 async def learning_window():
     """Provide configured learning window for testing."""
-    window = LearningWindow()
-    window.state = LearningWindowState.CLOSED
+    from datetime import datetime, timedelta
+    start_time = datetime.now()
+    end_time = start_time + timedelta(hours=1)
+    window = LearningWindow(
+        start_time=start_time,
+        end_time=end_time,
+        stability_threshold=0.7,
+        coherence_threshold=0.8,
+        max_changes_per_window=100
+    )
+    # LearningWindowState is an import alias for WindowState
+    window._state = LearningWindowState.CLOSED
     return window
 
 class MockPatternEvolutionService(PatternEvolutionService):
     """Mock pattern evolution service for testing."""
+    
+    def __init__(self):
+        """Initialize with empty pattern and relationship stores"""
+        self.pattern_store = {}  # Mock pattern store
+        self.relationship_store = {}  # Mock relationship store
+    
+    def register_pattern(self, pattern_data: Dict[str, Any]):
+        """Register a new pattern and return its ID"""
+        return f"test_pattern_{pattern_data.get('content', '')[:10]}"
+    
+    def calculate_coherence(self, pattern_id: str):
+        """Calculate coherence for a pattern"""
+        return 0.85  # High coherence for testing
+    
+    def update_pattern_state(self, pattern_id: str, new_state: Dict[str, Any]):
+        """Update pattern state"""
+        return new_state
+    
+    def get_pattern_metrics(self, pattern_id: str):
+        """Get pattern metrics"""
+        from habitat_evolution.adaptive_core.services.interfaces import PatternMetrics
+        return PatternMetrics(
+            coherence=0.85,
+            signal_strength=0.78,
+            phase_stability=0.92,
+            flow_metrics={"harmonic_resonance": 0.76}
+        )
+    
     async def extract_pattern(self, content: str) -> Pattern:
         return Pattern(
             id=f"test_pattern_{content[:10]}",
@@ -172,7 +209,7 @@ class MockEmergenceFlow:
     """Mock emergence flow for testing."""
     def __init__(self):
         self.context = type('Context', (), {
-            'state_space': StateSpaceCondition()
+            'state_space': StateSpaceCondition.CLOSED  # Use a specific enum value
         })
 
     def get_flow_state(self) -> FlowState:
@@ -243,7 +280,16 @@ async def settings():
 @pytest.fixture
 async def graph_service():
     """Provide mock graph service."""
-    return PatternGraphService()
+    from datetime import datetime
+    # Initialize with required parameters
+    return PatternGraphService(
+        id="test_graph_state",
+        nodes=[],  # Empty list of nodes initially
+        relations=[],  # Empty list of relations initially
+        patterns=[],  # Empty list of patterns initially
+        timestamp=datetime.now(),
+        version=1
+    )
 
 @pytest.fixture
 async def pattern_aware_rag(
@@ -255,7 +301,6 @@ async def pattern_aware_rag(
     metrics_service,
     quality_metrics_service,
     event_service,
-    rag_controller,
     coherence_analyzer,
     emergence_flow,
     settings,
@@ -270,7 +315,6 @@ async def pattern_aware_rag(
         metrics_service=metrics_service,
         quality_metrics_service=quality_metrics_service,
         event_service=event_service,
-        rag_controller=rag_controller,
         coherence_analyzer=coherence_analyzer,
         emergence_flow=emergence_flow,
         settings=settings,
