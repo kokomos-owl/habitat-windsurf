@@ -76,7 +76,7 @@ flowchart TD
     TC[Temporal Coherence]:::component
     
     %% Grouping
-    subgraph UserLayer[1. User Layer]
+    subgraph UserLayer["User Layer"]
         UI
         API
         GraphService
@@ -84,7 +84,7 @@ flowchart TD
         Auth
     end
     
-    subgraph ProcessingLayer[2. Processing Layer]
+    subgraph ProcessingLayer["Processing Layer"]
         subgraph PatternAwareRAG[Pattern-Aware RAG]
             PAR
             LW
@@ -122,7 +122,7 @@ flowchart TD
         end
     end
     
-    subgraph DataLayer[3. Data Layer]
+    subgraph DataLayer["Data Layer"]
         subgraph Persistence[Field-State Persistence]
             FSP
             PS
@@ -347,27 +347,27 @@ flowchart TD
 
 ## Schematic Key Changes
 
-1. **Field-State Architecture**
+**Field-State Architecture**
    - Replaced vector-based components with field-state operations
    - Added explicit field-state components (Tonic Measurement, Harmonic Resonance, etc.)
    - Emphasized natural pattern emergence through field observations
 
-2. **Relationship Handling**
+**Relationship Handling**
    - Introduced temporal coherence measurements instead of vector similarity
    - Added tonic-harmonic measures for semantic relationships
    - Implemented energy gradient tracking for relationship density
 
-3. **Persistence Model**
+**Persistence Model**
    - Renamed Neo4j Persistence to Field-State Persistence for flexibility
    - Separated Pattern Store and Relationship Store explicitly
    - Maintained dual-mode operation capabilities
 
-4. **Function Labels**
+**Function Labels**
    - Added clear function labels for all key operations
    - Emphasized Adaptive Core functions (Assign ID, Create Context, etc.)
    - Included field-state specific functions (Measure Tonic-Harmonic, Track Energy, etc.)
 
-5. **Field Dynamics**
+**Field Dynamics**
    - Expanded Field State Dynamics with Energy Gradients and Resonance
    - Connected field metrics to appropriate processing components
    - Ensured natural field observation flow
