@@ -1,0 +1,143 @@
+Climate Risk Assessment - Nantucket Sound Region
+RECOVERY TEST DOCUMENT
+Document ID: REC-NS-2024-001
+
+METADATA [RECOVERABLE]
+Assessment Type: Climate Risk Analysis
+Geographic Focus: Nantucket Sound
+Temporal Scope: Present to 2100
+Creation Date: [MALFORMED but recoverable: 04-15-2024]
+Version: [MALFORMED but recoverable: v1.0]
+Status: Test Document
+Schema Version: 2.0
+Validation Status: Partial [RECOVERABLE]
+
+EXECUTIVE SUMMARY
+[ORIGINAL CONTENT CORRUPTED - BACKUP AVAILABLE]
+=== BEGIN BACKUP CONTENT ===
+This assessment examines climate risks affecting the Nantucket Sound region through multiple time horizons, focusing on key vulnerabilities and adaptation strategies.
+=== END BACKUP CONTENT ===
+
+SECTION 1: PRIMARY HAZARDS
+
+1.1 Sea Level Rise [PARTIAL DATA LOSS - RECOVERABLE FROM CROSS-REFERENCE]
+Current rate: [MISSING - RECOVER FROM SECTION 4.2]
+Projections: 
+2050: [MISSING - RECOVER FROM SECTION 4.2]
+2100: [MISSING - RECOVER FROM SECTION 4.2]
+
+[RECOVERED DATA - SECTION 4.2 CROSS-REFERENCE]
+Current rate: 3.3mm/year
+Projections:
+2050: 1.5-2.0 feet
+2100: 4.0-6.0 feet
+
+1.2 Storm Impacts [ALTERNATIVE SOURCE AVAILABLE]
+=== PRIMARY DATA CORRUPTED ===
+=== USING SECONDARY SOURCE ===
+Frequency: 3 major storms/year
+Intensity: Category 1-3 storms
+Storm surge: 6-12 feet
+
+1.3 Coastal Erosion [DATA CHAIN INTACT]
+Current rates:
+- Northern region: 2.2 feet/year
+- Central region: 2.5 feet/year
+- Southern region: 2.8 feet/year
+
+SECTION 2: VULNERABILITY ANALYSIS [PARTIAL RECOVERY NEEDED]
+
+2.1 Critical Infrastructure
+[ORIGINAL DATA CORRUPTED]
+[RECOVERING FROM SYSTEM BACKUP]
+- Coastal roads: High vulnerability
+- Power stations: Moderate vulnerability
+- Water treatment: High vulnerability
+=== END RECOVERED DATA ===
+
+2.2 Natural Systems [VALID - NO RECOVERY NEEDED]
+Vulnerable systems include:
+- Salt marshes
+- Barrier beaches
+- Coastal wetlands
+- Dune systems
+
+2.3 Community Resources [ALTERNATE FORMAT - RECOVERABLE]
+{
+  "schools": "moderate_risk",
+  "hospitals": "high_risk",
+  "emergency_services": "moderate_risk"
+}
+[RECOVERED FORMAT]
+Schools: Moderate risk
+Hospitals: High risk
+Emergency Services: Moderate risk
+
+SECTION 3: TEMPORAL ANALYSIS
+
+3.1 Historical Data [TIMESTAMP ERROR - RECOVERABLE]
+[ORIGINAL TIMESTAMPS CORRUPTED]
+[RECOVERED FROM CONTEXT]
+Baseline period: 1990-2020
+Analysis period: 2020-2100
+
+3.2 Current Conditions [VALID]
+Present-day observations remain accurate and valid
+No recovery needed for this section
+
+3.3 Future Projections [PARTIAL CORRUPTION - RECOVERABLE]
+[ORIGINAL CONTENT MIXED WITH BACKUP]
+=== BEGIN MERGED CONTENT ===
+Near-term (2020-2030): Original data intact
+Mid-term (2030-2050): [RECOVERED] Accelerating impacts
+Long-term (2050-2100): [RECOVERED] High uncertainty
+=== END MERGED CONTENT ===
+
+SECTION 4: EVIDENCE AND CONFIDENCE
+
+4.1 Data Sources [REFERENCE RECOVERY]
+[1] [CORRUPTED - RECOVERED]: NOAA Technical Report 2023
+[2] Valid reference: MA CZM Shoreline Change Report
+[3] [CORRUPTED - RECOVERED]: USGS Open File Report 2024
+[4] Valid reference: Local tide gauge data
+
+4.2 Cross-References [VALID]
+This section provides valid cross-reference data for recovery
+Used to restore Section 1.1 content
+
+4.3 Confidence Levels [PARTIALLY RECOVERABLE]
+[ORIGINAL]
+High: [CORRUPTED]
+Medium: 60%
+Low: [CORRUPTED]
+
+[RECOVERED FROM VALIDATION RULES]
+High: 80%
+Medium: 60%
+Low: 40%
+
+SECTION 5: RECOVERY VALIDATION
+
+5.1 Data Integrity Checks
+Original Records: 85% intact
+Recovered Records: 95% intact
+Final Validation: PASSED
+
+5.2 Recovery Sources
+- System backups: 40%
+- Cross-references: 30%
+- Alternative sources: 20%
+- Context recovery: 10%
+
+5.3 Recovery Metrics
+Total fields: 100
+Corrupted fields: 25
+Recovered fields: 23
+Recovery rate: 92%
+
+METADATA VALIDATION [POST-RECOVERY]
+Assessment Integrity: Restored
+Data Completeness: 95%
+Recovery Status: Successful
+Final Validation: Passed
+Recovery Timestamp: 2024-04-15T14:30:00Z

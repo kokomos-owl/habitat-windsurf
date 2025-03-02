@@ -1,0 +1,190 @@
+Temporal Analysis of Climate Impacts - Plum Island, Massachusetts
+Timeline-Focused Risk Assessment
+Document ID: TEMP-PI-2024-001
+
+HISTORICAL BASELINE (1970-2020)
+
+Observed Changes:
+- Sea level rise: 2.8mm/year (1970-1990)
+- Sea level rise: 3.2mm/year (1990-2010)
+- Sea level rise: 3.6mm/year (2010-2020)
+
+Storm Patterns:
+1970s:
+- Average 2 major storms/year
+- Peak storm surge: 8.2 feet
+- Coastal erosion: 1.2 feet/year
+
+1980s:
+- Average 2.2 major storms/year
+- Peak storm surge: 8.4 feet
+- Coastal erosion: 1.3 feet/year
+
+1990s:
+- Average 2.5 major storms/year
+- Peak storm surge: 8.7 feet
+- Coastal erosion: 1.5 feet/year
+
+2000s:
+- Average 2.8 major storms/year
+- Peak storm surge: 9.1 feet
+- Coastal erosion: 1.8 feet/year
+
+2010s:
+- Average 3.2 major storms/year
+- Peak storm surge: 9.4 feet
+- Coastal erosion: 2.1 feet/year
+
+NEAR-TERM PROJECTIONS (2020-2030)
+
+Annual Changes:
+2024:
+- Projected SLR: 3.8mm
+- Expected storms: 3.3/year
+- Erosion rate: 2.2 feet/year
+
+2026:
+- Projected SLR: 4.0mm
+- Expected storms: 3.4/year
+- Erosion rate: 2.3 feet/year
+
+2028:
+- Projected SLR: 4.2mm
+- Expected storms: 3.5/year
+- Erosion rate: 2.4 feet/year
+
+2030:
+- Projected SLR: 4.4mm
+- Expected storms: 3.6/year
+- Erosion rate: 2.5 feet/year
+
+MID-TERM PROJECTIONS (2030-2050)
+
+Five-Year Intervals:
+2035:
+- SLR: +0.2 feet from 2030
+- Storm frequency: 3.8/year
+- Erosion: 2.7 feet/year
+- Beach loss: 13.5 feet
+
+2040:
+- SLR: +0.4 feet from 2030
+- Storm frequency: 4.0/year
+- Erosion: 2.9 feet/year
+- Beach loss: 28 feet
+
+2045:
+- SLR: +0.7 feet from 2030
+- Storm frequency: 4.2/year
+- Erosion: 3.1 feet/year
+- Beach loss: 43.5 feet
+
+2050:
+- SLR: +1.0 feet from 2030
+- Storm frequency: 4.5/year
+- Erosion: 3.3 feet/year
+- Beach loss: 60 feet
+
+LONG-TERM SCENARIOS (2050-2100)
+
+Decade Intervals:
+2060:
+- SLR Range: +1.5 to +2.0 feet
+- Storm Frequency: 4.8-5.2/year
+- Erosion: 3.6-4.0 feet/year
+
+2070:
+- SLR Range: +2.2 to +3.0 feet
+- Storm Frequency: 5.0-5.5/year
+- Erosion: 4.0-4.5 feet/year
+
+2080:
+- SLR Range: +3.0 to +4.2 feet
+- Storm Frequency: 5.3-6.0/year
+- Erosion: 4.5-5.0 feet/year
+
+2090:
+- SLR Range: +4.0 to +5.5 feet
+- Storm Frequency: 5.5-6.5/year
+- Erosion: 5.0-5.5 feet/year
+
+2100:
+- SLR Range: +5.0 to +7.0 feet
+- Storm Frequency: 6.0-7.0/year
+- Erosion: 5.5-6.0 feet/year
+
+TEMPORAL RELATIONSHIPS
+
+Sequential Impacts:
+1. Initial SLR
+2. Increased Storm Exposure
+3. Accelerated Erosion
+4. Infrastructure Damage
+5. Habitat Loss
+6. System Transformation
+
+Feedback Timelines:
+Short-term (1-5 years):
+- Beach profile changes
+- Dune scarping
+- Salt marsh response
+
+Medium-term (5-15 years):
+- Barrier island migration
+- Salt marsh drowning
+- Ecosystem shifts
+
+Long-term (15+ years):
+- Complete system restructuring
+- New equilibrium states
+- Habitat transformation
+
+TEMPORAL UNCERTAINTY
+
+Confidence Levels by Timeframe:
+
+2020-2030: High Confidence
+- Well-constrained projections
+- Clear trend continuation
+- Limited deviation potential
+
+2030-2050: Medium Confidence
+- Increasing uncertainty ranges
+- Multiple pathway possibilities
+- System feedback emergence
+
+2050-2100: Low Confidence
+- Wide projection ranges
+- Multiple scenarios possible
+- Complex feedback interactions
+
+TEMPORAL DATA SOURCES
+
+Historical Records:
+- NOAA tide gauge data (1970-2020)
+- Storm impact surveys (1970-2020)
+- Aerial photography analysis (1970-2020)
+- Beach profile measurements (1970-2020)
+
+Current Monitoring:
+- Continuous tide gauges
+- Monthly beach profiles
+- Annual aerial surveys
+- Seasonal habitat assessments
+
+Projection Models:
+- NOAA SLR scenarios
+- Storm frequency analysis
+- Erosion rate projections
+- Habitat response models
+
+METADATA
+Document Type: Temporal Analysis
+Geographic Focus: Plum Island, MA
+Time Range: 1970-2100
+Creation Date: 2024-03-01
+Version: 1.0
+Status: Test Document
+Temporal Resolution: Variable (Annual to Decadal)
+Confidence Tracking: Enabled
+Update Frequency: Annual

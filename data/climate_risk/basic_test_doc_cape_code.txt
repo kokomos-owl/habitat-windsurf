@@ -1,0 +1,52 @@
+Climate Risk Assessment - Cape Cod, MA
+
+Basic Assessment Document
+
+Introduction
+This assessment examines key climate risks for Cape Cod, Massachusetts. The analysis focuses on primary hazards affecting the region over the next few decades.
+
+Results Summary
+Cape Cod faces increasing risks from sea level rise, coastal flooding, and erosion. Current projections indicate accelerating impacts through mid-century, with substantial uncertainty in late-century estimates.
+
+Key Hazards
+
+Sea Level Rise
+Current trends show sea level rising at 3mm per year along Cape Cod's coast. Mid-century projections indicate:
+- 0.5-1.0 feet of rise by 2050
+- Increased coastal flooding frequency
+- Enhanced erosion of barrier beaches
+
+Coastal Flooding
+Storm surge flooding presents increasing risks:
+- Current 100-year flood zones expanding
+- More frequent moderate flooding events
+- Infrastructure vulnerability in low-lying areas
+
+Coastal Erosion
+Shoreline change analysis indicates:
+- Average erosion rates of 2-3 feet per year
+- Accelerating loss at coastal hotspots
+- Barrier beach system vulnerability
+
+Time Horizons
+- Present (2020-2030): Established trends continuing
+- Mid-century (2040-2060): Accelerating impacts
+- Late-century: Increasing uncertainty in projections
+
+Confidence Levels
+- High confidence in current trends
+- Medium confidence in mid-century projections
+- Lower confidence in late-century estimates
+
+References
+1. MA Coastal Zone Management reports
+2. NOAA sea level data
+3. USGS shoreline change studies
+
+Document Metadata
+- Assessment Type: Basic Climate Risk
+- Region: Cape Cod, Massachusetts 
+- Temporal Scope: Present to late-century
+- Creation Date: 2024-01-15
+- Version: 1.0
+- Status: Test Document
