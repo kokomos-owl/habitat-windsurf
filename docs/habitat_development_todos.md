@@ -289,3 +289,109 @@ habitat_evolution/
 5. **Phase 5 (Weeks 9-10)**: System Integration and Documentation
 
 Each phase includes unit tests, with integration tests developed throughout and comprehensive performance testing in Phase 5.
+
+
+# Implementation Addendum: Critical Path Tasks - Required Modules and Tests
+
+## CP-1: PatternAwareRAG Integration Tests Refactoring
+
+### Core Modules to Review
+| File Path | Current Purpose | Required Changes |
+|-----------|----------------|------------------|
+| [pattern_aware_rag/pattern_aware_rag.py](cci:7://file:///Users/prphillips/Documents/GitHub/habitat-windsurf/src/habitat_evolution/pattern_aware_rag/pattern_aware_rag.py:0:0-0:0) | Main RAG implementation | Remove vector operations, integrate field-state calculations |
+| [pattern_aware_rag/state/state_evolution.py](cci:7://file:///Users/prphillips/Documents/GitHub/habitat-windsurf/src/habitat_evolution/pattern_aware_rag/state/state_evolution.py:0:0-0:0) | State transition tracking | Enhance field-state observation tracking |
+| [pattern_aware_rag/state/state_handler.py](cci:7://file:///Users/prphillips/Documents/GitHub/habitat-windsurf/src/habitat_evolution/pattern_aware_rag/state/state_handler.py:0:0-0:0) | Graph state validation | Update coherence calculations for field-state |
+| [core/services/field/flow_dynamics_service.py](cci:7://file:///Users/prphillips/Documents/GitHub/habitat-windsurf/src/habitat_evolution/core/services/field/flow_dynamics_service.py:0:0-0:0) | Flow dynamics calculations | Convert to scalar-based metrics |
+| [pattern_aware_rag/core/pattern_processor.py](cci:7://file:///Users/prphillips/Documents/GitHub/habitat-windsurf/src/habitat_evolution/pattern_aware_rag/core/pattern_processor.py:0:0-0:0) | Pattern processing | Update for field-state paradigm |
+
+### Test Modules to Update
+| File Path | Current Purpose | Required Changes |
+|-----------|----------------|------------------|
+| [tests/integration/test_pattern_aware_rag_integration.py](cci:7://file:///Users/prphillips/Documents/GitHub/habitat-windsurf/src/habitat_evolution/tests/integration/test_pattern_aware_rag_integration.py:0:0-0:0) | Integration testing | Replace vector similarity tests with field coherence |
+| [tests/pattern/test_pattern_dynamics.py](cci:7://file:///Users/prphillips/Documents/GitHub/habitat-windsurf/src/habitat_evolution/tests/pattern/test_pattern_dynamics.py:0:0-0:0) | Pattern behavior testing | Update for field-state dynamics |
+| [tests/pattern/test_field_integration.py](cci:7://file:///Users/prphillips/Documents/GitHub/habitat-windsurf/src/habitat_evolution/tests/pattern/test_field_integration.py:0:0-0:0) | Field integration testing | Add field-state transition validation |
+| [tests/pattern/test_states.py](cci:7://file:///Users/prphillips/Documents/GitHub/habitat-windsurf/src/habitat_evolution/tests/pattern/test_states.py:0:0-0:0) | State testing | Update for field-state transitions |
+
+## CP-2: Geometric Field Semantics Implementation
+
+### Core Modules to Review
+| File Path | Current Purpose | Required Changes |
+|-----------|----------------|------------------|
+| [core/services/field/gradient_service.py](cci:7://file:///Users/prphillips/Documents/GitHub/habitat-windsurf/src/habitat_evolution/core/services/field/gradient_service.py:0:0-0:0) | Gradient calculations | Update for geometric field metrics |
+| [core/services/field/field_state_service.py](cci:7://file:///Users/prphillips/Documents/GitHub/habitat-windsurf/src/habitat_evolution/core/services/field/field_state_service.py:0:0-0:0) | Field state management | Add multi-dimensional field support |
+| [social/core/field.py](cci:7://file:///Users/prphillips/Documents/GitHub/habitat-windsurf/src/habitat_evolution/social/core/field.py:0:0-0:0) | Social field dynamics | Integrate geometric semantics |
+| [core/config/field_config.py](cci:7://file:///Users/prphillips/Documents/GitHub/habitat-windsurf/src/habitat_evolution/core/config/field_config.py:0:0-0:0) | Field configuration | Add geometric field parameters |
+| [pattern_aware_rag/interfaces/pattern_emergence.py](cci:7://file:///Users/prphillips/Documents/GitHub/habitat-windsurf/src/habitat_evolution/pattern_aware_rag/interfaces/pattern_emergence.py:0:0-0:0) | Pattern emergence | Update for geometric field model |
+
+### Test Modules to Update
+| File Path | Current Purpose | Required Changes |
+|-----------|----------------|------------------|
+| [tests/pattern/test_field_visualization.py](cci:7://file:///Users/prphillips/Documents/GitHub/habitat-windsurf/src/habitat_evolution/tests/pattern/test_field_visualization.py:0:0-0:0) | Field visualization | Add geometric field tests |
+| [tests/pattern/test_field_basics.py](cci:7://file:///Users/prphillips/Documents/GitHub/habitat-windsurf/src/habitat_evolution/tests/pattern/test_field_basics.py:0:0-0:0) | Basic field testing | Add multi-dimensional field tests |
+| [tests/pattern/test_field_navigation.py](cci:7://file:///Users/prphillips/Documents/GitHub/habitat-windsurf/src/habitat_evolution/tests/pattern/test_field_navigation.py:0:0-0:0) | Field navigation | Update for geometric navigation |
+
+## CP-3: Field Energy Gradients Implementation
+
+### Core Modules to Review
+| File Path | Current Purpose | Required Changes |
+|-----------|----------------|------------------|
+| [core/services/field/gradient_service.py](cci:7://file:///Users/prphillips/Documents/GitHub/habitat-windsurf/src/habitat_evolution/core/services/field/gradient_service.py:0:0-0:0) | Gradient control | Add energy gradient tracking |
+| `pattern_aware_rag/learning/learning_control.py` | Learning control | Integrate energy gradients |
+| [adaptive_core/models/pattern.py](cci:7://file:///Users/prphillips/Documents/GitHub/habitat-windsurf/src/habitat_evolution/adaptive_core/models/pattern.py:0:0-0:0) | Pattern models | Add gradient-based attributes |
+| [social/services/social_pattern_service.py](cci:7://file:///Users/prphillips/Documents/GitHub/habitat-windsurf/src/habitat_evolution/social/services/social_pattern_service.py:0:0-0:0) | Social patterns | Update for energy gradients |
+| [tests/medical/clinical_field.py](cci:7://file:///Users/prphillips/Documents/GitHub/habitat-windsurf/src/habitat_evolution/tests/medical/clinical_field.py:0:0-0:0) | Clinical field implementation | Add energy gradient support |
+
+### Test Modules to Update
+| File Path | Current Purpose | Required Changes |
+|-----------|----------------|------------------|
+| [tests/pattern/test_gradient_regulation.py](cci:7://file:///Users/prphillips/Documents/GitHub/habitat-windsurf/src/habitat_evolution/tests/pattern/test_gradient_regulation.py:0:0-0:0) | Gradient testing | Add energy gradient tests |
+| [tests/pattern/test_field_basics.py](cci:7://file:///Users/prphillips/Documents/GitHub/habitat-windsurf/src/habitat_evolution/tests/pattern/test_field_basics.py:0:0-0:0) | Field basics | Update for energy metrics |
+| [tests/pattern/test_climate_patterns.py](cci:7://file:///Users/prphillips/Documents/GitHub/habitat-windsurf/src/habitat_evolution/tests/pattern/test_climate_patterns.py:0:0-0:0) | Climate patterns | Add gradient-based tests |
+
+## CP-4: Persistence Layer Updates
+
+### Core Modules to Review
+| File Path | Current Purpose | Required Changes |
+|-----------|----------------|------------------|
+| [adaptive_core/persistence/neo4j/pattern_repository.py](cci:7://file:///Users/prphillips/Documents/GitHub/habitat-windsurf/src/habitat_evolution/adaptive_core/persistence/neo4j/pattern_repository.py:0:0-0:0) | Pattern storage | Add geometric field metrics |
+| [core/storage/field_repository.py](cci:7://file:///Users/prphillips/Documents/GitHub/habitat-windsurf/src/habitat_evolution/core/storage/field_repository.py:0:0-0:0) | Field storage | Update for field-state persistence |
+| [adaptive_core/persistence/neo4j/base_repository.py](cci:7://file:///Users/prphillips/Documents/GitHub/habitat-windsurf/src/habitat_evolution/adaptive_core/persistence/neo4j/base_repository.py:0:0-0:0) | Base persistence | Add field-state support |
+| [pattern_aware_rag/learning/field_neo4j_bridge.py](cci:7://file:///Users/prphillips/Documents/GitHub/habitat-windsurf/src/habitat_evolution/pattern_aware_rag/learning/field_neo4j_bridge.py:0:0-0:0) | Neo4j bridge | Update for field metrics |
+| [pattern_aware_rag/services/neo4j_service.py](cci:7://file:///Users/prphillips/Documents/GitHub/habitat-windsurf/src/habitat_evolution/pattern_aware_rag/services/neo4j_service.py:0:0-0:0) | Neo4j service | Add field-state support |
+
+### Test Modules to Update
+| File Path | Current Purpose | Required Changes |
+|-----------|----------------|------------------|
+| [tests/learning/test_field_neo4j_bridge.py](cci:7://file:///Users/prphillips/Documents/GitHub/habitat-windsurf/src/habitat_evolution/tests/learning/test_field_neo4j_bridge.py:0:0-0:0) | Neo4j integration | Add field metric tests |
+| [tests/storage/test_memory_storage.py](cci:7://file:///Users/prphillips/Documents/GitHub/habitat-windsurf/src/habitat_evolution/tests/storage/test_memory_storage.py:0:0-0:0) | Memory storage | Add field-state tests |
+| [tests/pattern/test_social_patterns.py](cci:7://file:///Users/prphillips/Documents/GitHub/habitat-windsurf/src/habitat_evolution/tests/pattern/test_social_patterns.py:0:0-0:0) | Social pattern persistence | Update for field metrics |
+
+## CP-5: Field Visualization Enhancement
+
+### Core Modules to Review
+| File Path | Current Purpose | Required Changes |
+|-----------|----------------|------------------|
+| [visualization/pattern_id.py](cci:7://file:///Users/prphillips/Documents/GitHub/habitat-windsurf/src/habitat_evolution/visualization/pattern_id.py:0:0-0:0) | Pattern identification | Add field-state visualization |
+| [examples/visualize_semantic_patterns.py](cci:7://file:///Users/prphillips/Documents/GitHub/habitat-windsurf/src/habitat_evolution/examples/visualize_semantic_patterns.py:0:0-0:0) | Pattern visualization | Update for field-state |
+
+### Test Modules to Update
+| File Path | Current Purpose | Required Changes |
+|-----------|----------------|------------------|
+| [tests/visualization/test_semantic_pattern_visualization.py](cci:7://file:///Users/prphillips/Documents/GitHub/habitat-windsurf/src/habitat_evolution/tests/visualization/test_semantic_pattern_visualization.py:0:0-0:0) | Pattern visualization | Add field visualization tests |
+| [tests/visualization/test_pattern_visualization.py](cci:7://file:///Users/prphillips/Documents/GitHub/habitat-windsurf/src/habitat_evolution/tests/visualization/test_pattern_visualization.py:0:0-0:0) | Pattern visualization | Update for field-state display |
+| `tests/visualization/test_visualization.py` | Core visualization | Add field-state tests |
+
+## Implementation Notes
+
+1. All vector-based operations must be replaced with scalar calculations
+2. Field-state observations should drive pattern emergence
+3. Temporal awareness must be maintained throughout
+4. All changes must preserve existing functionality while enhancing field-state capabilities
+
+## Testing Strategy
+
+1. Verify each converted vector operation with scalar equivalent
+2. Validate field-state coherence measurements
+3. Ensure pattern emergence remains natural
+4. Benchmark performance of scalar operations
+5. Verify visualization accuracy for field-state representation
