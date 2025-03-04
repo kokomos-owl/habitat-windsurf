@@ -349,8 +349,6 @@ Once the minimum viable test passes, you can continue refactoring the system to 
 
 ## Addendum: Tonic-Harmonic Pattern Detection
 
-## Tonic-Harmonic Pattern Detection
-
 Tonic-harmonic pattern detection is a crucial component of the field-state architecture that enables the system to identify natural boundaries and meaningful pattern relationships using scalar mathematics. This section details the implementation approach for tonic-harmonic pattern detection within the scalar mathematics refactoring.
 
 ### Concept and Theory
