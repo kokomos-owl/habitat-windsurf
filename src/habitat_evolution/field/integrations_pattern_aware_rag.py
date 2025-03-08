@@ -1,17 +1,104 @@
-# In pattern_aware_rag.py
+"""Pattern-Aware RAG Integration Module
 
-# Add to constructor
-def __init__(self, pattern_evolution_service, field_state_service, ...):
-    # ... existing initialization
+This module provides integration points between the field topology analysis components
+and the Pattern-Aware RAG system, allowing for field topology analysis and navigation
+within the pattern-aware retrieval augmented generation system.
+
+The integration enables enhanced pattern discovery, exploration of potentially interesting
+regions, and navigation through semantic fields in ways that transcend traditional
+vector-based similarity.
+"""
+
+from typing import List, Dict, Any, Optional, Tuple
+import numpy as np
+from ..pattern_aware_rag.pattern_aware_rag import PatternAwareRAG
+from .topological_field_analyzer import TopologicalFieldAnalyzer
+from .field_navigator import FieldNavigator
+
+
+# ------------------------------------------------
+# Integration functions for PatternAwareRAG class
+# ------------------------------------------------
+
+def extend_pattern_aware_rag(rag_instance: PatternAwareRAG) -> None:
+    """Extend a PatternAwareRAG instance with field topology functionality.
     
+    This function monkey-patches the provided PatternAwareRAG instance with
+    methods for field topology analysis and navigation.
+    
+    Args:
+        rag_instance: The PatternAwareRAG instance to extend
+    """
     # Initialize field topology components
-    self.field_analyzer = TopologicalFieldAnalyzer()
-    self.field_navigator = FieldNavigator(self.field_analyzer)
-    self.current_field_analysis = None
+    rag_instance.field_analyzer = TopologicalFieldAnalyzer()
+    rag_instance.field_navigator = FieldNavigator(rag_instance.field_analyzer)
+    rag_instance.current_field_analysis = None
     
-# Add or modify method for field analysis
+    # Add methods to the instance
+    rag_instance.analyze_pattern_field = analyze_pattern_field.__get__(rag_instance)
+    rag_instance.get_pattern_coordinates = get_pattern_coordinates.__get__(rag_instance)
+    rag_instance.find_pattern_path = find_pattern_path.__get__(rag_instance)
+    rag_instance.find_exploration_regions = find_exploration_regions.__get__(rag_instance)
+    rag_instance._get_related_patterns = _get_related_patterns.__get__(rag_instance)
+    
+    # Store original method reference for later enhancement
+    original_process = rag_instance.process_with_patterns
+    
+    # Enhance the process_with_patterns method
+    async def enhanced_process_with_patterns(query: str, context: Optional[Dict[str, Any]] = None):
+        # Call the original method
+        response = await original_process(query, context)
+        
+        # Enhance with field topology if patterns exist
+        if response.get("patterns"):
+            all_patterns = []
+            if "query_patterns" in response:
+                all_patterns.extend(response["query_patterns"])
+            if "retrieval_patterns" in response:
+                all_patterns.extend(response["retrieval_patterns"])
+            if "augmentation_patterns" in response:
+                all_patterns.extend(response["augmentation_patterns"])
+            
+            # Only analyze if we have patterns
+            if all_patterns:
+                field_analysis = await rag_instance.analyze_pattern_field(all_patterns)
+                
+                # Add field navigability data to the response
+                response["field_topology"] = {
+                    "dimensionality": field_analysis["topology"]["effective_dimensionality"],
+                    "density_centers": len(field_analysis["density"]["density_centers"]),
+                    "primary_dimensions": [
+                        dim["explained_variance"] 
+                        for dim in field_analysis["topology"]["principal_dimensions"]
+                    ],
+                    "field_coherence": field_analysis["field_properties"]["coherence"],
+                    "field_navigability": field_analysis["field_properties"]["navigability_score"]
+                }
+                
+                # Calculate pattern positions within the field
+                pattern_positions = {}
+                for pattern in all_patterns:
+                    position = rag_instance.get_pattern_coordinates(pattern)
+                    if position["pattern_index"] != -1:
+                        pattern_positions[pattern] = position["coordinates"]
+                
+                response["pattern_positions"] = pattern_positions
+        
+        return response
+    
+    # Bind the enhanced method to the instance
+    rag_instance.process_with_patterns = enhanced_process_with_patterns.__get__(rag_instance)
+
+
 async def analyze_pattern_field(self, patterns: List[str]) -> Dict[str, Any]:
-    """Analyze pattern field topology and create navigable space."""
+    """Analyze pattern field topology and create navigable space.
+    
+    Args:
+        patterns: List of pattern strings to analyze
+        
+    Returns:
+        A dictionary containing the field analysis results
+    """
     # Calculate resonance matrix
     n = len(patterns)
     resonance_matrix = np.zeros((n, n))
@@ -46,11 +133,18 @@ async def analyze_pattern_field(self, patterns: List[str]) -> Dict[str, Any]:
     # Return field analysis
     return self.current_field_analysis
 
-# Add method to get navigable coordinates for patterns
+
 def get_pattern_coordinates(self, pattern: str) -> Dict[str, Any]:
-    """Get coordinates and position in the navigable field for a pattern."""
+    """Get coordinates and position in the navigable field for a pattern.
+    
+    Args:
+        pattern: The pattern string to get coordinates for
+        
+    Returns:
+        A dictionary containing coordinates and nearest center information
+    """
     if not self.current_field_analysis:
-        return {"coordinates": [0.0, 0.0, 0.0], "nearest_center": None}
+        return {"coordinates": [0.0, 0.0, 0.0], "nearest_center": None, "pattern_index": -1}
     
     # Find pattern index
     pattern_index = -1
@@ -60,7 +154,7 @@ def get_pattern_coordinates(self, pattern: str) -> Dict[str, Any]:
             break
     
     if pattern_index == -1:
-        return {"coordinates": [0.0, 0.0, 0.0], "nearest_center": None}
+        return {"coordinates": [0.0, 0.0, 0.0], "nearest_center": None, "pattern_index": -1}
     
     # Get coordinates in 3D space
     coordinates = self.field_navigator.get_navigation_coordinates(
@@ -76,11 +170,17 @@ def get_pattern_coordinates(self, pattern: str) -> Dict[str, Any]:
         "pattern_index": pattern_index
     }
 
-# Continuing in pattern_aware_rag.py
 
-# Add method to find paths between patterns
 async def find_pattern_path(self, start_pattern: str, end_pattern: str) -> List[str]:
-    """Find a path between two patterns in the navigable field."""
+    """Find a path between two patterns in the navigable field.
+    
+    Args:
+        start_pattern: The starting pattern
+        end_pattern: The destination pattern
+        
+    Returns:
+        A list of pattern strings representing the path
+    """
     if not self.current_field_analysis:
         return []
     
@@ -108,42 +208,13 @@ async def find_pattern_path(self, start_pattern: str, end_pattern: str) -> List[
     
     return path_patterns
 
-# Update existing process_with_patterns method to include field topology
-async def process_with_patterns(self, query: str, context: Optional[Dict[str, Any]] = None):
-    # Existing method code...
-    
-    # After extracting patterns and before generating response
-    # Create and analyze the pattern field
-    all_patterns = query_patterns + retrieval_patterns + augmentation_patterns
-    field_analysis = await self.analyze_pattern_field(all_patterns)
-    
-    # Add field navigability data to the response
-    response["field_topology"] = {
-        "dimensionality": field_analysis["topology"]["effective_dimensionality"],
-        "density_centers": len(field_analysis["density"]["density_centers"]),
-        "primary_dimensions": [
-            dim["explained_variance"] 
-            for dim in field_analysis["topology"]["principal_dimensions"]
-        ],
-        "field_coherence": field_analysis["field_properties"]["coherence"],
-        "field_navigability": field_analysis["field_properties"]["navigability_score"]
-    }
-    
-    # Calculate pattern positions within the field
-    pattern_positions = {}
-    for pattern in all_patterns:
-        position = self.get_pattern_coordinates(pattern)
-        if position["pattern_index"] != -1:
-            pattern_positions[pattern] = position["coordinates"]
-    
-    response["pattern_positions"] = pattern_positions
-    
-    # Return updated response
-    return response
 
-# Add method to find exploration regions
 def find_exploration_regions(self) -> List[Dict[str, Any]]:
-    """Identify promising regions for exploration in the pattern field."""
+    """Identify promising regions for exploration in the pattern field.
+    
+    Returns:
+        A list of dictionaries describing interesting regions to explore
+    """
     if not self.current_field_analysis:
         return []
     
@@ -208,8 +279,17 @@ def find_exploration_regions(self) -> List[Dict[str, Any]]:
     
     return regions
 
+
 def _get_related_patterns(self, center_idx: int, count: int) -> List[str]:
-    """Get patterns related to a center pattern."""
+    """Get patterns related to a center pattern.
+    
+    Args:
+        center_idx: Index of the center pattern
+        count: Number of related patterns to retrieve
+        
+    Returns:
+        A list of related pattern strings
+    """
     if not self.current_field_analysis or center_idx >= len(self.field_navigator.pattern_metadata):
         return []
     
