@@ -1,0 +1,134 @@
+graph TB
+    %% TITLE AND MAIN SECTIONS
+    subgraph HabitatEvolution["Habitat Evolution System Architecture (Pattern-Aware RAG Focus)"]
+        subgraph EV["Event System"]
+            EV_BUS["Event Bus"]
+            EV_SUB["Event Subscribers"]
+            EV_PUB["Event Publishers"]
+            EV_HAND["Event Handlers"]
+        end
+
+        subgraph AC["Adaptive Core Services"]
+            AC_ID["Adaptive ID System"]
+            AC_PATT["Pattern Models"]
+            AC_REL["Relationship Models"]
+            AC_PEVO["Pattern Evolution Service"]
+            AC_METRICS["Metrics Service"]
+            AC_SNAP["Pattern Snapshot Service"]
+        end
+
+        subgraph PR["Pattern-Aware RAG"]
+            PR_CORE["RAG Controller"]
+            PR_VEC["Vector Embeddings"]
+            PR_LEARN["Learning Window Control"]
+            PR_HOOK["Service Hook System"]
+            PR_COH["Coherence Calculator"]
+            PR_STATE["Pattern State Manager"]
+        end
+
+        subgraph VG["Persistence Lab (Neo4j)"]
+            VG_NEO["Neo4j Graph Service"]
+            VG_PIID["Pattern Adaptive ID"]
+            VG_PATT["Pattern Visualizer"]
+            VG_BRIDGE["Pattern-Neo4j Bridge"]
+            VG_QUERY["Query Template Service"]
+            VG_EVOL["Evolution Tracker"]
+        end
+
+        subgraph EX["External Integration"]
+            EX_DOC["Document Processor"]
+            EX_EMB["External Embeddings"]
+            EX_INGEST["Data Ingestion"]
+        end
+
+        %% FUTURE INTEGRATION (GRAYED)
+        subgraph FR["Field System (Future Integration)"]
+            FR_PLUG["Field Integration Plugins"]
+        end
+    end
+
+    %% EVENT SYSTEM CONNECTIONS
+    EV_PUB --> EV_BUS
+    EV_BUS --> EV_SUB
+    EV_SUB --> EV_HAND
+
+    %% EVENT BUS CONNECTIONS (CENTRAL COORDINATION)
+    EV_BUS -.-> AC_ID
+    EV_BUS -.-> AC_PEVO
+    EV_BUS -.-> PR_LEARN
+    EV_BUS -.-> PR_STATE
+    EV_BUS -.-> VG_NEO
+    EV_BUS -.-> VG_EVOL
+
+    %% ADAPTIVE CORE INTERNAL CONNECTIONS
+    AC_ID --> AC_PATT
+    AC_PATT --> AC_REL
+    AC_PATT --> AC_METRICS
+    AC_PATT --> AC_PEVO
+    AC_PEVO --> AC_SNAP
+    AC_METRICS --> AC_PEVO
+
+    %% PATTERN-AWARE RAG INTERNAL CONNECTIONS
+    PR_CORE --> PR_VEC
+    PR_CORE --> PR_LEARN
+    PR_CORE --> PR_HOOK
+    PR_VEC --> PR_COH
+    PR_COH --> PR_LEARN
+    PR_LEARN --> PR_STATE
+
+    %% PERSISTENCE LAB INTERNAL CONNECTIONS
+    VG_PIID --> VG_PATT
+    VG_PATT --> VG_NEO
+    VG_BRIDGE --> VG_NEO
+    VG_NEO --> VG_QUERY
+    VG_EVOL --> VG_NEO
+
+    %% EXTERNAL INTEGRATION CONNECTIONS
+    EX_DOC --> EX_EMB
+    EX_EMB --> PR_VEC
+    EX_DOC --> EX_INGEST
+    EX_INGEST --> AC_PATT
+
+    %% PRIMARY INTEGRATION FLOWS
+    
+    %% 1. PATTERN EVOLUTION FLOW
+    AC_ID -.-> PR_CORE
+    AC_PATT -.-> PR_CORE
+    AC_PEVO -.-> PR_LEARN
+    PR_STATE -.-> AC_SNAP
+    
+    %% 2. PERSISTENCE FLOW
+    AC_SNAP -.-> VG_BRIDGE
+    AC_ID -.-> VG_PIID
+    AC_PATT -.-> VG_BRIDGE
+    PR_STATE -.-> VG_EVOL
+    
+    %% 3. QUERY FLOW
+    VG_QUERY -.-> PR_CORE
+    
+    %% 4. FUTURE FIELD INTEGRATION POINT
+    PR_HOOK -.-> FR_PLUG
+
+    %% STYLING FOR IMPLEMENTATION FOCUS
+    classDef primary fill:#fff0f6,stroke:#eb2f96,stroke-width:4px
+    classDef secondary fill:#f9f0ff,stroke:#722ed1,stroke-width:2px
+    classDef future fill:#f0f2f5,stroke:#8c8c8c,stroke-width:1px,stroke-dasharray: 5 5
+    
+    %% MARK PRIMARY IMPLEMENTATION FOCUS
+    class AC_ID,AC_PATT,AC_REL,AC_PEVO,AC_SNAP primary
+    class PR_CORE,PR_LEARN,PR_STATE primary 
+    class VG_PIID,VG_BRIDGE,VG_NEO,VG_EVOL primary
+    class EV_BUS primary
+    
+    %% MARK SECONDARY COMPONENTS
+    class AC_METRICS,PR_VEC,PR_COH,PR_HOOK,VG_PATT,VG_QUERY,EX_DOC,EX_EMB,EX_INGEST secondary
+    class EV_SUB,EV_PUB,EV_HAND secondary
+    
+    %% MARK FUTURE INTEGRATION
+    class FR_PLUG future
+    
+    %% INTERFACE POINTS (PLUGGABILITY)
+    class PR_HOOK "Service Hook System:\nPluggable Extension Points\nfor Field Integration"
+    class VG_BRIDGE "Pattern-Neo4j Bridge:\nTranslates Pattern Events\nto Graph Operations"
+    class AC_SNAP "Pattern Snapshot Service:\nCaptures Evolution States\nfor Persistence"
+    class FR_PLUG "Field Integration Plugins:\nFuture Field Analysis\nIntegration Point"
