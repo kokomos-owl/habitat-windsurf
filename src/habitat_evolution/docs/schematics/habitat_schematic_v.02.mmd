@@ -1,6 +1,6 @@
 graph TB
     %% TITLE AND MAIN SECTIONS
-    subgraph HabitatEvolution["Habitat Evolution System Architecture (Pattern-Aware RAG Focus)"]
+    subgraph HabitatEvolution["Habitat Evolution System Architecture (Pattern-Aware RAG Focus with Integrated Field)"]
         subgraph EV["Event System"]
             EV_BUS["Event Bus"]
             EV_SUB["Event Subscribers"]
@@ -15,6 +15,14 @@ graph TB
             AC_PEVO["Pattern Evolution Service"]
             AC_METRICS["Metrics Service"]
             AC_SNAP["Pattern Snapshot Service"]
+        end
+
+        subgraph FR["Field & Resonance System"]
+            FR_TOPO["Topological Field Analyzer"]
+            FR_NAV["Field Navigator"]
+            FR_RMAT["Resonance Matrix Constructor"]
+            FR_DPROJ["Dimensional Projection"]
+            FR_INT["Field-RAG Integration"]
         end
 
         subgraph PR["Pattern-Aware RAG"]
@@ -40,11 +48,6 @@ graph TB
             EX_EMB["External Embeddings"]
             EX_INGEST["Data Ingestion"]
         end
-
-        %% FUTURE INTEGRATION (GRAYED)
-        subgraph FR["Field System (Future Integration)"]
-            FR_PLUG["Field Integration Plugins"]
-        end
     end
 
     %% EVENT SYSTEM CONNECTIONS
@@ -67,6 +70,14 @@ graph TB
     AC_PATT --> AC_PEVO
     AC_PEVO --> AC_SNAP
     AC_METRICS --> AC_PEVO
+
+    %% FIELD SYSTEM INTERNAL CONNECTIONS
+    PR_VEC --> FR_RMAT
+    FR_RMAT --> FR_TOPO
+    FR_TOPO --> FR_DPROJ
+    FR_DPROJ --> FR_NAV
+    FR_NAV --> FR_INT
+    FR_INT --> PR_HOOK
 
     %% PATTERN-AWARE RAG INTERNAL CONNECTIONS
     PR_CORE --> PR_VEC
@@ -105,30 +116,60 @@ graph TB
     
     %% 3. QUERY FLOW
     VG_QUERY -.-> PR_CORE
+
+    %% 4. FIELD-TO-RAG INTEGRATION FLOWS (CRITICAL VECTOR + TONIC-HARMONIC BRIDGE)
+    PR_VEC -.-> FR_RMAT
+    FR_NAV -.-> PR_CORE
+    FR_TOPO -.-> PR_LEARN
+    FR_TOPO -.-> AC_METRICS
     
-    %% 4. FUTURE FIELD INTEGRATION POINT
-    PR_HOOK -.-> FR_PLUG
+    %% 5. VISUALIZATION INTEGRATION
+    FR_TOPO -.-> VG_PATT
 
     %% STYLING FOR IMPLEMENTATION FOCUS
     classDef primary fill:#fff0f6,stroke:#eb2f96,stroke-width:4px
     classDef secondary fill:#f9f0ff,stroke:#722ed1,stroke-width:2px
-    classDef future fill:#f0f2f5,stroke:#8c8c8c,stroke-width:1px,stroke-dasharray: 5 5
+    classDef field fill:#f6ffed,stroke:#52c41a,stroke-width:2px
     
     %% MARK PRIMARY IMPLEMENTATION FOCUS
-    class AC_ID,AC_PATT,AC_REL,AC_PEVO,AC_SNAP primary
-    class PR_CORE,PR_LEARN,PR_STATE primary 
-    class VG_PIID,VG_BRIDGE,VG_NEO,VG_EVOL primary
+    class AC_ID primary
+    class AC_PATT primary
+    class AC_REL primary
+    class AC_PEVO primary
+    class AC_SNAP primary
+    class PR_CORE primary
+    class PR_LEARN primary
+    class PR_STATE primary
+    class VG_PIID primary
+    class VG_BRIDGE primary
+    class VG_NEO primary
+    class VG_EVOL primary
     class EV_BUS primary
     
     %% MARK SECONDARY COMPONENTS
-    class AC_METRICS,PR_VEC,PR_COH,PR_HOOK,VG_PATT,VG_QUERY,EX_DOC,EX_EMB,EX_INGEST secondary
-    class EV_SUB,EV_PUB,EV_HAND secondary
+    class AC_METRICS secondary
+    class PR_VEC secondary
+    class PR_COH secondary
+    class PR_HOOK secondary
+    class VG_PATT secondary
+    class VG_QUERY secondary
+    class EX_DOC secondary
+    class EX_EMB secondary
+    class EX_INGEST secondary
+    class EV_SUB secondary
+    class EV_PUB secondary
+    class EV_HAND secondary
     
-    %% MARK FUTURE INTEGRATION
-    class FR_PLUG future
+    %% MARK FIELD COMPONENTS
+    class FR_TOPO field
+    class FR_NAV field
+    class FR_RMAT field
+    class FR_DPROJ field
+    class FR_INT field
     
     %% INTERFACE POINTS (PLUGGABILITY)
-    class PR_HOOK "Service Hook System:\nPluggable Extension Points\nfor Field Integration"
+    class PR_HOOK "Service Hook System:\nPluggable Extension Points\nfor Extensions"
     class VG_BRIDGE "Pattern-Neo4j Bridge:\nTranslates Pattern Events\nto Graph Operations"
     class AC_SNAP "Pattern Snapshot Service:\nCaptures Evolution States\nfor Persistence"
-    class FR_PLUG "Field Integration Plugins:\nFuture Field Analysis\nIntegration Point"
+    class FR_INT "Field-RAG Integration:\nConnects Topological Analysis\nto Pattern-Aware Processing"
+    class FR_RMAT "Resonance Matrix:\nVector-to-Harmonic Bridge,\nPattern Relationships"
