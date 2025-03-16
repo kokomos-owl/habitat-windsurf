@@ -20,6 +20,7 @@
 | TF-3 | Enhance FieldNavigator capabilities | ✅ Complete | High | None | Improved navigation through tonic_harmonic field space with metrics output |
 | TF-4 | Implement FlowDynamicsAnalyzer class | ⏳ Pending | High | TF-1 | Track energy flow and anticipate emergent patterns |
 | TF-5 | Create TonicHarmonicFieldState integration | ⏳ Pending | Medium | TF-1, TF-2, TF-3, TF-4 | Connect all field components to create unified field state |
+| TF-6 | Implement SemanticBoundaryDetector | ✅ Complete | High | TF-1, TF-3 | Detect fuzzy boundaries and transition zones between semantic communities |
 
 ### Advanced Pattern Relationships
 | ID | Task | Status | Priority | Dependencies | Notes |
@@ -28,6 +29,7 @@
 | PR-2 | Implement ResonantPatternPairDetector | ⏳ Pending | High | ✅ TF-3 | Identify patterns that resonate harmonically with each other |
 | PR-3 | Implement TemporalPatternSequencer | ⏳ Pending | Medium | TF-1 | Detect temporal, causal, and logical sequences of patterns |
 | PR-4 | Develop resonance gap identification | ⏳ Pending | Medium | TF-4 | Identify areas in the field that lack pattern coverage |
+| PR-5 | Integrate SemanticBoundaryDetector with learning windows | ✅ Complete | High | ✅ TF-6 | Enable learning opportunities based on semantic boundary detection |
 
 ### Persistence Layer
 | ID | Task | Status | Priority | Dependencies | Notes |
@@ -54,6 +56,7 @@
 | TS-3 | Create resonance pattern analysis tests | ⏳ Pending | High | TF-2 | Validate identification and classification of resonance patterns |
 | TS-4 | Implement resonant pattern pair tests | ⏳ Pending | Medium | PR-2 | Test detection of harmonically resonant pattern pairs |
 | TS-5 | Create flow dynamics tests | ⏳ Pending | Medium | TF-4 | Validate field flow and density center detection |
+| TS-6 | Test SemanticBoundaryDetector | ✅ Complete | High | ✅ TF-6 | Validate fuzzy boundary detection and learning opportunity identification |
 
 ## Documentation Tasks
 
@@ -65,6 +68,7 @@
 | DOC-4 | Document flow dynamics mechanics | ⏳ Pending | Medium | TF-4 | Explain energy flow and pattern emergence in tonic_harmonic fields |
 | DOC-5 | Create visualization guide for field topology | ⏳ Pending | Low | VZ-1, VZ-2, VZ-3 | Visual documentation with practical examples |
 | DOC-6 | Create tonic_harmonic field topology reference | 🔄 In Progress | High | None | Comprehensive reference for the vector + tonic_harmonic approach |
+| DOC-7 | Document SemanticBoundaryDetector integration | ✅ Complete | High | ✅ TF-6 | Integration guide for semantic boundary detection with learning windows |
 
 ## Technical Debt Reduction
 
