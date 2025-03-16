@@ -1,4 +1,4 @@
-# src/habitat_evolution/pattern_aware_rag/field_topology/topological_field_analyzer.py
+# src/habitat_evolution/field/topological_field_analyzer.py
 from typing import Dict, List, Any, Tuple, Optional
 import numpy as np
 from scipy import stats, ndimage
@@ -8,12 +8,32 @@ class TopologicalFieldAnalyzer:
     """Analyzes pattern field topology to create navigable semantic spaces."""
     
     def __init__(self, config: Optional[Dict[str, Any]] = None):
-        self.config = config or {
+        # Default configuration
+        default_config = {
             "dimensionality_threshold": 0.95,  # Variance threshold for effective dimensions
             "density_sensitivity": 0.25,       # Sensitivity for detecting density centers
             "gradient_smoothing": 1.0,         # Smoothing factor for gradient calculations
             "edge_threshold": 0.3              # Minimum weight for graph edges
         }
+        
+        # If config is provided, use it to update the default config
+        if config:
+            # Map test config keys to internal config keys if needed
+            config_mapping = {
+                "min_eigenvalue": "dimensionality_threshold",
+                "density_threshold": "density_sensitivity",
+                "flow_sensitivity": "gradient_smoothing",
+                "graph_weight_threshold": "edge_threshold"
+            }
+            
+            # Apply mapping and update default config
+            for key, value in config.items():
+                if key in config_mapping:
+                    default_config[config_mapping[key]] = value
+                else:
+                    default_config[key] = value
+        
+        self.config = default_config
         
     def analyze_field(self, resonance_matrix: np.ndarray, pattern_metadata: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Comprehensive analysis of field topology to create a navigable space."""
