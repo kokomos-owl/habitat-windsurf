@@ -147,7 +147,7 @@ class TestSemanticBoundaryDetector(unittest.TestCase):
         results = self.detector.analyze_transition_data(self.sample_vectors, self.sample_metadata)
         
         # Verify analyzer was called with correct data
-        self.mock_analyzer.analyze_field.assert_called_once_with(self.sample_vectors)
+        self.mock_analyzer.analyze_field.assert_called_once_with(self.sample_vectors, self.sample_metadata)
         
         # Check that results contain expected keys
         expected_keys = [
