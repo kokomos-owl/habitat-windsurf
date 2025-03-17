@@ -179,3 +179,5 @@ These advantages make the Vector + Tonic-Harmonic approach particularly well-sui
 2. Habitat Development Roadmap: Vector + Tonic_Harmonic Field Topology (Internal Document)
 3. Spectral Graph Theory and Applications (Chung, F. R. K., 1997)
 4. Manifold Learning and Dimensionality Reduction (Roweis, S. T., & Saul, L. K., 2000)
+5. **Wetland Scene Segmentation of Remote Sensing Images Based on Lie Group Feature and Graph Cut Model**: Canyu Chen , Guobin Zhu , and Xiliang Chen; IEEE JOURNAL OF SELECTED TOPICS IN APPLIED EARTH OBSERVATIONS AND REMOTE SENSING, VOL. 18, 2025
+

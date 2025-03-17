@@ -69,3 +69,7 @@ The eigenvalues represent the importance of each dimension, while the eigenvecto
 - **Dynamic Eigenspace Analysis**: Tracking changes in eigenspace as the field evolves
 - **Multi-scale Analysis**: Applying eigendecomposition at different scales to reveal hierarchical structure
 - **Temporal Eigenspace Tracking**: Following pattern trajectories through eigenspace over time
+
+## References
+
+- **Wetland Scene Segmentation of Remote Sensing Images Based on Lie Group Feature and Graph Cut Model**: Canyu Chen , Guobin Zhu , and Xiliang Chen; IEEE JOURNAL OF SELECTED TOPICS IN APPLIED EARTH OBSERVATIONS AND REMOTE SENSING, VOL. 18, 2025

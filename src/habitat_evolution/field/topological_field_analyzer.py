@@ -110,7 +110,18 @@ class TopologicalFieldAnalyzer:
         }
         
     def _analyze_topology(self, matrix: np.ndarray) -> Dict[str, Any]:
-        """Analyze dimensional structure of the field using eigendecomposition."""
+        """Analyze dimensional structure of the field using eigendecomposition.
+        
+        This enhanced method performs a comprehensive eigendecomposition analysis to reveal
+        the intrinsic dimensional structure of the semantic field, enabling detection of
+        dimensional resonance and fuzzy boundaries between pattern communities.
+        
+        Args:
+            matrix: Resonance matrix to analyze
+            
+        Returns:
+            Dictionary with topology analysis results
+        """
         # Calculate eigenvalues and eigenvectors (real, symmetric matrix)
         eigenvalues, eigenvectors = np.linalg.eigh(matrix)
         
@@ -130,7 +141,7 @@ class TopologicalFieldAnalyzer:
         
         # Calculate primary dimensions (projection matrices)
         principal_dimensions = []
-        for i in range(min(effective_dims, 3)):  # Store top 3 at most
+        for i in range(min(effective_dims, 5)):  # Store top 5 dimensions for better resonance detection
             if i < len(eigenvalues):
                 principal_dimensions.append({
                     "eigenvalue": float(eigenvalues[i]),
@@ -138,13 +149,27 @@ class TopologicalFieldAnalyzer:
                     "eigenvector": eigenvectors[:, i].tolist()
                 })
         
-        # Calculate projection coordinates for each pattern in top dimensions
+        # Calculate projection coordinates for each pattern in eigenspace
         projections = []
+        eigenspace_coordinates = []
+        
         for i in range(matrix.shape[0]):
+            # Create projection dictionary for each dimension
             proj = {}
-            for dim in range(min(effective_dims, 3)):
-                proj[f"dim_{dim}"] = float(eigenvectors[i, dim])
+            coords = []
+            
+            # Include more dimensions for better resonance detection
+            for dim in range(min(effective_dims, 5)):
+                proj_value = float(eigenvectors[i, dim])
+                proj[f"dim_{dim}"] = proj_value
+                
+                # Scale projection by eigenvalue importance for coordinates
+                if dim < 3:  # Use top 3 dimensions for visualization coordinates
+                    scaled_proj = proj_value * np.sqrt(np.abs(eigenvalues[dim]) / total_variance) if total_variance > 0 else proj_value
+                    coords.append(scaled_proj)
+            
             projections.append(proj)
+            eigenspace_coordinates.append(coords)
         
         # Calculate eigenspace distances between patterns
         eigenspace_distances = np.zeros((matrix.shape[0], matrix.shape[0]))
@@ -152,7 +177,7 @@ class TopologicalFieldAnalyzer:
             for j in range(matrix.shape[0]):
                 # Calculate distance in eigenspace using top dimensions
                 distance = 0
-                for dim in range(min(effective_dims, 3)):
+                for dim in range(min(effective_dims, 3)):  # Use top 3 dimensions for distance calculation
                     distance += (eigenvectors[i, dim] - eigenvectors[j, dim])**2
                 eigenspace_distances[i, j] = np.sqrt(distance)
         
@@ -161,16 +186,21 @@ class TopologicalFieldAnalyzer:
         
         # Calculate eigenvalue stability (ratio of largest to second largest eigenvalue)
         eigenvalue_stability = float(eigenvalues[0] / eigenvalues[1]) if len(eigenvalues) > 1 and abs(eigenvalues[1]) > 1e-10 else 1.0
-            
+        
+        # Detect dimensional resonance patterns
+        resonance_patterns = self._detect_dimensional_resonance(projections, eigenvalues, total_variance)
+        
         return {
             "effective_dimensionality": int(effective_dims),
             "principal_dimensions": principal_dimensions,
             "dimension_strengths": eigenvalues.tolist(),
             "cumulative_variance": cumulative_variance.tolist(),
             "pattern_projections": projections,
+            "eigenspace_coordinates": eigenspace_coordinates,
             "eigenspace_distances": eigenspace_distances.tolist(),
             "boundary_fuzziness": boundary_fuzziness,
-            "eigenvalue_stability": eigenvalue_stability
+            "eigenvalue_stability": eigenvalue_stability,
+            "resonance_patterns": resonance_patterns
         }
         
     def _analyze_density(self, matrix: np.ndarray, pattern_metadata: List[Dict[str, Any]]) -> Dict[str, Any]:
@@ -444,6 +474,10 @@ class TopologicalFieldAnalyzer:
     def _calculate_boundary_fuzziness(self, eigenspace_distances: np.ndarray, eigenvectors: np.ndarray, effective_dims: int) -> List[float]:
         """Calculate boundary fuzziness using sliding window approach.
         
+        This enhanced method uses a sophisticated sliding window analysis to identify
+        regions with high community assignment uncertainty, calculating boundary
+        fuzziness based on projection variance in local neighborhoods.
+        
         Args:
             eigenspace_distances: Matrix of distances between patterns in eigenspace
             eigenvectors: Matrix of eigenvectors
@@ -470,21 +504,160 @@ class TopologicalFieldAnalyzer:
                 
             # Calculate variance of projections within the neighborhood
             neighborhood_variance = 0.0
+            dimension_variances = []
+            
             for dim in range(min(effective_dims, 3)):
                 # Get projections for this dimension
                 projections = [eigenvectors[j, dim] for j in neighbors + [i]]
                 # Calculate variance
                 if len(projections) > 1:
-                    neighborhood_variance += np.var(projections)
+                    dim_variance = np.var(projections)
+                    dimension_variances.append(dim_variance)
+                    neighborhood_variance += dim_variance
             
             # Normalize by number of dimensions
-            if min(effective_dims, 3) > 0:
-                neighborhood_variance /= min(effective_dims, 3)
+            if dimension_variances:
+                neighborhood_variance /= len(dimension_variances)
+                
+                # Apply non-linear scaling to emphasize high variance regions
+                # This makes boundary detection more sensitive to projection discontinuities
+                neighborhood_variance = np.tanh(neighborhood_variance * 5) * 0.9 + 0.1
+            else:
+                neighborhood_variance = 0.0
                 
             # Higher variance means more fuzzy boundary
             fuzziness_values.append(float(neighborhood_variance))
             
         return fuzziness_values
+        
+    def _detect_dimensional_resonance(self, pattern_projections: List[Dict[str, float]], 
+                                     eigenvalues: np.ndarray, total_variance: float) -> List[Dict[str, Any]]:
+        """Detect dimensional resonance patterns in the field.
+        
+        This method identifies patterns with strong resonance along similar dimensions,
+        complementary patterns with opposite projections, and sequential patterns forming
+        progressive sequences in eigenspace.
+        
+        Args:
+            pattern_projections: List of pattern projections onto eigenvectors
+            eigenvalues: Array of eigenvalues
+            total_variance: Total variance explained by all eigenvalues
+            
+        Returns:
+            List of detected resonance patterns with metadata
+        """
+        resonance_patterns = []
+        n_patterns = len(pattern_projections)
+        
+        if n_patterns < 2:
+            return resonance_patterns
+            
+        # For each significant dimension
+        for dim in range(min(5, len(eigenvalues))):
+            dim_key = f"dim_{dim}"
+            dim_importance = np.abs(eigenvalues[dim]) / total_variance if total_variance > 0 else 0.0
+            
+            if dim_importance < 0.05:  # Skip less significant dimensions
+                continue
+                
+            # Find patterns with strong projections on this dimension
+            strong_positive = []
+            strong_negative = []
+            
+            for pattern_id, projections in enumerate(pattern_projections):
+                if dim_key in projections:
+                    proj_value = projections[dim_key]
+                    if proj_value > 0.5:  # Threshold for strong positive projection
+                        strong_positive.append({
+                            "pattern_id": pattern_id,
+                            "projection": proj_value
+                        })
+                    elif proj_value < -0.5:  # Threshold for strong negative projection
+                        strong_negative.append({
+                            "pattern_id": pattern_id,
+                            "projection": proj_value
+                        })
+            
+            # Patterns with strong positive projections (harmonic patterns)
+            if len(strong_positive) >= 2:
+                resonance_patterns.append({
+                    "id": f"harmonic_pos_{dim}",
+                    "pattern_type": "harmonic",
+                    "primary_dimension": dim,
+                    "projection_sign": "positive",
+                    "members": [p["pattern_id"] for p in strong_positive],
+                    "strength": dim_importance,
+                    "projections": [p["projection"] for p in strong_positive]
+                })
+            
+            # Patterns with strong negative projections (harmonic patterns)
+            if len(strong_negative) >= 2:
+                resonance_patterns.append({
+                    "id": f"harmonic_neg_{dim}",
+                    "pattern_type": "harmonic",
+                    "primary_dimension": dim,
+                    "projection_sign": "negative",
+                    "members": [p["pattern_id"] for p in strong_negative],
+                    "strength": dim_importance,
+                    "projections": [p["projection"] for p in strong_negative]
+                })
+            
+            # Patterns with opposite projections (complementary patterns)
+            if len(strong_positive) >= 1 and len(strong_negative) >= 1:
+                resonance_patterns.append({
+                    "id": f"complementary_{dim}",
+                    "pattern_type": "complementary",
+                    "primary_dimension": dim,
+                    "members": [p["pattern_id"] for p in strong_positive + strong_negative],
+                    "strength": dim_importance,
+                    "positive_members": [p["pattern_id"] for p in strong_positive],
+                    "negative_members": [p["pattern_id"] for p in strong_negative]
+                })
+            
+            # Look for sequential patterns (progressive sequence in eigenspace)
+            all_projections = []
+            for pattern_id, projections in enumerate(pattern_projections):
+                if dim_key in projections:
+                    all_projections.append((pattern_id, projections[dim_key]))
+            
+            # Sort by projection value
+            all_projections.sort(key=lambda x: x[1])
+            
+            # Find sequences with approximately equal spacing
+            if len(all_projections) >= 3:
+                for i in range(len(all_projections) - 2):
+                    # Check for at least 3 consecutive patterns with similar spacing
+                    p1, v1 = all_projections[i]
+                    p2, v2 = all_projections[i+1]
+                    p3, v3 = all_projections[i+2]
+                    
+                    spacing1 = v2 - v1
+                    spacing2 = v3 - v2
+                    
+                    # If spacings are similar (within 30%)
+                    if abs(spacing1 - spacing2) < 0.3 * max(abs(spacing1), abs(spacing2)) and min(abs(spacing1), abs(spacing2)) > 0.1:
+                        # Look for more patterns in the sequence
+                        sequence = [p1, p2, p3]
+                        expected_value = v3 + spacing2
+                        
+                        for j in range(i+3, len(all_projections)):
+                            pj, vj = all_projections[j]
+                            # If next pattern fits the sequence
+                            if abs(vj - expected_value) < 0.3 * abs(spacing2):
+                                sequence.append(pj)
+                                expected_value = vj + spacing2
+                        
+                        if len(sequence) >= 3:  # Only include sequences with at least 3 patterns
+                            resonance_patterns.append({
+                                "id": f"sequential_{dim}_{i}",
+                                "pattern_type": "sequential",
+                                "primary_dimension": dim,
+                                "members": sequence,
+                                "strength": dim_importance,
+                                "spacing": (spacing1 + spacing2) / 2
+                            })
+        
+        return resonance_patterns
     
     def _analyze_transition_zones(self, matrix: np.ndarray, topology: Dict[str, Any], graph_metrics: Dict[str, Any]) -> Dict[str, Any]:
         """Identify fuzzy boundaries and transition zones between communities.

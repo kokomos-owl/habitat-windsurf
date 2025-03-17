@@ -227,6 +227,99 @@ class FieldNavigator:
         # Return top candidates
         return unique_candidates[:count]
         
+    def explore_transition_zone(self, boundary_id: int, max_patterns: int = 5) -> List[Dict[str, Any]]:
+        """Find interesting patterns in a transition zone for exploration.
+        
+        This method identifies patterns in a transition zone that exhibit
+        characteristics of multiple communities, providing rich exploration
+        opportunities at semantic boundaries.
+        
+        Args:
+            boundary_id: Index of the boundary pattern to explore around
+            max_patterns: Maximum number of patterns to return
+            
+        Returns:
+            List of interesting patterns in the transition zone with metadata
+        """
+        if not self.current_field or "transition_zones" not in self.current_field:
+            return []
+            
+        transition_data = self.current_field["transition_zones"]
+        if not transition_data or "transition_zones" not in transition_data:
+            return []
+            
+        # Find the boundary pattern's transition zone
+        boundary_zone = None
+        for zone in transition_data["transition_zones"]:
+            if zone["pattern_idx"] == boundary_id:
+                boundary_zone = zone
+                break
+                
+        if not boundary_zone:
+            return []
+            
+        # Get community information
+        source_community = boundary_zone.get("source_community", -1)
+        neighboring_communities = boundary_zone.get("neighboring_communities", [])
+        
+        if source_community == -1 or not neighboring_communities:
+            return []
+            
+        # Find patterns in the neighborhood that span communities
+        candidates = []
+        community_assignment = self.current_field["graph_metrics"].get("community_assignment", {})
+        
+        # Get dimensional resonance patterns in this transition zone
+        for i in range(len(self.pattern_metadata)):
+            if i == boundary_id:
+                continue
+                
+            # Check if pattern is in one of the relevant communities
+            pattern_community = community_assignment.get(i, -1)
+            if pattern_community != source_community and pattern_community not in neighboring_communities:
+                continue
+                
+            # Check for dimensional resonance with the boundary pattern
+            resonance = self._detect_dimensional_resonance(boundary_id, i)
+            if resonance and resonance["strength"] > 0.3:
+                # Calculate eigenspace distance
+                boundary_coords = self.get_navigation_coordinates(boundary_id, dimensions=3)
+                pattern_coords = self.get_navigation_coordinates(i, dimensions=3)
+                distance = np.sqrt(sum((a - b)**2 for a, b in zip(boundary_coords, pattern_coords)))
+                
+                candidates.append({
+                    "index": i,
+                    "resonance_strength": resonance["strength"],
+                    "distance": distance,
+                    "community": pattern_community,
+                    "resonant_dimensions": resonance["resonant_dimensions"]
+                })
+        
+        # Sort by resonance strength (higher is better)
+        candidates.sort(key=lambda x: x["resonance_strength"], reverse=True)
+        
+        # Return top candidates with enriched metadata
+        result = []
+        for candidate in candidates[:max_patterns]:
+            idx = candidate["index"]
+            enriched = {
+                "index": idx,
+                "coordinates": self.get_navigation_coordinates(idx, dimensions=3),
+                "resonance_strength": candidate["resonance_strength"],
+                "distance": candidate["distance"],
+                "community": candidate["community"],
+                "resonant_dimensions": candidate["resonant_dimensions"]
+            }
+            
+            # Add pattern metadata
+            if idx < len(self.pattern_metadata):
+                enriched["id"] = self.pattern_metadata[idx].get("id", f"pattern_{idx}")
+                enriched["type"] = self.pattern_metadata[idx].get("type", "unknown")
+                
+            result.append(enriched)
+            
+        return result
+        
     def _explore_density_gradient(self, current_idx: int) -> List[Dict[str, Any]]:
         """Find exploration candidates along density gradient.
         
@@ -797,6 +890,408 @@ class FieldNavigator:
             
         return {"is_boundary": False}
         
+    def navigate_eigenspace(self, start_idx: int, end_idx: int, dimensions: int = 3) -> List[Dict[str, Any]]:
+        """Navigate through eigenspace between two patterns.
+        
+        This method provides a sophisticated navigation through eigenspace, leveraging
+        dimensional resonance and eigenspace coordinates to find paths that respect
+        the intrinsic dimensional structure of the field.
+        
+        Args:
+            start_idx: Index of the starting pattern
+            end_idx: Index of the ending pattern
+            dimensions: Number of dimensions to consider in eigenspace
+            
+        Returns:
+            List of navigation steps with pattern indices and navigation metadata
+        """
+        if not self.current_field or start_idx >= len(self.pattern_metadata) or end_idx >= len(self.pattern_metadata):
+            return []
+            
+        # Get eigenspace coordinates
+        start_coords = self.get_navigation_coordinates(start_idx, dimensions=dimensions)
+        end_coords = self.get_navigation_coordinates(end_idx, dimensions=dimensions)
+        
+        # Get dimensional resonance information
+        dimensional_resonance = self._detect_dimensional_resonance(start_idx, end_idx)
+        
+        # Determine if there are strong dimensional resonances to follow
+        if dimensional_resonance and dimensional_resonance["strength"] > 0.3:
+            # Navigate along resonant dimensions
+            path = self._navigate_along_resonant_dimensions(start_idx, end_idx, dimensional_resonance)
+        else:
+            # Use standard eigenspace path
+            path_indices = self._find_eigenvector_path(start_idx, end_idx)
+            path = [self._create_navigation_step(idx) for idx in path_indices]
+            
+        return path
+        
+    def _detect_dimensional_resonance(self, pattern1_idx: int, pattern2_idx: int) -> Optional[Dict[str, Any]]:
+        """Detect dimensional resonance between two patterns.
+        
+        This method identifies if two patterns share resonance in specific dimensions
+        despite potentially low overall similarity.
+        
+        Args:
+            pattern1_idx: Index of the first pattern
+            pattern2_idx: Index of the second pattern
+            
+        Returns:
+            Dictionary with dimensional resonance information or None if no significant resonance
+        """
+        if not self.current_field or "topology" not in self.current_field:
+            return None
+            
+        topology = self.current_field["topology"]
+        if "pattern_projections" not in topology or "principal_dimensions" not in topology:
+            return None
+            
+        projections = topology["pattern_projections"]
+        dimensions = topology["principal_dimensions"]
+        
+        if pattern1_idx >= len(projections) or pattern2_idx >= len(projections):
+            return None
+            
+        # Get projections for both patterns
+        proj1 = projections[pattern1_idx]
+        proj2 = projections[pattern2_idx]
+        
+        # Find dimensions with strong resonance (similar projections)
+        resonant_dimensions = []
+        total_resonance = 0.0
+        
+        for dim in range(min(len(dimensions), 5)):  # Check top 5 dimensions at most
+            dim_key = f"dim_{dim}"
+            if dim_key in proj1 and dim_key in proj2:
+                # Calculate projection similarity in this dimension
+                dim_resonance = 1.0 - abs(proj1[dim_key] - proj2[dim_key])
+                dim_importance = dimensions[dim]["explained_variance"] if dim < len(dimensions) else 0.0
+                
+                # If projections are similar in this dimension
+                if dim_resonance > 0.7:  # Threshold for considering dimensional resonance
+                    resonant_dimensions.append({
+                        "dimension": dim,
+                        "resonance": dim_resonance,
+                        "importance": dim_importance
+                    })
+                    total_resonance += dim_resonance * dim_importance
+        
+        if not resonant_dimensions:
+            return None
+            
+        # Calculate overall resonance strength
+        total_importance = sum(dim["importance"] for dim in resonant_dimensions)
+        resonance_strength = total_resonance / total_importance if total_importance > 0 else 0.0
+        
+        return {
+            "resonant_dimensions": resonant_dimensions,
+            "strength": resonance_strength,
+            "pattern1": pattern1_idx,
+            "pattern2": pattern2_idx
+        }
+        
+    def _navigate_along_resonant_dimensions(self, start_idx: int, end_idx: int, 
+                                           dimensional_resonance: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """Navigate along resonant dimensions between patterns.
+        
+        This method creates a path that follows the resonant dimensions between
+        two patterns, prioritizing movement along dimensions with strong resonance.
+        
+        Args:
+            start_idx: Index of the starting pattern
+            end_idx: Index of the ending pattern
+            dimensional_resonance: Dimensional resonance information
+            
+        Returns:
+            List of navigation steps with pattern indices and navigation metadata
+        """
+        if not self.current_field or "topology" not in self.current_field:
+            return []
+            
+        # Get pattern projections and resonant dimensions
+        topology = self.current_field["topology"]
+        projections = topology.get("pattern_projections", [])
+        resonant_dims = dimensional_resonance.get("resonant_dimensions", [])
+        
+        if not resonant_dims or start_idx >= len(projections) or end_idx >= len(projections):
+            # Fall back to eigenvector path
+            path_indices = self._find_eigenvector_path(start_idx, end_idx)
+            return [self._create_navigation_step(idx) for idx in path_indices]
+        
+        # Sort dimensions by importance
+        resonant_dims.sort(key=lambda x: x["importance"], reverse=True)
+        
+        # Create path steps
+        path = [self._create_navigation_step(start_idx)]
+        current_idx = start_idx
+        
+        # For each resonant dimension, find intermediate patterns
+        for dim_info in resonant_dims:
+            dim = dim_info["dimension"]
+            dim_key = f"dim_{dim}"
+            
+            # Find patterns that lie between start and end in this dimension
+            if dim_key in projections[start_idx] and dim_key in projections[end_idx]:
+                start_proj = projections[start_idx][dim_key]
+                end_proj = projections[end_idx][dim_key]
+                
+                # Find patterns with projections between start and end in this dimension
+                intermediate_patterns = []
+                for i, proj in enumerate(projections):
+                    if i != start_idx and i != end_idx and dim_key in proj:
+                        # Check if pattern lies between start and end in this dimension
+                        proj_val = proj[dim_key]
+                        if (start_proj <= proj_val <= end_proj) or (end_proj <= proj_val <= start_proj):
+                            # Calculate distance from the line connecting start and end in this dimension
+                            intermediate_patterns.append((i, abs(proj_val - start_proj) / abs(end_proj - start_proj) if end_proj != start_proj else 0))
+                
+                # Sort by position along the dimension (0 = start, 1 = end)
+                intermediate_patterns.sort(key=lambda x: x[1])
+                
+                # Add intermediate patterns to path
+                for idx, _ in intermediate_patterns:
+                    if idx != current_idx and idx not in [step["index"] for step in path]:
+                        path.append(self._create_navigation_step(idx, dimension=dim))
+                        current_idx = idx
+        
+        # Add end pattern if not already in path
+        if end_idx != current_idx and end_idx not in [step["index"] for step in path]:
+            path.append(self._create_navigation_step(end_idx))
+        
+        return path
+        
+    def _find_eigenvector_path(self, start_idx: int, end_idx: int, max_intermediate: int = 3) -> List[int]:
+        """Find a path between two patterns in eigenspace.
+        
+        This method identifies intermediate patterns that lie along the path
+        between two patterns in eigenspace, creating a smooth navigation path.
+        
+        Args:
+            start_idx: Index of the starting pattern
+            end_idx: Index of the ending pattern
+            max_intermediate: Maximum number of intermediate patterns to include
+            
+        Returns:
+            List of pattern indices forming a path in eigenspace
+        """
+        if not self.current_field or "topology" not in self.current_field:
+            return [start_idx, end_idx]
+            
+        topology = self.current_field["topology"]
+        if "pattern_projections" not in topology:
+            return [start_idx, end_idx]
+            
+        projections = topology["pattern_projections"]
+        if start_idx >= len(projections) or end_idx >= len(projections):
+            return [start_idx, end_idx]
+            
+        # Get eigenspace coordinates for start and end patterns
+        start_coords = self.get_navigation_coordinates(start_idx)
+        end_coords = self.get_navigation_coordinates(end_idx)
+        
+        # Calculate direction vector from start to end in eigenspace
+        direction = [end_coord - start_coord for start_coord, end_coord in zip(start_coords, end_coords)]
+        direction_magnitude = np.sqrt(sum(d**2 for d in direction))
+        
+        if direction_magnitude < 1e-6:  # If patterns are very close in eigenspace
+            return [start_idx, end_idx]
+            
+        # Normalize direction vector
+        direction = [d / direction_magnitude for d in direction]
+        
+        # Find patterns that lie along the path from start to end
+        candidates = []
+        for i in range(len(projections)):
+            if i == start_idx or i == end_idx:
+                continue
+                
+            # Get coordinates for this pattern
+            coords = self.get_navigation_coordinates(i)
+            
+            # Calculate vector from start to this pattern
+            vector = [coord - start_coord for coord, start_coord in zip(coords, start_coords)]
+            vector_magnitude = np.sqrt(sum(v**2 for v in vector))
+            
+            if vector_magnitude < 1e-6:  # If pattern is very close to start
+                continue
+                
+            # Calculate projection of this vector onto the direction vector
+            projection = sum(v * d for v, d in zip(vector, direction))
+            
+            # Calculate distance from the line connecting start and end
+            # (using Pythagorean theorem: distance^2 = magnitude^2 - projection^2)
+            distance_from_line = np.sqrt(max(0, vector_magnitude**2 - projection**2))
+            
+            # Check if pattern lies between start and end (projection between 0 and direction_magnitude)
+            if 0 <= projection <= direction_magnitude and distance_from_line < 0.2 * direction_magnitude:
+                # Calculate position along the path (0 = start, 1 = end)
+                position = projection / direction_magnitude
+                candidates.append((i, position, distance_from_line))
+        
+        # Sort by position along the path
+        candidates.sort(key=lambda x: x[1])
+        
+        # Select a subset of intermediate patterns for a smoother path
+        selected_candidates = []
+        if candidates:
+            # Divide the path into segments and select the best pattern in each segment
+            segment_count = min(max_intermediate, len(candidates))
+            segment_size = 1.0 / (segment_count + 1)
+            
+            for i in range(segment_count):
+                segment_center = (i + 1) * segment_size
+                
+                # Find patterns in this segment
+                segment_patterns = [(idx, pos, dist) for idx, pos, dist in candidates 
+                                   if segment_center - segment_size/2 <= pos <= segment_center + segment_size/2]
+                
+                if segment_patterns:
+                    # Select the pattern closest to the line
+                    best_pattern = min(segment_patterns, key=lambda x: x[2])
+                    selected_candidates.append(best_pattern)
+        
+        # Create the final path
+        path = [start_idx]
+        for idx, _, _ in selected_candidates:
+            path.append(idx)
+        path.append(end_idx)
+        
+        return path
+    
+    def _create_navigation_step(self, pattern_idx: int, dimension: Optional[int] = None) -> Dict[str, Any]:
+        """Create a navigation step with metadata.
+        
+        Args:
+            pattern_idx: Index of the pattern
+            dimension: Optional dimension being navigated along
+            
+        Returns:
+            Dictionary with navigation step information
+        """
+        step = {
+            "index": pattern_idx,
+            "coordinates": self.get_navigation_coordinates(pattern_idx, dimensions=3)
+        }
+        
+        # Add pattern metadata
+        if pattern_idx < len(self.pattern_metadata):
+            step["id"] = self.pattern_metadata[pattern_idx].get("id", f"pattern_{pattern_idx}")
+            step["type"] = self.pattern_metadata[pattern_idx].get("type", "unknown")
+        
+        # Add dimension information if provided
+        if dimension is not None:
+            step["dimension"] = dimension
+            
+            # Add projection value for this dimension
+            if self.current_field and "topology" in self.current_field:
+                projections = self.current_field["topology"].get("pattern_projections", [])
+                if pattern_idx < len(projections):
+                    dim_key = f"dim_{dimension}"
+                    if dim_key in projections[pattern_idx]:
+                        step["projection"] = projections[pattern_idx][dim_key]
+        
+        return step
+        
+    def detect_fuzzy_boundaries(self, field_analysis: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """Detect fuzzy boundaries between communities in the field.
+        
+        This method identifies boundary regions with high community assignment uncertainty
+        and calculates boundary characteristics for improved navigation.
+        
+        Args:
+            field_analysis: Optional field analysis results (uses current field if None)
+            
+        Returns:
+            Dictionary with fuzzy boundary information
+        """
+        analysis = field_analysis if field_analysis is not None else self.current_field
+        if not analysis or "transition_zones" not in analysis:
+            return {"boundaries": [], "uncertainty": []}
+        
+        transition_data = analysis["transition_zones"]
+        if not transition_data or "transition_zones" not in transition_data:
+            return {"boundaries": [], "uncertainty": []}
+        
+        # Extract boundary information
+        boundaries = []
+        for zone in transition_data["transition_zones"]:
+            pattern_idx = zone["pattern_idx"]
+            source_community = zone.get("source_community", -1)
+            neighboring_communities = zone.get("neighboring_communities", [])
+            uncertainty = zone.get("uncertainty", 0.0)
+            
+            # Only include zones with sufficient uncertainty
+            if uncertainty > 0.3:  # Threshold for significant boundaries
+                boundary = {
+                    "pattern_idx": pattern_idx,
+                    "source_community": source_community,
+                    "neighboring_communities": neighboring_communities,
+                    "uncertainty": uncertainty,
+                    "coordinates": self.get_navigation_coordinates(pattern_idx, dimensions=3)
+                }
+                
+                # Add gradient direction if available
+                if "gradient_direction" in zone:
+                    boundary["gradient_direction"] = zone["gradient_direction"]
+                    
+                boundaries.append(boundary)
+        
+        # Get overall boundary uncertainty values
+        uncertainty = transition_data.get("boundary_uncertainty", [])
+        
+        return {
+            "boundaries": boundaries,
+            "uncertainty": uncertainty
+        }
+    
+    def plan_boundary_crossing_path(self, start_idx: int, end_idx: int, 
+                                   boundaries: Optional[List[Dict[str, Any]]] = None) -> List[Dict[str, Any]]:
+        """Plan an optimal path through fuzzy boundaries between communities.
+        
+        This method creates a path that intelligently navigates through fuzzy boundaries
+        when crossing between different communities, using dimensional resonance and
+        boundary characteristics to find optimal crossing points.
+        
+        Args:
+            start_idx: Index of the starting pattern
+            end_idx: Index of the ending pattern
+            boundaries: Optional list of boundary information (detected if None)
+            
+        Returns:
+            List of navigation steps with pattern indices and navigation metadata
+        """
+        if not self.current_field or start_idx >= len(self.pattern_metadata) or end_idx >= len(self.pattern_metadata):
+            return []
+            
+        # Get boundary information if not provided
+        if boundaries is None:
+            boundary_info = self.detect_fuzzy_boundaries()
+            boundaries = boundary_info.get("boundaries", [])
+            
+        # Get community assignments
+        community_assignment = self.current_field["graph_metrics"].get("community_assignment", {})
+        
+        # If both patterns are in the same community, use eigenspace navigation
+        start_community = community_assignment.get(start_idx, -1)
+        end_community = community_assignment.get(end_idx, -1)
+        
+        if start_community == end_community or start_community == -1 or end_community == -1:
+            return self.navigate_eigenspace(start_idx, end_idx)
+            
+        # If no boundaries found, use eigenspace navigation
+        if not boundaries:
+            return self.navigate_eigenspace(start_idx, end_idx)
+            
+        # Find boundary patterns between the two communities
+        direct_boundaries = []
+        for boundary in boundaries:
+            source_comm = boundary["source_community"]
+            neighboring_comms = boundary["neighboring_communities"]
+            
+            if (source_comm == start_community and end_community in neighboring_comms) or \
+               (source_comm == end_community and start_community in neighboring_comms):
+                direct_boundaries.append(boundary)
+    
     def _find_fuzzy_boundary_path(self, start_idx: int, end_idx: int) -> List[int]:
         """Find a path between two patterns that navigates through fuzzy boundaries.
         
@@ -848,6 +1343,27 @@ class FieldNavigator:
                     start_community_boundaries.append(zone["pattern_idx"])
                 elif zone["source_community"] == end_community:
                     end_community_boundaries.append(zone["pattern_idx"])
+                    
+            # Also consider dimensional resonance when finding boundary patterns
+            if not start_community_boundaries or not end_community_boundaries:
+                # Look for patterns with dimensional resonance
+                for i in range(len(self.pattern_metadata)):
+                    if i == start_idx or i == end_idx:
+                        continue
+                        
+                    # Check community assignment
+                    if i in community_assignment:
+                        # Check for dimensional resonance with start and end patterns
+                        start_resonance = self._detect_dimensional_resonance(start_idx, i)
+                        end_resonance = self._detect_dimensional_resonance(end_idx, i)
+                        
+                        # If pattern has resonance with both start and end, consider it a boundary
+                        if start_resonance and end_resonance and \
+                           start_resonance["strength"] > 0.3 and end_resonance["strength"] > 0.3:
+                            if community_assignment[i] == start_community and i not in start_community_boundaries:
+                                start_community_boundaries.append(i)
+                            elif community_assignment[i] == end_community and i not in end_community_boundaries:
+                                end_community_boundaries.append(i)
             
             # If we have boundaries in both communities, find the best pair
             if start_community_boundaries and end_community_boundaries:
