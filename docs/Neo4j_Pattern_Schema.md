@@ -9,48 +9,56 @@ The Neo4j pattern schema is designed to store and query Vector + Tonic-Harmonic 
 ### Node Types
 
 1. **Pattern**
+
 ```cypher
 CREATE CONSTRAINT pattern_id IF NOT EXISTS
 FOR (p:Pattern) REQUIRE p.id IS UNIQUE
 ```
 
 Properties:
+
 - id: Unique identifier
 - vector: Original vector representation
 - coordinates: Eigenspace coordinates
 - effective_dims: Number of significant dimensions
 - community: Community assignment
 
-2. **Dimension**
+1. **Dimension**
+
 ```cypher
 CREATE CONSTRAINT dimension_id IF NOT EXISTS
 FOR (d:Dimension) REQUIRE d.id IS UNIQUE
 ```
 
 Properties:
+
 - id: Dimension identifier
 - eigenvalue: Associated eigenvalue
 - variance_explained: Proportion of variance explained
 
-3. **ResonancePattern**
+1. **ResonancePattern**
+
 ```cypher
 CREATE CONSTRAINT resonance_pattern_id IF NOT EXISTS
 FOR (r:ResonancePattern) REQUIRE r.id IS UNIQUE
 ```
 
 Properties:
+
 - id: Unique identifier
 - pattern_type: Type of resonance (harmonic/sequential/complementary)
 - strength: Resonance strength
 - primary_dimension: Primary dimension of resonance
 
-4. **Community**
+1. **Community**
+
 ```cypher
 CREATE CONSTRAINT community_id IF NOT EXISTS
 FOR (c:Community) REQUIRE c.id IS UNIQUE
 ```
 
 Properties:
+
 - id: Community identifier
 - cohesion: Internal cohesion metric
 - size: Number of patterns
@@ -58,35 +66,47 @@ Properties:
 ### Relationships
 
 1. **PROJECTS_ONTO**
+
 ```cypher
 (p:Pattern)-[r:PROJECTS_ONTO]->(d:Dimension)
 ```
+
 Properties:
+
 - projection_value: Strength of projection
 - sign: Positive/negative projection
 
-2. **RESONATES_WITH**
+1. **RESONATES_WITH**
+
 ```cypher
 (p1:Pattern)-[r:RESONATES_WITH]->(p2:Pattern)
 ```
+
 Properties:
+
 - strength: Resonance strength
 - dimensions: Array of shared dimensions
 - type: Type of resonance
 
-3. **BELONGS_TO**
+1. **BELONGS_TO**
+
 ```cypher
 (p:Pattern)-[r:BELONGS_TO]->(c:Community)
 ```
+
 Properties:
+
 - membership_strength: Degree of membership
 - is_boundary: Boolean for boundary patterns
 
-4. **FORMS_PATTERN**
+1. **FORMS_PATTERN**
+
 ```cypher
 (p:Pattern)-[r:FORMS_PATTERN]->(rp:ResonancePattern)
 ```
+
 Properties:
+
 - role: Role in the pattern (e.g., "source", "target")
 - position: Position in sequential patterns
 
@@ -167,13 +187,15 @@ def analyze_pattern_evolution(pattern_id: str, time_window: int):
 ## Performance Optimization
 
 1. **Indexing Strategy**
+
 ```cypher
 CREATE INDEX pattern_community IF NOT EXISTS
 FOR (p:Pattern)
 ON (p.community)
 ```
 
-2. **Batch Processing**
+1. **Batch Processing**
+
 ```python
 def batch_import_patterns(patterns: List[Dict]):
     query = """
@@ -187,6 +209,7 @@ def batch_import_patterns(patterns: List[Dict]):
 ## Usage Examples
 
 ### 1. Pattern Import
+
 ```python
 # Import patterns with eigenspace coordinates
 patterns = [
@@ -204,6 +227,7 @@ batch_import_patterns(patterns)
 ```
 
 ### 2. Resonance Analysis
+
 ```python
 # Analyze dimensional resonance
 query = """
@@ -222,11 +246,13 @@ results = graph.run(query)
 ## Future Extensions
 
 1. **Temporal Pattern Evolution**
+
 - Track pattern changes over time
 - Analyze evolutionary trajectories
 - Detect pattern emergence/decay
 
-2. **Advanced Resonance Types**
+1. **Advanced Resonance Types**
+
 - Multi-dimensional resonance patterns
 - Cross-community resonance
 - Harmonic series detection

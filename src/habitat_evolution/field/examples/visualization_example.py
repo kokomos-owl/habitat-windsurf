@@ -12,9 +12,9 @@ import json
 import logging
 from datetime import datetime
 
-from habitat_evolution.field.field_navigator import FieldNavigator
-from habitat_evolution.field.pattern_explorer import PatternExplorer
-from habitat_evolution.visualization.eigenspace_visualizer import EigenspaceVisualizer
+from ..field_navigator import FieldNavigator
+from ..pattern_explorer import PatternExplorer
+from ...visualization.eigenspace_visualizer import EigenspaceVisualizer
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -52,95 +52,105 @@ def create_output_directory():
     base_dir = Path(__file__).parent / "output" / timestamp
     
     # Create directory structure
-    (base_dir / "visualizations").mkdir(parents=True, exist_ok=True)
-    (base_dir / "metrics").mkdir(parents=True, exist_ok=True)
-    (base_dir / "analysis").mkdir(parents=True, exist_ok=True)
+    vis_dir = base_dir / "visualizations"
+    metrics_dir = base_dir / "metrics"
+    analysis_dir = base_dir / "analysis"
     
-    return base_dir
+    # Create all directories
+    for dir_path in [vis_dir, metrics_dir, analysis_dir]:
+        dir_path.mkdir(parents=True, exist_ok=True)
+        
+    # Create a README.md in the output directory
+    readme_path = base_dir / "README.md"
+    readme_content = f"""# Visualization Results - {timestamp}
+
+## Directory Structure
+- visualizations/: Generated plots and visualizations
+- metrics/: Performance and analysis metrics
+- analysis/: Pattern analysis results
+"""
+    readme_path.write_text(readme_content)
+    
+    return {
+        "base_dir": base_dir,
+        "vis_dir": vis_dir,
+        "metrics_dir": metrics_dir,
+        "analysis_dir": analysis_dir
+    }
 
 def main():
-    # Generate sample data
-    logger.info("Generating sample patterns...")
-    vectors, communities = generate_sample_patterns()
+    # Create output directories
+    output_dirs = create_output_directory()
     
-    # Create output directory
-    output_dir = create_output_directory()
-    logger.info(f"Created output directory: {output_dir}")
+    # Generate sample patterns
+    vectors, communities = generate_sample_patterns(n_patterns=50, n_dims=10)
+    
+    # Create pattern metadata
+    pattern_metadata = [
+        {
+            "id": f"pattern_{i}",
+            "community": communities[i],
+            "timestamp": datetime.now().isoformat()
+        } for i in range(len(vectors))
+    ]
     
     # Initialize components
     field_navigator = FieldNavigator()
-    pattern_explorer = PatternExplorer(field_navigator)
+    pattern_explorer = PatternExplorer()
+    visualizer = EigenspaceVisualizer()
     
     # Analyze field topology
-    logger.info("Analyzing field topology...")
-    field_data = pattern_explorer.analyze_field(vectors)
+    field_analysis = field_navigator.analyze_field_topology(vectors, pattern_metadata)
     
-    # Add community information
-    for i, pattern in enumerate(field_data["patterns"]):
-        pattern["community"] = int(communities[i])
+    # Generate visualizations
+    logger.info("Generating visualizations...")
     
-    # Initialize visualizer
-    visualizer = EigenspaceVisualizer(field_data)
-    
-    # Create 2D visualization
-    logger.info("Creating 2D visualization...")
-    fig_2d, ax_2d = visualizer.visualize_eigenspace_2d(
-        dim1=0, dim2=1,
-        highlight_boundaries=True,
-        highlight_communities=True,
-        title="Pattern Communities in 2D Eigenspace"
+    # 2D eigenspace plot
+    plt.figure(figsize=(10, 8))
+    visualizer.plot_eigenspace_2d(
+        vectors=vectors,
+        communities=communities,
+        title="Pattern Distribution in 2D Eigenspace"
     )
-    fig_2d.savefig(output_dir / "visualizations" / "eigenspace_2d.png")
+    plt.savefig(output_dirs["vis_dir"] / "eigenspace_2d.png")
+    plt.close()
     
-    # Create 2D visualization with different dimensions
-    logger.info("Creating alternative 2D visualization...")
-    fig_2d_alt, ax_2d_alt = visualizer.visualize_eigenspace_2d(
-        dim1=1, dim2=2,
-        highlight_boundaries=True,
-        highlight_communities=True,
-        title="Pattern Communities in Alternative 2D View"
+    # Alternative 2D view (using different eigenvectors)
+    plt.figure(figsize=(10, 8))
+    visualizer.plot_eigenspace_2d(
+        vectors=vectors,
+        communities=communities,
+        dims=[2, 3],  # Use 3rd and 4th eigenvectors
+        title="Alternative Pattern Distribution View"
     )
-    fig_2d_alt.savefig(output_dir / "visualizations" / "eigenspace_2d_alt.png")
+    plt.savefig(output_dirs["vis_dir"] / "eigenspace_2d_alt.png")
+    plt.close()
     
-    # Save field data for analysis
-    logger.info("Saving field analysis data...")
-    field_data_path = output_dir / "analysis" / "field_data.json"
-    with open(field_data_path, 'w') as f:
-        # Convert numpy arrays to lists for JSON serialization
-        serializable_data = {
-            "patterns": [
-                {
-                    "id": p.get("id", f"pattern_{i}"),
-                    "community": int(p.get("community", 0)),
-                    "coordinates": [float(x) for x in p.get("coordinates", [])],
-                    "is_boundary": bool(p.get("is_boundary", False))
-                }
-                for i, p in enumerate(field_data["patterns"])
+    # Save analysis results
+    analysis_file = output_dirs["analysis_dir"] / "field_data.json"
+    with open(analysis_file, "w") as f:
+        json.dump({
+            "n_patterns": len(vectors),
+            "n_dimensions": vectors.shape[1],
+            "n_communities": len(set(communities)),
+            "community_sizes": [
+                sum(1 for c in communities if c == i)
+                for i in range(max(communities) + 1)
             ],
-            "eigenvalues": [float(x) for x in field_data.get("eigenvalues", [])],
-            "effective_dimensions": int(field_data.get("effective_dimensions", 0))
-        }
-        json.dump(serializable_data, f, indent=2)
+            "timestamp": datetime.now().isoformat()
+        }, f, indent=2)
     
-    # Save metrics
-    logger.info("Saving performance metrics...")
-    metrics = {
-        "num_patterns": len(vectors),
-        "num_dimensions": vectors.shape[1],
-        "num_communities": len(set(communities)),
-        "effective_dimensions": field_data.get("effective_dimensions", 0),
-        "eigenvalues": [float(x) for x in field_data.get("eigenvalues", [])][:5],  # Top 5 eigenvalues
-        "boundary_patterns": sum(1 for p in field_data["patterns"] if p.get("is_boundary", False))
-    }
+    # Save visualization metrics
+    metrics_file = output_dirs["metrics_dir"] / "visualization_metrics.json"
+    with open(metrics_file, "w") as f:
+        json.dump({
+            "eigenvalues": field_analysis["eigenvalues"].tolist(),
+            "explained_variance_ratio": field_analysis["explained_variance_ratio"].tolist(),
+            "effective_dimensionality": field_analysis["effective_dimensionality"],
+            "timestamp": datetime.now().isoformat()
+        }, f, indent=2)
     
-    metrics_path = output_dir / "metrics" / "visualization_metrics.json"
-    with open(metrics_path, 'w') as f:
-        json.dump(metrics, f, indent=2)
-    
-    logger.info(f"Visualization example completed. Results saved to: {output_dir}")
-    
-    # Close all figures
-    plt.close('all')
+    logger.info(f"Results saved to {output_dirs['base_dir']}")
 
 if __name__ == "__main__":
     main()
