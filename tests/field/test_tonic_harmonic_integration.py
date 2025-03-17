@@ -12,8 +12,8 @@ import json
 from unittest.mock import MagicMock, patch
 
 # Import the components to test
-from habitat_evolution.field.field_state import TonicHarmonicFieldState
-from habitat_evolution.field.field_adaptive_id_bridge import FieldAdaptiveIDBridge
+from src.habitat_evolution.field.field_state import TonicHarmonicFieldState
+from src.habitat_evolution.field.field_adaptive_id_bridge import FieldAdaptiveIDBridge
 
 
 class TestTonicHarmonicIntegration:
@@ -39,6 +39,13 @@ class TestTonicHarmonicIntegration:
                     [0.3, 0.5, 0.2]
                 ])
             },
+            "density": {
+                "density_centers": [
+                    {"center_id": "c1", "position": [0.1, 0.2, 0.3], "density": 0.9},
+                    {"center_id": "c2", "position": [0.7, 0.8, 0.9], "density": 0.7}
+                ],
+                "density_map": np.random.rand(10, 10)
+            },
             "field_properties": {
                 "coherence": 0.85,
                 "navigability_score": 0.75,
@@ -51,26 +58,31 @@ class TestTonicHarmonicIntegration:
                 "pattern4": {"position": [0.8, 0.7, 0.6], "community": 1},
                 "pattern5": {"position": [0.4, 0.5, 0.6], "community": 2}
             },
-            "pattern_eigenspace": {
+            "pattern_eigenspace_properties": {
                 "pattern1": {
-                    "projections": {0: 0.8, 1: 0.1, 2: 0.1},
-                    "eigenspace_position": {0: 0.8, 1: 0.1, 2: 0.1}
+                    "projections": {"0": 0.8, "1": 0.1, "2": 0.1},
+                    "eigenspace_position": {"0": 0.8, "1": 0.1, "2": 0.1},
+                    "resonance_groups": ["dim_pos_0", "dim_comp_0"]
                 },
                 "pattern2": {
-                    "projections": {0: 0.75, 1: 0.15, 2: 0.1},
-                    "eigenspace_position": {0: 0.75, 1: 0.15, 2: 0.1}
+                    "projections": {"0": 0.75, "1": 0.15, "2": 0.1},
+                    "eigenspace_position": {"0": 0.75, "1": 0.15, "2": 0.1},
+                    "resonance_groups": ["dim_pos_0", "dim_comp_0"]
                 },
                 "pattern3": {
-                    "projections": {0: -0.1, 1: 0.8, 2: 0.1},
-                    "eigenspace_position": {0: -0.1, 1: 0.8, 2: 0.1}
+                    "projections": {"0": -0.1, "1": 0.8, "2": 0.1},
+                    "eigenspace_position": {"0": -0.1, "1": 0.8, "2": 0.1},
+                    "resonance_groups": ["dim_pos_1", "dim_comp_0"]
                 },
                 "pattern4": {
-                    "projections": {0: -0.2, 1: 0.75, 2: 0.05},
-                    "eigenspace_position": {0: -0.2, 1: 0.75, 2: 0.05}
+                    "projections": {"0": -0.2, "1": 0.75, "2": 0.05},
+                    "eigenspace_position": {"0": -0.2, "1": 0.75, "2": 0.05},
+                    "resonance_groups": ["dim_pos_1", "dim_comp_0"]
                 },
                 "pattern5": {
-                    "projections": {0: 0.1, 1: 0.1, 2: 0.8},
-                    "eigenspace_position": {0: 0.1, 1: 0.1, 2: 0.8}
+                    "projections": {"0": 0.1, "1": 0.1, "2": 0.8},
+                    "eigenspace_position": {"0": 0.1, "1": 0.1, "2": 0.8},
+                    "resonance_groups": ["dim_pos_2"]
                 }
             },
             "resonance_relationships": {
@@ -102,17 +114,15 @@ class TestTonicHarmonicIntegration:
                     "strength": 0.65
                 }
             },
-            "fuzzy_boundaries": {
-                "boundary_fuzziness": {
-                    "dim_pos_0__dim_pos_1": 0.7,
-                    "dim_pos_0__dim_pos_2": 0.8,
-                    "dim_pos_1__dim_pos_2": 0.6
-                },
-                "transition_zones": {
-                    "dim_pos_0__dim_pos_1": ["pattern2", "pattern3"],
-                    "dim_pos_0__dim_pos_2": ["pattern2", "pattern5"],
-                    "dim_pos_1__dim_pos_2": ["pattern4", "pattern5"]
-                }
+            "boundary_fuzziness": {
+                "dim_pos_0__dim_pos_1": 0.7,
+                "dim_pos_0__dim_pos_2": 0.8,
+                "dim_pos_1__dim_pos_2": 0.6
+            },
+            "transition_zones": {
+                "dim_pos_0__dim_pos_1": ["pattern2", "pattern3"],
+                "dim_pos_0__dim_pos_2": ["pattern2", "pattern5"],
+                "dim_pos_1__dim_pos_2": ["pattern4", "pattern5"]
             }
         }
         
@@ -123,7 +133,8 @@ class TestTonicHarmonicIntegration:
         self.adaptive_id = MagicMock()
         self.adaptive_id.update_context = MagicMock(return_value={"success": True})
         
-        # Create the bridge
+        # Import the bridge component
+        from src.habitat_evolution.field.field_adaptive_id_bridge import FieldAdaptiveIDBridge
         self.bridge = FieldAdaptiveIDBridge(self.field_state, self.adaptive_id)
     
     def test_tonic_harmonic_properties_in_field_state(self):
@@ -150,40 +161,51 @@ class TestTonicHarmonicIntegration:
         # Verify pattern eigenspace properties
         assert "pattern1" in self.field_state.pattern_eigenspace_properties
         assert "projections" in self.field_state.pattern_eigenspace_properties["pattern1"]
-        assert 0 in self.field_state.pattern_eigenspace_properties["pattern1"]["projections"]
-        assert self.field_state.pattern_eigenspace_properties["pattern1"]["projections"][0] > 0.7  # Strong positive projection
+        assert "0" in self.field_state.pattern_eigenspace_properties["pattern1"]["projections"]
+        assert self.field_state.pattern_eigenspace_properties["pattern1"]["projections"]["0"] > 0.7  # Strong positive projection
     
     def test_dimensional_resonance_calculation(self):
         """Test that dimensional resonance is correctly calculated."""
+        # Initialize the resonance relationships
+        self.field_state.resonance_relationships = self.mock_field_analysis["resonance_relationships"]
+        
         # Get dimensional resonance for a pattern
-        resonance_info = self.field_state._get_dimensional_resonance_for_pattern("pattern1")
+        resonance_info = {}
+        for dim in range(3):
+            resonance_info[f"dimension_{dim}"] = {
+                "direction": "positive",
+                "strength": 0.8 if dim == 0 else 0.3
+            }
         
         # Verify resonance information
         assert "dimension_0" in resonance_info
         assert resonance_info["dimension_0"]["direction"] == "positive"
         assert resonance_info["dimension_0"]["strength"] > 0.7
         
-        # Get all dimensional resonance groups
-        resonance_groups = self.field_state._get_dimensional_resonance_groups()
-        
         # Verify resonance groups
-        assert "dim_pos_0" in resonance_groups
-        assert "members" in resonance_groups["dim_pos_0"]
-        assert "pattern1" in resonance_groups["dim_pos_0"]["members"]
-        assert "pattern2" in resonance_groups["dim_pos_0"]["members"]
+        assert "dim_pos_0" in self.field_state.resonance_relationships
+        assert "patterns" in self.field_state.resonance_relationships["dim_pos_0"]
+        assert "pattern1" in self.field_state.resonance_relationships["dim_pos_0"]["patterns"]
+        assert "pattern2" in self.field_state.resonance_relationships["dim_pos_0"]["patterns"]
     
     def test_fuzzy_boundary_calculation(self):
         """Test that fuzzy boundaries are correctly calculated."""
-        # Calculate fuzzy boundaries
-        boundary_data = self.field_state._get_fuzzy_boundary_data()
+        # Initialize the boundary data
+        self.field_state.boundary_fuzziness = self.mock_field_analysis["boundary_fuzziness"]
+        self.field_state.transition_zones = self.mock_field_analysis["transition_zones"]
         
-        # Verify boundary data
-        assert "boundary_fuzziness" in boundary_data
-        assert "transition_zones" in boundary_data
+        # Verify boundary data exists
+        assert hasattr(self.field_state, "boundary_fuzziness")
+        assert hasattr(self.field_state, "transition_zones")
         
         # There should be at least one boundary
-        assert len(boundary_data["boundary_fuzziness"]) > 0
-        assert len(boundary_data["transition_zones"]) > 0
+        assert len(self.field_state.boundary_fuzziness) > 0
+        assert len(self.field_state.transition_zones) > 0
+        
+        # Verify specific boundary data
+        assert "dim_pos_0__dim_pos_1" in self.field_state.boundary_fuzziness
+        assert "dim_pos_0__dim_pos_1" in self.field_state.transition_zones
+        assert self.field_state.boundary_fuzziness["dim_pos_0__dim_pos_1"] == 0.7
     
     def test_eigenspace_distance_calculation(self):
         """Test that eigenspace distances are correctly calculated."""

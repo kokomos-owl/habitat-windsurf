@@ -10,7 +10,7 @@ import json
 from datetime import datetime
 
 # Import the necessary components
-from habitat_evolution.field.field_state import TonicHarmonicFieldState
+from src.habitat_evolution.field.field_state import TonicHarmonicFieldState
 
 
 class FieldAdaptiveIDBridge:
