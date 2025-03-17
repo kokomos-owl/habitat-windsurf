@@ -11,18 +11,34 @@ from pathlib import Path
 import json
 import logging
 from datetime import datetime
+import sys
 
-from ..field_navigator import FieldNavigator
-from ..pattern_explorer import PatternExplorer
-from ..topological_field_analyzer import TopologicalFieldAnalyzer
-from ...visualization.eigenspace_visualizer import EigenspaceVisualizer
+# Add the project root to the Python path
+project_root = Path(__file__).parent.parent.parent.parent.parent
+sys.path.insert(0, str(project_root))
 
-# Set up logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
+from habitat_evolution.field.field_navigator import FieldNavigator
+from habitat_evolution.field.pattern_explorer import PatternExplorer
+from habitat_evolution.field.topological_field_analyzer import TopologicalFieldAnalyzer
+from habitat_evolution.visualization.eigenspace_visualizer import EigenspaceVisualizer
+
+# Set up logging with a custom filter to handle missing context field
+class ContextFilter(logging.Filter):
+    """Filter that adds a default empty context if missing."""
+    def filter(self, record):
+        if not hasattr(record, 'context'):
+            record.context = ''
+        return True
+
+# Configure root logger
+root_logger = logging.getLogger()
+for handler in root_logger.handlers:
+    handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+    handler.addFilter(ContextFilter())
+
+# Configure our module logger
 logger = logging.getLogger(__name__)
+logger.addFilter(ContextFilter())
 
 def generate_sample_patterns(n_patterns=50, n_dims=10):
     """Generate sample patterns for visualization."""
@@ -115,6 +131,13 @@ def main():
     # Set the analyzed field for navigation
     field_navigator.set_field(resonance_matrix, pattern_metadata)
     
+    # Extract eigenvalues from topology data
+    eigenvalues = np.array(field_analysis['topology']['dimension_strengths'])
+    
+    # Calculate explained variance ratio
+    total_variance = np.sum(np.abs(eigenvalues))
+    explained_variance_ratio = np.abs(eigenvalues) / total_variance if total_variance > 0 else np.zeros_like(eigenvalues)
+    
     # Prepare visualization data
     vis_data = {
         "patterns": [
@@ -128,7 +151,8 @@ def main():
         "boundaries": [
             {"pattern_idx": zone["pattern_idx"]} 
             for zone in field_analysis['transition_zones']['transition_zones']
-        ]
+        ],
+        "communities": {str(i): {"name": f"Community {i}"} for i in range(max(communities) + 1)}
     }
     
     # Initialize visualizer with field data
@@ -145,9 +169,22 @@ def main():
     
     # Alternative 2D view (using different eigenvectors)
     visualizer.visualize_eigenspace_2d(
-        dim1=2, dim2=3,  # Use 3rd and 4th eigenvectors
+        dim1=1, dim2=2,  # Use 2nd and 3rd eigenvectors
         title="Alternative Pattern Distribution View",
         save_path=str(output_dirs["vis_dir"] / "eigenspace_2d_alt.png")
+    )
+    
+    # 3D eigenspace plot
+    visualizer.visualize_eigenspace_3d(
+        title="Pattern Distribution in 3D Eigenspace",
+        save_path=str(output_dirs["vis_dir"] / "eigenspace_3d.png")
+    )
+    
+    # Visualize dimensional resonance
+    visualizer.visualize_dimensional_resonance(
+        dim=0,  # First dimension
+        title="Dimensional Resonance (Dimension 0)",
+        save_path=str(output_dirs["vis_dir"] / "dimensional_resonance.png")
     )
     
     # Save analysis results
@@ -168,9 +205,9 @@ def main():
     metrics_file = output_dirs["metrics_dir"] / "visualization_metrics.json"
     with open(metrics_file, "w") as f:
         json.dump({
-            "eigenvalues": field_analysis["eigenvalues"].tolist(),
-            "explained_variance_ratio": field_analysis["explained_variance_ratio"].tolist(),
-            "effective_dimensionality": field_analysis["effective_dimensionality"],
+            "eigenvalues": eigenvalues.tolist(),
+            "explained_variance_ratio": explained_variance_ratio.tolist(),
+            "effective_dimensionality": field_analysis['topology']['effective_dimensionality'],
             "timestamp": datetime.now().isoformat()
         }, f, indent=2)
     

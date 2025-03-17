@@ -1,0 +1,11 @@
+{
+  "n_patterns": 50,
+  "n_dimensions": 10,
+  "n_communities": 3,
+  "community_sizes": [
+    16,
+    17,
+    17
+  ],
+  "timestamp": "2025-03-17T18:32:47.090844"
+}
