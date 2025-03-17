@@ -14,10 +14,14 @@ from datetime import datetime
 
 from ..field_navigator import FieldNavigator
 from ..pattern_explorer import PatternExplorer
+from ..topological_field_analyzer import TopologicalFieldAnalyzer
 from ...visualization.eigenspace_visualizer import EigenspaceVisualizer
 
 # Set up logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
 logger = logging.getLogger(__name__)
 
 def generate_sample_patterns(n_patterns=50, n_dims=10):
@@ -40,6 +44,9 @@ def generate_sample_patterns(n_patterns=50, n_dims=10):
         else:
             vectors[i, 6:9] += 1.0  # Community 2: strong in dimensions 6-8
             communities[i] = 2
+    
+    # Ensure all communities are integers
+    communities = communities.astype(int)
     
     # Normalize again after adding community bias
     vectors = vectors / np.linalg.norm(vectors, axis=1)[:, np.newaxis]
@@ -95,36 +102,53 @@ def main():
     ]
     
     # Initialize components
-    field_navigator = FieldNavigator()
-    pattern_explorer = PatternExplorer()
-    visualizer = EigenspaceVisualizer()
+    field_analyzer = TopologicalFieldAnalyzer()
+    field_navigator = FieldNavigator(field_analyzer)
+    pattern_explorer = PatternExplorer(field_navigator)
     
-    # Analyze field topology
-    field_analysis = field_navigator.analyze_field_topology(vectors, pattern_metadata)
+    # Analyze field topology using raw vectors
+    field_analysis = field_analyzer.analyze_field(vectors, pattern_metadata)
+    
+    # Create resonance matrix from field analysis
+    resonance_matrix = field_analysis['resonance_matrix']
+    
+    # Set the analyzed field for navigation
+    field_navigator.set_field(resonance_matrix, pattern_metadata)
+    
+    # Prepare visualization data
+    vis_data = {
+        "patterns": [
+            {
+                "index": i,
+                "id": f"pattern_{i}",
+                "coordinates": field_analysis['topology']['eigenspace_coordinates'][i],
+                "community": int(communities[i])
+            } for i in range(len(vectors))
+        ],
+        "boundaries": [
+            {"pattern_idx": zone["pattern_idx"]} 
+            for zone in field_analysis['transition_zones']['transition_zones']
+        ]
+    }
+    
+    # Initialize visualizer with field data
+    visualizer = EigenspaceVisualizer(vis_data)
     
     # Generate visualizations
     logger.info("Generating visualizations...")
     
     # 2D eigenspace plot
-    plt.figure(figsize=(10, 8))
-    visualizer.plot_eigenspace_2d(
-        vectors=vectors,
-        communities=communities,
-        title="Pattern Distribution in 2D Eigenspace"
+    visualizer.visualize_eigenspace_2d(
+        title="Pattern Distribution in 2D Eigenspace",
+        save_path=str(output_dirs["vis_dir"] / "eigenspace_2d.png")
     )
-    plt.savefig(output_dirs["vis_dir"] / "eigenspace_2d.png")
-    plt.close()
     
     # Alternative 2D view (using different eigenvectors)
-    plt.figure(figsize=(10, 8))
-    visualizer.plot_eigenspace_2d(
-        vectors=vectors,
-        communities=communities,
-        dims=[2, 3],  # Use 3rd and 4th eigenvectors
-        title="Alternative Pattern Distribution View"
+    visualizer.visualize_eigenspace_2d(
+        dim1=2, dim2=3,  # Use 3rd and 4th eigenvectors
+        title="Alternative Pattern Distribution View",
+        save_path=str(output_dirs["vis_dir"] / "eigenspace_2d_alt.png")
     )
-    plt.savefig(output_dirs["vis_dir"] / "eigenspace_2d_alt.png")
-    plt.close()
     
     # Save analysis results
     analysis_file = output_dirs["analysis_dir"] / "field_data.json"
