@@ -257,7 +257,8 @@ results = graph.run(query)
 - Cross-community resonance
 - Harmonic series detection
 
-3. **Pattern Metrics**
+1. **Pattern Metrics**
+
 - Centrality measures
 - Community influence scores
 - Pattern stability metrics
