@@ -6,8 +6,8 @@
 |----|------|--------|----------|--------------|-------|
 | CP-1 | Complete PatternAwareRAG integration tests refactoring | ✅ Complete | High | None | Focus on field-state observations with vector + tonic_harmonic field topology |
 | CP-2 | Enhance Vector + Tonic_Harmonic Field components | ✅ Complete | High | CP-1 | Improved resonance matrix analysis, field navigation, and topological metrics |
-| CP-3 | Develop field energy flow and pattern resonance metrics | 🔄 In Progress | High | CP-2 | Based on tonic_harmonic field interactions and resonance patterns |
-| CP-4 | Update persistence layer for field topology metrics | ⏳ Pending | Medium | CP-2 | Pattern Store, Relationship Store to use vector + tonic_harmonic field metrics |
+| CP-3 | Develop field energy flow and pattern resonance metrics | 🔄 In Progress | High | CP-2 | Based on tonic_harmonic field interactions and resonance patterns with AdaptiveID context propagation |
+| CP-4 | Update persistence layer for field topology metrics | ⏳ Pending | Medium | CP-2 | Pattern Store, Relationship Store to use vector + tonic_harmonic field metrics with PatternID evolution tracking |
 | CP-5 | Enhance visualization for field topology relationships | 🔄 In Progress | Medium | CP-3 | Implementing EigenspaceVisualizer with 2D/3D views, community boundaries, and resonance visualization |
 
 ## Component Implementation Tasks
@@ -16,9 +16,9 @@
 | ID | Task | Status | Priority | Dependencies | Notes |
 |----|------|--------|----------|--------------|-------|
 | TF-1 | Enhance TopologicalFieldAnalyzer class | 🔄 In Progress | High | None | Improve resonance matrix analysis and field topology metrics |
-| TF-2 | Implement ResonancePatternDetector class | ⏳ Pending | High | TF-1 | Identify and classify meaningful resonance patterns in the field |
+| TF-2 | Implement ResonancePatternDetector class | ⏳ Pending | High | TF-1 | Identify and classify meaningful resonance patterns with PatternID integration for evolution tracking |
 | TF-3 | Enhance FieldNavigator capabilities | ✅ Complete | High | None | Improved navigation through tonic_harmonic field space with metrics output |
-| TF-4 | Implement FlowDynamicsAnalyzer class | ⏳ Pending | High | TF-1 | Track energy flow and anticipate emergent patterns |
+| TF-4 | Implement FlowDynamicsAnalyzer class | ⏳ Pending | High | TF-1 | Track energy flow with AdaptiveID provenance and anticipate emergent patterns |
 | TF-5 | Create TonicHarmonicFieldState integration | ✅ Complete | Medium | TF-1, TF-2, TF-3, TF-4 | Connect all field components to create unified field state |
 | TF-6 | Implement SemanticBoundaryDetector | ✅ Complete | High | TF-1, TF-3 | Detect fuzzy boundaries and transition zones between semantic communities |
 
@@ -30,13 +30,22 @@
 | PR-3 | Implement TemporalPatternSequencer | ⏳ Pending | Medium | TF-1 | Detect temporal, causal, and logical sequences of patterns |
 | PR-4 | Develop resonance gap identification | ⏳ Pending | Medium | TF-4 | Identify areas in the field that lack pattern coverage |
 | PR-5 | Integrate SemanticBoundaryDetector with learning windows | ✅ Complete | High | ✅ TF-6 | Enable learning opportunities based on semantic boundary detection |
+| PR-6 | Implement AdaptiveID-PatternID synchronization | ⏳ Pending | High | TF-2, TF-4 | Bidirectional updates between AdaptiveID and PatternID with field state context |
+
+### Learning Control Integration
+| ID | Task | Status | Priority | Dependencies | Notes |
+|----|------|--------|----------|--------------|-------|
+| LC-1 | Implement Field Observer Interface | ⏳ Pending | High | TF-5 | Monitor field state changes for learning window control |
+| LC-2 | Create Event Coordination Interface | ⏳ Pending | High | LC-1 | Coordinate field events with learning window transitions |
+| LC-3 | Develop Neo4j Bridge Interface | ⏳ Pending | Medium | PL-3 | Align field state with Neo4j for pattern-aware RAG |
+| LC-4 | Add field-aware event coordination | ⏳ Pending | Medium | LC-2, PR-6 | Propagate AdaptiveID context through field events |
 
 ### Persistence Layer
 | ID | Task | Status | Priority | Dependencies | Notes |
 |----|------|--------|----------|--------------|-------|
-| PL-1 | Update PatternStore for tonic_harmonic field metrics | ⏳ Pending | Medium | TF-5 | Store resonance matrix and field topology properties |
+| PL-1 | Update PatternStore for tonic_harmonic field metrics | ⏳ Pending | Medium | TF-5 | Store resonance matrix and field topology properties with AdaptiveID context |
 | PL-2 | Enhance Neo4j Bridge for resonance patterns | ✅ Complete | Medium | TF-2 | Store resonance relationships with proper classification |
-| PL-3 | Create field topology serialization/deserialization | ⏳ Pending | Medium | PL-1, PL-2 | Consistent representation of field topology in storage |
+| PL-3 | Create field topology serialization/deserialization | ⏳ Pending | Medium | PL-1, PL-2 | Consistent representation of field topology with ID components in storage |
 | PL-4 | Develop query interface for resonance centers | ⏳ Pending | Low | TF-4 | Query for potential pattern emergence points and resonance gaps |
 
 ### Visualization
@@ -78,7 +87,7 @@
 | TD-1 | Optimize resonance matrix calculations | ⏳ Pending | Medium | None | Improve performance of field topology analysis |
 | TD-2 | Refactor code for tonic_harmonic field space | 🔄 In Progress | Medium | TF-1 | Update to leverage field topology capabilities |
 | TD-3 | Implement resonance pattern awareness | ⏳ Pending | Medium | TF-2 | Update code to recognize and utilize resonance patterns |
-| TD-4 | Add flow dynamics capabilities to key interfaces | ⏳ Pending | Medium | TF-4 | Integrate energy flow tracking and pattern emergence |
+| TD-4 | Add flow dynamics capabilities to key interfaces | ⏳ Pending | Medium | TF-4 | Integrate energy flow tracking and pattern emergence with ID components |
 | TD-5 | Create fixtures for resonant pattern testing | ⏳ Pending | Low | PR-2 | Develop test support for resonant relationship detection |
 
 ## Strengths to Leverage
@@ -88,6 +97,8 @@
 - **Flow Dynamics**: Energy flow analysis enables detection of high-density regions and pattern emergence
 - **Rich Relationship Types**: Resonant, sequential, and field-navigable relationships captured through topology analysis
 - **Increased Semantic Sensitivity**: Field coherence, complexity, stability, and navigability metrics for nuanced understanding
+- **ID Component Integration**: AdaptiveID and PatternID provide context consistency and evolution tracking across the system
+- **Pattern-Aware RAG Integration**: Learning window control with field state awareness enables sophisticated pattern evolution
 
 ## Development Approach
 
@@ -112,6 +123,8 @@ The vector + tonic_harmonic field topology provides a solid foundation for this 
 3. **Natural emergence through field density**: Allow patterns to emerge at high-density regions in the field
 4. **Resonance matrix analysis**: Maintain computational efficiency with topology-based field analysis
 5. **Flow dynamics over static analysis**: Track energy flow and pattern emergence through field navigation
+6. **Consistent context propagation**: Maintain AdaptiveID context consistency across all field operations
+7. **Pattern evolution tracking**: Use PatternID to track pattern evolution through field state changes
 
 ---
 
