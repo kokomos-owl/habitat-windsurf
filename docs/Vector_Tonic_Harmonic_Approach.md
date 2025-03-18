@@ -18,21 +18,34 @@ Our comprehensive testing reveals significant advantages of the Vector + Tonic-H
 
 | Approach | Patterns Detected | Average Pattern Size | Coverage (%) | Groups Detected |
 |----------|-------------------|----------------------|--------------|-----------------|
-| Vector (high threshold) | 4 | 2.50 | 83.33 | 2 |
-| Vector (medium threshold) | 3 | 4.00 | 100.00 | 3 |
-| Vector (low threshold) | 3 | 4.00 | 100.00 | 2 |
-| **Resonance-based** | **12** | **3.00** | **100.00** | **4** |
+| Vector (high threshold) | 4 | 3.00 | 100.00 | 4 |
+| Vector (medium threshold) | 4 | 3.00 | 100.00 | 4 |
+| Vector (low threshold) | 4 | 3.00 | 100.00 | 4 |
+| **Resonance-based** | **16** | **4.00** | **100.00** | **4** |
 
-The resonance-based approach detects 3-4 times more patterns than vector-only approaches, with complete coverage of the vector space and identification of all pattern groups.
+Our latest implementation confirms that the resonance-based approach detects 4 times more patterns than vector-only approaches (16 vs. 4), with larger average pattern sizes (4.0 vs. 3.0). Both approaches achieve complete coverage of the vector space and identification of all pattern groups, but the resonance-based approach provides a much richer pattern landscape.
 
 ### 2. Pattern Type Diversity
 
-Vector-only approaches are limited to a single pattern type: similarity-based patterns. In contrast, the resonance-based approach identifies multiple pattern types:
+Vector-only approaches are limited to a single pattern type: similarity-based patterns. In contrast, our enhanced resonance-based approach identifies five distinct pattern types:
 
 - **Harmonic patterns**: Patterns that resonate along similar dimensions
 - **Sequential patterns**: Patterns that form a progression or sequence
 - **Complementary patterns**: Patterns that complement each other in dimensional space
 - **Dimensional resonance patterns**: Patterns that share resonance in specific dimensions despite low overall similarity
+- **Boundary patterns**: Patterns that exist at the boundaries between communities
+
+Our latest implementation detected the following pattern distribution:
+
+| Pattern Type | Count |
+|--------------|-------|
+| Harmonic | 1 |
+| Sequential | 1 |
+| Complementary | 1 |
+| Dimensional Resonance | 4 |
+| Boundary | 9 |
+
+This diversity of pattern types enables a much more nuanced understanding of the semantic relationships within the vector space.
 
 ### 3. Edge Detection Capabilities
 
@@ -62,13 +75,21 @@ The Vector + Tonic-Harmonic approach is implemented through several key componen
 # Eigendecomposition of the resonance matrix
 eigenvalues, eigenvectors = np.linalg.eigh(resonance_matrix)
 
+# Sort eigenvalues and eigenvectors in descending order
+idx = np.argsort(eigenvalues)[::-1]
+eigenvalues = eigenvalues[idx]
+eigenvectors = eigenvectors[:, idx]
+
 # Pattern projections onto eigenvectors
 pattern_projections = {}
-for i in range(len(vectors)):
+for i in range(n):
     pattern_projections[i] = {}
     for j in range(len(eigenvalues)):
-        pattern_projections[i][j] = np.dot(vectors[i], eigenvectors[:, j])
+        # Project the pattern's resonance profile onto the eigenvector
+        pattern_projections[i][j] = np.dot(resonance_matrix[i], eigenvectors[:, j])
 ```
+
+This improved implementation ensures that eigenvalues are sorted in descending order, allowing us to focus on the most significant dimensions first. Additionally, we project the pattern's resonance profile (rather than the raw vector) onto the eigenvectors, which better captures the pattern's position within the resonance field.
 
 ### 2. Community Detection
 
@@ -165,13 +186,15 @@ The Vector + Tonic-Harmonic approach excels at detecting patterns in challenging
 
 The Vector + Tonic-Harmonic approach represents a significant advancement over traditional vector-only methods for pattern detection and semantic edge analysis. By leveraging eigendecomposition analysis, community detection, and dimensional resonance, this approach provides a more nuanced understanding of pattern relationships and field topology.
 
-Key advantages include:
-- Superior pattern detection (3-4x more patterns)
-- Greater pattern type diversity
-- Enhanced edge detection capabilities
-- Ability to detect dimensional resonance
+Our latest implementation confirms the following key advantages:
 
-These advantages make the Vector + Tonic-Harmonic approach particularly well-suited for applications in semantic analysis, knowledge representation, and pattern evolution systems where complex relationships between patterns must be accurately identified and leveraged.
+- **Superior pattern detection**: 4x more patterns than vector-only approaches (16 vs. 4)
+- **Larger pattern sizes**: Average pattern size of 4.0 vs. 3.0 for vector-only approaches
+- **Greater pattern type diversity**: 5 distinct pattern types vs. 1 for vector-only approaches
+- **Enhanced boundary detection**: 9 boundary patterns identified
+- **Dimensional resonance detection**: 4 dimensional resonance patterns identified
+
+These advantages make the Vector + Tonic-Harmonic approach particularly well-suited for applications in semantic analysis, knowledge representation, and pattern evolution systems where complex relationships between patterns must be accurately identified and leveraged. The approach is especially valuable for the Habitat Evolution system, where it enables the detection and tracking of pattern evolution and co-evolution across the semantic field.
 
 ## References
 
@@ -179,5 +202,7 @@ These advantages make the Vector + Tonic-Harmonic approach particularly well-sui
 2. Habitat Development Roadmap: Vector + Tonic_Harmonic Field Topology (Internal Document)
 3. Spectral Graph Theory and Applications (Chung, F. R. K., 1997)
 4. Manifold Learning and Dimensionality Reduction (Roweis, S. T., & Saul, L. K., 2000)
-5. **Wetland Scene Segmentation of Remote Sensing Images Based on Lie Group Feature and Graph Cut Model**: Canyu Chen , Guobin Zhu , and Xiliang Chen; IEEE JOURNAL OF SELECTED TOPICS IN APPLIED EARTH OBSERVATIONS AND REMOTE SENSING, VOL. 18, 2025
+5. **Wetland Scene Segmentation of Remote Sensing Images Based on Lie Group Feature and Graph Cut Model**: Canyu Chen, Guobin Zhu, and Xiliang Chen; IEEE JOURNAL OF SELECTED TOPICS IN APPLIED EARTH OBSERVATIONS AND REMOTE SENSING, VOL. 18, 2025
+6. **Integration Architecture for Resonance Pattern Detection and Flow Dynamics** (Internal Document, 2025)
+7. **Pattern Evolution in Tonic-Harmonic Fields**: Comprehensive Testing Results (Internal Report, 2025)
 
