@@ -226,6 +226,9 @@ To effectively test tonic-harmonic systems, we must:
 2. **Verify Essential Properties**: Focus on verifying essential tonic-harmonic properties while allowing flexibility in how they're structured
 3. **Test Co-Evolution**: Design tests that verify patterns evolve together, not in isolation
 4. **Observe Harmonic Waves**: Monitor the wave-like patterns that emerge from window state transitions
+5. **Filter by Change Type**: When testing pattern evolution, filter notifications by change type to isolate specific semantic shifts
+6. **Account for Multiple Notifications**: Recognize that patterns may receive multiple notifications during state transitions
+7. **Test Window Size Effects**: Verify that different window sizes affect pattern evolution differently
 
 ## Conclusion
 
@@ -240,8 +243,59 @@ Our latest implementation confirms the following key advantages:
 - **Dimensional resonance detection**: 4 dimensional resonance patterns identified
 - **Dynamic harmonic adaptation**: System structure adapts to harmonic state
 - **Constructive dissonance**: Leverages apparent inconsistencies to detect complex patterns
+- **Pattern co-evolution tracking**: Enables detection of patterns that evolve together through learning windows
+- **Differential tonic response**: Different pattern types respond differently to tonic values
 
 These advantages make the Vector + Tonic-Harmonic approach particularly well-suited for applications in semantic analysis, knowledge representation, and pattern evolution systems where complex relationships between patterns must be accurately identified and leveraged. The approach is especially valuable for the Habitat Evolution system, where it enables the detection and tracking of pattern evolution and co-evolution across the semantic field.
+
+## Neo4j Integration for Pattern Tracking
+
+The tonic-harmonic approach requires specialized storage and retrieval mechanisms to effectively track pattern evolution and co-evolution. Neo4j provides an ideal platform for this purpose, but requires careful design of Cypher templates to capture the nuanced relationships between patterns.
+
+### Pattern Evolution Tracking
+
+To track pattern evolution in Neo4j, we need to model:
+
+1. **Pattern Nodes**: Representing individual patterns with their properties
+2. **Evolution Relationships**: Connecting patterns across learning windows
+3. **Harmonic Properties**: Storing tonic and stability values
+
+```cypher
+// Create pattern node with tonic-harmonic properties
+MERGE (p:Pattern {id: $pattern_id, type: $pattern_type})
+SET p.tonic_value = $tonic_value,
+    p.stability = $stability,
+    p.harmonic_value = $tonic_value * $stability
+```
+
+### Co-Evolution Relationships
+
+To track pattern co-evolution, we need to create relationships between patterns that evolve together:
+
+```cypher
+// Create co-evolution relationship between patterns
+MATCH (p1:Pattern {id: $pattern_id1})
+MATCH (p2:Pattern {id: $pattern_id2})
+WHERE p1 <> p2
+MERGE (p1)-[r:CO_EVOLVES_WITH]->(p2)
+SET r.window_id = $window_id,
+    r.strength = $harmonic_value,
+    r.timestamp = $timestamp
+```
+
+### Differential Tonic Response
+
+To capture how different pattern types respond to tonic values, we need to store pattern-specific tonic responses:
+
+```cypher
+// Record pattern-specific tonic response
+MATCH (p:Pattern {id: $pattern_id})
+MERGE (p)-[r:RESPONDS_TO {change_type: $change_type}]->(t:TonicValue {value: $tonic_value})
+SET r.response_strength = $response_strength,
+    r.timestamp = $timestamp
+```
+
+These Cypher templates will need to be integrated into the persistence layer of the system to ensure that pattern evolution and co-evolution are properly tracked and can be analyzed for insights.
 
 ## References
 
@@ -254,4 +308,6 @@ These advantages make the Vector + Tonic-Harmonic approach particularly well-sui
 7. **Pattern Evolution in Tonic-Harmonic Fields**: Comprehensive Testing Results (Internal Report, 2025)
 8. **The Piano Tuner's Approach to Testing Dynamic Systems**: Lessons from Tonic-Harmonic Integration (Internal Document, 2025)
 9. **Constructive Dissonance in Pattern Co-Evolution**: A New Testing Paradigm (Technical Report, 2025)
+10. **Window Size Effects on Pattern Stability**: Empirical Analysis (Technical Report, 2025)
+11. **Neo4j Graph Models for Tonic-Harmonic Pattern Tracking** (Implementation Guide, 2025)
 

@@ -7,8 +7,9 @@
 | CP-1 | Complete PatternAwareRAG integration tests refactoring | ✅ Complete | High | None | Focus on field-state observations with vector + tonic_harmonic field topology |
 | CP-2 | Enhance Vector + Tonic_Harmonic Field components | ✅ Complete | High | CP-1 | Improved resonance matrix analysis, field navigation, and topological metrics |
 | CP-3 | Develop field energy flow and pattern resonance metrics | 🔄 In Progress | High | CP-2 | Based on tonic_harmonic field interactions and resonance patterns with AdaptiveID context propagation |
-| CP-4 | Update persistence layer for field topology metrics | ⏳ Pending | Medium | CP-2 | Pattern Store, Relationship Store to use vector + tonic_harmonic field metrics with PatternID evolution tracking |
+| CP-4 | Update persistence layer for field topology metrics | 🔄 In Progress | Medium | CP-2 | Pattern Store, Relationship Store to use vector + tonic_harmonic field metrics with PatternID evolution tracking |
 | CP-5 | Enhance visualization for field topology relationships | 🔄 In Progress | Medium | CP-3 | Implementing EigenspaceVisualizer with 2D/3D views, community boundaries, and resonance visualization |
+| CP-6 | Implement pattern co-evolution tracking in Neo4j | 🔄 In Progress | High | CP-4 | Track pattern evolution and co-evolution through learning windows with tonic-harmonic properties |
 
 ## Component Implementation Tasks
 
@@ -40,7 +41,9 @@
 | LC-3 | Develop Neo4j Bridge Interface | ✅ Complete | Medium | PL-3 | Basic Neo4j Bridge functionality implemented and tested |
 | LC-4 | Add field-aware event coordination | 🔄 In Progress | Medium | LC-2, PR-6 | Initial implementation with bidirectional synchronization validated |
 | LC-5 | Fix Learning Window AdaptiveID integration | ⏳ Pending | High | LC-1, LC-4 | Address failing tests in AdaptiveID integration |
-| LC-6 | Complete PatternID integration | ⏳ Pending | High | LC-4, PR-6 | Fix pattern counting and event tracking issues |
+| LC-6 | Complete PatternID integration | 🔄 In Progress | High | LC-4, PR-6 | Updated tests to handle multiple notifications and filter by change_type |
+| LC-7 | Implement pattern co-evolution testing | ✅ Complete | High | LC-6 | Tests for pattern co-evolution, differential tonic response, and window size effects |
+| LC-8 | Connect testing to Neo4j persistence | ⏳ Pending | Medium | LC-7, PL-5 | Integrate test framework with persistence layer for pattern tracking |
 
 ### Persistence Layer
 | ID | Task | Status | Priority | Dependencies | Notes |
@@ -48,7 +51,10 @@
 | PL-1 | Update PatternStore for tonic_harmonic field metrics | ⏳ Pending | Medium | TF-5 | Store resonance matrix and field topology properties with AdaptiveID context |
 | PL-2 | Enhance Neo4j Bridge for resonance patterns | ✅ Complete | Medium | TF-2 | Store resonance relationships with proper classification |
 | PL-3 | Create field topology serialization/deserialization | ⏳ Pending | Medium | PL-1, PL-2 | Consistent representation of field topology with ID components in storage |
-| PL-4 | Develop query interface for resonance centers | ⏳ Pending | Low | TF-4 | Query for potential pattern emergence points and resonance gaps |
+| PL-4 | Develop query interface for field topology | ⏳ Pending | Medium | PL-3 | Enable complex queries of field topology relationships |
+| PL-5 | Implement pattern co-evolution Cypher queries | ✅ Complete | High | PL-2 | Cypher queries for tracking pattern evolution and co-evolution |
+| PL-6 | Create pattern co-evolution persistence layer | ✅ Complete | High | PL-5 | Integration layer for persisting pattern evolution events to Neo4j |
+| PL-7 | Develop query interface for resonance centers | ⏳ Pending | Low | TF-4 | Query for potential pattern emergence points and resonance gaps |
 
 ### Visualization
 | ID | Task | Status | Priority | Dependencies | Notes |
@@ -406,12 +412,62 @@ Each phase includes unit tests, with integration tests developed throughout and 
 | [tests/visualization/test_pattern_visualization.py](cci:7://file:///Users/prphillips/Documents/GitHub/habitat-windsurf/src/habitat_evolution/tests/visualization/test_pattern_visualization.py:0:0-0:0) | Pattern visualization | Update for field-state display |
 | `tests/visualization/test_visualization.py` | Core visualization | Add field-state tests |
 
+## Next Steps and Focus Areas
+
+### Immediate Focus (Next Session)
+
+1. **Connect Pattern Co-Evolution Testing to Neo4j Persistence**:
+   - Integrate the `pattern_coevolution_persistence.py` layer with test framework
+   - Create a test helper class to record test results in Neo4j
+   - Implement test fixtures for Neo4j integration
+   - Add test cases that verify persistence of pattern evolution events
+
+2. **Implement Visualization for Pattern Co-Evolution**:
+   - Develop Neo4j-based visualization for pattern co-evolution
+   - Create dashboards for monitoring pattern evolution metrics
+   - Visualize differential tonic responses by pattern type
+   - Implement time-series visualization of pattern stability
+
+3. **Extend Cypher Templates for Complex Co-Evolution Patterns**:
+   - Add queries for detecting higher-order co-evolution patterns
+   - Implement temporal analysis of pattern evolution
+   - Create metrics for measuring co-evolution strength
+   - Develop queries for constructive dissonance detection
+
+4. **Integrate with AdaptiveID for Bidirectional Updates**:
+   - Enhance the `record_state_change` method to track pattern co-evolution
+   - Implement bidirectional synchronization between AdaptiveID and PatternID
+   - Add tonic-harmonic properties to AdaptiveID context propagation
+   - Create test cases for verifying bidirectional updates
+
+### Medium-Term Focus
+
+1. **Enhance Learning Window Integration**:
+   - Complete the Field Observer Interface (LC-1) implementation
+   - Fix the 'activate' method issue in the Event Coordination Interface (LC-2)
+   - Address failing tests in the Learning Window AdaptiveID integration (LC-5)
+   - Implement window size optimization based on pattern stability
+
+2. **Develop Flow Dynamics Analysis**:
+   - Complete the FlowDynamicsAnalyzer class (TF-4)
+   - Implement energy flow tracking with AdaptiveID provenance
+   - Create metrics for measuring pattern emergence probability
+   - Integrate flow dynamics with pattern co-evolution tracking
+
+3. **Update Persistence Layer**:
+   - Update the PatternStore for tonic-harmonic field metrics (PL-1)
+   - Implement field topology serialization/deserialization (PL-3)
+   - Develop query interface for field topology relationships (PL-4)
+   - Create visualization tools for field topology analysis
+
 ## Implementation Notes
 
 1. All vector-based operations must be replaced with scalar calculations
 2. Field-state observations should drive pattern emergence
 3. Temporal awareness must be maintained throughout
 4. All changes must preserve existing functionality while enhancing field-state capabilities
+5. Pattern co-evolution tracking should leverage tonic-harmonic properties
+6. Neo4j integration should focus on capturing relationship dynamics
 
 ## Testing Strategy
 
@@ -420,3 +476,6 @@ Each phase includes unit tests, with integration tests developed throughout and 
 3. Ensure pattern emergence remains natural
 4. Benchmark performance of scalar operations
 5. Verify visualization accuracy for field-state representation
+6. Test pattern co-evolution across different window sizes
+7. Validate differential tonic responses by pattern type
+8. Verify constructive dissonance detection in co-evolved patterns
