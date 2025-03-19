@@ -218,6 +218,83 @@ class LearningWindow:
                 asyncio.create_task(self.notify_state_change())
         except (RuntimeError, ImportError):
             pass
+            
+    def record_state_change(self, entity_id, change_type, old_value, new_value, origin) -> bool:
+        """Record a state change from an AdaptiveID or other entity.
+        
+        This method integrates with the AdaptiveID.notify_state_change method,
+        allowing learning windows to track state changes and maintain field awareness.
+        
+        Args:
+            entity_id: ID of the entity making the change
+            change_type: Type of change (e.g., 'temporal_context', 'confidence_update')
+            old_value: Previous value before change
+            new_value: New value after change
+            origin: Origin of the change (e.g., component name)
+        
+        Returns:
+            bool: True if the change was recorded successfully
+        """
+        # Use current window stability as the default
+        stability_score = self.stability_score
+        
+        # Calculate tonic value based on change type
+        # Temporal context changes have higher tonic values
+        tonic_value = 0.7 if change_type == "temporal_context" else 0.5
+        
+        # Record the change in window metrics
+        self.record_change(stability_score)
+        
+        # Create context for field observers with tonic-harmonic properties
+        context = {
+            "entity_id": entity_id,
+            "change_type": change_type,
+            "old_value": old_value,
+            "new_value": new_value,
+            "origin": origin,
+            "window_state": self.state.value,
+            "stability": stability_score,
+            "tonic_value": tonic_value,
+            "field_properties": {
+                "coherence": self.coherence_threshold,
+                "stability": stability_score,
+                "navigability": min(1.0, self.max_changes_per_window / max(1, self.change_count)),
+                "saturation": self.change_count / max(1, self.max_changes_per_window)
+            },
+            "timestamp": datetime.now().isoformat()
+        }
+        
+        # Calculate harmonic value (stability * tonic)
+        context["harmonic_value"] = stability_score * tonic_value
+        
+        # Notify field observers of the state change
+        try:
+            import asyncio
+            if asyncio.get_event_loop().is_running():
+                for observer in self.field_observers:
+                    asyncio.create_task(observer.observe(context))
+            else:
+                # Synchronous fallback for testing environments
+                for observer in self.field_observers:
+                    observer.observations.append({"context": context, "time": datetime.now()})
+        except (RuntimeError, ImportError):
+            # Fallback if no event loop is available
+            for observer in self.field_observers:
+                observer.observations.append({"context": context, "time": datetime.now()})
+                
+        # Check for state transition after recording change
+        new_state = self.transition_if_needed()
+        if new_state:
+            # If state changed, notify observers of the transition
+            try:
+                import asyncio
+                if asyncio.get_event_loop().is_running():
+                    asyncio.create_task(self.notify_state_change())
+            except (RuntimeError, ImportError):
+                pass
+                
+        # Return True for backward compatibility
+        return True
 
 class BackPressureController:
     """Controls state change rate based on system stability."""

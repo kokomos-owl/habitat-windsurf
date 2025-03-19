@@ -6,7 +6,7 @@ import uuid
 import json
 import threading
 from typing import Dict, Any, List, Optional, Tuple
-from datetime import datetime
+from datetime import datetime, timedelta
 from .base_adaptive_id import BaseAdaptiveID, LoggingManager
 
 class AdaptiveIDException(Exception):
@@ -163,6 +163,8 @@ class AdaptiveID(BaseAdaptiveID):
 
     def update_temporal_context(self, key: str, value: Any, origin: str) -> None:
         """Update temporal context."""
+        old_value = self.get_temporal_context(key)
+        
         with self._lock:
             if key not in self.temporal_context:
                 self.temporal_context[key] = {}
@@ -173,15 +175,34 @@ class AdaptiveID(BaseAdaptiveID):
                 "origin": origin
             }
             self.metadata["last_modified"] = timestamp
+            
+        # Notify learning windows of the change
+        self.notify_state_change(
+            "temporal_context", 
+            old_value, 
+            {"key": key, "value": value}, 
+            origin
+        )
 
     def update_spatial_context(self, key: str, value: Any, origin: str) -> None:
         """Update spatial context."""
+        # Get old value before updating
+        old_value = self.get_spatial_context(key)
+        
         with self._lock:
             if key in self.spatial_context:
                 self.spatial_context[key] = value
                 self.metadata["last_modified"] = datetime.now().isoformat()
             else:
                 raise InvalidValueError(f"Invalid spatial context key: {key}")
+                
+        # Notify learning windows of the change
+        self.notify_state_change(
+            "spatial_context", 
+            old_value, 
+            {"key": key, "value": value}, 
+            origin
+        )
 
     def get_temporal_context(self, key: str) -> Any:
         """Get temporal context value."""
@@ -198,3 +219,160 @@ class AdaptiveID(BaseAdaptiveID):
     def get_spatial_context(self, key: str) -> Any:
         """Get spatial context value."""
         return self.spatial_context.get(key)
+        
+    def register_with_field_observer(self, field_observer) -> None:
+        """Register this ID with a field observer for field-aware tracking.
+        
+        Args:
+            field_observer: The field observer to register with
+        """
+        with self._lock:
+            if not hasattr(self, 'field_observers'):
+                self.field_observers = []
+            
+            # Avoid duplicate registrations
+            if field_observer not in self.field_observers:
+                self.field_observers.append(field_observer)
+                
+                # Provide initial state to field observer
+                try:
+                    # Create context with current state information including vector properties
+                    context = {
+                        "entity_id": self.id,
+                        "entity_type": "adaptive_id",
+                        "base_concept": self.base_concept,
+                        "current_version": self.current_version,
+                        "last_modified": self.metadata["last_modified"],
+                        "stability": self.confidence,  # Use confidence as stability proxy
+                        "tonic_value": 0.5,  # Default tonic value
+                        "vector_properties": {
+                            "temporal_context": list(self.temporal_context.keys()),
+                            "spatial_context": list(self.spatial_context.keys()),
+                            "relationships": list(self.relationships.keys()) if hasattr(self, 'relationships') else []
+                        }
+                    }
+                    
+                    # Use asyncio if available, otherwise fall back to direct observation
+                    import asyncio
+                    try:
+                        if asyncio.get_event_loop().is_running():
+                            asyncio.create_task(field_observer.observe(context))
+                        else:
+                            # Direct observation for testing environments
+                            field_observer.observations.append({"context": context, "time": datetime.now()})
+                    except (RuntimeError, ImportError):
+                        # Direct observation as fallback
+                        field_observer.observations.append({"context": context, "time": datetime.now()})
+                except Exception as e:
+                    self.logger.error(f"Error registering with field observer: {e}")
+
+    def register_with_learning_window(self, learning_window) -> None:
+        """Register this ID with a learning window for change tracking.
+        
+        Args:
+            learning_window: The learning window to register with
+        """
+        with self._lock:
+            if not hasattr(self, 'learning_windows'):
+                self.learning_windows = []
+            
+            # Avoid duplicate registrations
+            if learning_window not in self.learning_windows:
+                self.learning_windows.append(learning_window)
+    
+    def notify_state_change(self, change_type: str, old_value: Any, new_value: Any, origin: str) -> None:
+        """Notify all registered learning windows and field observers of state changes.
+        
+        Args:
+            change_type: Type of change (e.g., 'field_metrics', 'relationship')
+            old_value: Previous value (can be None)
+            new_value: New value
+            origin: Origin of the change
+        """
+        # Calculate tonic value based on change type for tonic-harmonic analysis
+        # Temporal context changes have higher tonic values
+        tonic_value = 0.7 if change_type == "temporal_context" else 0.5
+        
+        # Use confidence as stability proxy
+        stability = self.confidence
+        
+        # Notify learning windows
+        if hasattr(self, 'learning_windows'):
+            for window in self.learning_windows:
+                try:
+                    # Use the standard parameter order: entity_id, change_type, old_value, new_value, origin
+                    window.record_state_change(
+                        self.id,
+                        change_type,
+                        old_value,
+                        new_value,
+                        origin
+                    )
+                except Exception as e:
+                    # Log error but continue with other windows
+                    self.logger.error(f"Error notifying learning window: {e}")
+        
+        # Notify field observers with tonic-harmonic context
+        if hasattr(self, 'field_observers'):
+            for observer in self.field_observers:
+                try:
+                    # Create context with change information including vector properties
+                    context = {
+                        "entity_id": self.id,
+                        "entity_type": "adaptive_id",
+                        "change_type": change_type,
+                        "old_value": old_value,
+                        "new_value": new_value,
+                        "origin": origin,
+                        "timestamp": datetime.now().isoformat(),
+                        "stability": stability,
+                        "tonic_value": tonic_value,
+                        "vector_properties": {
+                            "temporal_context": list(self.temporal_context.keys()),
+                            "spatial_context": list(self.spatial_context.keys()),
+                            "relationships": list(self.relationships.keys()) if hasattr(self, 'relationships') else []
+                        },
+                        "field_properties": {
+                            "coherence": self.confidence,  # Use confidence as coherence proxy
+                            "navigability": 0.5 + (self.confidence * 0.5),  # Derive navigability from confidence
+                            "stability": stability
+                        }
+                    }
+                    
+                    # Calculate harmonic value (stability * tonic) for tonic-harmonic analysis
+                    context["harmonic_value"] = stability * tonic_value
+                    
+                    # Use asyncio if available, otherwise fall back to direct observation
+                    try:
+                        import asyncio
+                        if asyncio.get_event_loop().is_running():
+                            asyncio.create_task(observer.observe(context))
+                        else:
+                            # Direct observation for testing environments
+                            observer.observations.append({"context": context, "time": datetime.now()})
+                    except (RuntimeError, ImportError):
+                        # Direct observation as fallback
+                        observer.observations.append({"context": context, "time": datetime.now()})
+                except Exception as e:
+                    self.logger.error(f"Error notifying field observer: {e}")
+    
+    def get_version_history(self, start_time: Optional[str] = None, end_time: Optional[str] = None) -> List[Any]:
+        """Get version history within a time window.
+        
+        Args:
+            start_time: ISO format timestamp for start of window (inclusive)
+            end_time: ISO format timestamp for end of window (inclusive)
+            
+        Returns:
+            List of versions within the specified time window
+        """
+        history = []
+        with self._lock:
+            for version_id, version in self.versions.items():
+                # Check if version is within time window
+                if (start_time is None or version.timestamp >= start_time) and \
+                   (end_time is None or version.timestamp <= end_time):
+                    history.append(version)
+        
+        # Sort by timestamp
+        return sorted(history, key=lambda v: v.timestamp)

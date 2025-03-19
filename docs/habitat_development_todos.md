@@ -35,10 +35,12 @@
 ### Learning Control Integration
 | ID | Task | Status | Priority | Dependencies | Notes |
 |----|------|--------|----------|--------------|-------|
-| LC-1 | Implement Field Observer Interface | ⏳ Pending | High | TF-5 | Monitor field state changes for learning window control |
-| LC-2 | Create Event Coordination Interface | ⏳ Pending | High | LC-1 | Coordinate field events with learning window transitions |
-| LC-3 | Develop Neo4j Bridge Interface | ⏳ Pending | Medium | PL-3 | Align field state with Neo4j for pattern-aware RAG |
-| LC-4 | Add field-aware event coordination | ⏳ Pending | Medium | LC-2, PR-6 | Propagate AdaptiveID context through field events |
+| LC-1 | Implement Field Observer Interface | 🔄 In Progress | High | TF-5 | Basic implementation complete, needs integration with AdaptiveID |
+| LC-2 | Create Event Coordination Interface | 🔄 In Progress | High | LC-1 | Initial implementation in place, needs to fix 'activate' method issue |
+| LC-3 | Develop Neo4j Bridge Interface | ✅ Complete | Medium | PL-3 | Basic Neo4j Bridge functionality implemented and tested |
+| LC-4 | Add field-aware event coordination | 🔄 In Progress | Medium | LC-2, PR-6 | Initial implementation with bidirectional synchronization validated |
+| LC-5 | Fix Learning Window AdaptiveID integration | ⏳ Pending | High | LC-1, LC-4 | Address failing tests in AdaptiveID integration |
+| LC-6 | Complete PatternID integration | ⏳ Pending | High | LC-4, PR-6 | Fix pattern counting and event tracking issues |
 
 ### Persistence Layer
 | ID | Task | Status | Priority | Dependencies | Notes |
@@ -67,6 +69,9 @@
 | TS-5 | Implement resonant pattern pair tests | ⏳ Pending | Medium | PR-2 | Test detection of harmonically resonant pattern pairs |
 | TS-6 | Create flow dynamics tests | ⏳ Pending | Medium | TF-4 | Validate field flow and density center detection |
 | TS-7 | Test SemanticBoundaryDetector | ✅ Complete | High | ✅ TF-6 | Validate fuzzy boundary detection and learning opportunity identification |
+| TS-8 | Complete ID-field-pattern synchronization test | ✅ Complete | High | LC-4, PR-6 | Validated bidirectional synchronization between AdaptiveID, field observations, pattern detection, and PatternID |
+| TS-9 | Fix Learning Window AdaptiveID integration tests | ⏳ Pending | High | LC-5 | Address failing tests in AdaptiveID integration |
+| TS-10 | Fix Integrated Tonic-Harmonic System tests | ⏳ Pending | High | LC-2, LC-4 | Fix 'activate' method issue and other integration problems |
 
 ## Documentation Tasks
 
@@ -79,6 +84,8 @@
 | DOC-5 | Create visualization guide for field topology | ⏳ Pending | Low | VZ-1, VZ-2, VZ-3 | Visual documentation with practical examples |
 | DOC-6 | Create tonic_harmonic field topology reference | ✅ Complete | High | None | Comprehensive reference for the vector + tonic_harmonic approach with updated implementation details |
 | DOC-7 | Document SemanticBoundaryDetector integration | ✅ Complete | High | ✅ TF-6 | Integration guide for semantic boundary detection with learning windows |
+| DOC-8 | Document Tonic-Harmonic Integration Status | ✅ Complete | High | TS-8 | Comprehensive status report on the bidirectional synchronization cycle implementation |
+| DOC-9 | Document remaining integration issues | ✅ Complete | High | TS-9, TS-10 | Detailed documentation of failing tests and required fixes |
 
 ## Technical Debt Reduction
 
