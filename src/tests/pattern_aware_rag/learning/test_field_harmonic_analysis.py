@@ -42,15 +42,23 @@ class FieldObserver:
         """Observe learning window state changes."""
         self.observations.append(context)
         
+        # Debug print to track observations
+        print(f"FieldObserver received context: {context.get('change_type', 'unknown')} | "
+              f"stability: {context.get('stability', 'N/A')} | "
+              f"tonic: {context.get('tonic_value', 'N/A')} | "
+              f"state: {context.get('window_state', context.get('state', 'N/A'))}")
+        
         # Extract stability score and tonic value
         if "stability" in context:
             self.stability_scores.append(context["stability"])
             # Default tonic value if not provided
             tonic = context.get("tonic_value", 0.5)
             self.tonic_values.append(tonic)
+            print(f"FieldObserver now has {len(self.stability_scores)} stability scores")
         
         # Perform harmonic analysis if we have enough data
         if len(self.stability_scores) >= 3:
+            print(f"FieldObserver performing harmonic analysis with {len(self.stability_scores)} scores")
             analysis = self.perform_harmonic_analysis(
                 self.stability_scores[-10:] if len(self.stability_scores) > 10 else self.stability_scores,
                 self.tonic_values[-10:] if len(self.tonic_values) > 10 else self.tonic_values
@@ -59,6 +67,7 @@ class FieldObserver:
             self.harmonic_analysis = analysis
             # Add to the context
             context["harmonic_analysis"] = analysis
+            print(f"FieldObserver completed harmonic analysis, analysis_count: {self.analysis_count}")
         
         return {"status": "observed", "context": context}
     
@@ -237,13 +246,18 @@ def setup_learning_window_tonic_harmonic():
     # Extend record_state_change to include tonic value
     original_record_state_change = LearningWindow.record_state_change
     
-    def extended_record_state_change(self, entity_id, change_type, old_value, new_value, origin):
+    def extended_record_state_change(self, change_type, old_value, new_value, origin, entity_id, tonic_value=0.5, stability=None):
         """Extended record_state_change that includes tonic value in context."""
         # Call original method
-        result = original_record_state_change(self, entity_id, change_type, old_value, new_value, origin)
+        result = original_record_state_change(self, change_type, old_value, new_value, origin, entity_id, tonic_value, stability)
         
-        # Add tonic value to context for field observers
-        tonic_value = self.get_tonic_value() if hasattr(self, 'get_tonic_value') else 0.5
+        # Use the passed tonic_value or get it from the method
+        if tonic_value is None:
+            tonic_value = self.get_tonic_value() if hasattr(self, 'get_tonic_value') else 0.5
+            
+        # Use the passed stability or get it from the instance
+        if stability is None:
+            stability = self.stability_score if hasattr(self, 'stability_score') else 0.5
         
         # Update context for field observers
         if hasattr(self, 'field_observers') and self.field_observers:
@@ -253,9 +267,9 @@ def setup_learning_window_tonic_harmonic():
                 "old_value": old_value,
                 "new_value": new_value,
                 "window_state": self.state.value,
-                "stability": self.stability_score if hasattr(self, 'stability_score') else 0.5,
+                "stability": stability,
                 "tonic_value": tonic_value,
-                "harmonic_value": (self.stability_score if hasattr(self, 'stability_score') else 0.5) * tonic_value,
+                "harmonic_value": stability * tonic_value,
                 "timestamp": datetime.now().isoformat()
             }
             

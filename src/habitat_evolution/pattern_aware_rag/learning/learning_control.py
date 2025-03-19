@@ -39,6 +39,7 @@ class LearningWindow:
     
     def __post_init__(self):
         self.field_observers = []
+        self.pattern_observers = []  # Add pattern observers list
         self.stability_scores = []
         self.stability_metrics = []
         
@@ -52,20 +53,30 @@ class LearningWindow:
         3. OPEN (after first minute)
         4. CLOSED (when saturated or expired)
         """
-        now = datetime.now()
-        
-        # First check timing
-        if now < self.start_time:
-            return WindowState.CLOSED
-        elif now > self.end_time:
-            return WindowState.CLOSED
-        elif (now - self.start_time).total_seconds() < 60:  # First minute
-            return WindowState.OPENING
-        else:
-            # Check saturation after timing
+        # Return current state if explicitly set (to avoid recursion in some cases)
+        if hasattr(self, '_current_state_calculation'):
+            return self._state
+            
+        # Set recursion guard
+        self._current_state_calculation = True
+        try:
+            now = datetime.now()
+            
+            # First check saturation - this takes precedence over timing
             if self.is_saturated:
                 return WindowState.CLOSED
-            return WindowState.OPEN
+            # Then check timing conditions
+            elif now < self.start_time:
+                return WindowState.CLOSED
+            elif now > self.end_time:
+                return WindowState.CLOSED
+            elif (now - self.start_time).total_seconds() < 60:  # First minute
+                return WindowState.OPENING
+            else:
+                return WindowState.OPEN
+        finally:
+            # Remove recursion guard
+            delattr(self, '_current_state_calculation')
     
     @property
     def is_active(self) -> bool:
@@ -86,6 +97,15 @@ class LearningWindow:
         recent_scores = self.stability_scores[-10:]
         return sum(recent_scores) / len(recent_scores)
         
+    @stability_score.setter
+    def stability_score(self, value: float) -> None:
+        """Set stability score by adding to metrics.
+        
+        Args:
+            value: New stability score to add to metrics
+        """
+        self.stability_scores.append(value)
+        
     @property
     def is_saturated(self) -> bool:
         """Check if window is saturated with changes.
@@ -96,12 +116,43 @@ class LearningWindow:
         return self.change_count >= self.max_changes_per_window
         
     def transition_if_needed(self) -> Optional[WindowState]:
-        """Check for state transition and return new state if changed."""
-        current_state = self.state
-        if current_state != self._state:
-            self._state = current_state
-            return current_state
-        return None
+        """Check for state transition and return new state if changed.
+        
+        This method calculates the current state based on time and saturation
+        without using the state property to avoid recursion.
+        """
+        # Use recursion guard to prevent infinite loops
+        if hasattr(self, '_transition_calculation'):
+            return None
+            
+        # Set recursion guard
+        self._transition_calculation = True
+        try:
+            # Calculate current state directly without using the state property
+            now = datetime.now()
+            
+            # First check saturation - this takes precedence over timing
+            if self.is_saturated:
+                expected_state = WindowState.CLOSED
+            # Then check timing conditions
+            elif now < self.start_time:
+                expected_state = WindowState.CLOSED
+            elif now > self.end_time:
+                expected_state = WindowState.CLOSED
+            elif (now - self.start_time).total_seconds() < 60:  # First minute
+                expected_state = WindowState.OPENING
+            else:
+                expected_state = WindowState.OPEN
+            
+            # Only update if there's a change
+            if expected_state != self._state:
+                old_state = self._state
+                self._state = expected_state
+                return expected_state
+            return None
+        finally:
+            # Remove recursion guard
+            delattr(self, '_transition_calculation')
 
     def register_field_observer(self, observer):
         """Register a field observer to receive state notifications.
@@ -125,8 +176,9 @@ class LearningWindow:
                     "coherence": self.coherence_threshold,
                     "saturation": self.change_count / max(1, self.max_changes_per_window)
                 }
-                # Direct append to observations
-                observer.observations.append({"context": context, "time": datetime.now()})
+                # Direct append to observations if available
+                if hasattr(observer, 'observations'):
+                    observer.observations.append({"context": context, "time": datetime.now()})
         except (RuntimeError, ImportError):
             # Fallback if no event loop can be accessed
             current_state = self.state
@@ -136,7 +188,9 @@ class LearningWindow:
                 "coherence": self.coherence_threshold,
                 "saturation": self.change_count / max(1, self.max_changes_per_window)
             }
-            observer.observations.append({"context": context, "time": datetime.now()})
+            # Direct append to observations if available
+            if hasattr(observer, 'observations'):
+                observer.observations.append({"context": context, "time": datetime.now()})
 
     async def notify_field_observers(self):
         """Notify all field observers of current state."""
@@ -154,18 +208,104 @@ class LearningWindow:
                 await observer.observe(context)
             except Exception as e:
                 print(f"Error notifying field observer: {e}")
-
-    async def notify_state_change(self) -> None:
-        """Notify observers of state changes without coupling."""
+                
+    def notify_field_observers_sync(self):
+        """Notify all field observers of current state synchronously."""
+        current_state = self.state
         context = {
-            "state": self.state.value,
+            "state": current_state.value,
             "stability": self.stability_score,
             "coherence": self.coherence_threshold,
             "saturation": self.change_count / max(1, self.max_changes_per_window)
         }
         
-        # Notify field observers
-        await self.notify_field_observers()
+        # Notify each observer synchronously
+        for observer in self.field_observers:
+            try:
+                if hasattr(observer, 'observe'):
+                    observer.observe(context)
+            except Exception as e:
+                print(f"Error notifying field observer: {e}")
+                
+    def register_pattern_observer(self, observer):
+        """Register a pattern observer to receive pattern evolution notifications.
+        
+        Args:
+            observer: The pattern observer to register
+        """
+        self.pattern_observers.append(observer)
+        
+        # Immediately notify of current state
+        pattern_context = {
+            "entity_id": str(id(self)),
+            "change_type": "observer_registration",
+            "window_state": self._state.value,  # Use _state directly to avoid recursion
+            "stability": self.stability_score,
+            "timestamp": datetime.now().isoformat()
+        }
+        
+        # Notify the observer of the current state
+        if hasattr(observer, 'observe_pattern_evolution'):
+            observer.observe_pattern_evolution(pattern_context)
+            
+    def notify_pattern_observers(self, context):
+        """Notify all pattern observers of pattern evolution.
+        
+        Args:
+            context: Context information about the pattern evolution
+        """
+        # Check if we're already in a notification cycle
+        if hasattr(self, '_in_notify_pattern_observers') and self._in_notify_pattern_observers:
+            return
+            
+        # Set recursion guard
+        self._in_notify_pattern_observers = True
+        
+        try:
+            for observer in self.pattern_observers:
+                if hasattr(observer, 'observe_pattern_evolution'):
+                    try:
+                        observer.observe_pattern_evolution(context)
+                    except Exception as e:
+                        print(f"Error notifying pattern observer: {e}")
+        finally:
+            # Clear recursion guard
+            delattr(self, '_in_notify_pattern_observers')
+
+    def notify_state_change(self) -> None:
+        """Notify observers of state changes without coupling."""
+        # Check if we're already in a notification cycle
+        if hasattr(self, '_in_notify_state_change') and self._in_notify_state_change:
+            return
+            
+        # Set recursion guard
+        self._in_notify_state_change = True
+        
+        try:
+            # Include tonic value to ensure harmonic analysis can be performed
+            context = {
+                "state": self._state.value,  # Use _state directly to avoid recursion
+                "stability": self.stability_score,
+                "coherence": self.coherence_threshold,
+                "saturation": self.change_count / max(1, self.max_changes_per_window),
+                "tonic_value": 0.5,  # Default tonic value for harmonic analysis
+                "timestamp": datetime.now().isoformat()
+            }
+            
+            # Notify field observers - handle async properly
+            try:
+                # Try to get the event loop and run the async method
+                loop = asyncio.get_event_loop()
+                if loop.is_running():
+                    asyncio.create_task(self.notify_field_observers())
+                else:
+                    loop.run_until_complete(self.notify_field_observers())
+            except RuntimeError:
+                # If no event loop is available, use a synchronous approach
+                self.notify_field_observers_sync()
+        finally:
+            # Clear recursion guard
+            delattr(self, '_in_notify_state_change')
 
     def get_harmonic_analysis(self) -> List[float]:
         """Get harmonic analysis from field observers if available."""
@@ -211,6 +351,9 @@ class LearningWindow:
         self.change_count += 1
         self.stability_metrics.append(stability_score)
         
+        # Check if window state needs to transition (e.g., due to saturation)
+        new_state = self.transition_if_needed()
+        
         # Trigger field observers notification on significant state changes
         try:
             import asyncio
@@ -219,7 +362,113 @@ class LearningWindow:
         except (RuntimeError, ImportError):
             pass
             
-    def record_state_change(self, entity_id, change_type, old_value, new_value, origin) -> bool:
+    def activate(self, origin: str = "system", stability_score: float = None) -> bool:
+        """Activate the learning window, transitioning it from CLOSED to OPENING state.
+        
+        This method is part of the window lifecycle management and enables external
+        components to trigger the opening of a learning window.
+        
+        Args:
+            origin: The component or system that triggered the activation
+            stability_score: Optional stability score to associate with this activation
+            
+        Returns:
+            bool: True if activation was successful, False otherwise
+        """
+        # Use recursion guard to prevent infinite loops
+        if hasattr(self, '_activate_in_progress'):
+            return False
+            
+        # Set recursion guard
+        self._activate_in_progress = True
+        
+        try:
+            # Only activate if window is in CLOSED state
+            if self._state != WindowState.CLOSED:
+                return False
+                
+            # Set stability score if provided
+            if stability_score is not None:
+                self.stability_scores.append(stability_score)
+            
+            # Transition to OPENING state
+            old_state = self._state
+            self._state = WindowState.OPENING
+            
+            # Create pattern evolution context
+            pattern_context = {
+                "entity_id": str(id(self)),
+                "change_type": "window_state",
+                "old_value": old_state.value,
+                "new_value": WindowState.OPENING.value,
+                "window_state": WindowState.OPENING.value,
+                "stability": self.stability_score,
+                "timestamp": datetime.now().isoformat(),
+                "origin": origin,
+                "event": "window_activated"
+            }
+            
+            # Notify pattern observers
+            if not hasattr(self, 'pattern_observers'):
+                self.pattern_observers = []
+                
+            for observer in self.pattern_observers:
+                if hasattr(observer, 'observe_pattern_evolution'):
+                    try:
+                        observer.observe_pattern_evolution(pattern_context)
+                    except Exception as e:
+                        print(f"Error notifying pattern observer: {e}")
+            
+            # Create context for field observer notification with enhanced tonic-harmonic properties
+            # Calculate a unique tonic value based on window ID and current time to ensure uniqueness
+            tonic_value = 0.1 + (hash(str(id(self)) + datetime.now().isoformat()) % 1000) / 10000
+            
+            field_context = {
+                "state": WindowState.OPENING.value,
+                "window_state": WindowState.OPENING.value,  # Add window_state for compatibility
+                "stability": self.stability_score,
+                "coherence": self.coherence_threshold,
+                "saturation": self.change_count / max(1, self.max_changes_per_window),
+                "event": "window_activated",
+                "change_type": "window_activation",  # Add change_type for compatibility
+                "origin": origin,
+                "tonic_value": tonic_value,  # Unique tonic value for harmonic analysis
+                "harmonic_value": self.stability_score * tonic_value,  # Pre-calculated harmonic value
+                "timestamp": datetime.now().isoformat()
+            }
+            
+            # Notify field observers properly without forcing analysis
+            # First check if we're in an event loop
+            try:
+                loop = asyncio.get_running_loop()
+                is_async = True
+            except RuntimeError:
+                is_async = False
+                
+            for observer in self.field_observers:
+                try:
+                    if hasattr(observer, 'observe'):
+                        if is_async and asyncio.iscoroutinefunction(observer.observe):
+                            # Schedule the coroutine to run in the event loop
+                            asyncio.create_task(observer.observe(field_context))
+                        else:
+                            # Call synchronously if not a coroutine function or no event loop
+                            observer.observe(field_context)
+                    elif hasattr(observer, 'observations'):
+                        observer.observations.append({"context": field_context, "time": datetime.now()})
+                except Exception as e:
+                    print(f"Error notifying field observer: {e}")
+            
+            # Record the change directly without going through record_change to avoid recursion
+            self.change_count += 1
+            self.stability_metrics.append(self.stability_score)
+            
+            return True
+        finally:
+            # Remove recursion guard
+            delattr(self, '_activate_in_progress')
+        
+    def record_state_change(self, entity_id, change_type, old_value, new_value, origin, tonic_value=0.5, stability=None) -> bool:
         """Record a state change from an AdaptiveID or other entity.
         
         This method integrates with the AdaptiveID.notify_state_change method,
@@ -231,70 +480,131 @@ class LearningWindow:
             old_value: Previous value before change
             new_value: New value after change
             origin: Origin of the change (e.g., component name)
+            tonic_value: Optional tonic value for harmonic analysis (default: 0.5)
+            stability: Optional stability score to use (default: current window stability)
         
         Returns:
             bool: True if the change was recorded successfully
         """
-        # Use current window stability as the default
-        stability_score = self.stability_score
+        # Use recursion guard to prevent infinite loops
+        if hasattr(self, '_record_state_change_in_progress'):
+            return True
+            
+        # Set recursion guard
+        self._record_state_change_in_progress = True
         
-        # Calculate tonic value based on change type
-        # Temporal context changes have higher tonic values
-        tonic_value = 0.7 if change_type == "temporal_context" else 0.5
-        
-        # Record the change in window metrics
-        self.record_change(stability_score)
-        
-        # Create context for field observers with tonic-harmonic properties
-        context = {
-            "entity_id": entity_id,
-            "change_type": change_type,
-            "old_value": old_value,
-            "new_value": new_value,
-            "origin": origin,
-            "window_state": self.state.value,
-            "stability": stability_score,
-            "tonic_value": tonic_value,
-            "field_properties": {
-                "coherence": self.coherence_threshold,
-                "stability": stability_score,
-                "navigability": min(1.0, self.max_changes_per_window / max(1, self.change_count)),
-                "saturation": self.change_count / max(1, self.max_changes_per_window)
-            },
-            "timestamp": datetime.now().isoformat()
-        }
-        
-        # Calculate harmonic value (stability * tonic)
-        context["harmonic_value"] = stability_score * tonic_value
-        
-        # Notify field observers of the state change
         try:
-            import asyncio
-            if asyncio.get_event_loop().is_running():
-                for observer in self.field_observers:
-                    asyncio.create_task(observer.observe(context))
-            else:
-                # Synchronous fallback for testing environments
-                for observer in self.field_observers:
-                    observer.observations.append({"context": context, "time": datetime.now()})
-        except (RuntimeError, ImportError):
-            # Fallback if no event loop is available
-            for observer in self.field_observers:
-                observer.observations.append({"context": context, "time": datetime.now()})
-                
-        # Check for state transition after recording change
-        new_state = self.transition_if_needed()
-        if new_state:
-            # If state changed, notify observers of the transition
+            # Use provided stability or current window stability as the default
+            stability_score = stability if stability is not None else self.stability_score
+            
+            # Only calculate tonic value if not explicitly provided
+            # This preserves the provided tonic_value parameter
+            if tonic_value == 0.5:  # If it's still the default value
+                # Temporal context changes have higher tonic values
+                tonic_value = 0.7 if change_type == "temporal_context" else 0.5
+            
+            # Record the change in window metrics
+            self.record_change(stability_score)
+            
+            # Create context for field observers with tonic-harmonic properties
+            context = {
+                "entity_id": entity_id,
+                "change_type": change_type,
+                "old_value": old_value,
+                "new_value": new_value,
+                "origin": origin,
+                "window_state": self._state.value,  # Use _state directly to avoid recursion
+                "stability": stability_score,
+                "tonic_value": tonic_value,
+                "field_properties": {
+                    "coherence": self.coherence_threshold,
+                    "stability": stability_score,
+                    "navigability": min(1.0, self.max_changes_per_window / max(1, self.change_count)),
+                    "saturation": self.change_count / max(1, self.max_changes_per_window)
+                },
+                "timestamp": datetime.now().isoformat()
+            }
+            
+            # Calculate harmonic value (stability * tonic)
+            context["harmonic_value"] = stability_score * tonic_value
+            
+            # Notify field observers of the state change
             try:
                 import asyncio
                 if asyncio.get_event_loop().is_running():
-                    asyncio.create_task(self.notify_state_change())
+                    for observer in self.field_observers:
+                        if hasattr(observer, 'observe') and asyncio.iscoroutinefunction(observer.observe):
+                            asyncio.create_task(observer.observe(context))
+                        elif hasattr(observer, 'observe'):
+                            observer.observe(context)
+                        elif hasattr(observer, 'observations'):
+                            observer.observations.append({"context": context, "time": datetime.now()})
+                else:
+                    # Synchronous fallback for testing environments
+                    for observer in self.field_observers:
+                        if hasattr(observer, 'observations'):
+                            observer.observations.append({"context": context, "time": datetime.now()})
+                        elif hasattr(observer, 'observe'):
+                            try:
+                                observer.observe(context)
+                            except Exception as e:
+                                print(f"Error notifying field observer: {e}")
             except (RuntimeError, ImportError):
-                pass
+                # Fallback if no event loop is available
+                for observer in self.field_observers:
+                    if hasattr(observer, 'observations'):
+                        observer.observations.append({"context": context, "time": datetime.now()})
+                    elif hasattr(observer, 'observe'):
+                        try:
+                            observer.observe(context)
+                        except Exception as e:
+                            print(f"Error notifying field observer: {e}")
+                            
+            # Notify pattern observers of the state change
+            if hasattr(self, 'pattern_observers'):
+                for observer in self.pattern_observers:
+                    if hasattr(observer, 'observe_pattern_evolution'):
+                        try:
+                            observer.observe_pattern_evolution(context)
+                        except Exception as e:
+                            print(f"Error notifying pattern observer: {e}")
+                    
+            # Check for state transition after recording change
+            # Use direct state calculation to avoid recursion
+            now = datetime.now()
+            
+            # Determine the expected state based on timing and saturation
+            if now < self.start_time:
+                expected_state = WindowState.CLOSED
+            elif now > self.end_time:
+                expected_state = WindowState.CLOSED
+            elif (now - self.start_time).total_seconds() < 60:  # First minute
+                expected_state = WindowState.OPENING
+            else:
+                # Check saturation after timing
+                if self.is_saturated:
+                    expected_state = WindowState.CLOSED
+                else:
+                    expected_state = WindowState.OPEN
+            
+            # Only update if there's a change
+            if expected_state != self._state:
+                old_state = self._state
+                self._state = expected_state
                 
-        # Return True for backward compatibility
-        return True
+                # If state changed, notify observers of the transition
+                try:
+                    import asyncio
+                    if asyncio.get_event_loop().is_running():
+                        asyncio.create_task(self.notify_state_change())
+                except (RuntimeError, ImportError):
+                    pass
+                    
+            # Return True for backward compatibility
+            return True
+        finally:
+            # Remove recursion guard
+            delattr(self, '_record_state_change_in_progress')
 
 class BackPressureController:
     """Controls state change rate based on system stability."""

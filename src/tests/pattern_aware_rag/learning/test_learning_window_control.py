@@ -161,7 +161,8 @@ class TestLearningWindowControl:
         assert window.is_saturated
         
         # Test rejection of events in saturated window
-        with pytest.raises(ValueError, match="Learning window is saturated"):
+        # When window is saturated, it transitions to CLOSED state, so we get "No active learning window"
+        with pytest.raises(ValueError, match="No active learning window"):
             event_coordinator.queue_event(
                 event_type="test",
                 entity_id="test_4",

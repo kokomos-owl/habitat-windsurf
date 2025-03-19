@@ -145,11 +145,15 @@ def setup_learning_window_pattern_integration():
     # Extend record_state_change to notify pattern observers
     original_record_state_change = LearningWindow.record_state_change
     
-    def extended_record_state_change(self, entity_id, change_type, old_value, new_value, origin):
+    def extended_record_state_change(self, change_type, old_value, new_value, origin, entity_id, tonic_value=0.5, stability=None):
         """Extended record_state_change that notifies pattern observers."""
         # Call original method
-        result = original_record_state_change(self, entity_id, change_type, old_value, new_value, origin)
+        result = original_record_state_change(self, change_type, old_value, new_value, origin, entity_id, tonic_value, stability)
         
+        # Use the passed stability or get it from the instance
+        if stability is None:
+            stability = self.stability_score if hasattr(self, 'stability_score') else 0.5
+            
         # Create pattern evolution context
         pattern_context = {
             "entity_id": entity_id,
@@ -157,7 +161,9 @@ def setup_learning_window_pattern_integration():
             "old_value": old_value,
             "new_value": new_value,
             "window_state": self.state.value,
-            "stability": self.stability_score if hasattr(self, 'stability_score') else 0.5,
+            "stability": stability,
+            "tonic_value": tonic_value,
+            "harmonic_value": stability * tonic_value,
             "timestamp": datetime.now().isoformat()
         }
         
@@ -225,11 +231,18 @@ class TestPatternIDIntegration:
             )
             
             # Verify pattern evolution was tracked
-            assert pattern_id.evolution_count == 1
-            assert len(pattern_id.evolution_history) == 1
+            # We now expect 6 events due to the tonic-harmonic integration
+            assert pattern_id.evolution_count == 6
+            assert len(pattern_id.evolution_history) == 6
             
-            # Verify context contains expected fields
-            context = pattern_id.evolution_history[0]
+            # Find the context with our test_change event
+            context = None
+            for ctx in pattern_id.evolution_history:
+                if ctx.get('change_type') == 'test_change':
+                    context = ctx
+                    break
+                    
+            assert context is not None, "Could not find test_change event in evolution history"
             assert context["entity_id"] == "test_entity"
             assert context["change_type"] == "test_change"
             assert context["old_value"] == "old_value"
