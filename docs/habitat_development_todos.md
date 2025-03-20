@@ -7,7 +7,7 @@
 | CP-1 | Complete PatternAwareRAG integration tests refactoring | ✅ Complete | High | None | Focus on field-state observations with vector + tonic_harmonic field topology |
 | CP-2 | Enhance Vector + Tonic_Harmonic Field components | ✅ Complete | High | CP-1 | Improved resonance matrix analysis, field navigation, and topological metrics |
 | CP-3 | Develop field energy flow and pattern resonance metrics | 🔄 In Progress | High | CP-2 | Based on tonic_harmonic field interactions and resonance patterns with AdaptiveID context propagation |
-| CP-4 | Update persistence layer for field topology metrics | 🔄 In Progress | Medium | CP-2 | Pattern Store, Relationship Store to use vector + tonic_harmonic field metrics with PatternID evolution tracking |
+| CP-4 | Update persistence layer for field topology metrics | ✅ Complete | Medium | CP-2 | Pattern Store, Relationship Store to use vector + tonic_harmonic field metrics with PatternID evolution tracking |
 | CP-5 | Enhance visualization for field topology relationships | 🔄 In Progress | Medium | CP-3 | Implementing EigenspaceVisualizer with 2D/3D views, community boundaries, and resonance visualization |
 | CP-6 | Implement pattern co-evolution tracking in Neo4j | 🔄 In Progress | High | CP-4 | Track pattern evolution and co-evolution through learning windows with tonic-harmonic properties |
 
@@ -43,15 +43,15 @@
 | LC-5 | Fix Learning Window AdaptiveID integration | ⏳ Pending | High | LC-1, LC-4 | Address failing tests in AdaptiveID integration |
 | LC-6 | Complete PatternID integration | 🔄 In Progress | High | LC-4, PR-6 | Updated tests to handle multiple notifications and filter by change_type |
 | LC-7 | Implement pattern co-evolution testing | ✅ Complete | High | LC-6 | Tests for pattern co-evolution, differential tonic response, and window size effects |
-| LC-8 | Connect testing to Neo4j persistence | ⏳ Pending | Medium | LC-7, PL-5 | Integrate test framework with persistence layer for pattern tracking |
+| LC-8 | Connect testing to Neo4j persistence | 🔄 In Progress | Medium | LC-7, PL-5 | Integrate test framework with persistence layer for pattern tracking |
 
 ### Persistence Layer
 | ID | Task | Status | Priority | Dependencies | Notes |
 |----|------|--------|----------|--------------|-------|
 | PL-1 | Update PatternStore for tonic_harmonic field metrics | ⏳ Pending | Medium | TF-5 | Store resonance matrix and field topology properties with AdaptiveID context |
 | PL-2 | Enhance Neo4j Bridge for resonance patterns | ✅ Complete | Medium | TF-2 | Store resonance relationships with proper classification |
-| PL-3 | Create field topology serialization/deserialization | ⏳ Pending | Medium | PL-1, PL-2 | Consistent representation of field topology with ID components in storage |
-| PL-4 | Develop query interface for field topology | ⏳ Pending | Medium | PL-3 | Enable complex queries of field topology relationships |
+| PL-3 | Create field topology serialization/deserialization | ✅ Complete | Medium | PL-1, PL-2 | Consistent representation of field topology with ID components in storage |
+| PL-4 | Develop query interface for field topology | ✅ Complete | Medium | PL-3 | Enable complex queries of field topology relationships |
 | PL-5 | Implement pattern co-evolution Cypher queries | ✅ Complete | High | PL-2 | Cypher queries for tracking pattern evolution and co-evolution |
 | PL-6 | Create pattern co-evolution persistence layer | ✅ Complete | High | PL-5 | Integration layer for persisting pattern evolution events to Neo4j |
 | PL-7 | Develop query interface for resonance centers | ⏳ Pending | Low | TF-4 | Query for potential pattern emergence points and resonance gaps |
@@ -416,9 +416,99 @@ Each phase includes unit tests, with integration tests developed throughout and 
 
 ### Immediate Focus (Next Session)
 
-1. **Connect Pattern Co-Evolution Testing to Neo4j Persistence**:
-   - Integrate the `pattern_coevolution_persistence.py` layer with test framework
-   - Create a test helper class to record test results in Neo4j
+## 1. Topology Visualization (VZ-1, VZ-4)
+
+### Required Modules
+
+- `habitat_evolution/visualization/topology_visualizer.py` (New): Visualize topology states including frequency domains, boundaries, and resonance points
+- `habitat_evolution/visualization/eigenspace_visualizer.py` (Update): Enhance to render topology states with eigenspace projections
+- `habitat_evolution/visualization/dashboard/topology_dashboard.py` (New): Create a dashboard for monitoring topology evolution
+
+### Test Implementation
+
+- `tests/visualization/test_topology_visualizer.py`: Test visualization of topology components
+  - `test_frequency_domain_visualization`: Verify frequency domains are correctly visualized
+  - `test_boundary_visualization`: Ensure boundaries between domains are properly rendered
+  - `test_resonance_point_visualization`: Test visualization of resonance points
+- `tests/visualization/test_topology_dashboard.py`: Test dashboard functionality
+  - `test_dashboard_metrics`: Verify metrics display correctly
+  - `test_dashboard_interactive_elements`: Test interactive elements of the dashboard
+
+## 2. Pattern Co-Evolution Integration with Topology (LC-8)
+
+### Required Modules for Co-Evolution Integration
+
+- `habitat_evolution/pattern_aware_rag/learning/coevolution_topology_tracker.py` (New): Track how topology evolves with pattern co-evolution
+- `habitat_evolution/pattern_aware_rag/topology/evolution_detector.py` (New): Detect changes in topology over time
+- `habitat_evolution/pattern_aware_rag/topology/manager.py` (Update): Add methods to track topology evolution
+
+### Test Implementation for Co-Evolution
+
+- `tests/pattern_aware_rag/learning/test_coevolution_topology_integration.py`: Test integration between co-evolution and topology
+  - `test_topology_changes_during_coevolution`: Verify topology changes are tracked during pattern co-evolution
+  - `test_bidirectional_feedback`: Ensure changes in topology influence pattern evolution and vice versa
+  - `test_persistence_of_evolution_history`: Test that evolution history is correctly persisted to Neo4j
+
+## 3. Flow Dynamics Analysis (TF-4)
+
+### Required Modules for Flow Dynamics
+
+- `habitat_evolution/pattern_aware_rag/topology/flow_dynamics_analyzer.py` (New): Analyze energy flow between frequency domains
+- `habitat_evolution/pattern_aware_rag/topology/energy_transfer_metrics.py` (New): Metrics for measuring energy transfer across boundaries
+- `habitat_evolution/pattern_aware_rag/topology/flow_persistence.py` (New): Persist flow dynamics data to Neo4j
+
+### Test Implementation for Flow Dynamics
+
+- `tests/pattern_aware_rag/topology/test_flow_dynamics_analyzer.py`: Test flow dynamics analysis
+  - `test_energy_flow_detection`: Verify energy flow between domains is correctly detected
+  - `test_adaptive_id_provenance`: Ensure AdaptiveID provenance is maintained during energy flow
+  - `test_flow_metrics_calculation`: Test calculation of energy transfer metrics
+- `tests/pattern_aware_rag/topology/test_flow_persistence.py`: Test persistence of flow dynamics
+  - `test_flow_data_serialization`: Verify flow data is correctly serialized
+  - `test_flow_data_persistence_to_neo4j`: Test persistence of flow data to Neo4j
+
+## 4. Prompt Engineering with Topology
+
+### Required Modules for Prompt Engineering
+
+- `habitat_evolution/pattern_aware_rag/prompts/topology_adapter.py` (New): Adapt prompts based on topology states
+- `habitat_evolution/pattern_aware_rag/prompts/domain_templates.py` (New): Domain-specific prompt templates
+- `habitat_evolution/pattern_aware_rag/prompts/resonance_enhancer.py` (New): Enhance prompts for high-coherence regions
+
+### Test Implementation for Prompt Engineering
+
+- `tests/pattern_aware_rag/prompts/test_topology_adapter.py`: Test topology-aware prompt adaptation
+  - `test_prompt_adaptation_by_domain`: Verify prompts are adapted based on frequency domain
+  - `test_resonance_aware_enhancement`: Test enhancement of prompts in high-coherence regions
+  - `test_template_selection`: Ensure appropriate templates are selected based on topology
+
+## Implementation Strategy
+
+For the next session, we'll focus on implementing the **Topology Visualization** components first, as they will provide immediate visual feedback on our topology structure. This will help validate our understanding of the topology and guide further development.
+
+### Step 1: Create the `topology_visualizer.py` module
+
+- Implement visualization of frequency domains as colored regions in a 2D space
+- Add boundary visualization as lines or gradients between domains
+- Implement resonance point visualization as highlighted points within domains
+
+### Step 2: Update the `eigenspace_visualizer.py` module
+
+- Enhance to project topology states into eigenspace
+- Add methods to visualize topology evolution over time
+- Implement interactive visualization capabilities
+
+### Step 3: Develop tests for visualization components
+
+- Create test fixtures with sample topology states
+- Implement tests to verify visualization correctness
+- Add tests for edge cases and complex topology structures
+
+### Step 4: Begin dashboard implementation
+
+- Create basic dashboard structure with key metrics
+- Implement interactive elements for exploring topology
+- Add time-series visualization of topology evolution
    - Implement test fixtures for Neo4j integration
    - Add test cases that verify persistence of pattern evolution events
 
