@@ -50,6 +50,9 @@ wheels/
 logs/
 log/
 
+# Output
+output/
+
 # Cache
 .cache/
 .pytest_cache/
