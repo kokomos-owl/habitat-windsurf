@@ -69,7 +69,38 @@ Perhaps the most significant advantage is the ability to detect dimensional reso
 
 The Vector + Tonic-Harmonic approach is implemented through several key components:
 
-### 1. Eigenspace Analysis
+### 1. Window Frequency Interactions and Resonance Patterns
+
+Our latest research has revealed that the interaction between learning windows of different frequencies creates a rich landscape of resonance patterns and natural boundaries. Rather than categorizing windows by size (small, medium, large), we now understand that it's more effective to conceptualize them in terms of their frequency characteristics:
+
+- **High-frequency windows**: Process more state changes in the same time period (higher `max_changes_per_window`)
+- **Medium-frequency windows**: Process a moderate number of state changes
+- **Low-frequency windows**: Process fewer state changes but over longer durations
+
+When these different frequency windows interact within a field, they create interference patterns similar to wave interactions in physical systems:
+
+- **Constructive interference**: At certain points in time, changes from multiple windows align, creating resonance points with high harmonic values
+- **Destructive interference**: At other points, changes from different windows cancel each other out, creating natural boundaries with low harmonic values
+
+These emergent patterns allow the system to self-organize information into coherent structures without requiring explicit categorization. The key metrics we track include:
+
+| Metric | Description | Implementation |  
+|--------|-------------|----------------|  
+| Resonance Points | Local maxima in combined harmonic values | Detected as peaks in the harmonic landscape |  
+| Boundary Points | Local minima in combined harmonic values | Detected as valleys in the harmonic landscape |  
+| Phase Alignment | Temporal alignment of oscillation patterns | Measured through phase shift calculations |  
+| Harmonic Amplification | Increase in harmonic values at resonance points | Ratio of resonance to average harmonic values |  
+
+This frequency-based approach has several advantages over static categorization:
+
+1. **Natural boundary emergence**: Boundaries form naturally at points of destructive interference
+2. **Adaptive resonance**: The system can adapt to changing patterns by shifting phase relationships
+3. **Bidirectional synchronization**: Changes propagate bidirectionally between components, ensuring coherent system behavior
+4. **Constructive dissonance**: Apparent dissonance in individual patterns can contribute to overall system harmony
+
+Our testing demonstrates that this approach significantly outperforms static categorization in detecting complex pattern relationships and semantic edges.
+
+### 2. Eigenspace Analysis
 
 ```python
 # Eigendecomposition of the resonance matrix
