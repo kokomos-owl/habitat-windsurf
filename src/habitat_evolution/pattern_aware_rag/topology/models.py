@@ -14,9 +14,11 @@ import uuid
 
 
 def serialize_datetime(obj):
-    """Helper function to serialize datetime objects to JSON."""
+    """Helper function to serialize datetime objects and sets to JSON."""
     if isinstance(obj, datetime):
         return obj.isoformat()
+    elif isinstance(obj, set):
+        return list(obj)  # Convert sets to lists for JSON serialization
     raise TypeError(f"Type {type(obj)} not serializable")
 
 
@@ -34,6 +36,11 @@ class FrequencyDomain:
     created_at: datetime = field(default_factory=datetime.now)
     last_updated: datetime = field(default_factory=datetime.now)
     metadata: Dict[str, Any] = field(default_factory=dict)  # Additional properties
+    
+    def __post_init__(self):
+        # Ensure pattern_ids is always a set
+        if isinstance(self.pattern_ids, list):
+            self.pattern_ids = set(self.pattern_ids)
 
 
 @dataclass
@@ -103,19 +110,35 @@ class TopologyState:
         
         # Convert dictionaries back to proper objects
         if 'frequency_domains' in data:
-            data['frequency_domains'] = {
-                k: FrequencyDomain(**v) for k, v in data['frequency_domains'].items()
-            }
+            domains = {}
+            for k, v in data['frequency_domains'].items():
+                # Convert pattern_ids from list back to set if it exists
+                if 'pattern_ids' in v and isinstance(v['pattern_ids'], list):
+                    v['pattern_ids'] = set(v['pattern_ids'])
+                domains[k] = FrequencyDomain(**v)
+            data['frequency_domains'] = domains
         
         if 'boundaries' in data:
-            data['boundaries'] = {
-                k: Boundary(**v) for k, v in data['boundaries'].items()
-            }
+            boundaries = {}
+            for k, v in data['boundaries'].items():
+                # Convert domain_ids from list back to tuple if it exists
+                if 'domain_ids' in v and isinstance(v['domain_ids'], list):
+                    v['domain_ids'] = tuple(v['domain_ids'])
+                # Convert coordinates from list of lists to list of tuples if it exists
+                if 'coordinates' in v and isinstance(v['coordinates'], list):
+                    v['coordinates'] = [tuple(coord) if isinstance(coord, list) else coord 
+                                       for coord in v['coordinates']]
+                boundaries[k] = Boundary(**v)
+            data['boundaries'] = boundaries
         
         if 'resonance_points' in data:
-            data['resonance_points'] = {
-                k: ResonancePoint(**v) for k, v in data['resonance_points'].items()
-            }
+            points = {}
+            for k, v in data['resonance_points'].items():
+                # Convert coordinates from list back to tuple if it exists
+                if 'coordinates' in v and isinstance(v['coordinates'], list):
+                    v['coordinates'] = tuple(v['coordinates'])
+                points[k] = ResonancePoint(**v)
+            data['resonance_points'] = points
         
         if 'field_metrics' in data:
             data['field_metrics'] = FieldMetrics(**data['field_metrics'])
@@ -154,8 +177,33 @@ class TopologyState:
             if domain_id not in self.frequency_domains:
                 diff_result['removed_domains'][domain_id] = other.frequency_domains[domain_id]
         
-        # Similar comparisons for boundaries and resonance points
-        # ...
+        # Compare boundaries
+        for boundary_id, boundary in self.boundaries.items():
+            if boundary_id not in other.boundaries:
+                diff_result['added_boundaries'][boundary_id] = boundary
+            elif boundary != other.boundaries[boundary_id]:
+                diff_result['modified_boundaries'][boundary_id] = {
+                    'before': other.boundaries[boundary_id],
+                    'after': boundary
+                }
+        
+        for boundary_id in other.boundaries:
+            if boundary_id not in self.boundaries:
+                diff_result['removed_boundaries'][boundary_id] = other.boundaries[boundary_id]
+        
+        # Compare resonance points
+        for point_id, point in self.resonance_points.items():
+            if point_id not in other.resonance_points:
+                diff_result['added_resonance_points'][point_id] = point
+            elif point != other.resonance_points[point_id]:
+                diff_result['modified_resonance_points'][point_id] = {
+                    'before': other.resonance_points[point_id],
+                    'after': point
+                }
+        
+        for point_id in other.resonance_points:
+            if point_id not in self.resonance_points:
+                diff_result['removed_resonance_points'][point_id] = other.resonance_points[point_id]
         
         # Compare field metrics
         for attr, value in asdict(self.field_metrics).items():
