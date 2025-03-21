@@ -97,6 +97,12 @@ class TopologyState:
     resonance_points: Dict[str, ResonancePoint] = field(default_factory=dict)
     field_metrics: FieldMetrics = field(default_factory=FieldMetrics)
     timestamp: datetime = field(default_factory=datetime.now)
+    # Eigenspace properties
+    effective_dimensionality: int = 0
+    eigenvalues: List[float] = field(default_factory=list)
+    eigenvectors: List[List[float]] = field(default_factory=list)
+    pattern_eigenspace_properties: Dict[str, Dict[str, Any]] = field(default_factory=dict)
+    resonance_relationships: Dict[str, List[str]] = field(default_factory=dict)
     metadata: Dict[str, Any] = field(default_factory=dict)  # Additional properties
     
     def to_json(self) -> str:
