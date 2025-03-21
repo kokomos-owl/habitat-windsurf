@@ -16,6 +16,7 @@ from habitat_evolution.pattern_aware_rag.topology.models import (
     TopologyState, FrequencyDomain, Boundary, ResonancePoint, FieldMetrics
 )
 from habitat_evolution.pattern_aware_rag.topology.detector import TopologyDetector
+from habitat_evolution.pattern_aware_rag.topology.semantic_topology_enhancer import SemanticTopologyEnhancer
 
 logger = logging.getLogger(__name__)
 
@@ -378,6 +379,15 @@ class TopologyManager:
                     eigenvectors=json.dumps(state.eigenvectors)
                 )
                 
+                # Enhance topology state with semantic summary if patterns are available
+                if hasattr(state, 'patterns') and state.patterns:
+                    try:
+                        SemanticTopologyEnhancer.enhance_topology_state_persistence(
+                            session, state.id, state.patterns
+                        )
+                    except Exception as e:
+                        logger.warning(f"Error enhancing topology state {state.id} with semantic summary: {e}")
+                
                 # Connect topology state to learning windows if available
                 if hasattr(state, 'learning_windows') and state.learning_windows:
                     for window_id, window_info in state.learning_windows.items():
@@ -458,6 +468,22 @@ class TopologyManager:
                         state_id=state.id
                     )
                     
+                    # Enhance frequency domain with semantic content if patterns are available
+                    try:
+                        # Get all patterns in this domain
+                        domain_patterns = []
+                        if hasattr(state, 'patterns'):
+                            for pid, pattern in state.patterns.items():
+                                if pid in domain.pattern_ids:
+                                    domain_patterns.append(pattern)
+                        
+                        if domain_patterns:
+                            SemanticTopologyEnhancer.enhance_frequency_domain_persistence(
+                                session, domain_id, domain_patterns, state.id
+                            )
+                    except Exception as e:
+                        logger.warning(f"Error enhancing frequency domain {domain_id} with semantic content: {e}")
+                    
                     # Connect patterns to domains
                     for pattern_id in domain.pattern_ids:
                         session.run("""
@@ -522,6 +548,15 @@ class TopologyManager:
                         last_updated=boundary.last_updated.timestamp(),
                         state_id=state.id
                     )
+                    
+                    # Enhance boundary with semantic content
+                    try:
+                        if len(boundary.domain_ids) == 2:
+                            SemanticTopologyEnhancer.enhance_boundary_persistence(
+                                session, boundary_id, boundary.domain_ids, state.id
+                            )
+                    except Exception as e:
+                        logger.warning(f"Error enhancing boundary {boundary_id} with semantic content: {e}")
                     
                     # Connect domains to boundaries
                     if len(boundary.domain_ids) == 2:
@@ -716,6 +751,16 @@ class TopologyManager:
                             state_id=state.id
                         )
                         
+                        # Enhance pattern with semantic content if available in state.patterns
+                        try:
+                            if hasattr(state, 'patterns') and pattern_id in state.patterns:
+                                pattern = state.patterns[pattern_id]
+                                SemanticTopologyEnhancer.enhance_pattern_persistence(
+                                    session, pattern_id, pattern, state.id
+                                )
+                        except Exception as e:
+                            logger.warning(f"Error enhancing pattern {pattern_id} with semantic content: {e}")
+                        
                         # Connect patterns to their resonance groups with enhanced relationship properties
                         for group_id in properties.get('resonance_groups', []):
                             # Calculate group affinity - how strongly this pattern belongs to the group
@@ -846,9 +891,39 @@ class TopologyManager:
                                 harmonic_alignment=dimensional_alignment * similarity
                             )
                             
+                            # Enhance relationship with semantic properties
+                            try:
+                                SemanticTopologyEnhancer.enhance_relationship_persistence(
+                                    session, pattern_id, related_id, "RESONATES_WITH", {
+                                        "similarity": similarity,
+                                        "resonance_types": resonance_types,
+                                        "dimensional_alignment": dimensional_alignment,
+                                        "wave_interference": wave_interference_type,
+                                        "interference_strength": interference_strength
+                                    }
+                                )
+                            except Exception as e:
+                                logger.warning(f"Error enhancing relationship between {pattern_id} and {related_id} with semantic properties: {e}")
+                            
                 # Create and persist ResonanceGroup nodes with enhanced properties
                 if hasattr(state, 'resonance_groups') and state.resonance_groups:
+                    # Store pattern objects by group for semantic enhancement
+                    group_patterns = {}
+                    if hasattr(state, 'patterns'):
+                        for group_id in state.resonance_groups.keys():
+                            group_patterns[group_id] = []
+                        
+                        # Collect patterns for each group
+                        for pattern_id, pattern in state.patterns.items():
+                            if hasattr(state, 'pattern_eigenspace_properties') and pattern_id in state.pattern_eigenspace_properties:
+                                props = state.pattern_eigenspace_properties[pattern_id]
+                                if 'resonance_groups' in props:
+                                    for group_id in props['resonance_groups']:
+                                        if group_id in group_patterns:
+                                            group_patterns[group_id].append(pattern)
                     for group_id, group_properties in state.resonance_groups.items():
+                        # Store reference to patterns in this group for semantic enhancement
+                        patterns_in_group = group_patterns.get(group_id, [])
                         # Extract group properties
                         dimension = group_properties.get('dimension', -1)
                         coherence = group_properties.get('coherence', 0.0)

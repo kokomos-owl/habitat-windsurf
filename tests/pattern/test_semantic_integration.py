@@ -1,0 +1,1036 @@
+"""
+Integration tests for semantic topology in the Habitat Evolution framework.
+
+These tests validate the direct semantic space representation without abstractions,
+focusing on how semantic content emerges naturally from observations.
+"""
+
+import unittest
+import logging
+import json
+import math
+import time
+from unittest.mock import MagicMock, patch
+from datetime import datetime, timedelta
+
+from habitat_evolution.adaptive_core.id.adaptive_id import AdaptiveID
+from habitat_evolution.pattern_aware_rag.pattern import Pattern
+from habitat_evolution.pattern_aware_rag.topology.manager import TopologyManager
+from habitat_evolution.pattern_aware_rag.topology.models import (
+    TopologyState, FrequencyDomain, Boundary, ResonancePoint, FieldMetrics
+)
+from habitat_evolution.pattern_aware_rag.semantic.neo4j_semantic_queries import Neo4jSemanticQueries
+from habitat_evolution.pattern_aware_rag.topology.semantic.pattern_semantic import PatternSemanticEnhancer
+from habitat_evolution.pattern_aware_rag.topology.semantic_topology_enhancer import SemanticTopologyEnhancer
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+class TestSemanticTopologyObservation(unittest.TestCase):
+    """
+    Tests for semantic topology that respect the observational approach.
+    
+    These tests validate that semantic content emerges naturally from
+    observations rather than being imposed with predetermined structure.
+    """
+    
+    def setUp(self):
+        """Set up test environment with minimal structure."""
+        # Create a mock Neo4j driver for topology tests
+        self.neo4j_driver = MagicMock()
+        self.session = MagicMock()
+        self.transaction = MagicMock()
+        self.result = MagicMock()
+        
+        # Configure the mock objects
+        self.neo4j_driver.session.return_value = self.session
+        self.session.__enter__.return_value = self.session
+        self.session.__exit__.return_value = None
+        self.session.begin_transaction.return_value = self.transaction
+        self.transaction.__enter__.return_value = self.transaction
+        self.transaction.__exit__.return_value = None
+        self.transaction.run.return_value = self.result
+        self.session.run.return_value = self.result
+        
+        # Create a topology manager with the mock driver
+        self.topology_manager = TopologyManager(neo4j_driver=self.neo4j_driver)
+        
+        # Create a document processor that will generate observations
+        # This simulates the natural process of extracting observations from documents
+        self.document_processor = self._create_document_processor()
+    
+    def _create_document_processor(self):
+        """
+        Create a document processor that simulates natural observation extraction.
+        
+        This method simulates how observations would naturally emerge from
+        processing documents, rather than being predetermined.
+        """
+        processor = MagicMock()
+        
+        # Simulate the process of extracting observations from a document
+        # In a real system, this would analyze text and extract meaningful concepts
+        def process_document(document_text, context=None):
+            # This simulates natural observation extraction without predetermined structure
+            observations = []
+            
+            # Extract temporal context naturally from document content
+            # In a real system, this would use NLP to identify key concepts and relationships
+            if "climate" in document_text.lower():
+                observations.append(("climate_factor", document_text.count("climate") / len(document_text)))
+            
+            if "risk" in document_text.lower():
+                observations.append(("risk_level", document_text.count("risk") / len(document_text)))
+                
+            if "coastal" in document_text.lower() or "coast" in document_text.lower():
+                observations.append(("coastal_reference", True))
+                
+            if "impact" in document_text.lower() or "effect" in document_text.lower():
+                observations.append(("impact_mentioned", True))
+                
+            # Extract any years mentioned in the document
+            import re
+            years = re.findall(r'\b20\d\d\b', document_text)
+            if years:
+                observations.append(("timeframe_years", years))
+                
+            # Calculate a tonic value based on document characteristics
+            # This emerges naturally from the document's properties
+            word_count = len(document_text.split())
+            sentence_count = document_text.count('.') + document_text.count('!') + document_text.count('?')
+            avg_sentence_length = word_count / max(1, sentence_count)
+            
+            # Tonic value emerges from document structure
+            tonic_value = min(0.99, max(0.1, avg_sentence_length / 20))
+            observations.append(("document_tonic", tonic_value))
+            
+            # Phase position emerges from document timestamp
+            timestamp = time.time()
+            phase_position = (timestamp % 86400) / 86400  # Position in day cycle
+            observations.append(("document_phase", phase_position))
+            
+            return observations
+            
+        processor.process_document = process_document
+        return processor
+    
+    def test_topology_manager_initialization(self):
+        """Test that the topology manager initializes correctly."""
+        self.assertIsNotNone(self.topology_manager)
+        self.assertEqual(self.topology_manager.neo4j_driver, self.neo4j_driver)
+        self.assertTrue(self.topology_manager.persistence_mode)
+    
+    def test_pattern_emergence_from_observations(self):
+        """
+        Test that patterns emerge naturally from observations.
+        
+        This test validates that semantic content emerges from observations
+        rather than being imposed with predetermined structure.
+        """
+        # Create a document with natural content
+        document_text = """
+        Climate risk assessment for Martha's Vineyard shows increasing coastal erosion
+        by 2030. The impact on property values could be significant, with estimates
+        suggesting a 15-20% decrease in waterfront properties by 2050. Adaptation 
+        strategies need to be implemented to mitigate these risks.
+        """
+        
+        # Process the document to extract natural observations
+        observations = self.document_processor.process_document(document_text)
+        
+        # Create an AdaptiveID that will receive these observations
+        adaptive_id = AdaptiveID(
+            id="test-adaptive-id",
+            base_concept="document observation",
+            creator_id="test-creator"
+        )
+        
+        # Apply the observations to the AdaptiveID
+        for key, value in observations:
+            adaptive_id.update_temporal_context(key, value)
+        
+        # Create a pattern that will derive its properties from the AdaptiveID
+        pattern = Pattern(
+            id="test-pattern",
+            creator_id="test-creator"
+        )
+        
+        # Connect the pattern to the AdaptiveID to allow bidirectional flow
+        pattern.adaptive_id = adaptive_id
+        
+        # Verify that semantic content can be extracted from the pattern
+        semantic_content = PatternSemanticEnhancer.get_semantic_content(pattern)
+        keywords = PatternSemanticEnhancer.get_keywords(pattern)
+        
+        # Validate that semantic content emerged naturally
+        self.assertIsNotNone(semantic_content)
+        self.assertIsInstance(keywords, list)
+        
+        # Create a topology state with this pattern
+        state = TopologyState(
+            id="ts-test-observation",
+            timestamp=datetime.now(),
+            field_metrics=FieldMetrics(coherence=0.8, stability=0.7, saturation=0.6),
+            patterns={pattern.id: pattern},
+            frequency_domains={},
+            boundaries={},
+            resonance_points={},
+            pattern_eigenspace_properties={}
+        )
+        
+        # Add eigenspace properties that emerge from observations
+        # These properties are derived from the observations, not predetermined
+        eigenspace_props = {}
+        for key, value in observations:
+            if key == "document_tonic":
+                eigenspace_props["tonic_value"] = value
+            elif key == "document_phase":
+                eigenspace_props["phase_position"] = value
+        
+        # Add dimensional coordinates based on observation values
+        dimensional_coords = []
+        for key, value in observations:
+            if isinstance(value, (int, float)):
+                dimensional_coords.append(value)
+            elif isinstance(value, bool):
+                dimensional_coords.append(1.0 if value else 0.0)
+            elif isinstance(value, list):
+                dimensional_coords.append(len(value))
+        
+        # Normalize dimensional coordinates
+        if dimensional_coords:
+            max_coord = max(abs(coord) for coord in dimensional_coords)
+            if max_coord > 0:
+                dimensional_coords = [coord / max_coord for coord in dimensional_coords]
+        
+        eigenspace_props["dimensional_coordinates"] = dimensional_coords
+        
+        # Calculate primary dimensions based on coordinate magnitudes
+        primary_dims = list(range(len(dimensional_coords)))
+        primary_dims.sort(key=lambda i: abs(dimensional_coords[i]), reverse=True)
+        eigenspace_props["primary_dimensions"] = primary_dims[:3]  # Top 3 dimensions
+        
+        # Add eigenspace properties to the state
+        state.pattern_eigenspace_properties = {pattern.id: eigenspace_props}
+        
+        # Persist the state to Neo4j
+        self.topology_manager.persist_to_neo4j(state)
+        
+        # Verify that the pattern was persisted with semantic content
+        self.session.run.assert_called()
+        
+        # Extract calls related to pattern persistence
+        pattern_calls = [
+            call for call in self.session.run.call_args_list 
+            if "Pattern" in str(call) and "semantic_content" in str(call)
+        ]
+        
+        # Verify that at least one call was made to persist pattern with semantic content
+        self.assertTrue(len(pattern_calls) > 0, "No calls to persist pattern with semantic content")
+    
+    def test_bidirectional_integration(self):
+        """
+        Test bidirectional integration between topology and eigenspace properties.
+        
+        This test validates that changes in topology update eigenspace properties and vice versa,
+        maintaining consistency between these representations as required by the system.
+        """
+        # Create a document with natural content
+        document_text = """
+        Martha's Vineyard climate adaptation plan identifies two critical resonance groups:
+        1) Coastal infrastructure with high tonic values (>0.96) showing constructive interference
+        2) Economic impact patterns forming stable harmonic relationships across frequency domains
+        The phase relationships between these groups create a coherent semantic topology.
+        """
+        
+        # Process the document to extract natural observations
+        observations = self.document_processor.process_document(document_text)
+        
+        # Create patterns that will derive their properties from observations
+        patterns = {}
+        adaptive_ids = {}
+        
+        # Create two patterns with different observational contexts
+        for i in range(2):
+            # Create an AdaptiveID that will receive observations
+            adaptive_id = AdaptiveID(
+                id=f"test-adaptive-id-{i}",
+                base_concept="document observation",
+                creator_id="test-creator"
+            )
+            
+            # Apply a subset of observations to each AdaptiveID
+            # This simulates how different patterns naturally observe different aspects
+            for j, (key, value) in enumerate(observations):
+                if j % 2 == i:  # Distribute observations between patterns
+                    adaptive_id.update_temporal_context(key, value)
+            
+            # Create a pattern connected to this AdaptiveID
+            pattern = Pattern(
+                id=f"test-pattern-{i}",
+                creator_id="test-creator"
+            )
+            
+            # Connect the pattern to the AdaptiveID to allow bidirectional flow
+            pattern.adaptive_id = adaptive_id
+            
+            patterns[pattern.id] = pattern
+            adaptive_ids[pattern.id] = adaptive_id
+        
+        # Create frequency domains that emerge from pattern properties
+        domains = {}
+        for i in range(2):
+            # Domain frequency emerges from pattern observations
+            domain_frequency = 0.3 + (i * 0.4)  # Creates domains at different frequencies
+            
+            domain = FrequencyDomain(
+                id=f"fd-test-{i}",
+                dominant_frequency=domain_frequency,
+                bandwidth=0.1,
+                phase_coherence=0.8,
+                last_updated=datetime.now(),
+                pattern_ids=[f"test-pattern-{i}"]
+            )
+            
+            domains[domain.id] = domain
+        
+        # Create a boundary between the domains
+        boundary = Boundary(
+            id="b-test-01",
+            sharpness=0.7,
+            permeability=0.5,
+            stability=0.8,
+            dimensionality=2,
+            last_updated=datetime.now(),
+            domain_ids=[domain.id for domain in domains.values()]
+        )
+        
+        # Create eigenspace properties that emerge from observations
+        eigenspace_properties = {}
+        
+        for pattern_id, pattern in patterns.items():
+            # Extract observations from the pattern's AdaptiveID
+            adaptive_id = adaptive_ids[pattern_id]
+            pattern_observations = []
+            
+            # Get the latest value for each observation key
+            for key in adaptive_id.temporal_context.keys():
+                latest_timestamp = max(adaptive_id.temporal_context[key].keys())
+                latest_value = adaptive_id.temporal_context[key][latest_timestamp]["value"]
+                pattern_observations.append((key, latest_value))
+            
+            # Create eigenspace properties from observations
+            props = {}
+            
+            # Tonic value and phase position emerge from observations
+            for key, value in pattern_observations:
+                if key == "document_tonic":
+                    props["tonic_value"] = value
+                elif key == "document_phase":
+                    props["phase_position"] = value
+            
+            # If no tonic or phase was observed, calculate them from pattern properties
+            if "tonic_value" not in props:
+                # Tonic value emerges from pattern's temporal context size
+                context_size = len(adaptive_id.temporal_context)
+                props["tonic_value"] = min(0.99, max(0.1, context_size / 10))
+            
+            if "phase_position" not in props:
+                # Phase position emerges from pattern's creation time
+                timestamp = time.time()
+                props["phase_position"] = (timestamp % 86400) / 86400  # Position in day cycle
+            
+            # Create dimensional coordinates from observations
+            dimensional_coords = []
+            for key, value in pattern_observations:
+                if isinstance(value, (int, float)):
+                    dimensional_coords.append(value)
+                elif isinstance(value, bool):
+                    dimensional_coords.append(1.0 if value else 0.0)
+                elif isinstance(value, list):
+                    dimensional_coords.append(len(value))
+            
+            # Ensure we have at least 3 dimensions
+            while len(dimensional_coords) < 3:
+                dimensional_coords.append(0.0)
+            
+            # Normalize dimensional coordinates
+            max_coord = max(abs(coord) for coord in dimensional_coords)
+            if max_coord > 0:
+                dimensional_coords = [coord / max_coord for coord in dimensional_coords]
+            
+            props["dimensional_coordinates"] = dimensional_coords
+            
+            # Calculate primary dimensions based on coordinate magnitudes
+            primary_dims = list(range(len(dimensional_coords)))
+            primary_dims.sort(key=lambda i: abs(dimensional_coords[i]), reverse=True)
+            props["primary_dimensions"] = primary_dims[:3]  # Top 3 dimensions
+            
+            # Calculate eigenspace stability from dimensional coordinates
+            if dimensional_coords:
+                # Stability is inverse of variance in coordinate magnitudes
+                magnitudes = [abs(coord) for coord in dimensional_coords]
+                mean = sum(magnitudes) / len(magnitudes)
+                variance = sum((x - mean) ** 2 for x in magnitudes) / len(magnitudes)
+                props["eigenspace_stability"] = 1.0 / (1.0 + variance) if variance > 0 else 1.0
+            else:
+                props["eigenspace_stability"] = 0.5
+            
+            # Assign pattern to resonance groups based on tonic value
+            # This demonstrates how resonance groups emerge from eigenspace properties
+            props["resonance_groups"] = []
+            if props["tonic_value"] > 0.7:
+                props["resonance_groups"].append("rg-high-tonic")
+            else:
+                props["resonance_groups"].append("rg-low-tonic")
+            
+            eigenspace_properties[pattern_id] = props
+        
+        # Create resonance relationships between patterns
+        resonance_relationships = {}
+        pattern_ids = list(patterns.keys())
+        
+        # Create relationships based on eigenspace properties
+        for i, pattern_id in enumerate(pattern_ids):
+            related_patterns = []
+            
+            for j, other_id in enumerate(pattern_ids):
+                if pattern_id != other_id:
+                    # Calculate similarity based on eigenspace properties
+                    props_i = eigenspace_properties[pattern_id]
+                    props_j = eigenspace_properties[other_id]
+                    
+                    # Calculate phase difference to determine interference type
+                    phase_i = props_i.get("phase_position", 0.0)
+                    phase_j = props_j.get("phase_position", 0.0)
+                    phase_diff = abs(phase_i - phase_j)
+                    if phase_diff > 1.0:
+                        phase_diff = phase_diff % 1.0
+                    
+                    # Determine interference type based on phase difference
+                    if phase_diff < 0.1 or phase_diff > 0.9:
+                        interference_type = "CONSTRUCTIVE"
+                    elif abs(phase_diff - 0.5) < 0.1:
+                        interference_type = "DESTRUCTIVE"
+                    else:
+                        interference_type = "PARTIAL"
+                    
+                    # Calculate similarity based on dimensional coordinates
+                    coords_i = props_i.get("dimensional_coordinates", [])
+                    coords_j = props_j.get("dimensional_coordinates", [])
+                    
+                    similarity = 0.5  # Default similarity
+                    if coords_i and coords_j and len(coords_i) == len(coords_j):
+                        # Calculate cosine similarity
+                        dot_product = sum(a * b for a, b in zip(coords_i, coords_j))
+                        magnitude_i = sum(a * a for a in coords_i) ** 0.5
+                        magnitude_j = sum(b * b for b in coords_j) ** 0.5
+                        
+                        if magnitude_i > 0 and magnitude_j > 0:
+                            similarity = dot_product / (magnitude_i * magnitude_j)
+                    
+                    # Create relationship with properties that emerged from eigenspace
+                    related_patterns.append({
+                        "pattern_id": other_id,
+                        "similarity": similarity,
+                        "resonance_types": ["eigenspace", interference_type.lower()],
+                        "wave_interference": interference_type,
+                        "phase_difference": phase_diff
+                    })
+            
+            resonance_relationships[pattern_id] = related_patterns
+        
+        # Create resonance groups based on tonic values
+        resonance_groups = {
+            "rg-high-tonic": {
+                "dimension": 0,  # Primary dimension
+                "coherence": 0.85,
+                "stability": 0.9,
+                "pattern_count": sum(1 for props in eigenspace_properties.values() 
+                                   if "tonic_value" in props and props["tonic_value"] > 0.7),
+                "patterns": [pid for pid, props in eigenspace_properties.items() 
+                           if "tonic_value" in props and props["tonic_value"] > 0.7]
+            },
+            "rg-low-tonic": {
+                "dimension": 1,  # Secondary dimension
+                "coherence": 0.7,
+                "stability": 0.75,
+                "pattern_count": sum(1 for props in eigenspace_properties.values() 
+                                   if "tonic_value" in props and props["tonic_value"] <= 0.7),
+                "patterns": [pid for pid, props in eigenspace_properties.items() 
+                           if "tonic_value" in props and props["tonic_value"] <= 0.7]
+            }
+        }
+        
+        # Create a topology state with all these components
+        state = TopologyState(
+            id="ts-test-bidirectional",
+            timestamp=datetime.now(),
+            field_metrics=FieldMetrics(coherence=0.8, stability=0.7, saturation=0.6),
+            patterns=patterns,
+            frequency_domains=domains,
+            boundaries={boundary.id: boundary},
+            resonance_points={},
+            pattern_eigenspace_properties=eigenspace_properties,
+            resonance_relationships=resonance_relationships,
+            resonance_groups=resonance_groups
+        )
+        
+        # Persist the state to Neo4j
+        self.topology_manager.persist_to_neo4j(state)
+        
+        # Verify that bidirectional integration occurred
+        self.session.run.assert_called()
+        
+        # Extract calls related to pattern persistence with eigenspace properties
+        eigenspace_calls = [
+            call for call in self.session.run.call_args_list 
+            if "Pattern" in str(call) and "dimensional_coordinates" in str(call)
+        ]
+        
+        # Extract calls related to semantic enhancement
+        semantic_calls = [
+            call for call in self.session.run.call_args_list 
+            if "semantic_content" in str(call) or "keywords" in str(call)
+        ]
+        
+        # Extract calls related to wave interference relationships
+        wave_calls = [
+            call for call in self.session.run.call_args_list 
+            if "RESONATES_WITH" in str(call) and "wave_interference" in str(call)
+        ]
+        
+        # Verify that all aspects of bidirectional integration were persisted
+        self.assertTrue(len(eigenspace_calls) > 0, "No calls to persist eigenspace properties")
+        self.assertTrue(len(semantic_calls) > 0, "No calls to persist semantic content")
+        self.assertTrue(len(wave_calls) > 0, "No calls to persist wave interference relationships")
+    
+    def test_direct_semantic_representation(self):
+        """
+        Test that the semantic space is directly represented without abstractions.
+        
+        This test validates that patterns are concept-relationships, not abstractions of them,
+        and that all topology features emerge from the semantic space naturally.
+        """
+        # Load real climate risk document for Martha's Vineyard
+        # This uses actual observations rather than artificial test data
+        climate_risk_path = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
+            "data", "climate_risk", "climate_risk_marthas_vineyard.txt"
+        )
+        
+        # Read the document content
+        with open(climate_risk_path, "r") as f:
+            document_content = f.read()
+        
+        # Log document loading
+        logging.info(f"Loaded document: Climate Risk Assessment - Martha's Vineyard, MA")
+        
+        # Split document into paragraphs - these are our natural observations
+        paragraphs = [p.strip() for p in document_content.split("\n\n") if p.strip()]
+        logging.info(f"Document has {len(paragraphs)} paragraphs")
+        
+        # Process the document to extract natural observations
+        # We'll use the first 10 paragraphs as our observation set
+        observations = []
+        for i, paragraph in enumerate(paragraphs[:10]):
+            observations.append({
+                "id": f"obs-{i}",
+                "content": paragraph,
+                "timestamp": datetime.now().isoformat(),
+                "source": "climate_risk_assessment",
+                "metadata": {
+                    "document_id": "climate_risk_marthas_vineyard",
+                    "paragraph_index": i
+                }
+            })
+        
+        # Create patterns directly from observations without imposing structure
+        # Each pattern emerges naturally from the observation content
+        patterns = {}
+        for i, obs in enumerate(observations):
+            # Create a pattern from this observation
+            pattern_id = f"p-{i}"
+            pattern = Pattern(
+                id=pattern_id,
+                creator_id="test-creator"
+            )
+            
+            # Create AdaptiveID with temporal context from the observation
+            adaptive_id = AdaptiveID(
+                id=f"aid-{i}",
+                base_concept="climate_observation",
+                creator_id="test-creator"
+            )
+            
+            # Add the observation content as temporal context
+            # This is how real observations accumulate in the system
+            adaptive_id.update_temporal_context("content", obs["content"])
+            adaptive_id.update_temporal_context("timestamp", obs["timestamp"])
+            adaptive_id.update_temporal_context("source", obs["source"])
+            
+            # Connect pattern to AdaptiveID
+            pattern.adaptive_id = adaptive_id
+            patterns[pattern_id] = pattern
+        
+        # Extract semantic content from patterns
+        # This content emerges naturally from the observation text
+        semantic_contents = {}
+        keywords_list = {}
+        
+        for pattern_id, pattern in patterns.items():
+            # Extract semantic content directly from pattern
+            semantic_content = PatternSemanticEnhancer.get_semantic_content(pattern)
+            keywords = PatternSemanticEnhancer.get_keywords(pattern)
+            
+            semantic_contents[pattern_id] = semantic_content
+            keywords_list[pattern_id] = keywords
+        
+        # Extract semantic content through natural language processing
+        # This is a true observation process - we're measuring the semantic content
+        # rather than imposing categories
+        
+        # Create a document-term matrix from the observations
+        # This is a fundamental measurement of the semantic space
+        from sklearn.feature_extraction.text import TfidfVectorizer
+        
+        # Extract all observation content
+        documents = [semantic_contents[pid] for pid in patterns.keys()]
+        
+        # Create a TF-IDF vectorizer to measure term importance
+        # This naturally captures the semantic significance without imposing structure
+        vectorizer = TfidfVectorizer(max_features=100, stop_words='english')
+        tfidf_matrix = vectorizer.fit_transform(documents)
+        
+        # Get the feature names (terms) that emerged from the data
+        feature_names = vectorizer.get_feature_names_out()
+        logging.info(f"Discovered {len(feature_names)} significant terms in the observations")
+        
+        # Perform dimensionality reduction to find the natural dimensions
+        # This lets the semantic space emerge from the data rather than being predefined
+        from sklearn.decomposition import TruncatedSVD
+        
+        # Use SVD to find the latent semantic dimensions
+        # These dimensions emerge naturally from the data
+        svd = TruncatedSVD(n_components=5)
+        latent_semantic_space = svd.fit_transform(tfidf_matrix)
+        
+        # Log the explained variance to understand the natural structure
+        explained_variance = svd.explained_variance_ratio_.sum()
+        logging.info(f"Natural semantic space captured {explained_variance:.2%} of variance")
+        
+        # Create embedding vectors from the latent semantic space
+        # These vectors represent the natural position of each observation
+        embedding_vectors = {}
+        for i, pattern_id in enumerate(patterns.keys()):
+            # The embedding is the projection of the document onto the latent dimensions
+            embedding = latent_semantic_space[i]
+            
+            # Normalize the embedding to unit length
+            norm = np.linalg.norm(embedding)
+            if norm > 0:
+                embedding = embedding / norm
+            
+            embedding_vectors[pattern_id] = embedding
+            
+        # Discover the most important terms for each dimension
+        # This helps us understand what each dimension represents naturally
+        components = svd.components_
+        dimension_terms = []
+        for i, component in enumerate(components):
+            # Get the top terms for this dimension
+            top_term_indices = component.argsort()[-5:][::-1]
+            top_terms = [feature_names[idx] for idx in top_term_indices]
+            dimension_terms.append(top_terms)
+            logging.info(f"Dimension {i} naturally represents: {', '.join(top_terms)}")
+        
+        # Calculate resonance matrix (cosine similarity)
+        # This naturally emerges from the semantic relationships
+        pattern_ids = list(patterns.keys())
+        resonance_matrix = np.zeros((len(pattern_ids), len(pattern_ids)))
+        
+        for i, pid1 in enumerate(pattern_ids):
+            for j, pid2 in enumerate(pattern_ids):
+                if i != j:
+                    # Calculate cosine similarity between embeddings
+                    vec1 = embedding_vectors[pid1]
+                    vec2 = embedding_vectors[pid2]
+                    dot_product = np.dot(vec1, vec2)
+                    norm1 = np.linalg.norm(vec1)
+                    norm2 = np.linalg.norm(vec2)
+                    
+                    if norm1 > 0 and norm2 > 0:
+                        resonance_matrix[i, j] = dot_product / (norm1 * norm2)
+                else:
+                    resonance_matrix[i, j] = 1.0  # Self-similarity is 1
+        
+        # Calculate eigenspace properties for each pattern
+        # These properties emerge naturally from the measured semantic space
+        eigenspace_properties = {}
+        
+        for i, pattern_id in enumerate(pattern_ids):
+            embedding = embedding_vectors[pattern_id]
+            
+            # Calculate tonic value - this is the resonance strength of the pattern
+            # in the semantic field - it emerges from the embedding's magnitude profile
+            tonic_value = np.max(np.abs(embedding))
+            
+            # Calculate phase position - this represents the pattern's position
+            # in the oscillation cycle of the semantic field
+            phase_position = np.sum(embedding) % 1.0
+            
+            # Calculate resonance strength with other patterns
+            # This measures how strongly this pattern interacts with others
+            resonance_strength = np.mean(resonance_matrix[i])
+            
+            # Identify primary dimensions - these are the semantic dimensions
+            # where this pattern has the strongest projection
+            primary_dimensions = np.argsort(-np.abs(embedding)).tolist()[:3]
+            
+            # Create eigenspace properties dict
+            props = {
+                "tonic_value": float(tonic_value),  # Convert to native Python float
+                "phase_position": float(phase_position),
+                "dimensional_coordinates": embedding.tolist(),
+                "resonance_strength": float(resonance_strength),
+                "primary_dimensions": primary_dimensions,
+                "dimension_terms": [dimension_terms[dim] for dim in primary_dimensions],
+                "semantic_density": float(np.linalg.norm(embedding) / np.sqrt(len(embedding)))
+            }
+            
+            eigenspace_properties[pattern_id] = props
+            
+        # Now we'll detect the natural frequency domains that emerge from the data
+        # We'll use clustering to find natural groupings in the semantic space
+        from sklearn.cluster import KMeans
+        
+        # Convert embeddings to a matrix for clustering
+        embedding_matrix = np.array([embedding_vectors[pid] for pid in pattern_ids])
+        
+        # Determine optimal number of clusters using silhouette score
+        from sklearn.metrics import silhouette_score
+        silhouette_scores = []
+        max_clusters = min(len(pattern_ids) - 1, 5)  # Avoid too many clusters
+        
+        for n_clusters in range(2, max_clusters + 1):
+            kmeans = KMeans(n_clusters=n_clusters, random_state=42)
+            cluster_labels = kmeans.fit_predict(embedding_matrix)
+            if len(set(cluster_labels)) > 1:  # Ensure we have at least 2 clusters
+                score = silhouette_score(embedding_matrix, cluster_labels)
+                silhouette_scores.append((n_clusters, score))
+        
+        # Find optimal number of clusters
+        optimal_n_clusters = max(silhouette_scores, key=lambda x: x[1])[0] if silhouette_scores else 2
+        logging.info(f"Optimal number of frequency domains detected: {optimal_n_clusters}")
+        
+        # Perform clustering with optimal number of clusters
+        kmeans = KMeans(n_clusters=optimal_n_clusters, random_state=42)
+        cluster_labels = kmeans.fit_predict(embedding_matrix)
+        
+        # Create frequency domains based on the clusters
+        # These domains emerge naturally from the semantic space
+        frequency_domains = {}
+        
+        for i in range(optimal_n_clusters):
+            # Get patterns in this cluster
+            cluster_pattern_indices = np.where(cluster_labels == i)[0]
+            cluster_patterns = [pattern_ids[idx] for idx in cluster_pattern_indices]
+            
+            if not cluster_patterns:
+                continue
+                
+            # Calculate domain properties from the cluster
+            domain_center = kmeans.cluster_centers_[i]
+            
+            # Get the most representative terms for this domain
+            domain_terms = []
+            for pattern_idx in cluster_pattern_indices:
+                pattern_id = pattern_ids[pattern_idx]
+                domain_terms.extend(eigenspace_properties[pattern_id]["dimension_terms"][0])  # Use top dimension terms
+            
+            # Count term frequencies and get top terms
+            from collections import Counter
+            term_counter = Counter(domain_terms)
+            top_domain_terms = [term for term, count in term_counter.most_common(5)]
+            
+            # Create a meaningful name for the domain based on top terms
+            domain_name = "_".join(top_domain_terms[:2]) if top_domain_terms else f"domain_{i}"
+            
+            # Create the frequency domain with properties that emerge from the cluster
+            domain_id = f"fd-{domain_name}"
+            frequency_domains[domain_id] = FrequencyDomain(
+                id=domain_id,
+                dominant_frequency=float(np.linalg.norm(domain_center)),
+                bandwidth=float(np.std([np.linalg.norm(embedding_vectors[pid] - domain_center) 
+                                for pid in cluster_patterns])),
+                phase_coherence=float(np.mean([eigenspace_properties[pid]["phase_position"] 
+                                    for pid in cluster_patterns])),
+                radius=float(np.max([np.linalg.norm(embedding_vectors[pid] - domain_center) 
+                            for pid in cluster_patterns])),
+                metadata={
+                    "name": domain_name.capitalize(),
+                    "representative_terms": top_domain_terms,
+                    "pattern_count": len(cluster_patterns),
+                    "center_coordinates": domain_center.tolist(),
+                    "patterns": cluster_patterns
+                }
+            )
+            logging.info(f"Created frequency domain: {domain_name} with {len(cluster_patterns)} patterns")
+        
+        # Detect natural boundaries between domains
+        # These boundaries emerge from the relationships between domains
+        boundaries = {}
+        domain_ids = list(frequency_domains.keys())
+        
+        for i in range(len(domain_ids)):
+            for j in range(i+1, len(domain_ids)):
+                domain1_id = domain_ids[i]
+                domain2_id = domain_ids[j]
+                
+                # Calculate boundary properties based on the domains
+                domain1_center = np.array(frequency_domains[domain1_id].metadata["center_coordinates"])
+                domain2_center = np.array(frequency_domains[domain2_id].metadata["center_coordinates"])
+                
+                # Calculate distance between domain centers
+                center_distance = np.linalg.norm(domain1_center - domain2_center)
+                
+                # Only create boundaries between nearby domains
+                if center_distance < 1.5:  # Threshold for boundary creation
+                    # Create boundary with properties that emerge from the domain relationship
+                    boundary_id = f"b-{domain1_id.split('-')[1]}-{domain2_id.split('-')[1]}"
+                    
+                    # Calculate permeability based on domain overlap
+                    permeability = 1.0 / (1.0 + center_distance)  # Higher for closer domains
+                    
+                    # Calculate sharpness based on domain radii
+                    domain1_radius = frequency_domains[domain1_id].radius
+                    domain2_radius = frequency_domains[domain2_id].radius
+                    sharpness = 1.0 - (min(domain1_radius, domain2_radius) / max(domain1_radius, domain2_radius))
+                    
+                    # Calculate stability based on phase coherence
+                    domain1_coherence = frequency_domains[domain1_id].phase_coherence
+                    domain2_coherence = frequency_domains[domain2_id].phase_coherence
+                    stability = (domain1_coherence + domain2_coherence) / 2.0
+                    
+                    boundaries[boundary_id] = Boundary(
+                        id=boundary_id,
+                        domain_ids=(domain1_id, domain2_id),
+                        permeability=float(permeability),
+                        sharpness=float(sharpness),
+                        stability=float(stability)
+                    )
+                    logging.info(f"Created boundary between {domain1_id} and {domain2_id}")
+        
+        # Create resonance relationships based on resonance matrix
+        # These relationships emerge naturally from pattern similarities
+        resonance_relationships = {}
+        
+        for i, pattern_id in enumerate(pattern_ids):
+            related_patterns = []
+            
+            for j, other_id in enumerate(pattern_ids):
+                if pattern_id != other_id and resonance_matrix[i, j] > 0.5:  # Only strong resonances
+                    # Calculate phase difference to determine interference type
+                    phase_i = eigenspace_properties[pattern_id]["phase_position"]
+                    phase_j = eigenspace_properties[other_id]["phase_position"]
+                    phase_diff = abs(phase_i - phase_j)
+                    if phase_diff > 1.0:
+                        phase_diff = phase_diff % 1.0
+                    
+                    # Interference type emerges from phase difference
+                    if phase_diff < 0.1 or phase_diff > 0.9:
+                        interference_type = "CONSTRUCTIVE"
+                    elif abs(phase_diff - 0.5) < 0.1:
+                        interference_type = "DESTRUCTIVE"
+                    else:
+                        interference_type = "PARTIAL"
+                    
+                    # Calculate resonance strength based on embedding similarity
+                    similarity = float(resonance_matrix[i, j])
+                    
+                    # Create relationship with properties that emerged from vectors
+                    related_patterns.append({
+                        "pattern_id": other_id,
+                        "similarity": similarity,
+                        "resonance_types": ["eigenspace", interference_type.lower()],
+                        "wave_interference": interference_type,
+                        "phase_difference": float(phase_diff)
+                    })
+            
+            if related_patterns:
+                resonance_relationships[pattern_id] = related_patterns
+                logging.info(f"Created {len(related_patterns)} resonance relationships for pattern {pattern_id}")
+        
+        # Detect resonance points - areas of high semantic significance
+        # These points emerge from patterns with high tonic values
+        resonance_points = {}
+        
+        # Use patterns with high tonic values as resonance points
+        high_tonic_patterns = sorted(
+            [(pid, props["tonic_value"]) for pid, props in eigenspace_properties.items()],
+            key=lambda x: x[1],
+            reverse=True
+        )[:3]  # Top 3 patterns by tonic value
+        
+        for i, (pattern_id, tonic_value) in enumerate(high_tonic_patterns):
+            # Find patterns that resonate with this one
+            pattern_idx = pattern_ids.index(pattern_id)
+            resonating_patterns = {}
+            
+            for j, pid in enumerate(pattern_ids):
+                if resonance_matrix[pattern_idx, j] > 0.7:  # High resonance threshold
+                    resonating_patterns[pid] = float(resonance_matrix[pattern_idx, j])
+            
+            # Create resonance point with properties that emerge from the pattern relationships
+            point_id = f"rp-{i}"
+            resonance_points[point_id] = ResonancePoint(
+                id=point_id,
+                coordinates=tuple(embedding_vectors[pattern_id].tolist()),
+                strength=float(tonic_value),
+                stability=float(np.mean([eigenspace_properties[pid]["tonic_value"] for pid in resonating_patterns])),
+                attractor_radius=float(0.3 + (0.1 * np.random.random())),  # Small random variation
+                contributing_pattern_ids=resonating_patterns
+            )
+            logging.info(f"Created resonance point {point_id} with {len(resonating_patterns)} contributing patterns")
+        
+        # Create resonance groups based on clustering in eigenspace
+        # Groups emerge from patterns with similar dimensional characteristics
+        resonance_groups = {}
+        
+        # Use hierarchical clustering to find natural groupings of patterns by tonic value
+        from sklearn.cluster import AgglomerativeClustering
+        
+        # Extract tonic values for clustering
+        tonic_values = np.array([[eigenspace_properties[pid]["tonic_value"]] for pid in pattern_ids])
+        
+        # Determine optimal number of clusters using silhouette score
+        max_groups = min(len(pattern_ids) // 2, 3)  # Avoid too many groups
+        silhouette_scores = []
+        
+        for n_clusters in range(2, max_groups + 1):
+            clustering = AgglomerativeClustering(n_clusters=n_clusters)
+            cluster_labels = clustering.fit_predict(tonic_values)
+            if len(set(cluster_labels)) > 1:  # Ensure we have at least 2 clusters
+                score = silhouette_score(tonic_values, cluster_labels)
+                silhouette_scores.append((n_clusters, score))
+        
+        # Find optimal number of clusters
+        optimal_n_groups = max(silhouette_scores, key=lambda x: x[1])[0] if silhouette_scores else 2
+        
+        # Perform clustering with optimal number of clusters
+        clustering = AgglomerativeClustering(n_clusters=optimal_n_groups)
+        group_labels = clustering.fit_predict(tonic_values)
+        
+        for group_id in range(optimal_n_groups):
+            # Get patterns in this group
+            group_pattern_indices = np.where(group_labels == group_id)[0]
+            group_patterns = [pattern_ids[idx] for idx in group_pattern_indices]
+            
+            if not group_patterns:
+                continue
+            
+            # Calculate group properties from patterns
+            group_tonic_values = [eigenspace_properties[pid]["tonic_value"] for pid in group_patterns]
+            avg_tonic = np.mean(group_tonic_values)
+            
+            # Create a meaningful name for the group based on tonic value range
+            if avg_tonic > 0.8:
+                group_name = "high_resonance"
+            elif avg_tonic > 0.5:
+                group_name = "medium_resonance"
+            else:
+                group_name = "low_resonance"
+            
+            # Create group with properties that emerge from patterns
+            resonance_groups[f"rg-{group_name}_{group_id}"] = {
+                "coherence": float(1.0 - np.std(group_tonic_values)),  # Higher coherence = lower std dev
+                "stability": float(avg_tonic),  # Higher tonic values = more stable
+                "harmonic_value": float(avg_tonic * (1.0 - np.std(group_tonic_values))),  # Combined metric
+                "pattern_count": len(group_patterns),
+                "patterns": group_patterns,
+                "average_tonic": float(avg_tonic)
+            }
+            logging.info(f"Created resonance group {group_name}_{group_id} with {len(group_patterns)} patterns")
+        
+        # Create a topology state with all components that emerged naturally from the data
+        state = TopologyState(
+            id="ts-test-semantic",
+            timestamp=datetime.now(),
+            field_metrics=FieldMetrics(
+                coherence=float(np.mean([domain.phase_coherence for domain in frequency_domains.values()])),
+                stability=float(np.mean([boundary.stability for boundary in boundaries.values()])),
+                saturation=float(len(patterns) / 20.0)  # Normalized by expected capacity
+            ),
+            patterns=patterns,
+            frequency_domains=frequency_domains,
+            boundaries=boundaries,
+            resonance_points=resonance_points,
+            pattern_eigenspace_properties=eigenspace_properties,
+            resonance_relationships=resonance_relationships,
+            resonance_groups=resonance_groups
+        )
+        
+        # Use the semantic topology enhancer to enhance the state
+        # This demonstrates how semantic content is directly integrated with topology
+        enhanced_state = semantic_enhancer.enhance_topology_state(state)
+        
+        # Verify that the enhanced state has semantic properties
+        self.assertEqual(enhanced_state.id, state.id)
+        self.assertEqual(enhanced_state.patterns, state.patterns)
+        
+        # Persist the enhanced state to Neo4j
+        self.topology_manager.persist_to_neo4j(enhanced_state)
+        
+        # Verify that semantic content was persisted directly
+        self.session.run.assert_called()
+        
+        # Extract calls related to pattern persistence with eigenspace properties
+        eigenspace_calls = [
+            call for call in self.session.run.call_args_list 
+            if "Pattern" in str(call) and "dimensional_coordinates" in str(call)
+        ]
+        
+        # Extract calls related to frequency domain persistence
+        domain_calls = [
+            call for call in self.session.run.call_args_list 
+            if "FrequencyDomain" in str(call)
+        ]
+        
+        # Extract calls related to boundary persistence
+        boundary_calls = [
+            call for call in self.session.run.call_args_list 
+            if "Boundary" in str(call)
+        ]
+        
+        # Extract calls related to resonance relationships
+        resonance_calls = [
+            call for call in self.session.run.call_args_list 
+            if "RESONATES_WITH" in str(call)
+        ]
+        
+        # Verify that all components were persisted
+        self.assertTrue(len(eigenspace_calls) > 0, "No calls to persist eigenspace properties")
+        self.assertTrue(len(domain_calls) > 0, "No calls to persist frequency domains")
+        self.assertTrue(len(boundary_calls) > 0, "No calls to persist boundaries")
+        self.assertTrue(len(resonance_calls) > 0, "No calls to persist resonance relationships")
+        
+        # Verify that semantic queries can be executed on the persisted state
+        semantic_queries = Neo4jSemanticQueries(self.neo4j_driver)
+        
+        # Mock the query result for testing
+        query_result = MagicMock()
+        query_result.data.return_value = [
+            {"pattern": {"id": pattern_id}} for pattern_id in patterns.keys()
+        ]
+        self.result.data.return_value = query_result.data()
+        
+        # Test querying patterns by eigenspace properties
+        result = semantic_queries.get_patterns_by_eigenspace_properties({"tonic_value": {"min": 0.8}})
+        
+        # Verify that the query was executed
+        self.session.run.assert_called()
+        
+        # Verify that the result contains patterns
+        self.assertIsNotNone(result)
+        self.assertTrue(len(result) > 0)
