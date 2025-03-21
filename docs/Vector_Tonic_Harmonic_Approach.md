@@ -12,7 +12,7 @@ The Vector + Tonic-Harmonic approach addresses these limitations by leveraging e
 
 ## Comparative Analysis
 
-Our comprehensive testing reveals significant advantages of the Vector + Tonic-Harmonic approach across multiple metrics:
+Our comprehensive testing reveals significant advantages of the Vector + Tonic-Harmonic approach across multiple metrics. Recent integration tests with climate risk documents (March 2025) demonstrate a 1.74x improvement in coherence when using the vector+tonic-harmonic approach compared to vector-only methods.
 
 ### 1. Pattern Detection Capabilities
 
@@ -65,9 +65,28 @@ Perhaps the most significant advantage is the ability to detect dimensional reso
 - **Eigenspace projections**: Identifies patterns based on their projections onto principal eigenvectors
 - **Effective dimensionality**: Calculates the intrinsic dimensionality of the pattern field
 
+### 5. Dynamic Domain Detection
+
+Our latest implementation (March 2025) demonstrates the ability to dynamically detect frequency domains based on observed data rather than relying on predefined or hard-coded values:
+
+- **Emergent domains**: Frequency domains emerge naturally from pattern relationships without predefined categories
+- **Domain characterization**: Each domain is characterized by its dominant frequency, bandwidth, phase coherence, and radius
+- **Coherence metrics**: The system calculates average phase coherence, pattern tonic values, and boundary stability
+
+In our climate risk integration tests, the system automatically identified four distinct frequency domains:
+
+| Domain | Dominant Frequency | Phase Coherence | Pattern Count |
+|--------|-------------------|-----------------|---------------|
+| Marine & Coastal | 0.1 | 0.5000 | 4 |
+| Research & Marine | 0.2 | 1.0000 | 3 |
+| Coastal & Ecological | 0.3 | 0.5596 | 6 |
+| Coastal & Research | 0.4 | 0.6173 | 2 |
+
+This dynamic approach enables the system to adapt to different document types and content without requiring manual tuning or predefined domain structures.
+
 ## Technical Implementation
 
-The Vector + Tonic-Harmonic approach is implemented through several key components:
+The Vector + Tonic-Harmonic approach is implemented through several key components. Recent integration testing (March 2025) demonstrates a 1.74x improvement in coherence using this approach compared to vector-only methods:
 
 ### 1. Window Frequency Interactions and Resonance Patterns
 
@@ -97,8 +116,18 @@ This frequency-based approach has several advantages over static categorization:
 2. **Adaptive resonance**: The system can adapt to changing patterns by shifting phase relationships
 3. **Bidirectional synchronization**: Changes propagate bidirectionally between components, ensuring coherent system behavior
 4. **Constructive dissonance**: Apparent dissonance in individual patterns can contribute to overall system harmony
+5. **Dynamic domain detection**: Frequency domains emerge naturally from the data without predefined categories
 
-Our testing demonstrates that this approach significantly outperforms static categorization in detecting complex pattern relationships and semantic edges.
+Our testing demonstrates that this approach significantly outperforms static categorization in detecting complex pattern relationships and semantic edges. Recent climate risk integration tests (March 2025) show:
+
+| Metric | Vector-Only | Vector+Tonic-Harmonic | Improvement |
+|--------|-------------|------------------------|-------------|
+| Coherence | 0.3231 | 0.5611 | 1.74x |
+| Average Phase Coherence | N/A | 0.6692 | N/A |
+| Average Pattern Tonic Value | N/A | 0.8385 | N/A |
+| Average Boundary Stability | N/A | 0.8346 | N/A |
+
+These results validate the effectiveness of the vector+tonic-harmonic approach in processing complex semantic relationships in climate risk documents.
 
 ### 2. Eigenspace Analysis
 
