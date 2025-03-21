@@ -69,11 +69,15 @@ src/habitat_evolution/domain_ontology/rules/__init__.py
 src/habitat_evolution/examples/visualize_semantic_patterns.py
 src/habitat_evolution/field/__init__.py
 src/habitat_evolution/field/cypher_query_library.py
+src/habitat_evolution/field/field_adaptive_id_bridge.py
 src/habitat_evolution/field/field_navigator.py
+src/habitat_evolution/field/field_rag_bridge.py
+src/habitat_evolution/field/field_state.py
 src/habitat_evolution/field/flow_dynamics_analyzer.py
 src/habitat_evolution/field/integrations_pattern_aware_rag.py
 src/habitat_evolution/field/neo4j_pattern_schema.py
 src/habitat_evolution/field/pattern_aware_rag_example.py
+src/habitat_evolution/field/pattern_coevolution_cypher.py
 src/habitat_evolution/field/pattern_explorer.py
 src/habitat_evolution/field/resonance_pattern_detector.py
 src/habitat_evolution/field/semantic_boundary_detector.py
@@ -99,6 +103,7 @@ src/habitat_evolution/pattern_aware_rag/learning/__init__.py
 src/habitat_evolution/pattern_aware_rag/learning/field_neo4j_bridge.py
 src/habitat_evolution/pattern_aware_rag/learning/learning_control.py
 src/habitat_evolution/pattern_aware_rag/learning/learning_health_integration.py
+src/habitat_evolution/pattern_aware_rag/learning/pattern_coevolution_persistence.py
 src/habitat_evolution/pattern_aware_rag/learning/window_manager.py
 src/habitat_evolution/pattern_aware_rag/monitoring/metrics_logger.py
 src/habitat_evolution/pattern_aware_rag/monitoring/vector_attention_monitor.py
@@ -124,6 +129,12 @@ src/habitat_evolution/pattern_aware_rag/superceeded/emergence_flow.py
 src/habitat_evolution/pattern_aware_rag/superceeded/graph_service.py
 src/habitat_evolution/pattern_aware_rag/superceeded/pattern_evolution.py
 src/habitat_evolution/pattern_aware_rag/superceeded/rag_controller.py
+src/habitat_evolution/pattern_aware_rag/topology/__init__.py
+src/habitat_evolution/pattern_aware_rag/topology/api.py
+src/habitat_evolution/pattern_aware_rag/topology/detector.py
+src/habitat_evolution/pattern_aware_rag/topology/manager.py
+src/habitat_evolution/pattern_aware_rag/topology/models.py
+src/habitat_evolution/pattern_aware_rag/topology/semantic_topology_enhancer.py
 src/habitat_evolution/service/__init__.py
 src/habitat_evolution/social/core/field.py
 src/habitat_evolution/social/core/pattern.py
@@ -184,6 +195,7 @@ src/habitat_evolution/visualization/eigenspace_visualizer.py
 src/habitat_evolution/visualization/pattern_id.py
 src/habitat_evolution/visualization/semantic_validation.py
 src/habitat_evolution/visualization/test_visualization.py
+src/habitat_evolution/visualization/dashboard/__init__.py
 src/habitat_evolution_old/__init__.py
 src/habitat_evolution_old/adapters/document/processor.py
 src/habitat_evolution_old/adapters/pattern/transformer.py
@@ -233,6 +245,10 @@ src/tests/core/flow/test_habitat_flow.py
 src/tests/core/services/field/test_field_state_service.py
 src/tests/integration/__init__.py
 src/tests/integration/test_api.py
+src/tests/integration/test_climate_risk_integration.py
+src/tests/integration/test_climate_risk_integration_fixed.py
+src/tests/integration/test_climate_risk_integration_new.py
+src/tests/integration/test_climate_risk_integration_updated.py
 src/tests/mocks/__init__.py
 src/tests/mocks/mock_db.py
 src/tests/mocks/mock_websocket.py
@@ -263,6 +279,8 @@ src/tests/unified/PORT/adaptive_core/pattern_core.py
 src/tests/unified/PORT/adaptive_core/pattern_integration.py
 src/tests/unified/PORT/adaptive_core/relationship_model.py
 src/tests/unified/PORT/adaptive_core/relationship_repository.py
+src/tests/unified/PORT/adaptive_core/test_adaptive_id_field_integration.py
+src/tests/unified/PORT/adaptive_core/test_adaptive_id_learning_integration.py
 src/tests/unified/PORT/adaptive_core/config/__init__.py
 src/tests/unified/PORT/adaptive_core/config/field_config.py
 src/tests/unified/PORT/adaptive_core/mocks/mock_adaptive_id.py
