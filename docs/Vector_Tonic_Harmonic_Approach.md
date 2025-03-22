@@ -151,6 +151,37 @@ for i in range(n):
 
 This improved implementation ensures that eigenvalues are sorted in descending order, allowing us to focus on the most significant dimensions first. Additionally, we project the pattern's resonance profile (rather than the raw vector) onto the eigenvectors, which better captures the pattern's position within the resonance field.
 
+### 4. Multi-scale Analysis and Eigenvector Stability
+
+Our March 2025 enhancements to the eigenspace window management system incorporate two key observational approaches that significantly improve boundary detection:
+
+#### Multi-scale Analysis
+
+Rather than relying on a single arbitrary threshold, our system now observes boundary persistence across multiple scales:
+
+- **Threshold Variation**: We apply multiple eigenvalue ratio thresholds (1.2, 1.5, 1.8, 2.1) to identify candidate boundaries
+- **Persistence Scoring**: Boundaries that persist across multiple scales receive higher scores
+- **Natural Structure Preservation**: This approach respects the inherent structure of the data rather than imposing artificial divisions
+
+#### Eigenvector Stability Analysis
+
+Beyond eigenvalues, we now observe how eigenvector directions change across potential boundaries:
+
+- **Projection Distance**: We measure the projection distance between eigenvectors on either side of potential boundaries
+- **Semantic Shift Detection**: Sharp changes in eigenvector direction indicate natural semantic transitions
+- **Dissonance Recognition**: This approach detects meaningful dissonance patterns, similar to how piano tuners use dissonance to guide tuning
+
+#### Single vs. Multiple Cluster Detection
+
+Our system now employs a multi-criteria approach to distinguish between single coherent clusters and multiple distinct clusters:
+
+- **Eigenvalue Dominance**: Examining the ratio between the first and subsequent eigenvalues
+- **Principal Eigenvector Coherence**: Measuring the alignment of components in the principal eigenvector
+- **Similarity Matrix Structure**: Analyzing the average off-diagonal similarity
+- **Data Distribution Patterns**: Recognizing characteristic patterns of coherent clusters
+
+These enhancements enable our system to adapt dynamically to the natural structure of semantic spaces, whether they contain a single coherent cluster or multiple distinct clusters, without imposing arbitrary thresholds.
+
 ### 2. Community Detection
 
 ```python
