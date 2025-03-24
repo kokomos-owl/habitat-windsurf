@@ -18,10 +18,56 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../.
 
 from habitat_evolution.adaptive_core.transformation.actant_journey_tracker import ActantJourneyTracker
 from habitat_evolution.pattern_aware_rag.learning.learning_control import LearningWindow, WindowState
-from habitat_evolution.adaptive_core.transformation.predicate_transformation_detector import (
-    Actant, Predicate, Domain, PredicateTransformationDetector
-)
+from habitat_evolution.adaptive_core.transformation.predicate_transformation_detector import PredicateTransformationDetector
 from habitat_evolution.adaptive_core.id.adaptive_id import AdaptiveID
+
+# Define test classes for Actant, Predicate, and Domain
+from dataclasses import dataclass, field
+from typing import List
+
+@dataclass
+class Actant:
+    """Test class for representing an actant in a semantic domain."""
+    id: str
+    name: str
+    aliases: List[str] = field(default_factory=list)
+    
+    def __post_init__(self):
+        if self.aliases is None:
+            self.aliases = []
+
+@dataclass
+class Predicate:
+    """Test class for representing a predicate in a semantic domain."""
+    id: str
+    subject: str
+    verb: str
+    object: str
+    text: str
+    domain_id: str
+    position: int = 0
+    
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "subject": self.subject,
+            "verb": self.verb,
+            "object": self.object,
+            "text": self.text,
+            "domain_id": self.domain_id,
+            "position": self.position
+        }
+
+@dataclass
+class Domain:
+    """Test class for representing a semantic domain."""
+    id: str
+    name: str
+    predicates: List[str] = field(default_factory=list)
+    
+    def __post_init__(self):
+        if self.predicates is None:
+            self.predicates = []
 
 
 class TestActantJourneyTracker(unittest.TestCase):

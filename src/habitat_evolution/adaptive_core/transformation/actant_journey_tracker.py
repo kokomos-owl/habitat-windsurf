@@ -19,6 +19,27 @@ from collections import defaultdict
 
 from ..id.adaptive_id import AdaptiveID
 
+# Mock class for testing TransformationEdge
+class MockTransformationEdge:
+    """Mock class for testing transformation edges."""
+    
+    def __init__(self, source_id, target_id, carrying_actants=None, source_predicate=None, target_predicate=None):
+        self.source_id = source_id
+        self.target_id = target_id
+        self.carrying_actants = carrying_actants or []
+        self.source_predicate = source_predicate or {}
+        self.target_predicate = target_predicate or {}
+        
+    def to_dict(self):
+        return {
+            "id": str(uuid.uuid4()),
+            "source_id": self.source_id,
+            "target_id": self.target_id,
+            "carrying_actants": self.carrying_actants,
+            "source_predicate": self.source_predicate,
+            "target_predicate": self.target_predicate
+        }
+
 
 @dataclass
 class ActantJourneyPoint:
@@ -515,7 +536,17 @@ class ActantJourneyTracker:
         
         # Get or create actant journey
         if actant_name not in self.actant_journeys:
-            self.actant_journeys[actant_name] = ActantJourney.create(actant_name)
+            # Create a new ActantJourney with an AdaptiveID
+            journey = ActantJourney.create(actant_name)
+            
+            # Register the journey's AdaptiveID with learning windows and field observers
+            for window in self.learning_windows:
+                journey.register_with_learning_window(window)
+                
+            for observer in self.field_observers:
+                journey.register_with_field_observer(observer)
+                
+            self.actant_journeys[actant_name] = journey
         
         # Add domain transition to actant journey
         self.actant_journeys[actant_name].add_domain_transition(transition)
@@ -531,10 +562,27 @@ class ActantJourneyTracker:
         Returns:
             Role of the actant in the predicate, or None if not found
         """
-        if predicate.get("subject") == actant_name:
+        subject = predicate.get("subject", "")
+        obj = predicate.get("object", "")
+        
+        # Check for exact matches first
+        if subject == actant_name:
             return "subject"
-        elif predicate.get("object") == actant_name:
+        elif obj == actant_name:
             return "object"
+        
+        # Check for substring matches
+        if actant_name in subject.split():
+            return "subject"
+        elif actant_name in obj.split():
+            return "object"
+        
+        # Check for more flexible matches
+        if actant_name.lower() in subject.lower():
+            return "subject"
+        elif actant_name.lower() in obj.lower():
+            return "object"
+            
         return None
     
     def get_actant_journey(self, actant_name: str) -> Optional[Dict[str, Any]]:
