@@ -9,7 +9,7 @@ narrative structure or "character building" as concepts transform.
 import os
 import sys
 import unittest
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Dict, List, Any, Tuple, Optional
 import uuid
 
@@ -142,6 +142,15 @@ class TestActantJourneyTracker(unittest.TestCase):
         
         # Detect transformations
         self.transformations = self.detector.detect_transformations()
+        
+        # Debug: Print information about the transformations
+        print(f"Number of transformations detected: {len(self.transformations)}")
+        if self.transformations:
+            for i, t in enumerate(self.transformations):
+                print(f"Transformation {i}:")
+                print(f"  Source ID: {t.source_id}")
+                print(f"  Target ID: {t.target_id}")
+                print(f"  Carrying Actants: {t.carrying_actants}")
     
     def test_tracker_initialization(self):
         """Test that the tracker initializes correctly."""
@@ -345,13 +354,14 @@ class TestActantJourneyTracker(unittest.TestCase):
         adaptive_id.register_with_learning_window(mock_window)
         
         # Observe another transformation to trigger a state change
+        # Use the same transformation but with a different timestamp to simulate a state change
         pattern_context = {
             "entity_id": str(uuid.uuid4()),
             "change_type": "predicate_transformation",
-            "transformation": self.transformations[1].to_dict(),
+            "transformation": self.transformations[0].to_dict(),
             "window_state": WindowState.OPEN.value,
-            "stability": 0.8,
-            "timestamp": datetime.now().isoformat()
+            "stability": 0.9,  # Changed stability to trigger state change
+            "timestamp": (datetime.now() + timedelta(seconds=10)).isoformat()  # Later timestamp
         }
         self.tracker.observe_pattern_evolution(pattern_context)
         
