@@ -16,6 +16,21 @@ The Habitat Pattern Language addresses this limitation by providing a formal fra
 
 ## 2. Core Components of the Emergence Language
 
+```mermaid
+flowchart TB
+    SP[Semantic Proposition] --> EP[Emergent Propensity]
+    DC[Domain Context] --> EP
+    EP --> MP[Manifestation Potential]
+    EP --> SCV[State Change Vectors]
+    EP --> CCI[Community Condition Indices]
+    
+    subgraph "Emergent Quotients"
+        MP
+        SCV
+        CCI
+    end
+```
+
 ### 2.1 Emergent Quotients
 
 At the heart of our framework are emergent quotients - variables that themselves emerge from the interaction between propositions and domains. These include:
@@ -42,7 +57,7 @@ These quotients capture:
 
 Test output demonstrates these quotients in action:
 
-```
+```text
 === Testing Emergent Propensities ===
 
 Manifestation Potentials:
@@ -57,6 +72,17 @@ Manifestation Potentials:
 ```
 
 ### 2.2 State-Change vs. State-Condition Duality
+
+```mermaid
+flowchart LR
+    P[Proposition] --> SC[State-Change]
+    P --> SCond[State-Condition]
+    SC -->|"How patterns transform"| D[Domains]
+    SCond -->|"How communities embody"| SF[Semantic Flows]
+    D --> FL[Feedback Loop]
+    SF --> FL
+    FL --> P
+```
 
 Our framework formalizes the dual nature of propositions:
 
@@ -79,7 +105,7 @@ def __init__(self, domain_context: Dict[str, Any]):
 
 The feedback loop between these components is captured in the `FeedbackLoop` class, which models how instantiated propositions affect their domains over time:
 
-```
+```text
 === Testing Feedback Loops ===
 
 Feedback Loop Summary:
@@ -100,6 +126,15 @@ Domain Changes:
 ```
 
 ### 2.3 Propensities "Of" Patterns
+
+```mermaid
+flowchart LR
+    P[Pattern] --> |contains| IP[Inherent Propensity]
+    IP --> |directs toward| C[Capaciousness]
+    IP --> |manifests as| D[Directionality]
+    IP --> |transforms via| TR[Transformation Rules]
+    D --> |weights| SF[Semantic Flows]
+```
 
 Rather than just describing patterns, we capture the inherent propensities within them - the "supposing" within meaning itself that indicates where semantic flows want to move toward greater capaciousness.
 
@@ -128,7 +163,7 @@ def _calculate_manifestation_potential(self) -> float:
 
 This allows us to model how patterns carry inherent directionality, as shown in the transformation rules test:
 
-```
+```text
 === Testing Transformation Rules ===
 
 Original State Change Vectors:
@@ -146,6 +181,22 @@ Applicable Rules for 'adapts':
 
 ## 3. Multi-Proposition Dynamics
 
+```mermaid
+graph TB
+    subgraph "Proposition Ecosystem"
+        P1[Proposition 1] --> |interacts with| P2[Proposition 2]
+        P2 --> |interacts with| P3[Proposition 3]
+        P3 --> |interacts with| P1
+        P1 --> |produces| EP1[Emergent Propensity 1]
+        P2 --> |produces| EP2[Emergent Propensity 2]
+        P3 --> |produces| EP3[Emergent Propensity 3]
+        EP1 --> |influences| D[Domain]
+        EP2 --> |influences| D
+        EP3 --> |influences| D
+    end
+    D --> |shapes| ED[Emergent Directions]
+```
+
 Real-world semantic environments involve multiple propositions interacting in complex ways. Our framework models these interactions through the `PropositionEcosystem` class:
 
 ```python
@@ -159,7 +210,7 @@ def __init__(self, domain_context: Dict[str, Any]):
 
 This enables the analysis of emergent behaviors that arise from proposition interactions:
 
-```
+```text
 === Testing Multi-Proposition Dynamics ===
 
 Ecosystem Summary:
@@ -193,6 +244,21 @@ Interaction Types:
 
 ## 4. Transformation Rules: The Grammar of Emergence
 
+```mermaid
+flowchart LR
+    SD[Source Direction] --> |transforms to| TD[Target Direction]
+    C[Conditions] --> |influence| T[Transformation]
+    M[Modifiers] --> |adjust| T
+    T --> |weight| TW[Transformation Weight]
+    
+    subgraph "Transformation Rule"
+        SD
+        TD
+        T
+        TW
+    end
+```
+
 Our framework includes a sophisticated system of transformation rules that capture how semantic directions transform across domains:
 
 ```python
@@ -209,7 +275,7 @@ def __init__(self, source_direction: str, target_direction: str,
 
 These rules form the grammar of our emergence language, specifying how meaning evolves as it moves between contexts:
 
-```
+```text
 Applicable Rules for 'adapts':
   adaptation_leads_to_support (base weight: 0.40)
     Condition: Community is present
@@ -219,6 +285,18 @@ Applicable Rules for 'adapts':
 ```
 
 ## 5. Propensity Gradients and Landscapes
+
+```mermaid
+graph TD
+    P[Proposition] --> PG[Propensity Gradient]
+    D1[Domain 1] --> PG
+    D2[Domain 2] --> PG
+    D3[Domain 3] --> PG
+    PG --> MP[Manifestation Potential Gradient]
+    PG --> DG[Direction Gradients]
+    PG --> CG[Condition Gradients]
+    MP --> |visualizes as| PL[Propensity Landscape]
+```
 
 To visualize how propensities vary across different contexts, we implement the `PropensityGradient` class:
 
@@ -237,7 +315,7 @@ def __init__(self, proposition: SemanticProposition, domains: List[Dict[str, Any
 
 This allows us to create propensity landscapes that show how patterns manifest across different domains:
 
-```
+```text
 === Testing Propensity Gradients ===
 
 Propensity Gradient Summary:
@@ -269,6 +347,23 @@ Direction Gradients:
 ```
 
 ## 6. Applications and Capabilities
+
+```mermaid
+mindmap
+  root((Habitat Pattern Language))
+    Projecting Pattern Transformations
+      Predict evolution across domains
+      Apply transformation rules
+    Assessing Community Conditions
+      Generate semantic flow indices
+      Measure community embodiment
+    Comparing Cross-Domain Effects
+      Analyze contextual manifestation
+      Identify domain-specific variations
+    Identifying Conductive Gaps
+      Find missing semantic flows
+      Discover intervention opportunities
+```
 
 The Habitat Pattern Language enables several powerful capabilities:
 
@@ -311,7 +406,7 @@ def _calculate_community_condition_indices(self) -> Dict[str, float]:
 
 We can analyze how the same proposition manifests differently across domains, revealing the contextual nature of meaning:
 
-```
+```text
 Manifestation Potentials:
   Community-Policy Pattern:
     Coastal: 0.69
@@ -340,6 +435,31 @@ def identify_conductive_gaps(expected_flows, actual_flows):
 
 ## 7. Integration with Predicate Transformation Visualization
 
+```mermaid
+flowchart TB
+    HPL[Habitat Pattern Language] --- PTV[Predicate Transformation Visualization]
+    HPL --> |provides theory for| PTV
+    PTV --> |visualizes| HPL
+    
+    subgraph "Theoretical Foundation"
+        PE[Pattern Evolution]
+        CE[Co-Evolution]
+        SC[Semantic Change]
+    end
+    
+    HPL --- Theoretical Foundation
+    
+    subgraph "Visualization Approach"
+        PS[Pattern Showing]
+        MP[Multiple Perspectives]
+        IE[Interactive Exploration]
+        TD[Temporal Dimensions]
+        EP[Emergent Properties]
+    end
+    
+    PTV --- Visualization Approach
+```
+
 The Habitat Pattern Language complements the predicate transformation visualization work by providing a theoretical foundation for understanding what those transformations mean and how they manifest in different contexts.
 
 The visualization approach emphasizes:
@@ -353,9 +473,25 @@ This aligns perfectly with our core principles of pattern evolution and co-evolu
 
 ## 8. Conclusion and Future Work
 
+```mermaid
+gantt
+    title Future Development Roadmap
+    dateFormat  YYYY-MM-DD
+    section Implementation
+    Document Ingestion           :a1, 2025-04-01, 30d
+    Transformation Tracking      :a2, after a1, 45d
+    section Visualization
+    Enhanced Visualization Tools :b1, 2025-04-15, 60d
+    Interactive Dashboards       :b2, after b1, 30d
+    section Framework
+    Multi-Proposition Dynamics   :c1, 2025-05-01, 45d
+    Integration with Habitat     :c2, after c1, 30d
+```
+
 The Habitat Pattern Language represents a significant advancement in understanding semantic emergence, moving from description to proposition. By codifying variables that are themselves emergent, formalizing the dual nature of propositions, and capturing the inherent propensities within patterns, we've created a powerful framework for modeling how meaning emerges and transforms across domains.
 
 Future work will focus on:
+
 1. Implementing document ingestion to extract domains and predicates from real-world data
 2. Enhancing transformation tracking across both vector and resonance boundaries
 3. Developing more sophisticated visualization tools for emergent propensities
@@ -364,10 +500,17 @@ Future work will focus on:
 ## References
 
 1. Lakoff, G., & Johnson, M. (1980). Metaphors We Live By. University of Chicago Press.
+
 2. Latour, B. (2005). Reassembling the Social: An Introduction to Actor-Network-Theory. Oxford University Press.
+
 3. Holland, J. H. (1998). Emergence: From Chaos to Order. Perseus Books.
+
 4. Alexander, C. (1977). A Pattern Language: Towns, Buildings, Construction. Oxford University Press.
+
 5. Deleuze, G., & Guattari, F. (1987). A Thousand Plateaus. University of Minnesota Press.
+
 6. Hofstadter, D. R. (1979). Gödel, Escher, Bach: An Eternal Golden Braid. Basic Books.
+
 7. Varela, F. J., Thompson, E., & Rosch, E. (1991). The Embodied Mind: Cognitive Science and Human Experience. MIT Press.
+
 8. Barad, K. (2007). Meeting the Universe Halfway: Quantum Physics and the Entanglement of Matter and Meaning. Duke University Press.
