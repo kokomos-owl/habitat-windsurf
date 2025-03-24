@@ -21,6 +21,7 @@ from habitat_evolution.pattern_aware_rag.learning.learning_control import Learni
 from habitat_evolution.adaptive_core.transformation.predicate_transformation_detector import (
     Actant, Predicate, Domain, PredicateTransformationDetector
 )
+from habitat_evolution.adaptive_core.id.adaptive_id import AdaptiveID
 
 
 class TestActantJourneyTracker(unittest.TestCase):
@@ -198,6 +199,118 @@ class TestActantJourneyTracker(unittest.TestCase):
         
         # Check that the tracker received the notification
         self.assertGreaterEqual(len(self.tracker.predicate_transformations), 1)
+        
+    def test_adaptive_id_integration(self):
+        """Test integration with the AdaptiveID system."""
+        # First, have the tracker observe transformations
+        for transformation in self.transformations:
+            pattern_context = {
+                "entity_id": str(uuid.uuid4()),
+                "change_type": "predicate_transformation",
+                "transformation": transformation.to_dict(),
+                "window_state": WindowState.OPEN.value,
+                "stability": 0.8,
+                "timestamp": datetime.now().isoformat()
+            }
+            self.tracker.observe_pattern_evolution(pattern_context)
+        
+        # Get the journey for the "sea level" actant
+        actant_name = "sea level"
+        journey = self.tracker.get_actant_journey(actant_name)
+        
+        # Check that the journey has an associated AdaptiveID
+        self.assertIsNotNone(journey)
+        
+        # Get the actual ActantJourney object
+        actant_journey = self.tracker.actant_journeys.get(actant_name)
+        self.assertIsNotNone(actant_journey)
+        
+        # Check that it has an AdaptiveID
+        self.assertIsNotNone(actant_journey.adaptive_id)
+        self.assertIsInstance(actant_journey.adaptive_id, AdaptiveID)
+        
+        # Check that the AdaptiveID has the correct base concept
+        self.assertEqual(actant_journey.adaptive_id.base_concept, actant_name)
+        
+    def test_adaptive_id_versioning(self):
+        """Test that AdaptiveID versioning works correctly for actant journeys."""
+        # First, have the tracker observe transformations
+        for transformation in self.transformations:
+            pattern_context = {
+                "entity_id": str(uuid.uuid4()),
+                "change_type": "predicate_transformation",
+                "transformation": transformation.to_dict(),
+                "window_state": WindowState.OPEN.value,
+                "stability": 0.8,
+                "timestamp": datetime.now().isoformat()
+            }
+            self.tracker.observe_pattern_evolution(pattern_context)
+        
+        # Get the journey for the "coastal communities" actant
+        actant_name = "coastal communities"
+        actant_journey = self.tracker.actant_journeys.get(actant_name)
+        self.assertIsNotNone(actant_journey)
+        
+        # Check that the AdaptiveID has version history
+        adaptive_id = actant_journey.adaptive_id
+        self.assertIsNotNone(adaptive_id)
+        
+        # Get version history
+        version_history = adaptive_id.get_version_history()
+        self.assertGreater(len(version_history), 0)
+        
+    def test_adaptive_id_notifications(self):
+        """Test that AdaptiveID properly notifies about state changes."""
+        # Create a mock learning window to track notifications
+        class MockLearningWindow:
+            def __init__(self):
+                self.notifications = []
+                
+            def record_state_change(self, entity_id, change_type, old_value, new_value, origin):
+                self.notifications.append({
+                    "entity_id": entity_id,
+                    "change_type": change_type,
+                    "old_value": old_value,
+                    "new_value": new_value,
+                    "origin": origin
+                })
+        
+        mock_window = MockLearningWindow()
+        
+        # First, have the tracker observe one transformation
+        pattern_context = {
+            "entity_id": str(uuid.uuid4()),
+            "change_type": "predicate_transformation",
+            "transformation": self.transformations[0].to_dict(),
+            "window_state": WindowState.OPEN.value,
+            "stability": 0.8,
+            "timestamp": datetime.now().isoformat()
+        }
+        self.tracker.observe_pattern_evolution(pattern_context)
+        
+        # Get the journey for the actant
+        actant_name = self.transformations[0].carrying_actants[0]
+        actant_journey = self.tracker.actant_journeys.get(actant_name)
+        self.assertIsNotNone(actant_journey)
+        
+        # Register the mock window with the AdaptiveID
+        adaptive_id = actant_journey.adaptive_id
+        self.assertIsNotNone(adaptive_id)
+        adaptive_id.register_with_learning_window(mock_window)
+        
+        # Observe another transformation to trigger a state change
+        pattern_context = {
+            "entity_id": str(uuid.uuid4()),
+            "change_type": "predicate_transformation",
+            "transformation": self.transformations[1].to_dict(),
+            "window_state": WindowState.OPEN.value,
+            "stability": 0.8,
+            "timestamp": datetime.now().isoformat()
+        }
+        self.tracker.observe_pattern_evolution(pattern_context)
+        
+        # Check that the mock window received notifications
+        self.assertGreater(len(mock_window.notifications), 0)
 
 
 if __name__ == "__main__":

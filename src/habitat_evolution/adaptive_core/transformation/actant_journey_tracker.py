@@ -139,31 +139,191 @@ class ActantJourney:
     @classmethod
     def create(cls, actant_name: str):
         """Create a new actant journey."""
-        return cls(
+        journey = cls(
             id=str(uuid.uuid4()),
             actant_name=actant_name
         )
+        
+        # Initialize the AdaptiveID for this journey
+        journey.initialize_adaptive_id()
+        
+        return journey
+    
+    def initialize_adaptive_id(self) -> None:
+        """Initialize the AdaptiveID for this journey."""
+        if self.adaptive_id is None:
+            self.adaptive_id = AdaptiveID(
+                base_concept=self.actant_name,
+                creator_id="actant_journey_tracker",
+                weight=1.0,
+                confidence=0.8,
+                uncertainty=0.2
+            )
+            
+            # Add initial temporal context
+            self.adaptive_id.update_temporal_context(
+                "creation_time",
+                datetime.now().isoformat(),
+                "initialization"
+            )
+            
+            # Add initial journey state
+            self.adaptive_id.update_temporal_context(
+                "journey_state",
+                {
+                    "journey_points": 0,
+                    "domain_transitions": 0,
+                    "role_shifts": 0,
+                    "domains_visited": set()
+                },
+                "initialization"
+            )
     
     def add_journey_point(self, journey_point: ActantJourneyPoint) -> None:
         """Add a journey point to this actant's journey."""
+        # Store the previous state for change notification
+        old_state = self.to_dict() if self.adaptive_id else None
+        
+        # Add the journey point
         self.journey_points.append(journey_point)
+        
+        # Update the AdaptiveID if it exists
+        if self.adaptive_id:
+            # Update the journey state in temporal context
+            domains_visited = set(jp.domain_id for jp in self.journey_points)
+            journey_state = {
+                "journey_points": len(self.journey_points),
+                "domain_transitions": len(self.domain_transitions),
+                "role_shifts": len(self.get_role_shifts()),
+                "domains_visited": list(domains_visited)  # Convert set to list for serialization
+            }
+            
+            # Notify about the state change
+            self.adaptive_id.notify_state_change(
+                "journey_point_added",
+                old_state,
+                {
+                    "journey_point": journey_point.to_dict(),
+                    "journey_state": journey_state
+                },
+                "actant_journey_tracker"
+            )
+            
+            # Update temporal context
+            self.adaptive_id.update_temporal_context(
+                "journey_state",
+                journey_state,
+                "journey_point_added"
+            )
+            
+            # Update domain context
+            self.adaptive_id.update_temporal_context(
+                "current_domain",
+                journey_point.domain_id,
+                "journey_point_added"
+            )
+            
+            # Update role context
+            self.adaptive_id.update_temporal_context(
+                "current_role",
+                journey_point.role,
+                "journey_point_added"
+            )
     
     def add_domain_transition(self, transition: DomainTransition) -> None:
         """Add a domain transition to this actant's journey."""
+        # Store the previous state for change notification
+        old_state = self.to_dict() if self.adaptive_id else None
+        
+        # Add the domain transition
         self.domain_transitions.append(transition)
+        
+        # Update the AdaptiveID if it exists
+        if self.adaptive_id:
+            # Update the journey state in temporal context
+            domains_visited = set(jp.domain_id for jp in self.journey_points)
+            journey_state = {
+                "journey_points": len(self.journey_points),
+                "domain_transitions": len(self.domain_transitions),
+                "role_shifts": len(self.get_role_shifts()),
+                "domains_visited": list(domains_visited)  # Convert set to list for serialization
+            }
+            
+            # Notify about the state change
+            self.adaptive_id.notify_state_change(
+                "domain_transition_added",
+                old_state,
+                {
+                    "transition": transition.to_dict(),
+                    "journey_state": journey_state,
+                    "is_role_shift": transition.has_role_shift
+                },
+                "actant_journey_tracker"
+            )
+            
+            # Update temporal context
+            self.adaptive_id.update_temporal_context(
+                "journey_state",
+                journey_state,
+                "domain_transition_added"
+            )
+            
+            # Update domain context
+            self.adaptive_id.update_temporal_context(
+                "current_domain",
+                transition.target_domain_id,
+                "domain_transition_added"
+            )
+            
+            # Update role context
+            self.adaptive_id.update_temporal_context(
+                "current_role",
+                transition.target_role,
+                "domain_transition_added"
+            )
+            
+            # If this is a role shift, update the role shift context
+            if transition.has_role_shift:
+                self.adaptive_id.update_temporal_context(
+                    "role_shifts",
+                    len(self.get_role_shifts()),
+                    "role_shift_detected"
+                )
     
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary representation."""
-        return {
+        result = {
             "id": self.id,
             "actant_name": self.actant_name,
             "journey_points": [jp.to_dict() for jp in self.journey_points],
             "domain_transitions": [dt.to_dict() for dt in self.domain_transitions]
         }
+        
+        # Include AdaptiveID information if available
+        if self.adaptive_id:
+            result["adaptive_id"] = {
+                "id": self.adaptive_id.id,
+                "base_concept": self.adaptive_id.base_concept,
+                "confidence": self.adaptive_id.confidence,
+                "uncertainty": self.adaptive_id.uncertainty,
+                "version_count": self.adaptive_id.metadata.get("version_count", 0)
+            }
+        
+        return result
     
     def get_role_shifts(self) -> List[DomainTransition]:
         """Get all transitions where the actant's role shifted."""
         return [t for t in self.domain_transitions if t.has_role_shift]
+        
+    def register_with_learning_window(self, learning_window) -> None:
+        """Register this journey's AdaptiveID with a learning window."""
+        if self.adaptive_id:
+            self.adaptive_id.register_with_learning_window(learning_window)
+            
+    def register_with_field_observer(self, field_observer) -> None:
+        """Register this journey's AdaptiveID with a field observer."""
+        if self.adaptive_id:
+            self.adaptive_id.register_with_field_observer(field_observer)
 
 
 class ActantJourneyTracker:
@@ -173,6 +333,9 @@ class ActantJourneyTracker:
     This class implements the observer pattern to detect when actants appear in
     different semantic domains and how their relationships change over time. It
     integrates with the LearningWindow to observe pattern evolution events.
+    
+    The tracker also integrates with the AdaptiveID system to provide versioning,
+    relationship tracking, and state change notifications for actant journeys.
     """
     
     def __init__(self):
@@ -181,6 +344,8 @@ class ActantJourneyTracker:
         self.predicate_transformations = []  # List of transformation dictionaries
         self.predicates = {}  # predicate_id -> predicate dictionary
         self.domains = {}  # domain_id -> domain dictionary
+        self.learning_windows = []  # List of registered learning windows
+        self.field_observers = []  # List of registered field observers
         self.logger = logging.getLogger(__name__)
     
     def observe_pattern_evolution(self, context: Dict[str, Any]) -> None:
@@ -297,7 +462,17 @@ class ActantJourneyTracker:
         
         # Get or create actant journey
         if actant_name not in self.actant_journeys:
-            self.actant_journeys[actant_name] = ActantJourney.create(actant_name)
+            # Create a new ActantJourney with an AdaptiveID
+            journey = ActantJourney.create(actant_name)
+            
+            # Register the journey's AdaptiveID with learning windows and field observers
+            for window in self.learning_windows:
+                journey.register_with_learning_window(window)
+                
+            for observer in self.field_observers:
+                journey.register_with_field_observer(observer)
+                
+            self.actant_journeys[actant_name] = journey
         
         # Add journey point to actant journey
         self.actant_journeys[actant_name].add_journey_point(journey_point)
@@ -375,6 +550,48 @@ class ActantJourneyTracker:
         if actant_name in self.actant_journeys:
             return self.actant_journeys[actant_name].to_dict()
         return None
+        
+    def get_adaptive_id(self, actant_name: str) -> Optional[AdaptiveID]:
+        """
+        Get the AdaptiveID for a specific actant's journey.
+        
+        Args:
+            actant_name: Name of the actant
+            
+        Returns:
+            AdaptiveID instance, or None if not found
+        """
+        if actant_name in self.actant_journeys:
+            return self.actant_journeys[actant_name].adaptive_id
+        return None
+        
+    def register_learning_window(self, learning_window) -> None:
+        """
+        Register a learning window for notifications about actant journeys.
+        
+        Args:
+            learning_window: The learning window to register
+        """
+        if learning_window not in self.learning_windows:
+            self.learning_windows.append(learning_window)
+            
+            # Register the window with all existing actant journeys
+            for journey in self.actant_journeys.values():
+                journey.register_with_learning_window(learning_window)
+                
+    def register_field_observer(self, field_observer) -> None:
+        """
+        Register a field observer for notifications about actant journeys.
+        
+        Args:
+            field_observer: The field observer to register
+        """
+        if field_observer not in self.field_observers:
+            self.field_observers.append(field_observer)
+            
+            # Register the observer with all existing actant journeys
+            for journey in self.actant_journeys.values():
+                journey.register_with_field_observer(field_observer)
     
     def get_role_shifts(self, actant_name: str) -> List[Dict[str, Any]]:
         """
