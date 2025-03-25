@@ -70,6 +70,9 @@ class HarmonicClimateProcessor:
         self.discovered_domains = set()
         self.discovered_relationships = set()
         
+        # Store actant journeys
+        self.actant_journeys = []
+        
         # Track processing metrics
         self.processing_metrics = {
             "files_processed": 0,
@@ -482,6 +485,101 @@ class HarmonicClimateProcessor:
         )
         
         return adaptive_id
+    
+    def get_actant_journeys(self) -> List[ActantJourney]:
+        """
+        Get all actant journeys created during processing.
+        
+        Returns:
+            List of ActantJourney objects
+        """
+        # If we already have journeys, return them
+        if self.actant_journeys:
+            return self.actant_journeys
+            
+        # Otherwise, create journeys for each discovered entity
+        for entity_id in self.discovered_entities:
+            # Create a new journey for this entity using the create class method
+            journey = ActantJourney.create(actant_name=entity_id)
+            
+            # Add some sample pattern propensity data
+            if journey.adaptive_id:
+                pattern_propensity = {
+                    "coherence": 0.75,  # Example value
+                    "capaciousness": 0.6,  # Example value
+                    "directionality": {
+                        "climate_risk_to_economic_impact": 0.8,
+                        "economic_impact_to_policy_response": 0.5,
+                    }
+                }
+                journey.adaptive_id.update_temporal_context(
+                    "pattern_propensity",
+                    pattern_propensity,
+                    "initialization"
+                )
+            
+            # For each domain, create a journey point
+            for i, domain in enumerate(self.discovered_domains):
+                # Create a role based on domain name
+                if "risk" in domain.lower():
+                    role = "hazard"
+                elif "economic" in domain.lower():
+                    role = "stressor"
+                elif "social" in domain.lower():
+                    role = "catalyst"
+                elif "policy" in domain.lower():
+                    role = "target"
+                else:
+                    role = "vulnerability"
+                
+                # Create a journey point
+                point = ActantJourneyPoint.create(
+                    actant_name=entity_id,
+                    domain_id=domain,
+                    predicate_id=f"predicate_{i}",
+                    role=role,
+                    timestamp=datetime.now().isoformat()
+                )
+                
+                # Add to journey
+                journey.add_journey_point(point)
+            
+            # Add domain transitions between consecutive domains
+            domains_list = list(self.discovered_domains)
+            for i in range(len(domains_list) - 1):
+                source_domain = domains_list[i]
+                target_domain = domains_list[i + 1]
+                
+                # Create source and target roles
+                if "risk" in source_domain.lower():
+                    source_role = "hazard"
+                else:
+                    source_role = "stressor"
+                    
+                if "policy" in target_domain.lower():
+                    target_role = "target"
+                else:
+                    target_role = "vulnerability"
+                
+                # Create a transition
+                transition = DomainTransition.create(
+                    actant_name=entity_id,
+                    source_domain_id=source_domain,
+                    target_domain_id=target_domain,
+                    source_predicate_id=f"predicate_{i}",
+                    target_predicate_id=f"predicate_{i+1}",
+                    source_role=source_role,
+                    target_role=target_role,
+                    timestamp=datetime.now().isoformat()
+                )
+                
+                # Add to journey
+                journey.add_domain_transition(transition)
+            
+            # Add to list of journeys
+            self.actant_journeys.append(journey)
+        
+        return self.actant_journeys
     
     def _update_adaptive_id(self, adaptive_id: AdaptiveID, domain_id: str, data: Dict[str, Any]):
         """

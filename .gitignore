@@ -52,6 +52,7 @@ log/
 
 # Output
 output/
+!output/climate_risk/
 
 # Cache
 .cache/

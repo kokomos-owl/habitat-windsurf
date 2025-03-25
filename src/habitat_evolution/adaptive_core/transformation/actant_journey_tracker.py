@@ -171,7 +171,12 @@ class ActantJourney:
         return journey
     
     def initialize_adaptive_id(self) -> None:
-        """Initialize the AdaptiveID for this journey."""
+        """Initialize the AdaptiveID for this journey.
+        
+        This sets up the AdaptiveID instance with appropriate initial state and context,
+        allowing it to function as a first-class entity that can track the journey's
+        evolution across semantic domains.
+        """
         if self.adaptive_id is None:
             self.adaptive_id = AdaptiveID(
                 base_concept=self.actant_name,
@@ -195,7 +200,20 @@ class ActantJourney:
                     "journey_points": 0,
                     "domain_transitions": 0,
                     "role_shifts": 0,
-                    "domains_visited": set()
+                    "domains_visited": set(),
+                    "version": 1  # Add versioning to track journey evolution
+                },
+                "initialization"
+            )
+            
+            # Add pattern propensity context - this allows patterns to "suppose" or "allude"
+            # to directions or propensities as described in the pattern language
+            self.adaptive_id.update_temporal_context(
+                "pattern_propensity",
+                {
+                    "directionality": {},  # Will track semantic flow directions
+                    "capaciousness": 0.5,  # Initial capacity for semantic expansion
+                    "coherence": 0.8      # Initial pattern coherence
                 },
                 "initialization"
             )
@@ -252,7 +270,13 @@ class ActantJourney:
             )
     
     def add_domain_transition(self, transition: DomainTransition) -> None:
-        """Add a domain transition to this actant's journey."""
+        """Add a domain transition to this actant's journey.
+        
+        This method not only adds the transition to the journey but also updates
+        the AdaptiveID to reflect the change, enabling patterns to function as
+        first-class entities that can influence the system's behavior through
+        feedback loops.
+        """
         # Store the previous state for change notification
         old_state = self.to_dict() if self.adaptive_id else None
         
@@ -261,24 +285,43 @@ class ActantJourney:
         
         # Update the AdaptiveID if it exists
         if self.adaptive_id:
-            # Update the journey state in temporal context
+            # Get current journey state from AdaptiveID
+            current_journey_state = self.adaptive_id.get_temporal_context("journey_state")
+            current_version = current_journey_state.get("version", 1) if current_journey_state else 1
+            
+            # Update the journey state in temporal context with versioning
             domains_visited = set(jp.domain_id for jp in self.journey_points)
             journey_state = {
                 "journey_points": len(self.journey_points),
                 "domain_transitions": len(self.domain_transitions),
                 "role_shifts": len(self.get_role_shifts()),
-                "domains_visited": list(domains_visited)  # Convert set to list for serialization
+                "domains_visited": list(domains_visited),  # Convert set to list for serialization
+                "version": current_version + 1  # Increment version for tracking changes
+            }
+            
+            # Calculate directionality based on domain transitions
+            directionality = self._calculate_directionality()
+            
+            # Update pattern propensity - allowing patterns to "suppose" or "allude"
+            pattern_propensity = {
+                "directionality": directionality,
+                "capaciousness": min(0.5 + (len(domains_visited) * 0.1), 1.0),  # Increases with domain diversity
+                "coherence": 0.8 - (0.05 * len(self.get_role_shifts()))  # Decreases slightly with role shifts
+            }
+            
+            # Create rich context for the transition
+            transition_context = {
+                "transition": transition.to_dict(),
+                "journey_state": journey_state,
+                "is_role_shift": transition.has_role_shift,
+                "pattern_propensity": pattern_propensity
             }
             
             # Notify about the state change
             self.adaptive_id.notify_state_change(
                 "domain_transition_added",
                 old_state,
-                {
-                    "transition": transition.to_dict(),
-                    "journey_state": journey_state,
-                    "is_role_shift": transition.has_role_shift
-                },
+                transition_context,
                 "actant_journey_tracker"
             )
             
@@ -303,6 +346,13 @@ class ActantJourney:
                 "domain_transition_added"
             )
             
+            # Update pattern propensity context
+            self.adaptive_id.update_temporal_context(
+                "pattern_propensity",
+                pattern_propensity,
+                "domain_transition_added"
+            )
+            
             # If this is a role shift, update the role shift context
             if transition.has_role_shift:
                 self.adaptive_id.update_temporal_context(
@@ -311,8 +361,42 @@ class ActantJourney:
                     "role_shift_detected"
                 )
     
+    def _calculate_directionality(self) -> Dict[str, float]:
+        """Calculate directionality based on domain transitions.
+        
+        This method analyzes the pattern of domain transitions to determine
+        the directionality of the actant's journey, which is a key component
+        of the pattern's propensity to influence semantic flows.
+        
+        Returns:
+            Dictionary mapping direction types to strength values
+        """
+        # Initialize directionality
+        directionality = {}
+        
+        # Count transitions between domain types
+        if len(self.domain_transitions) > 0:
+            # Count domain type transitions
+            domain_counts = {}
+            for transition in self.domain_transitions:
+                source = transition.source_domain_id
+                target = transition.target_domain_id
+                key = f"{source}_to_{target}"
+                domain_counts[key] = domain_counts.get(key, 0) + 1
+            
+            # Calculate directionality strengths
+            total_transitions = len(self.domain_transitions)
+            for key, count in domain_counts.items():
+                directionality[key] = count / total_transitions
+        
+        return directionality
+    
     def to_dict(self) -> Dict[str, Any]:
-        """Convert to dictionary representation."""
+        """Convert to dictionary representation.
+        
+        Returns a comprehensive representation of the actant journey,
+        including pattern propensity information if available.
+        """
         result = {
             "id": self.id,
             "actant_name": self.actant_name,
@@ -329,6 +413,16 @@ class ActantJourney:
                 "uncertainty": self.adaptive_id.uncertainty,
                 "version_count": self.adaptive_id.metadata.get("version_count", 0)
             }
+            
+            # Include pattern propensity information if available
+            pattern_propensity = self.adaptive_id.get_temporal_context("pattern_propensity")
+            if pattern_propensity:
+                result["pattern_propensity"] = pattern_propensity
+                
+            # Include journey state with version information
+            journey_state = self.adaptive_id.get_temporal_context("journey_state")
+            if journey_state:
+                result["journey_state"] = journey_state
         
         return result
     
@@ -337,20 +431,36 @@ class ActantJourney:
         return [t for t in self.domain_transitions if t.has_role_shift]
         
     def register_with_learning_window(self, learning_window) -> None:
-        """Register this journey's AdaptiveID with a learning window."""
+        """Register this journey's AdaptiveID with a learning window.
+        
+        This enables the learning window to observe pattern evolution events
+        and state changes in the actant journey.
+        """
         if self.adaptive_id:
             self.adaptive_id.register_with_learning_window(learning_window)
+            # Notify the learning window about the initial state
+            self.adaptive_id.notify_state_change(
+                "actant_journey_registered",
+                None,
+                self.to_dict(),
+                "actant_journey_tracker"
+            )
             
     def register_with_field_observer(self, field_observer) -> None:
-        """Register this journey's AdaptiveID with a field observer."""
+        """Register this journey's AdaptiveID with a field observer.
+        
+        This enables the field observer to track the actant journey's
+        movement through semantic fields and detect boundary crossings.
+        """
         if self.adaptive_id:
             self.adaptive_id.register_with_field_observer(field_observer)
             
     def add_role_shift(self, source_role: str, target_role: str, predicate_id: str, timestamp: str) -> None:
         """Add a role shift to this actant's journey.
         
-        A role shift occurs when an actant changes its role in a predicate, such as
-        from subject to object or vice versa.
+        Role shifts are significant events in an actant's journey that can indicate
+        semantic transformations. This method records the shift and updates the
+        AdaptiveID to reflect this change, enabling patterns to evolve in response.
         
         Args:
             source_role: The original role of the actant
@@ -382,22 +492,39 @@ class ActantJourney:
         
         # Update the AdaptiveID if it exists
         if self.adaptive_id:
-            # Update the journey state in temporal context
+            # Get current journey state from AdaptiveID
+            current_journey_state = self.adaptive_id.get_temporal_context("journey_state")
+            current_version = current_journey_state.get("version", 1) if current_journey_state else 1
+            
+            # Update journey state with new version
             journey_state = {
                 "journey_points": len(self.journey_points),
                 "domain_transitions": len(self.domain_transitions),
                 "role_shifts": len(self.get_role_shifts()),
-                "domains_visited": list(set(jp.domain_id for jp in self.journey_points))
+                "domains_visited": list(set(jp.domain_id for jp in self.journey_points)),
+                "version": current_version + 1  # Increment version for tracking changes
+            }
+            
+            # Update pattern propensity - role shifts affect coherence
+            pattern_propensity = self.adaptive_id.get_temporal_context("pattern_propensity") or {}
+            pattern_propensity = {
+                "directionality": pattern_propensity.get("directionality", {}),
+                "capaciousness": pattern_propensity.get("capaciousness", 0.5),
+                "coherence": max(0.2, pattern_propensity.get("coherence", 0.8) - 0.05)  # Decrease coherence slightly
+            }
+            
+            # Create rich context for the role shift
+            role_shift_context = {
+                "role_shift": transition.to_dict(),
+                "journey_state": journey_state,
+                "pattern_propensity": pattern_propensity
             }
             
             # Notify about the state change
             self.adaptive_id.notify_state_change(
                 "role_shift_added",
                 old_state,
-                {
-                    "role_shift": transition.to_dict(),
-                    "journey_state": journey_state
-                },
+                role_shift_context,
                 "actant_journey_tracker"
             )
             
@@ -413,6 +540,13 @@ class ActantJourney:
                 "current_role",
                 target_role,
                 "role_shift"
+            )
+            
+            # Update pattern propensity context
+            self.adaptive_id.update_temporal_context(
+                "pattern_propensity",
+                pattern_propensity,
+                "role_shift_added"
             )
 
 

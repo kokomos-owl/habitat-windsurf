@@ -310,7 +310,8 @@ class AdaptiveID(BaseAdaptiveID):
                     )
                 except Exception as e:
                     # Log error but continue with other windows
-                    self.logger.error(f"Error notifying learning window: {e}")
+                    import logging
+                    logging.getLogger(__name__).error(f"Error notifying learning window: {e}")
         
         # Notify field observers with tonic-harmonic context
         if hasattr(self, 'field_observers'):
@@ -354,7 +355,8 @@ class AdaptiveID(BaseAdaptiveID):
                         # Direct observation as fallback
                         observer.observations.append({"context": context, "time": datetime.now()})
                 except Exception as e:
-                    self.logger.error(f"Error notifying field observer: {e}")
+                    import logging
+                    logging.getLogger(__name__).error(f"Error notifying field observer: {e}")
     
     def get_version_history(self, start_time: Optional[str] = None, end_time: Optional[str] = None) -> List[Any]:
         """Get version history within a time window.

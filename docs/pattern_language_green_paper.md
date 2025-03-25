@@ -2,7 +2,7 @@
 
 ## Abstract
 
-This green paper introduces the Habitat Pattern Language, a novel computational framework for modeling the emergence of meaning across semantic domains. By formalizing the dynamics of semantic propositions as they transform across contexts, we enable the detection and tracking of emergent patterns that transcend individual domains. The framework introduces a set of emergent quotients, state-change/state-condition duality mechanisms, and propensity modeling that together form a comprehensive language for describing semantic emergence. This approach allows for the projection of pattern transformations, assessment of community conditions, cross-domain effect analysis, and identification of conductive gaps in semantic flows. The paper demonstrates the framework's implementation through code examples and test results, highlighting its potential applications in complex semantic analysis tasks.
+This green paper introduces the Habitat Pattern Language, a novel computational framework for modeling the emergence of meaning across semantic domains. By formalizing the dynamics of semantic propositions as they transform across contexts, we enable the detection and tracking of emergent patterns that transcend individual domains. The framework introduces a set of emergent quotients, state-change/state-condition duality mechanisms, and propensity modeling that together form a comprehensive language for describing semantic emergence. This approach allows for the projection of pattern transformations, assessment of community conditions, cross-domain effect analysis, and identification of conductive gaps in semantic flows. Recent advances in ActantJourney tracking and AdaptiveID integration provide enhanced visualization capabilities for pattern evolution across semantic domains, with specific applications in climate risk analysis. The paper demonstrates the framework's implementation through code examples, visualizations, and test results, highlighting its potential applications in complex semantic analysis tasks.
 
 ## 1. Introduction: The Need for an Emergence Language
 
@@ -29,9 +29,154 @@ flowchart TB
         SCV
         CCI
     end
+    
+    AJ[Actant Journey] --> AID[Adaptive ID]
+    AID --> TC[Temporal Context]
+    TC --> PP[Pattern Propensity]
+    
+    subgraph "Pattern Evolution Tracking"
+        AJ
+        AID
+        TC
+        PP
+    end
 ```
 
 ### 2.1 Emergent Quotients
+
+Emergent quotients are quantitative measures that capture different aspects of pattern emergence and transformation. They provide a way to assess how patterns manifest, change, and influence their semantic environments.
+
+#### 2.1.1 Manifestation Potential
+
+Manifestation potential measures the likelihood that a pattern will emerge in a given context. It is calculated based on the presence of conducive conditions, the strength of pattern carriers (actants), and the historical precedent of similar patterns emerging in similar contexts.
+
+#### 2.1.2 State Change Vectors
+
+State change vectors describe the direction and magnitude of transformation that patterns undergo as they move across domains. These vectors capture both the preservation of pattern identity and the adaptation to new contexts.
+
+#### 2.1.3 Community Condition Indices
+
+Community condition indices measure how patterns influence and are influenced by the broader semantic community. They capture the network effects of pattern propagation and the emergence of higher-order patterns from the interaction of simpler patterns.
+
+### 2.2 ActantJourney and AdaptiveID Integration
+
+A significant advancement in the Habitat Pattern Language framework is the integration of ActantJourney tracking with AdaptiveID for enhanced pattern evolution visualization. This integration enables the observation and analysis of how semantic patterns transform across domains while maintaining their core identity.
+
+```mermaid
+flowchart LR
+    AJ[ActantJourney] --> JP[Journey Points]
+    AJ --> DT[Domain Transitions]
+    AJ --> AID[AdaptiveID]
+    
+    AID --> TC[Temporal Context]
+    TC --> PP[Pattern Propensity]
+    
+    PP --> COH[Coherence]
+    PP --> CAP[Capaciousness]
+    PP --> DIR[Directionality]
+```
+
+#### 2.2.1 ActantJourney: Tracking Semantic Transformations
+
+The ActantJourney component tracks how actants (entities that carry semantic meaning) move across domain boundaries, creating a narrative structure or "character building" as concepts transform. Each journey consists of:
+
+- **Journey Points**: Specific instances where an actant appears in a semantic domain, capturing its role and relationship to predicates
+- **Domain Transitions**: Movements between domains, representing semantic transformations
+- **Adaptive Identity**: Maintained through AdaptiveID, allowing the actant to evolve while preserving core identity
+
+#### 2.2.2 AdaptiveID: Maintaining Identity Through Transformation
+
+The AdaptiveID system provides a mechanism for maintaining identity through semantic transformations. It consists of:
+
+- **Base Concept**: The foundational identity of the entity
+- **Temporal Context**: A time-series record of how the entity has changed
+- **Pattern Propensity**: Measurements of how the entity participates in pattern formation
+
+#### 2.2.3 Pattern Propensity Metrics
+
+Pattern propensity metrics quantify different aspects of how entities participate in pattern formation:
+
+- **Coherence**: Measures how consistently a pattern maintains its identity across different contexts (0.0-1.0)
+- **Capaciousness**: Measures how adaptable a pattern is across different contexts (0.0-1.0)
+- **Directionality**: Measures the flow of pattern transformations between specific domain pairs
+
+#### 2.2.4 Visualization of Pattern Evolution
+
+The integration enables powerful visualizations of pattern evolution:
+
+- **Network Graphs**: Showing relationships between actants and domains
+- **Pattern Propensity Charts**: Visualizing coherence, capaciousness, and directionality
+- **Semantic Distance Mapping**: Revealing which domains are conceptually closer or further apart
+
+These visualizations provide insights into how patterns maintain coherence while adapting to different contexts - a key concept in the habitat evolution framework.
+
+### 2.3 Modality-Agnostic Knowledge Representation
+
+A fundamental property of the Habitat Pattern Language is its modality-agnosticism and AI-agnosticism, creating a paradigm shift in how we conceptualize knowledge representation and transfer.
+
+```mermaid
+flowchart TB
+    A[Actant] --> T[Text Modality]
+    A --> V[Visual Modality]
+    A --> Au[Audio Modality]
+    A --> I[Interactive Modality]
+    
+    T --> AID[AdaptiveID]
+    V --> AID
+    Au --> AID
+    I --> AID
+    
+    AID --> P[Pattern Emergence]
+```
+
+#### 2.3.1 Transcending Media Boundaries
+
+The key insight is that "actants" in the system aren't tied to any specific medium or representation. They can be:
+
+- **Transcribed across modalities**: Text, image, audio, video, interactive systems
+- **Transferred between AI systems**: From LLMs to vision models to multimodal systems
+- **Translated between human and machine understanding**: Creating a bridge between different forms of intelligence
+- **Transformed into prompts**: Actants can become prompts for AI systems, carrying their semantic identity across different generative contexts
+
+#### 2.3.2 Knowledge-Media Implications
+
+This modality-agnostic approach has several revolutionary implications:
+
+1. **Medium-Independent Knowledge**
+
+   Knowledge is no longer bound to its original medium. The same actant journey can be:
+   - Visualized as a network graph
+   - Narrated as a story
+   - Encoded as structured data
+   - Represented in an interactive simulation
+
+2. **Preservation of Semantic Identity**
+
+   As actants move across media, they maintain their core identity through the AdaptiveID system, while adapting to the constraints and affordances of each medium. This solves the long-standing problem of knowledge degradation during media conversion. This principle extends even to user identity, allowing for consistent representation of human actors across different systems and interfaces.
+
+3. **Emergent Cross-Modal Patterns**
+
+   When actants traverse different media, new patterns emerge that wouldn't be visible in any single medium. This enables the detection of deeper semantic structures that transcend surface representations. A form of computational synesthesia becomes possible, where patterns from one modality can be performatively expressed in another, revealing previously hidden connections.
+
+4. **AI-Agnostic Knowledge Exchange**
+
+   The system can serve as a universal translator between different AI architectures. An actant journey discovered by an LLM can be meaningfully transferred to a computer vision system or a multimodal AI, preserving the semantic relationships.
+
+#### 2.3.3 Practical Applications
+
+This modality-agnostic approach opens up remarkable possibilities:
+
+- **Multimodal Knowledge Bases**: Information systems that represent knowledge in whatever modality is most appropriate for the context
+- **Cross-AI Collaboration**: Different AI systems working together through the shared language of actant journeys
+- **Adaptive Educational Content**: Learning materials that maintain semantic coherence while adapting to different presentation modalities
+- **Semantic Preservation in Archives**: Archival systems that preserve meaning across media formats and technological changes
+- **Cross-Psyche Collaboration**: Enabling communication between different cognitive styles (e.g., autistic individuals and AI agents) by translating semantic patterns across different processing modalities
+
+#### 2.3.4 The Mathematical Foundation
+
+What makes this possible is the mathematical system that abstracts meaning from its representation. By focusing on the patterns of transformation rather than static representations, the framework is inherently modality-agnostic.
+
+This represents a significant advance beyond current approaches to knowledge representation, which typically bind meaning to specific formats or models. The Habitat Pattern Language treats meaning as something that flows across representations, maintaining identity while adapting to context.
 
 At the heart of our framework are emergent quotients - variables that themselves emerge from the interaction between propositions and domains. These include:
 
