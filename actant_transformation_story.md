@@ -26,15 +26,15 @@ Base concept: econ_001
 
 econ_001 begins its journey in the economic_impact domain as a stressor.
 
-Then, it moves to the policy_response domain as a target.
-
 Then, it moves to the sea_level_rise domain as a vulnerability.
+
+Then, it moves to the policy_response domain as a target.
 
 ### Role Shifts
 
-- Shifted from stressor to target when moving from economic_impact to policy_response.
+- Shifted from stressor to vulnerability when moving from economic_impact to sea_level_rise.
 
-- Shifted from stressor to vulnerability when moving from policy_response to sea_level_rise.
+- Shifted from stressor to target when moving from sea_level_rise to policy_response.
 
 ### Semantic Transformation Insights
 
@@ -68,15 +68,15 @@ Base concept: policy_002
 
 policy_002 begins its journey in the economic_impact domain as a stressor.
 
-Then, it moves to the policy_response domain as a target.
-
 Then, it moves to the sea_level_rise domain as a vulnerability.
+
+Then, it moves to the policy_response domain as a target.
 
 ### Role Shifts
 
-- Shifted from stressor to target when moving from economic_impact to policy_response.
+- Shifted from stressor to vulnerability when moving from economic_impact to sea_level_rise.
 
-- Shifted from stressor to vulnerability when moving from policy_response to sea_level_rise.
+- Shifted from stressor to target when moving from sea_level_rise to policy_response.
 
 ### Semantic Transformation Insights
 
@@ -110,15 +110,15 @@ Base concept: slr_001
 
 slr_001 begins its journey in the economic_impact domain as a stressor.
 
-Then, it moves to the policy_response domain as a target.
-
 Then, it moves to the sea_level_rise domain as a vulnerability.
+
+Then, it moves to the policy_response domain as a target.
 
 ### Role Shifts
 
-- Shifted from stressor to target when moving from economic_impact to policy_response.
+- Shifted from stressor to vulnerability when moving from economic_impact to sea_level_rise.
 
-- Shifted from stressor to vulnerability when moving from policy_response to sea_level_rise.
+- Shifted from stressor to target when moving from sea_level_rise to policy_response.
 
 ### Semantic Transformation Insights
 
