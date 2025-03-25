@@ -92,6 +92,10 @@ class HarmonicIOService:
         self.processing_threads = {}
         self.running = False
         
+        # Data transformation tracking
+        self.transformation_log = []
+        self.actant_transformations = defaultdict(list)
+        
         # Logging
         self.logger = logging.getLogger(__name__)
         
@@ -389,6 +393,22 @@ class HarmonicIOService:
                     # Update system load based on operation duration
                     self._update_system_load(operation_type, duration)
                     
+                    # Track data transformation if context contains transformation data
+                    if "source_domain" in data_context and "target_domain" in data_context and "actant_id" in data_context:
+                        self.track_data_transformation(
+                            source_domain=data_context["source_domain"],
+                            target_domain=data_context["target_domain"],
+                            actant_id=data_context["actant_id"],
+                            transformation_type=operation_type,
+                            metadata={
+                                "method": method_name,
+                                "duration": duration,
+                                "priority": priority,
+                                "status": status,
+                                **{k: v for k, v in data_context.items() if k not in ["source_domain", "target_domain", "actant_id"]}
+                            }
+                        )
+                    
                     # Calculate adaptive sleep based on system load and harmonics
                     if self.adaptive_timing:
                         cycle_pos = self.get_cycle_position()
@@ -469,6 +489,68 @@ class HarmonicIOService:
         """
         self.resonance_level = max(0.0, min(1.0, resonance))
         
+    def track_data_transformation(self, 
+                               source_domain: str,
+                               target_domain: str,
+                               actant_id: str,
+                               transformation_type: str,
+                               metadata: Dict[str, Any] = None) -> None:
+        """
+        Track a data transformation for visualization and analysis.
+        
+        Args:
+            source_domain: Domain where the data originated
+            target_domain: Domain where the data is being transformed to
+            actant_id: ID of the actant being transformed
+            transformation_type: Type of transformation being applied
+            metadata: Additional metadata about the transformation
+        """
+        if metadata is None:
+            metadata = {}
+            
+        # Create transformation record
+        transformation = {
+            "timestamp": datetime.now().isoformat(),
+            "source_domain": source_domain,
+            "target_domain": target_domain,
+            "actant_id": actant_id,
+            "transformation_type": transformation_type,
+            "cycle_position": self.get_cycle_position(),
+            "eigenspace_stability": self.eigenspace_stability,
+            "pattern_coherence": self.pattern_coherence,
+            "metadata": metadata
+        }
+        
+        # Log the transformation
+        self.logger.info(f"Data transformation: {actant_id} from {source_domain} to {target_domain} ({transformation_type})")
+        
+        # Add to transformation log
+        self.transformation_log.append(transformation)
+        
+        # Track by actant
+        self.actant_transformations[actant_id].append(transformation)
+        
+    def get_transformation_log(self) -> List[Dict[str, Any]]:
+        """
+        Get the complete transformation log.
+        
+        Returns:
+            List of transformation records
+        """
+        return self.transformation_log
+    
+    def get_actant_transformations(self, actant_id: str) -> List[Dict[str, Any]]:
+        """
+        Get transformations for a specific actant.
+        
+        Args:
+            actant_id: ID of the actant
+            
+        Returns:
+            List of transformation records for the actant
+        """
+        return self.actant_transformations.get(actant_id, [])
+    
     def get_metrics(self) -> Dict[str, Any]:
         """
         Get current metrics for the harmonic I/O service.
@@ -491,7 +573,13 @@ class HarmonicIOService:
                 op_type: len(metrics)
                 for op_type, metrics in self.operation_metrics.items()
             },
-            "cycle_position": self.get_cycle_position()
+            "cycle_position": self.get_cycle_position(),
+            "transformation_metrics": {
+                "total_transformations": len(self.transformation_log),
+                "unique_actants": len(self.actant_transformations),
+                "domains": list(set([t["source_domain"] for t in self.transformation_log] + 
+                                  [t["target_domain"] for t in self.transformation_log]))
+            }
         }
         
         return metrics

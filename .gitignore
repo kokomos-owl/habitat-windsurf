@@ -53,6 +53,7 @@ log/
 # Output
 output/
 !output/climate_risk/
+!demos/output/meaning_bridges/
 
 # Cache
 .cache/

@@ -1,0 +1,13 @@
+{
+  "id": "econ_001",
+  "name": "Coastal Economic Impact",
+  "description": "Economic impact of sea level rise on coastal regions",
+  "affected_sectors": ["real_estate", "tourism", "fishing"],
+  "estimated_cost": 15000000000,
+  "timeframe": "2025-2035",
+  "uncertainty": 0.25,
+  "related_risk": "slr_001",
+  "policy_options": ["policy_002", "policy_003"],
+  "confidence": 0.75,
+  "timestamp": "2025-03-25T07:35:00-04:00"
+}

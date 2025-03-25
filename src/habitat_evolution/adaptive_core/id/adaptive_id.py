@@ -378,3 +378,124 @@ class AdaptiveID(BaseAdaptiveID):
         
         # Sort by timestamp
         return sorted(history, key=lambda v: v.timestamp)
+        
+    def get_coherence(self) -> float:
+        """Get the coherence score for this adaptive ID.
+        
+        Coherence represents how well the concept maintains its identity across contexts.
+        Higher values indicate stronger semantic stability.
+        
+        Returns:
+            float: Coherence score between 0.0 and 1.0
+        """
+        # For now, use confidence as a proxy for coherence
+        # In a more sophisticated implementation, this would analyze temporal context
+        # and relationship stability to derive a true coherence score
+        base_coherence = self.confidence
+        
+        # Adjust based on temporal context stability if available
+        if hasattr(self, 'temporal_context') and self.temporal_context:
+            # More stable temporal contexts increase coherence
+            context_stability = min(1.0, len(self.temporal_context) / 10.0)
+            return (base_coherence * 0.7) + (context_stability * 0.3)
+        
+        return base_coherence
+    
+    def get_capaciousness(self) -> float:
+        """Get the capaciousness score for this adaptive ID.
+        
+        Capaciousness represents how well the concept can absorb and integrate new information.
+        Higher values indicate greater ability to expand while maintaining identity.
+        
+        Returns:
+            float: Capaciousness score between 0.0 and 1.0
+        """
+        # Base capaciousness is inversely related to uncertainty
+        # Lower uncertainty means higher capacity to absorb new information
+        base_capaciousness = 1.0 - self.uncertainty
+        
+        # Adjust based on version history if available
+        # More versions indicate higher capaciousness (ability to evolve)
+        if hasattr(self, 'versions') and self.versions:
+            version_factor = min(1.0, len(self.versions) / 20.0)
+            return (base_capaciousness * 0.6) + (version_factor * 0.4)
+        
+        return base_capaciousness
+    
+    def get_directionality_dict(self) -> Dict[str, float]:
+        """Get the directionality metrics for this adaptive ID.
+        
+        Directionality represents the tendency of the concept to evolve in particular directions.
+        This returns multiple directional metrics to capture different aspects of evolution.
+        
+        Returns:
+            Dict[str, float]: Dictionary of directionality metrics
+        """
+        # Initialize with default directionality metrics
+        directionality = {
+            "expansion": 0.5,  # Tendency to expand in scope
+            "contraction": 0.5,  # Tendency to become more focused
+            "stability": self.confidence,  # Tendency to maintain current state
+            "volatility": self.uncertainty  # Tendency to change rapidly
+        }
+        
+        # If we have version history, calculate expansion/contraction based on changes
+        if hasattr(self, 'versions') and len(self.versions) > 1:
+            # More versions indicate higher expansion potential
+            version_count = len(self.versions)
+            directionality["expansion"] = min(0.9, 0.3 + (version_count / 20.0))
+            directionality["contraction"] = max(0.1, 0.7 - (version_count / 20.0))
+        
+        # If we have temporal context, adjust stability/volatility
+        if hasattr(self, 'temporal_context') and self.temporal_context:
+            context_count = len(self.temporal_context)
+            # More contexts indicate higher stability
+            directionality["stability"] = min(0.9, 0.4 + (context_count / 15.0))
+            directionality["volatility"] = max(0.1, 0.6 - (context_count / 15.0))
+        
+        return directionality
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert AdaptiveID to dictionary for serialization.
+        
+        Returns:
+            Dict[str, Any]: Dictionary representation of this AdaptiveID
+        """
+        # Create a basic dictionary with essential properties
+        result = {
+            "id": self.id,
+            "base_concept": self.base_concept,
+            "weight": self.weight,
+            "confidence": self.confidence,
+            "uncertainty": self.uncertainty,
+            "metadata": self.metadata,
+            "current_version": self.current_version
+        }
+        
+        # Add temporal context if available
+        if hasattr(self, 'temporal_context') and self.temporal_context:
+            result["temporal_context"] = {}
+            for key, timestamps in self.temporal_context.items():
+                result["temporal_context"][key] = {
+                    ts: {
+                        "value": data["value"],
+                        "origin": data["origin"]
+                    } for ts, data in timestamps.items()
+                }
+        
+        # Add spatial context if available
+        if hasattr(self, 'spatial_context') and self.spatial_context:
+            result["spatial_context"] = self.spatial_context
+        
+        # Add pattern propensities
+        result["pattern_propensities"] = {
+            "coherence": self.get_coherence(),
+            "capaciousness": self.get_capaciousness(),
+            "directionality": self.get_directionality_dict()
+        }
+        
+        # Add user interactions if available
+        if hasattr(self, 'user_interactions') and self.user_interactions:
+            result["user_interactions"] = self.user_interactions
+        
+        return result

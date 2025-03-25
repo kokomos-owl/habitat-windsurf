@@ -1,0 +1,12 @@
+{
+  "id": "slr_001",
+  "name": "Sea Level Rise",
+  "description": "Projected sea level rise for coastal regions",
+  "risk_level": "high",
+  "probability": 0.85,
+  "impact_areas": ["coastal_infrastructure", "agriculture", "biodiversity"],
+  "economic_impact_ref": "econ_001",
+  "policy_response_ref": "policy_002",
+  "confidence": 0.9,
+  "timestamp": "2025-03-25T07:30:00-04:00"
+}
