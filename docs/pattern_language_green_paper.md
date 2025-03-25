@@ -578,6 +578,88 @@ def identify_conductive_gaps(expected_flows, actual_flows):
     return gaps
 ```
 
+### 6.5 Queries as First-Class Actants
+
+A significant advancement in the Habitat Pattern Language framework is the treatment of queries as first-class actants within the semantic landscape. This approach transforms queries from mere retrieval mechanisms into active participants in the meaning-making process:
+
+```mermaid
+flowchart TB
+    Q[Query] --> QA[Query Actant]
+    QA --> |has| AI[Adaptive Identity]
+    QA --> |forms| MB[Meaning Bridges]
+    QA --> |traverses| MT[Modalities]
+    QA --> |undergoes| QE[Evolution]
+    QA --> |creates| AJ[Actant Journey]
+    
+    subgraph "Modalities"
+        Text
+        Image
+        Audio
+        Video
+        Interactive
+    end
+```
+
+The `QueryActant` class implements this approach, enabling queries to maintain semantic identity across transformations:
+
+```python
+# From QueryActant class
+def transform_modality(self, new_modality: str, transformation_context: Dict[str, Any] = None) -> 'QueryActant':
+    """Transform this query into a new modality while preserving semantic identity."""
+    # Create a new query in the target modality
+    new_query = QueryActant.create(
+        query_text=self.query_text,
+        modality=new_modality,
+        context={
+            **self.context,
+            **(transformation_context or {}),
+            "source_modality": self.modality,
+            "source_query_id": self.id
+        }
+    )
+    
+    # Link the new query's AdaptiveID to the original
+    if self.adaptive_id and new_query.adaptive_id:
+        # Track the relationship in temporal context
+        self.adaptive_id.update_temporal_context(
+            key=f"transformation_{new_query.id}",
+            value={
+                "relationship_type": "modality_transformation",
+                "target_id": new_query.adaptive_id.id,
+                "source_modality": self.modality,
+                "target_modality": new_modality,
+                "transformation_time": datetime.now().isoformat()
+            },
+            origin="query_transformation"
+        )
+```
+
+This approach enables several powerful capabilities:
+
+1. **Cross-Modal Query Processing**: Queries can be processed across different modalities (text, image, audio) while maintaining their semantic identity, enabling more comprehensive analysis.
+
+2. **Query Evolution**: Queries can evolve based on new information, adapting their form while preserving their connection to their original intent.
+
+```text
+Query Evolution Example:
+Original Query: "What is the projected sea level rise by 2050?"
+Evolved Query: "What economic impacts will result from a 2-meter sea level rise by 2050?"
+```
+
+3. **Semantic Network Formation**: Queries form meaning bridges with other actants, creating a rich network of semantic relationships that can reveal emergent patterns.
+
+4. **Journey Tracking**: The system tracks a query's path through semantic domains, creating a historical record of its transformations and interactions.
+
+```text
+Query Journey:
+1. initial_query in domain 'query_domain'
+2. query_processed in domain 'query_processing_domain'
+3. modality_transformation in domain 'image_domain'
+4. query_evolution in domain 'evolved_query_domain'
+```
+
+By treating queries as actants, the Habitat Pattern Language enables a more dynamic and participatory form of interaction where meaning emerges from relationships rather than being statically defined. This creates a richer IO space where queries become part of the semantic landscape they are exploring.
+
 ## 7. Integration with Predicate Transformation Visualization
 
 ```mermaid
