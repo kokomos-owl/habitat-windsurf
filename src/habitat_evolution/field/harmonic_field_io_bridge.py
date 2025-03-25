@@ -145,6 +145,51 @@ class HarmonicFieldIOBridge:
         """
         boundary_detector.register_observer(self)
         
+    def on_field_change(self, event_type=None, **kwargs):
+        """
+        Handle field change events from the field navigator.
+        
+        This method is called by the field navigator when the field state
+        changes, allowing the bridge to update the I/O service with relevant metrics.
+        
+        Args:
+            event_type: Type of event that occurred
+            **kwargs: Additional event data
+        """
+        if event_type == "field_updated" and "field" in kwargs:
+            field_state = kwargs["field"]
+            self.observe_field_state(field_state)
+    
+    def on_boundary_change(self, event_type=None, **kwargs):
+        """
+        Handle boundary change events from the semantic boundary detector.
+        
+        This method is called by the semantic boundary detector when boundaries
+        change, allowing the bridge to update the I/O service with relevant metrics.
+        
+        Args:
+            event_type: Type of event that occurred
+            **kwargs: Additional event data
+        """
+        if event_type == "transitions_detected" and "transitions" in kwargs:
+            transitions = kwargs["transitions"]
+            
+            # Extract boundary metrics from transitions
+            if transitions:
+                # Calculate average uncertainty as a measure of boundary strength
+                avg_uncertainty = sum(t.get("uncertainty", 0) for t in transitions) / len(transitions)
+                self.field_metrics["boundary_strength"] = avg_uncertainty
+                
+                # Count number of transitions as a measure of transition width
+                self.field_metrics["transition_width"] = len(transitions) / 10.0  # Normalize to 0-1 range
+                
+                # Update pattern coherence based on boundary clarity
+                # Lower uncertainty means higher coherence
+                self.field_metrics["pattern_coherence"] = 1.0 - min(1.0, avg_uncertainty)
+                
+                # Update the I/O service with the new metrics
+                self._update_io_service()
+    
     def register_with_field_adaptive_id_bridge(self, field_adaptive_id_bridge):
         """
         Register this bridge with a field adaptive ID bridge.

@@ -237,7 +237,7 @@ class TestHarmonicIOCore:
         
         # Verify worker threads are stopped
         time.sleep(0.2)  # Allow threads to terminate
-        assert all(not worker.is_alive() for worker in service.workers)
+        assert all(not thread.is_alive() for thread in service.processing_threads.values() if thread is not None)
 
 
 class TestRepositoryIntegration:

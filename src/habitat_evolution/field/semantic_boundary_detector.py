@@ -39,7 +39,30 @@ class SemanticBoundaryDetector:
         self.field_navigator = field_navigator or FieldNavigator()
         self.observed_transitions = []
         self.learning_opportunities = []
+        self.observers = []  # List of observers to notify of boundary changes
         
+    def register_observer(self, observer):
+        """
+        Register an observer to be notified of boundary changes.
+        
+        Args:
+            observer: An object that will be notified of boundary state changes
+        """
+        if observer not in self.observers:
+            self.observers.append(observer)
+            
+    def notify_observers(self, event_type=None, **kwargs):
+        """
+        Notify all registered observers of a boundary state change.
+        
+        Args:
+            event_type: Type of event that occurred
+            **kwargs: Additional event data
+        """
+        for observer in self.observers:
+            if hasattr(observer, 'on_boundary_change'):
+                observer.on_boundary_change(event_type=event_type, **kwargs)
+                
     def detect_transition_patterns(self, semantic_vectors: np.ndarray, 
                                   metadata: List[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
         """
@@ -109,6 +132,9 @@ class SemanticBoundaryDetector:
             
         # Store observed transitions for learning
         self.observed_transitions.extend(enriched_transitions)
+        
+        # Notify observers about the detected transitions
+        self.notify_observers(event_type="transitions_detected", transitions=enriched_transitions)
             
         return enriched_transitions
     

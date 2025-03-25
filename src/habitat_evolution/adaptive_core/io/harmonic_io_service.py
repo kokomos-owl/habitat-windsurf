@@ -335,8 +335,13 @@ class HarmonicIOService:
                     data_context = operation["data_context"]
                     
                     # Get method to call
+                    # First try with _direct_ prefix
                     method = getattr(repository, f"_direct_{method_name}", None)
                     
+                    # If not found, try the method name directly
+                    if method is None:
+                        method = getattr(repository, method_name, None)
+                        
                     if method is None:
                         self.logger.error(f"Method _direct_{method_name} not found in repository")
                         continue

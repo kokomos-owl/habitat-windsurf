@@ -24,6 +24,7 @@ class FieldNavigator:
         self.pattern_metadata = []
         self.navigation_history = []  # Track navigation history for path analysis
         self.sliding_window_size = 3  # Default sliding window size for local analysis
+        self.observers = []  # List of observers to notify of field changes
         
     def set_field(self, resonance_matrix: np.ndarray, pattern_metadata: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Set and analyze the current field."""
@@ -36,6 +37,9 @@ class FieldNavigator:
         
         # Process transition zones and boundary uncertainty
         self._process_transition_zones()
+        
+        # Notify observers of field change
+        self.notify_observers(event_type="field_updated", field=self.current_field)
             
         return self.current_field
         
@@ -193,6 +197,26 @@ class FieldNavigator:
         # In practice, would use nx.shortest_path
         return self._find_eigenvector_path(start_idx, end_idx)  # Placeholder
         
+    def register_observer(self, observer):
+        """Register an observer to be notified of field changes.
+        
+        Args:
+            observer: An object that will be notified of field state changes
+        """
+        if observer not in self.observers:
+            self.observers.append(observer)
+            
+    def notify_observers(self, event_type=None, **kwargs):
+        """Notify all registered observers of a field state change.
+        
+        Args:
+            event_type: Type of event that occurred
+            **kwargs: Additional event data
+        """
+        for observer in self.observers:
+            if hasattr(observer, 'on_field_change'):
+                observer.on_field_change(event_type=event_type, **kwargs)
+                
     def suggest_exploration_points(self, current_idx: int, count: int = 3) -> List[Dict[str, Any]]:
         """Suggest interesting points to explore from current position."""
         if not self.current_field:
