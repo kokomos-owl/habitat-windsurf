@@ -14,7 +14,7 @@ from datetime import datetime
 
 from .query_actant import QueryActant
 from ..transformation.meaning_bridges import MeaningBridge, MeaningBridgeTracker
-from ..transformation.actant_journey_tracker import ActantJourney
+from ..transformation.actant_journey_tracker import ActantJourney, ActantJourneyPoint
 
 logger = logging.getLogger(__name__)
 
@@ -91,13 +91,20 @@ class QueryInteraction:
         
         # Update the query's actant journey with this processing step
         if query.actant_journey:
-            processing_point = ActantJourney.create_journey_point(
+            # Create a journey point directly
+            processing_point = ActantJourneyPoint(
+                id=str(uuid.uuid4()),
                 actant_name=query.id,
                 domain_id="query_processing_domain",
                 predicate_id="query_processed",
                 role="subject",
-                context={"result_summary": str(result)[:100] + "..." if len(str(result)) > 100 else str(result)}
+                timestamp=datetime.now().isoformat(),
+                confidence=0.95  # High confidence for query processing
             )
+            
+            # Note: ActantJourneyPoint doesn't have a context parameter
+            # We'll store the result summary in the query's context instead
+            query.context["processing_result"] = str(result)[:100] + "..." if len(str(result)) > 100 else str(result)
             query.actant_journey.add_journey_point(processing_point)
         
         return result

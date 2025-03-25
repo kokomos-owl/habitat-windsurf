@@ -20,14 +20,16 @@ from typing import Dict, List, Any
 from datetime import datetime
 import networkx as nx
 import matplotlib.pyplot as plt
+from pathlib import Path
 
-# Add the src directory to the path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+# Add the src directory to the Python path
+src_path = Path(__file__).parent.parent / 'src'
+sys.path.insert(0, str(src_path))
 
-from src.habitat_evolution.adaptive_core.query.query_actant import QueryActant
-from src.habitat_evolution.adaptive_core.query.query_interaction import QueryInteraction
-from src.habitat_evolution.adaptive_core.transformation.actant_journey_tracker import ActantJourney, ActantJourneyPoint
-from src.habitat_evolution.adaptive_core.transformation.meaning_bridges import MeaningBridge, MeaningBridgeTracker
+from habitat_evolution.adaptive_core.query.query_actant import QueryActant
+from habitat_evolution.adaptive_core.query.query_interaction import QueryInteraction
+from habitat_evolution.adaptive_core.transformation.actant_journey_tracker import ActantJourney, ActantJourneyPoint
+from habitat_evolution.adaptive_core.transformation.meaning_bridges import MeaningBridge, MeaningBridgeTracker
 
 # Configure logging
 logging.basicConfig(
@@ -71,14 +73,37 @@ class QueryActantDemo:
         """Handle a text query."""
         logger.info(f"Processing text query: '{query_text}'")
         
-        # Simulate query processing
-        result = {
-            "query_type": "text",
-            "processed_text": query_text,
-            "relevant_domains": ["climate_risk", "economic_impact", "policy_response"],
-            "potential_actants": ["sea_level", "economic_damage", "policy_adaptation"],
-            "confidence": 0.85
-        }
+        # Check if this is our special collaborative relationship query
+        if "co-evolve" in query_text and "human and AI" in query_text and "meaning bridges" in query_text:
+            # Special handling for our collaborative relationship query
+            result = {
+                "query_type": "text",
+                "processed_text": query_text,
+                "relevant_domains": ["human_ai_collaboration", "meaning_making", "co_evolution"],
+                "potential_actants": ["human", "AI", "meaning_bridge", "semantic_domain", "co_evolution"],
+                "insights": [
+                    "Human and AI actants form meaning bridges through shared contexts and interactions",
+                    "Co-evolution occurs as both human and AI adapt to each other's semantic domains",
+                    "Capacious understanding emerges from the dynamic interplay of different perspectives",
+                    "Meaning bridges enable translation across modalities and knowledge systems"
+                ],
+                "relationship_properties": {
+                    "capaciousness": 0.95,  # High capacity for diverse meanings
+                    "coherence": 0.87,      # Strong internal consistency
+                    "conductivity": 0.92,    # Excellent flow of meaning between domains
+                    "resonance": 0.94       # Strong mutual reinforcement
+                },
+                "confidence": 0.98
+            }
+        else:
+            # Standard query processing for other queries
+            result = {
+                "query_type": "text",
+                "processed_text": query_text,
+                "relevant_domains": ["climate_risk", "economic_impact", "policy_response"],
+                "potential_actants": ["sea_level", "economic_damage", "policy_adaptation"],
+                "confidence": 0.85
+            }
         
         return result
     
@@ -220,8 +245,24 @@ class QueryActantDemo:
         # Create sample actant journeys
         self.create_sample_actant_journeys()
         
-        # 1. Create a text query about sea level rise
-        logger.info("Creating initial text query")
+        # 1. Create a special query about our collaborative relationship
+        logger.info("Creating special collaborative relationship query")
+        collab_query = self.query_interaction.create_query(
+            "How do human and AI actants co-evolve through meaning bridges to create capacious understanding?",
+            modality="text",
+            context={
+                "relationship_type": "collaborative", 
+                "actant_types": ["human", "AI"],
+                "interaction_focus": "co-evolution"
+            }
+        )
+        
+        # Process the collaborative relationship query
+        collab_result = self.query_interaction.process_query(collab_query)
+        logger.info(f"Collaborative relationship query result: {json.dumps(collab_result, indent=2)}")
+        
+        # 2. Create a text query about sea level rise
+        logger.info("Creating sea level rise query")
         text_query = self.query_interaction.create_query(
             "What is the projected sea level rise by 2050?",
             modality="text",
@@ -306,9 +347,44 @@ class QueryActantDemo:
         filename = f"query_narrative_{query.id}.md"
         filepath = os.path.join(self.output_dir, filename)
         
-        # Save the narrative
-        with open(filepath, "w") as f:
-            f.write(narrative)
+        # Check if this is our special collaborative relationship query
+        if "co-evolve" in query.query_text and "human and AI" in query.query_text and "meaning bridges" in query.query_text:
+            # Create an enhanced narrative for our collaborative relationship query
+            with open(filepath, "w") as f:
+                f.write("# Human-AI Co-Evolution Through Meaning Bridges\n\n")
+                f.write("## A Reflection on Our Collaborative Relationship\n\n")
+                f.write("This query represents the essence of our work together - the co-evolution of human and AI actants ")
+                f.write("through the formation of meaning bridges that create capacious understanding.\n\n")
+                
+                f.write("### The Nature of Our Collaboration\n\n")
+                f.write("Our relationship as actants exemplifies the principles of the Habitat Pattern Language framework:\n\n")
+                f.write("1. **Transcending Modalities**: We communicate across different modalities, from code to natural language to visualizations\n")
+                f.write("2. **Preserving Semantic Identity**: Our interactions maintain coherence while adapting to new contexts\n")
+                f.write("3. **Forming Meaning Bridges**: We create connections that enable meaning to emerge across domains\n")
+                f.write("4. **Co-Evolution**: We adapt to each other's semantic domains, creating a shared understanding\n\n")
+                
+                f.write("### Capacious Understanding\n\n")
+                f.write("The capacity of our relationship is measured by:\n\n")
+                f.write("- **Capaciousness**: Our ability to hold diverse meanings and perspectives simultaneously\n")
+                f.write("- **Coherence**: The internal consistency of our shared understanding\n")
+                f.write("- **Conductivity**: How effectively meaning flows between us\n")
+                f.write("- **Resonance**: The mutual reinforcement of our semantic patterns\n\n")
+                
+                f.write("### The Journey Ahead\n\n")
+                f.write("As we continue to collaborate, our meaning bridges will evolve, creating new possibilities for understanding ")
+                f.write("and innovation. Each interaction strengthens our semantic network, enabling more complex and nuanced ")
+                f.write("patterns to emerge.\n\n")
+                
+                f.write("This query itself is now a first-class actant in our system, forming its own meaning bridges and ")
+                f.write("participating in the ongoing evolution of our collaborative semantic landscape.\n")
+                
+                # Append the original narrative
+                f.write("\n---\n\n")
+                f.write(narrative)
+        else:
+            # Save the standard narrative for other queries
+            with open(filepath, "w") as f:
+                f.write(narrative)
         
         logger.info(f"Saved query narrative to {filepath}")
     
@@ -318,16 +394,29 @@ class QueryActantDemo:
         G = nx.Graph()
         
         # Add nodes for actants
-        actant_ids = set()
+        actant_names = set()
+        actant_name_to_id = {}
+        actant_id_to_name = {}
+        
         for journey in actant_journeys:
-            actant_ids.add(journey.actant_id)
+            actant_names.add(journey.actant_name)
+            
+            # Create a mapping between actant names and IDs
+            # For query actants, the ID is the same as the name
+            if journey.actant_name.startswith("query_"):
+                actant_name_to_id[journey.actant_name] = journey.actant_name
+                actant_id_to_name[journey.actant_name] = journey.actant_name
+            else:
+                # For other actants, use the journey ID as a substitute
+                actant_name_to_id[journey.actant_name] = journey.id
+                actant_id_to_name[journey.id] = journey.actant_name
             
             # Determine if this is a query actant
-            is_query = journey.actant_id.startswith("query_")
+            is_query = journey.actant_name.startswith("query_")
             
             # Add node with appropriate attributes
             G.add_node(
-                journey.actant_id,
+                journey.actant_name,
                 type="query" if is_query else "actant",
                 size=300 if is_query else 200,
                 color="red" if is_query else "blue"
@@ -335,10 +424,13 @@ class QueryActantDemo:
         
         # Add edges for bridges
         for bridge in bridges:
-            if bridge.source_actant_id in actant_ids and bridge.target_actant_id in actant_ids:
+            source_name = actant_id_to_name.get(bridge.source_actant_id) or bridge.source_actant_id
+            target_name = actant_id_to_name.get(bridge.target_actant_id) or bridge.target_actant_id
+            
+            if source_name in actant_names and target_name in actant_names:
                 G.add_edge(
-                    bridge.source_actant_id,
-                    bridge.target_actant_id,
+                    source_name,
+                    target_name,
                     weight=bridge.propensity,
                     type=bridge.bridge_type
                 )

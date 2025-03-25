@@ -134,14 +134,21 @@ class QueryActant:
         
         # Link the new query's AdaptiveID to the original
         if self.adaptive_id and new_query.adaptive_id:
-            self.adaptive_id.add_relationship(
-                relationship_type="modality_transformation",
-                target_id=new_query.adaptive_id.id,
-                context={
-                    "source_modality": self.modality,
-                    "target_modality": new_modality,
-                    "transformation_time": datetime.now().isoformat()
-                }
+            # Instead of using add_relationship which doesn't exist,
+            # we'll use update_temporal_context to track the relationship
+            transformation_context = {
+                "relationship_type": "modality_transformation",
+                "target_id": new_query.adaptive_id.id,
+                "source_modality": self.modality,
+                "target_modality": new_modality,
+                "transformation_time": datetime.now().isoformat()
+            }
+            
+            # Update temporal context with the transformation information
+            self.adaptive_id.update_temporal_context(
+                key=f"transformation_{new_query.id}",
+                value=transformation_context,
+                origin="query_transformation"
             )
             
             # Notify about the state change
@@ -192,14 +199,21 @@ class QueryActant:
         
         # Link the new query's AdaptiveID to the original
         if self.adaptive_id and new_query.adaptive_id:
-            self.adaptive_id.add_relationship(
-                relationship_type="query_evolution",
-                target_id=new_query.adaptive_id.id,
-                context={
-                    "original_query": self.query_text,
-                    "evolved_query": new_query_text,
-                    "evolution_time": datetime.now().isoformat()
-                }
+            # Instead of using add_relationship which doesn't exist,
+            # we'll use update_temporal_context to track the relationship
+            evolution_context_data = {
+                "relationship_type": "query_evolution",
+                "target_id": new_query.adaptive_id.id,
+                "original_query": self.query_text,
+                "evolved_query": new_query_text,
+                "evolution_time": datetime.now().isoformat()
+            }
+            
+            # Update temporal context with the evolution information
+            self.adaptive_id.update_temporal_context(
+                key=f"evolution_{new_query.id}",
+                value=evolution_context_data,
+                origin="query_evolution"
             )
             
             # Notify about the state change

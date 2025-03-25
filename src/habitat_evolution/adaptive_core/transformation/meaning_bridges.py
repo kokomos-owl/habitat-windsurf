@@ -14,8 +14,8 @@ from datetime import datetime
 import numpy as np
 from collections import defaultdict
 
-from habitat_evolution.adaptive_core.transformation.actant_journey_tracker import ActantJourney
-from habitat_evolution.adaptive_core.id.adaptive_id import AdaptiveID
+from .actant_journey_tracker import ActantJourney
+from ..id.adaptive_id import AdaptiveID
 
 logger = logging.getLogger(__name__)
 
