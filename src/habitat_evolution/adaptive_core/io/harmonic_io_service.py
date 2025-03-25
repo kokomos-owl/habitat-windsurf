@@ -85,6 +85,9 @@ class HarmonicIOService:
             for op_type in OperationType
         }
         
+        # Counter for breaking ties in priority queue
+        self.operation_counter = 0
+        
         # Processing threads
         self.processing_threads = {}
         self.running = False
@@ -282,7 +285,12 @@ class HarmonicIOService:
         
         # Add to appropriate queue
         try:
-            self.operation_queues[operation_type].put((priority, operation), block=False)
+            # Increment counter for unique ordering
+            self.operation_counter += 1
+            
+            # Use a tuple of (priority, counter, operation) to ensure unique ordering
+            # The counter ensures that operations with the same priority are processed in FIFO order
+            self.operation_queues[operation_type].put((priority, self.operation_counter, operation), block=False)
             
             # Record metrics
             self.operation_metrics[operation_type].append({
@@ -326,7 +334,8 @@ class HarmonicIOService:
             try:
                 if not queue_obj.empty():
                     # Get next operation
-                    priority, operation = queue_obj.get(block=False)
+                    # The queue now contains (priority, counter, operation) tuples
+                    priority, _, operation = queue_obj.get(block=False)
                     
                     # Extract operation details
                     repository = operation["repository"]
