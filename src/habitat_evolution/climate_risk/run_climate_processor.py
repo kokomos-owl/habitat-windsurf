@@ -37,8 +37,7 @@ logging.basicConfig(
 for logger_name in logging.root.manager.loggerDict:
     logger_obj = logging.getLogger(logger_name)
     for handler in logger_obj.handlers:
-        if isinstance(handler, logging.Formatter):
-            handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+        handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
 
 logger = logging.getLogger(__name__)
 

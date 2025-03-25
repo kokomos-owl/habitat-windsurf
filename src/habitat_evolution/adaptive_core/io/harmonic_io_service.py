@@ -28,6 +28,7 @@ class OperationType(Enum):
     UPDATE = "update"
     DELETE = "delete"
     QUERY = "query"
+    PROCESS = "process"
 
 
 class HarmonicIOService:
