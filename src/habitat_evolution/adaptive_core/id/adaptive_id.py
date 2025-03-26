@@ -240,6 +240,7 @@ class AdaptiveID(BaseAdaptiveID):
         
         return result
         
+
     def register_with_field_observer(self, field_observer) -> None:
         """Register this ID with a field observer for field-aware tracking.
         

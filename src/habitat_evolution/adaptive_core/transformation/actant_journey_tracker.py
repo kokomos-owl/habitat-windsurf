@@ -616,15 +616,100 @@ class ActantJourneyTracker:
         """Process a relationship observation from an AdaptiveID."""
         # Extract relationship information
         if "source" in observation and "predicate" in observation and "target" in observation:
+            # Get source, predicate, and target
+            source = observation["source"]
+            predicate = observation["predicate"]
+            target = observation["target"]
+            
+            # Get context information
+            context = observation.get("context", {})
+            domain = context.get("domain", "default_domain")
+            timestamp = context.get("timestamp", datetime.now().isoformat())
+            
             # Create or update actant journeys for source and target
-            for actant_name in [observation["source"], observation["target"]]:
+            for actant_name in [source, target]:
+                # Create journey if it doesn't exist
                 if actant_name not in self.actant_journeys:
                     self.actant_journeys[actant_name] = ActantJourney.create(actant_name)
+                
+                # Get the journey
+                journey = self.actant_journeys[actant_name]
+                
+                # Create a journey point
+                point = ActantJourneyPoint(
+                    actant_name=actant_name,
+                    domain=domain,
+                    timestamp=timestamp,
+                    relationship={
+                        "role": "source" if actant_name == source else "target",
+                        "predicate": predicate,
+                        "other": target if actant_name == source else source
+                    },
+                    context=context
+                )
+                
+                # Add the point to the journey
+                journey.add_point(point)
+                
+                # Log the journey point
+                self.logger.debug(f"Added journey point for {actant_name} in domain {domain}")
+                
+                # Notify field observers if registered
+                for observer in self.field_observers:
+                    if hasattr(observer, 'observe_actant_movement'):
+                        observer.observe_actant_movement(actant_name, domain, point)
     
     def _process_pattern_detection(self, entity_id: str, pattern_data: Dict[str, Any]) -> None:
         """Process a pattern detection from an AdaptiveID."""
-        # Update pattern tracking as needed
-        pass
+        # Extract pattern information
+        pattern_id = pattern_data.get("pattern_id")
+        if not pattern_id:
+            return
+            
+        # Get source, predicate, and target if available
+        source = pattern_data.get("source")
+        predicate = pattern_data.get("predicate")
+        target = pattern_data.get("target")
+        
+        # Get context information
+        context = pattern_data.get("context", {})
+        domain = context.get("domain", "pattern_domain")
+        timestamp = context.get("timestamp", datetime.now().isoformat())
+        
+        # Create a pattern evolution record
+        evolution_record = {
+            "pattern_id": pattern_id,
+            "entity_id": entity_id,
+            "timestamp": timestamp,
+            "domain": domain,
+            "source": source,
+            "predicate": predicate,
+            "target": target,
+            "context": context,
+            "evolved_from": pattern_data.get("evolved_from")
+        }
+        
+        # Store the record
+        if not hasattr(self, 'pattern_evolution_records'):
+            self.pattern_evolution_records = []
+        self.pattern_evolution_records.append(evolution_record)
+        
+        # Log the pattern detection
+        self.logger.debug(f"Recorded pattern evolution for pattern {pattern_id}")
+        
+        # If this pattern involves actants we're tracking, update their journeys
+        if source and source in self.actant_journeys:
+            journey = self.actant_journeys[source]
+            journey.add_pattern_involvement(pattern_id, "source", domain, timestamp)
+            
+        if target and target in self.actant_journeys:
+            journey = self.actant_journeys[target]
+            journey.add_pattern_involvement(pattern_id, "target", domain, timestamp)
+            
+        # Notify field observers if registered
+        for observer in self.field_observers:
+            if hasattr(observer, 'observe_pattern_evolution'):
+                observer.observe_pattern_evolution(pattern_id, evolution_record)
     
     def observe_pattern_evolution(self, context: Dict[str, Any]) -> None:
         """

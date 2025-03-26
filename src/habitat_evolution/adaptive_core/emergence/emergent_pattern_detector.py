@@ -292,11 +292,18 @@ class EmergentPatternDetector:
                 }
                 
                 # Update the AdaptiveID with this meta-pattern
-                self.adaptive_id.update_context({
-                    "meta_pattern_detected": evolution_type,
-                    "meta_pattern_data": meta_pattern,
-                    "timestamp": datetime.now().isoformat()
-                })
+                timestamp = datetime.now().isoformat()
+                
+                # Use update_temporal_context for each value that should be tracked over time
+                self.adaptive_id.update_temporal_context(
+                    "meta_pattern_detected", 
+                    {
+                        "type": evolution_type,
+                        "data": meta_pattern,
+                        "timestamp": timestamp
+                    },
+                    "pattern_detection"
+                )
                 
                 meta_patterns.append(meta_pattern)
         
