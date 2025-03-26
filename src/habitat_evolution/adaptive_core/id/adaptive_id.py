@@ -220,6 +220,26 @@ class AdaptiveID(BaseAdaptiveID):
         """Get spatial context value."""
         return self.spatial_context.get(key)
         
+    def get_all_context_values(self) -> Dict[str, Any]:
+        """Get all context values from both temporal and spatial contexts.
+        
+        Returns:
+            Dictionary containing all context values
+        """
+        result = {
+            "temporal_context": {},
+            "spatial_context": self.spatial_context.copy()
+        }
+        
+        # Extract the most recent values from temporal context
+        for key, timestamps in self.temporal_context.items():
+            if timestamps:
+                # Get the most recent timestamp
+                latest_timestamp = sorted(timestamps.keys())[-1]
+                result["temporal_context"][key] = timestamps[latest_timestamp]["value"]
+        
+        return result
+        
     def register_with_field_observer(self, field_observer) -> None:
         """Register this ID with a field observer for field-aware tracking.
         

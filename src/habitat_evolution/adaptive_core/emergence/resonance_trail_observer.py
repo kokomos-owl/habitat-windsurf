@@ -324,17 +324,16 @@ class ResonanceTrailObserver:
                 pathway["average_intensity"] = sum(self.trail_map[t]["intensity"] for t in pathway["trails"]) / len(pathway["trails"])
                 
                 # Update the AdaptiveID with this pathway
-                self.adaptive_id.update_context({
-                    "pathway_detected": pathway["id"],
-                    "pathway_data": {
-                        "id": pathway["id"],
-                        "trail_count": len(pathway["trails"]),
-                        "pattern_count": len(pathway["pattern_ids"]),
-                        "average_intensity": pathway["average_intensity"],
-                        "timestamp": datetime.now().isoformat()
-                    },
-                    "timestamp": datetime.now().isoformat()
-                })
+                timestamp = datetime.now().isoformat()
+                pathway_key = f"pathway_detected_{pathway['id']}"
+                pathway_data = {
+                    "id": pathway["id"],
+                    "trail_count": len(pathway["trails"]),
+                    "pattern_count": len(pathway["pattern_ids"]),
+                    "average_intensity": pathway["average_intensity"],
+                    "timestamp": timestamp
+                }
+                self.adaptive_id.update_temporal_context(pathway_key, pathway_data, "pathway_detection")
                 
                 pathways.append(pathway)
         
