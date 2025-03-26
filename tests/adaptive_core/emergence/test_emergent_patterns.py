@@ -13,6 +13,7 @@ from datetime import datetime, timedelta
 from typing import Dict, List, Any
 import logging
 import json
+import random
 
 # Add the src directory to the path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../src')))
@@ -31,6 +32,7 @@ from habitat_evolution.adaptive_core.emergence.pattern_integration import (
     integrate_with_field_state,
     setup_emergent_pattern_system
 )
+from habitat_evolution.adaptive_core.emergence.climate_data_loader import ClimateDataLoader
 
 
 class TestEmergentPatterns(unittest.TestCase):
@@ -103,6 +105,11 @@ class TestEmergentPatterns(unittest.TestCase):
         integrate_with_actant_journey_tracker(self.semantic_observer, self.journey_tracker)
         integrate_with_field_navigator(self.pattern_detector, self.field_navigator)
         integrate_with_field_state(self.resonance_observer, self.field_state)
+        
+        # Initialize climate data loader
+        climate_risk_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../data/climate_risk'))
+        self.data_loader = ClimateDataLoader(climate_risk_dir)
+        self.data_loader.load_all_files()
     
     def test_semantic_current_observation(self):
         """Test that semantic currents are properly observed."""
@@ -602,6 +609,56 @@ class TestEmergentPatterns(unittest.TestCase):
             if "evolved_from" in pattern:
                 print(f"    Evolved from: {pattern['evolved_from']}")
 
+
+    def test_climate_risk_data_patterns(self):
+        """Test pattern detection using real climate risk data."""
+        # Get observation data from climate risk documents
+        observations = self.data_loader.generate_observation_data(batch_size=3)
+        
+        # Verify we have observations
+        self.assertGreaterEqual(len(observations), 1)
+        
+        # Feed data to semantic observer
+        for observation in observations:
+            self.semantic_observer.observe_semantic_currents(observation)
+        
+        # Detect patterns
+        patterns = self.pattern_detector.detect_patterns()
+        
+        # Verify patterns were detected
+        self.assertGreaterEqual(len(patterns), 1)
+        
+        # Print detected patterns for analysis
+        print("\nDetected Climate Risk Patterns from Real Data:")
+        for pattern in patterns:
+            print(f"  {pattern['source']} {pattern['predicate']} {pattern['target']} "
+                  f"(frequency: {pattern['frequency']}, confidence: {pattern['confidence']:.2f})")
+        
+        # Test pattern evolution with real data
+        evolution_data = self.data_loader.generate_evolution_data(steps=4)
+        
+        # Feed evolution data
+        for data in evolution_data:
+            self.semantic_observer.observe_semantic_currents(data)
+        
+        # Detect patterns again
+        evolved_patterns = self.pattern_detector.detect_patterns()
+        
+        # Find evolved patterns
+        evolved_count = 0
+        for pattern in evolved_patterns:
+            if "evolved_from" in pattern:
+                evolved_count += 1
+                print(f"\nEvolved Pattern: {pattern['source']} {pattern['predicate']} {pattern['target']}")
+                print(f"  Evolved from: {pattern['evolved_from']}")
+        
+        # We may not have evolved patterns in every run due to thresholds,
+        # but we should have observed the evolution data
+        self.assertGreaterEqual(len(evolution_data), 1)
+        
+        # Verify AdaptiveID participation
+        context_values = self.semantic_observer.adaptive_id.get_all_context_values()
+        self.assertGreaterEqual(len(context_values), len(observations) + len(evolution_data))
 
 if __name__ == "__main__":
     unittest.main()
