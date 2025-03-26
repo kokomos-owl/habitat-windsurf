@@ -75,23 +75,62 @@ class TestEmergentPatterns(unittest.TestCase):
         
         # Create pattern metadata
         self.pattern_metadata = []
+        self.pattern_dict = {}
         for i in range(size):
             community = i // 3  # Assign community based on index
-            self.pattern_metadata.append({
+            pattern = {
                 "id": f"pattern_{i}",
                 "type": "test",
                 "metrics": {
                     "coherence": 0.8,
                     "stability": 0.7
                 },
-                "community": community
-            })
+                "community": community,
+                "position": [i * 0.1, i * 0.1, 0],
+                "eigenspace_position": [i * 0.1, i * 0.1, i * 0.1, i * 0.1, i * 0.1]
+            }
+            self.pattern_metadata.append(pattern)
+            self.pattern_dict[f"pattern_{i}"] = pattern
         
         # Initialize the field
         self.field = self.field_navigator.set_field(self.resonance_matrix, self.pattern_metadata)
         
-        # Create field state
-        self.field_state = TonicHarmonicFieldState(self.field)
+        # Create a proper field analysis structure for the field state
+        # This ensures we have the required topology data with eigenvalues
+        mock_field_analysis = {
+            "topology": {
+                "effective_dimensionality": 3,
+                "principal_dimensions": [0, 1, 2],
+                "eigenvalues": np.array([0.8, 0.5, 0.3, 0.1, 0.05]),
+                "eigenvectors": np.random.rand(5, 5)
+            },
+            "communities": {
+                "count": 3,
+                "membership": [0, 0, 0, 1, 1, 1, 2, 2, 2, 2]
+            },
+            "boundaries": {
+                "transitions": [(2, 3), (5, 6)],
+                "uncertainty": {"2-3": 0.5, "5-6": 0.5}
+            },
+            "density": {
+                "density_centers": [(1.0, 1.0), (4.0, 4.0), (8.0, 8.0)],
+                "density_map": np.random.rand(10, 10)
+            },
+            "field_properties": {
+                "coherence": 0.75,
+                "navigability_score": 0.8,
+                "stability": 0.7
+            },
+            "resonance_relationships": {
+                "pattern_0": {"pattern_1": 0.8, "pattern_2": 0.5},
+                "pattern_1": {"pattern_0": 0.8, "pattern_2": 0.6},
+                "pattern_2": {"pattern_0": 0.5, "pattern_1": 0.6}
+            },
+            "patterns": self.pattern_dict
+        }
+        
+        # Create field state with the mock analysis
+        self.field_state = TonicHarmonicFieldState(mock_field_analysis)
         
         # Create actant journey tracker
         self.journey_tracker = ActantJourneyTracker()

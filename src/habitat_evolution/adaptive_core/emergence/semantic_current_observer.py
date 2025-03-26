@@ -108,14 +108,16 @@ class SemanticCurrentObserver:
             })
             
             # Update the AdaptiveID with this observation
-            self.adaptive_id.update_context({
-                "relationship_observed": rel_key,
+            relationship_key = f"relationship_observed_{rel_key}"
+            relationship_data = {
+                "relationship": rel_key,
                 "timestamp": datetime.now().isoformat(),
                 "source": rel["source"],
                 "predicate": rel["predicate"],
                 "target": rel["target"],
                 "frequency": self.relationship_frequency[rel_key]
-            })
+            }
+            self.adaptive_id.update_temporal_context(relationship_key, relationship_data, "semantic_observation")
         
         # Add to observation history
         self.observation_history.append(observation_results)

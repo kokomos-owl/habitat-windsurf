@@ -90,11 +90,17 @@ class EmergentPatternDetector:
                     pattern["evolved_from"] = evolved_from
                 
                 # Update the AdaptiveID with this pattern
-                self.adaptive_id.update_context({
-                    "pattern_detected": rel_key,
-                    "pattern_data": pattern,
-                    "timestamp": datetime.now().isoformat()
-                })
+                pattern_key = f"pattern_detected_{rel_key}"
+                pattern_data = {
+                    "pattern_id": pattern["id"],
+                    "source": pattern["source"],
+                    "predicate": pattern["predicate"],
+                    "target": pattern["target"],
+                    "frequency": pattern["frequency"],
+                    "confidence": pattern["confidence"],
+                    "detection_timestamp": pattern["detection_timestamp"]
+                }
+                self.adaptive_id.update_temporal_context(pattern_key, pattern_data, "pattern_detection")
                 
                 self.potential_patterns.append(pattern)
                 

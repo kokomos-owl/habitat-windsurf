@@ -106,17 +106,15 @@ class ResonanceTrailObserver:
         })
         
         # Update the AdaptiveID with this movement
-        self.adaptive_id.update_context({
-            "pattern_movement": pattern_id,
-            "movement_data": {
-                "pattern_id": pattern_id,
-                "old_position": str(old_position),
-                "new_position": str(new_position),
-                "timestamp": timestamp,
-                "trail_key": trail_key
-            },
-            "timestamp": timestamp
-        })
+        movement_key = f"pattern_movement_{pattern_id}_{timestamp}"
+        movement_data = {
+            "pattern_id": pattern_id,
+            "old_position": str(old_position),
+            "new_position": str(new_position),
+            "timestamp": timestamp,
+            "trail_key": trail_key
+        }
+        self.adaptive_id.update_temporal_context(movement_key, movement_data, "resonance_observation")
         
         # Register with field state to participate in field analysis
         if hasattr(self.field_state, 'register_observer'):
