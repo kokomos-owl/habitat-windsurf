@@ -169,17 +169,16 @@ class ResonanceTrailObserver:
             trail_data["intensity"] *= decay_factor
             
             # Update AdaptiveID with decay information
-            self.adaptive_id.update_context({
-                "trail_decay": trail_key,
-                "decay_data": {
-                    "trail_key": trail_key,
-                    "old_intensity": trail_data["intensity"] / decay_factor,
-                    "new_intensity": trail_data["intensity"],
-                    "decay_factor": decay_factor,
-                    "hours_since_update": hours_since
-                },
+            decay_key = f"trail_decay_{trail_key}_{current_time.isoformat()}"
+            decay_data = {
+                "trail_key": trail_key,
+                "old_intensity": trail_data["intensity"] / decay_factor,
+                "new_intensity": trail_data["intensity"],
+                "decay_factor": decay_factor,
+                "hours_since_update": hours_since,
                 "timestamp": current_time.isoformat()
-            })
+            }
+            self.adaptive_id.update_temporal_context(decay_key, decay_data, "trail_decay")
     
     def get_trail_influence(self, position: Tuple) -> Dict[str, Any]:
         """

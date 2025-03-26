@@ -66,7 +66,11 @@ class EmergentPatternDetector:
         for rel_key, count in frequencies.items():
             if count >= self.threshold:
                 rel_data = observations[rel_key]
-                source, predicate, target = rel_key.split('_')
+                # Extract source, predicate, target from the relationship data
+                # instead of trying to parse from the key
+                source = rel_data["source"]
+                predicate = rel_data["predicate"]
+                target = rel_data["target"]
                 
                 # Calculate confidence based on frequency and recency
                 confidence = self._calculate_confidence(rel_data)

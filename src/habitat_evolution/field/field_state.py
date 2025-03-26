@@ -85,6 +85,9 @@ class TonicHarmonicFieldState:
                 "state": self._get_current_state()
             }
         }
+        
+        # Initialize observers list for pattern changes
+        self.observers = []
     
     def _initialize_pattern_eigenspace_properties(self, field_analysis: Dict[str, Any]) -> None:
         """
@@ -128,6 +131,80 @@ class TonicHarmonicFieldState:
             for pattern_id in members:
                 if pattern_id in self.pattern_eigenspace_properties:
                     self.pattern_eigenspace_properties[pattern_id]["resonance_groups"].append(group_id)
+    
+    def update_patterns(self, updated_patterns: Dict[str, Any]) -> None:
+        """
+        Update pattern positions and metadata in the field state.
+        
+        Args:
+            updated_patterns: Dictionary of pattern IDs to updated pattern data
+        """
+        # Create a new version ID for this update
+        new_version_id = str(uuid.uuid4())
+        timestamp = datetime.now().isoformat()
+        
+        # Track old pattern state for notifications
+        old_patterns = deepcopy(self.patterns)
+        
+        # Update patterns
+        for pattern_id, pattern_data in updated_patterns.items():
+            if pattern_id in self.patterns:
+                # Update existing pattern
+                self.patterns[pattern_id].update(pattern_data)
+            else:
+                # Add new pattern
+                self.patterns[pattern_id] = pattern_data
+        
+        # Update last modified timestamp
+        self.last_modified = timestamp
+        
+        # Add to version history
+        self.versions[new_version_id] = {
+            "timestamp": timestamp,
+            "state": self._get_current_state()
+        }
+        
+        # Notify observers of pattern changes
+        self._notify_observers(old_patterns, self.patterns)
+    
+    def register_observer(self, observer) -> None:
+        """
+        Register an observer to be notified of field state changes.
+        
+        Args:
+            observer: Observer object with an observe_field_state_change method
+        """
+        if observer not in self.observers:
+            self.observers.append(observer)
+    
+    def _notify_observers(self, old_patterns: Dict[str, Any], new_patterns: Dict[str, Any]) -> None:
+        """
+        Notify all registered observers of pattern changes.
+        
+        Args:
+            old_patterns: Previous pattern state
+            new_patterns: New pattern state
+        """
+        for observer in self.observers:
+            try:
+                if hasattr(observer, 'observe_field_state_change'):
+                    observer.observe_field_state_change({
+                        "old_patterns": old_patterns,
+                        "new_patterns": new_patterns,
+                        "timestamp": self.last_modified
+                    })
+                elif hasattr(observer, 'observations'):
+                    # Direct observation for testing environments
+                    observer.observations.append({
+                        "context": {
+                            "old_patterns": old_patterns,
+                            "new_patterns": new_patterns,
+                            "timestamp": self.last_modified
+                        },
+                        "time": datetime.now()
+                    })
+            except Exception as e:
+                print(f"Error notifying observer: {e}")
     
     def _get_current_state(self) -> Dict[str, Any]:
         """

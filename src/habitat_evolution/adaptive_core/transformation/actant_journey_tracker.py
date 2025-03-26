@@ -570,7 +570,61 @@ class ActantJourneyTracker:
         self.domains = {}  # domain_id -> domain dictionary
         self.learning_windows = []  # List of registered learning windows
         self.field_observers = []  # List of registered field observers
+        self.observations = []  # For testing purposes
         self.logger = logging.getLogger(__name__)
+    
+    def record_state_change(self, entity_id: str, change_type: str, old_value: Any, new_value: Any, origin: str) -> None:
+        """
+        Record a state change from an AdaptiveID.
+        
+        This method is called by the AdaptiveID when a state change occurs. It processes
+        the state change and updates the actant journeys accordingly.
+        
+        Args:
+            entity_id: ID of the entity that changed
+            change_type: Type of change (e.g., 'temporal_context', 'relationship')
+            old_value: Previous value (can be None)
+            new_value: New value
+            origin: Origin of the change
+        """
+        try:
+            # Store the observation for testing purposes
+            self.observations.append({
+                "entity_id": entity_id,
+                "change_type": change_type,
+                "old_value": old_value,
+                "new_value": new_value,
+                "origin": origin,
+                "timestamp": datetime.now().isoformat()
+            })
+            
+            # Process different types of state changes
+            if change_type == "temporal_context" and isinstance(new_value, dict):
+                # Check if this is a relationship observation
+                if "relationship" in new_value:
+                    self._process_relationship_observation(entity_id, new_value)
+                # Check if this is a pattern detection
+                elif "pattern_id" in new_value:
+                    self._process_pattern_detection(entity_id, new_value)
+            
+            # Process other types of state changes as needed
+            
+        except Exception as e:
+            self.logger.error(f"Error recording state change: {e}")
+    
+    def _process_relationship_observation(self, entity_id: str, observation: Dict[str, Any]) -> None:
+        """Process a relationship observation from an AdaptiveID."""
+        # Extract relationship information
+        if "source" in observation and "predicate" in observation and "target" in observation:
+            # Create or update actant journeys for source and target
+            for actant_name in [observation["source"], observation["target"]]:
+                if actant_name not in self.actant_journeys:
+                    self.actant_journeys[actant_name] = ActantJourney.create(actant_name)
+    
+    def _process_pattern_detection(self, entity_id: str, pattern_data: Dict[str, Any]) -> None:
+        """Process a pattern detection from an AdaptiveID."""
+        # Update pattern tracking as needed
+        pass
     
     def observe_pattern_evolution(self, context: Dict[str, Any]) -> None:
         """
