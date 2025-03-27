@@ -315,15 +315,87 @@ class TestVectorTonicWindowIntegration:
             },
             "vectors": {
                 f"vector_{i}": np.random.rand(128).tolist() for i in range(10)
+            },
+            "topology": {
+                "resonance_centers": [
+                    {
+                        "id": f"center_{i}",
+                        "position": [np.random.uniform(0, 1), np.random.uniform(0, 1)],
+                        "strength": np.random.uniform(0.5, 0.9),
+                        "radius": np.random.uniform(0.1, 0.3),
+                        "stability": stability
+                    } for i in range(3)
+                ],
+                "interference_patterns": [
+                    {
+                        "id": f"interference_{i}",
+                        "position": [np.random.uniform(0, 1), np.random.uniform(0, 1)],
+                        "strength": np.random.uniform(0.3, 0.7),
+                        "type": np.random.choice(["constructive", "destructive", "neutral"])
+                    } for i in range(2)
+                ],
+                "field_density_centers": [
+                    {
+                        "id": f"density_{i}",
+                        "position": [np.random.uniform(0, 1), np.random.uniform(0, 1)],
+                        "density": np.random.uniform(0.6, 0.9)
+                    } for i in range(4)
+                ],
+                "flow_vectors": [
+                    {
+                        "id": f"flow_{i}",
+                        "start": [np.random.uniform(0, 1), np.random.uniform(0, 1)],
+                        "end": [np.random.uniform(0, 1), np.random.uniform(0, 1)],
+                        "strength": np.random.uniform(0.4, 0.8)
+                    } for i in range(5)
+                ]
             }
         }
         
-        # Publish field gradient event
+        # Publish field gradient event with carefully structured data
+        # Ensure all topology data is properly formatted as dictionaries
+        # Convert any list-based topology data to dictionary format
+        
+        # Create a copy of the topology data to avoid modifying the original
+        topology_dict = {}
+        
+        # Ensure resonance_centers is a dictionary
+        resonance_centers_dict = {}
+        for i, center in enumerate(gradient_data["topology"]["resonance_centers"]):
+            resonance_centers_dict[f"center_{i}"] = center
+        topology_dict["resonance_centers"] = resonance_centers_dict
+        
+        # Ensure interference_patterns is a dictionary
+        interference_patterns_dict = {}
+        for i, pattern in enumerate(gradient_data["topology"]["interference_patterns"]):
+            interference_patterns_dict[f"pattern_{i}"] = pattern
+        topology_dict["interference_patterns"] = interference_patterns_dict
+        
+        # Ensure field_density_centers is a dictionary
+        density_centers_dict = {}
+        for i, center in enumerate(gradient_data["topology"]["field_density_centers"]):
+            density_centers_dict[f"density_{i}"] = center
+        topology_dict["field_density_centers"] = density_centers_dict
+        
+        # Ensure flow_vectors is a dictionary
+        flow_vectors_dict = {}
+        for i, vector in enumerate(gradient_data["topology"]["flow_vectors"]):
+            flow_vectors_dict[f"flow_{i}"] = vector
+        topology_dict["flow_vectors"] = flow_vectors_dict
+        
+        # Publish the event with properly structured data
         self.event_bus.publish(Event.create(
             type="field.gradient.update",
             source="test_field_service",
             data={
-                "gradient": gradient_data,
+                "gradients": gradient_data["metrics"],  # Match what event_aware_detector expects
+                "gradient": {  # Match what vector_tonic_window_integration expects
+                    "metrics": gradient_data["metrics"],
+                    "vectors": gradient_data["vectors"],
+                    "topology": topology_dict  # Use dictionary-based topology data
+                },
+                "topology": topology_dict,  # Include dictionary-based topology at the top level
+                "vectors": gradient_data["vectors"],   # Include vectors at the top level
                 "timestamp": datetime.now().isoformat()
             }
         ))
@@ -335,8 +407,59 @@ class TestVectorTonicWindowIntegration:
             data={
                 "field_state": {
                     "metrics": gradient_data["metrics"],
-                    "effective_dimensionality": 64,
-                    "timestamp": datetime.now().isoformat()
+                    "timestamp": datetime.now().isoformat(),
+                    "topology": {
+                        # Include topology data in the expected structure
+                        "effective_dimensionality": 64,
+                        "principal_dimensions": [
+                            {
+                                "eigenvalue": 0.8,
+                                "explained_variance": 0.5,
+                                "eigenvector": [0.1, 0.2, 0.3]
+                            },
+                            {
+                                "eigenvalue": 0.6,
+                                "explained_variance": 0.3,
+                                "eigenvector": [0.4, 0.5, 0.6]
+                            },
+                            {
+                                "eigenvalue": 0.4,
+                                "explained_variance": 0.2,
+                                "eigenvector": [0.7, 0.8, 0.9]
+                            }
+                        ],
+                        "eigenvalues": {"0": 0.8, "1": 0.6, "2": 0.4},
+                        "eigenvectors": {"0": [0.1, 0.2, 0.3], "1": [0.4, 0.5, 0.6], "2": [0.7, 0.8, 0.9]},
+                        # Include the topology data from gradient_data
+                        "resonance_centers": gradient_data["topology"]["resonance_centers"],
+                        "interference_patterns": gradient_data["topology"]["interference_patterns"],
+                        "field_density_centers": gradient_data["topology"]["field_density_centers"],
+                        "flow_vectors": gradient_data["topology"]["flow_vectors"]
+                    },
+                    # Add density information required by TonicHarmonicFieldState
+                    "density": {
+                        "density_centers": [
+                            {
+                                "index": i,
+                                "position": [np.random.uniform(0, 1), np.random.uniform(0, 1), np.random.uniform(0, 1)],
+                                "density": center["density"],
+                                "influence_radius": np.random.uniform(0.1, 0.3)
+                            } for i, center in enumerate(gradient_data["topology"]["field_density_centers"])
+                        ],
+                        "density_map": [[np.random.uniform(0, 1) for _ in range(3)] for _ in range(3)]
+                    },
+                    # Add field properties required by TonicHarmonicFieldState
+                    "field_properties": {
+                        "coherence": gradient_data["metrics"]["coherence"],
+                        "navigability_score": np.random.uniform(0.5, 0.9),
+                        "stability": gradient_data["metrics"]["stability"]
+                    },
+                    # Add patterns required by TonicHarmonicFieldState
+                    "patterns": [],
+                    # Include additional field state properties needed by handlers
+                    "resonance_history": [],
+                    "resonance_relationships": {},
+                    "pattern_relationships": {}
                 }
             }
         ))

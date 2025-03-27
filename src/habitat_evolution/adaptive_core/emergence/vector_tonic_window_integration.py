@@ -565,9 +565,27 @@ class VectorTonicWindowIntegrator:
             return
             
         # Update field history for adaptive soak period calculation
+        # Extract metrics from field_state_data, handling possible nested structure
+        metrics = {}
+        if isinstance(field_state_data, dict):
+            # Try to get metrics directly
+            if 'metrics' in field_state_data and isinstance(field_state_data['metrics'], dict):
+                metrics = field_state_data['metrics']
+            # If not found, check if metrics is nested in field_properties
+            elif 'field_properties' in field_state_data and isinstance(field_state_data['field_properties'], dict):
+                # Extract relevant metrics from field_properties
+                field_props = field_state_data['field_properties']
+                metrics = {
+                    'coherence': field_props.get('coherence', 0.5),
+                    'stability': field_props.get('stability', 0.5),
+                    'turbulence': 1.0 - field_props.get('stability', 0.5),
+                    'density': field_props.get('density', 0.5)
+                }
+        
+        # Add to field history with proper structure
         self.field_history.append({
             'timestamp': datetime.now(),
-            'metrics': field_state_data.get('metrics', {})
+            'metrics': metrics
         })
         
         # If window is in OPENING state, use this update for progressive preparation
@@ -607,17 +625,43 @@ class VectorTonicWindowIntegrator:
         Args:
             event: Vector gradient update event
         """
-        gradient_data = event.data.get('gradient', {})
-        if not gradient_data:
-            return
-            
-        # Use gradient data to inform window state decisions
-        if self.base_detector.window_state == WindowState.OPENING:
-            # Update detection thresholds based on gradient
-            self._adjust_detection_thresholds(gradient_data)
-            
-            # Warm vector cache with gradient data
-            self._warm_vector_cache(gradient_data)
+        try:
+            # Log the structure of the event data for debugging
+            logger.info(f"Vector gradient update event data structure: {type(event.data)}")
+            for key, value in event.data.items():
+                logger.info(f"Key: {key}, Type: {type(value)}")
+                
+            gradient_data = event.data.get('gradient', {})
+            if not gradient_data:
+                logger.warning("No gradient data found in event")
+                return
+                
+            # Log the structure of the gradient data for debugging
+            logger.info(f"Gradient data structure: {type(gradient_data)}")
+            for key, value in gradient_data.items():
+                logger.info(f"Gradient key: {key}, Type: {type(value)}")
+                
+            # Use gradient data to inform window state decisions
+            if self.base_detector.window_state == WindowState.OPENING:
+                try:
+                    # Update detection thresholds based on gradient
+                    self._adjust_detection_thresholds(gradient_data)
+                except Exception as e:
+                    logger.error(f"Error in _adjust_detection_thresholds: {e}")
+                    import traceback
+                    logger.error(traceback.format_exc())
+                
+                try:
+                    # Warm vector cache with gradient data
+                    self._warm_vector_cache(gradient_data)
+                except Exception as e:
+                    logger.error(f"Error in _warm_vector_cache: {e}")
+                    import traceback
+                    logger.error(traceback.format_exc())
+        except Exception as e:
+            logger.error(f"Error in vector gradient update handler: {e}")
+            import traceback
+            logger.error(traceback.format_exc())
     
     def _start_progressive_preparation(self):
         """Start progressive preparation during OPENING state."""
@@ -635,7 +679,7 @@ class VectorTonicWindowIntegrator:
                 # The error was due to passing the event_bus as repository
                 # We should pass self as the repository since we have the _warm_vector_cache method
                 self.harmonic_io_service.schedule_operation(
-                    operation_type=OperationType.PROCESS.value,
+                    operation_type="process",  # Use the string value, not the enum
                     repository=self,  # Pass self as the repository
                     method_name='_warm_vector_cache',
                     args=(),  # No arguments needed
@@ -644,7 +688,8 @@ class VectorTonicWindowIntegrator:
                         'priority': 'high',
                         'purpose': 'cache_warming',
                         'stability': 0.8,  # High stability for predictable warming
-                        'coherence': 0.7    # Good coherence for meaningful patterns
+                        'coherence': 0.7,   # Good coherence for meaningful patterns
+                        'field_state_id': self.field_modulator.field_state_id if hasattr(self.field_modulator, 'field_state_id') else None
                     }
                 )
                 logger.info("Scheduled vector gradient analysis for cache warming")
@@ -697,10 +742,19 @@ class VectorTonicWindowIntegrator:
         if gradient_data and gradient_data.get('vectors'):
             # Extract vectors from gradient data
             vectors = gradient_data.get('vectors', {})
-            for key, vector in vectors.items():
-                self.vector_cache[key] = vector
             
-            logger.info(f"Vector cache warmed with {len(vectors)} vectors from gradient data")
+            # Handle both dictionary and list types for vectors
+            if isinstance(vectors, dict):
+                for key, vector in vectors.items():
+                    self.vector_cache[key] = vector
+                logger.info(f"Vector cache warmed with {len(vectors)} vectors from gradient data")
+            elif isinstance(vectors, list):
+                # If vectors is a list, use index as key
+                for i, vector in enumerate(vectors):
+                    self.vector_cache[f"vector_{i}"] = vector
+                logger.info(f"Vector cache warmed with {len(vectors)} vectors from gradient data")
+            else:
+                logger.warning(f"Unexpected vectors type: {type(vectors)}")
             return
         
         # If no gradient data provided, try to load climate risk data
@@ -864,8 +918,24 @@ class VectorTonicWindowIntegrator:
             return self.max_soak_period
             
         # Calculate field volatility
-        coherence_values = [entry['metrics'].get('coherence', 0.5) for entry in self.field_history if 'metrics' in entry]
-        stability_values = [entry['metrics'].get('stability', 0.5) for entry in self.field_history if 'metrics' in entry]
+        coherence_values = []
+        stability_values = []
+        
+        for entry in self.field_history:
+            # Handle both dictionary and list types for field history entries
+            if isinstance(entry, dict) and 'metrics' in entry:
+                metrics = entry['metrics']
+                if isinstance(metrics, dict):
+                    coherence_values.append(metrics.get('coherence', 0.5))
+                    stability_values.append(metrics.get('stability', 0.5))
+                elif isinstance(metrics, list) and len(metrics) > 0:
+                    # If metrics is a list, try to find coherence and stability in the first item
+                    if isinstance(metrics[0], dict):
+                        coherence_values.append(metrics[0].get('coherence', 0.5))
+                        stability_values.append(metrics[0].get('stability', 0.5))
+            # Log unexpected entry type for debugging
+            elif not isinstance(entry, dict):
+                logger.warning(f"Unexpected field history entry type: {type(entry)}")
         
         if not coherence_values or not stability_values:
             return self.max_soak_period

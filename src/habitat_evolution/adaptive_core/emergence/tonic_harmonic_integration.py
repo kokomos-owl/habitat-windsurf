@@ -14,6 +14,7 @@ import logging
 from typing import Dict, List, Any, Optional, Tuple, Set, Callable
 import numpy as np
 from datetime import datetime
+from collections import deque
 
 # Use absolute imports to avoid module path issues
 from src.habitat_evolution.core.services.event_bus import LocalEventBus, Event
