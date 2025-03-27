@@ -177,7 +177,7 @@ def test_learning_window_integration():
     
     # Publish field gradient updates
     logger.info("Publishing field gradient with low coherence")
-    event_bus.publish(Event(
+    event_bus.publish(Event.create(
         "field.gradient.update",
         {
             "gradients": {
@@ -197,7 +197,7 @@ def test_learning_window_integration():
     
     # Publish field gradient with high coherence
     logger.info("Publishing field gradient with high coherence")
-    event_bus.publish(Event(
+    event_bus.publish(Event.create(
         "field.gradient.update",
         {
             "gradients": {
@@ -215,11 +215,23 @@ def test_learning_window_integration():
     # Check window state - should be OPENING due to high coherence
     logger.info(f"Window state after high coherence: {learning_window_detector.window_state}")
     
-    # Test back pressure control
-    logger.info("Testing back pressure control")
+    # Manually force window to OPEN state to test back pressure
+    # In a real scenario, this would happen after the 30-second delay
+    logger.info("Manually transitioning window to OPEN state to test back pressure")
+    learning_window_detector.update_window_state(WindowState.OPEN)
+    logger.info(f"Window state after manual transition: {learning_window_detector.window_state}")
     
-    # Feed more relationships rapidly to trigger back pressure
-    for rel in synthetic_relationships[10:]:
+    # Reset detection delay to ensure back pressure starts from baseline
+    learning_window_detector.detection_delay = learning_window_detector.back_pressure_controller.base_delay
+    learning_window_detector.last_detection_time = datetime.now() - timedelta(seconds=10)  # Ensure first detection passes
+    
+    # Test back pressure control with window in OPEN state
+    logger.info("Testing back pressure control with OPEN window")
+    
+    # Feed relationships in rapid succession to trigger back pressure
+    detected_pattern_counts = []
+    for i, rel in enumerate(synthetic_relationships[10:]):
+        # Feed relationship multiple times to ensure pattern detection
         for _ in range(3):
             semantic_observer.observe_relationship(
                 source=rel["source"],
@@ -228,9 +240,19 @@ def test_learning_window_integration():
                 context=rel.get("context", {})
             )
         
-        # Try to detect patterns immediately - back pressure should limit this
+        # Try to detect patterns - first should work, subsequent ones should be limited by back pressure
         patterns = field_controller.detect_patterns()
-        logger.info(f"Patterns detected: {len(patterns)}, Delay: {learning_window_detector.detection_delay:.2f}s")
+        detected_pattern_counts.append(len(patterns))
+        logger.info(f"Iteration {i+1}: Patterns detected: {len(patterns)}, Delay: {learning_window_detector.detection_delay:.2f}s")
+        
+        # Short delay but not enough to bypass back pressure
+        time.sleep(0.05)
+    
+    # Verify back pressure is working by checking pattern counts
+    non_zero_detections = sum(1 for count in detected_pattern_counts if count > 0)
+    logger.info(f"Detected patterns in {non_zero_detections} out of {len(detected_pattern_counts)} iterations")
+    assert non_zero_detections > 0, "No patterns were detected even with OPEN window"
+    assert non_zero_detections < len(detected_pattern_counts), "Back pressure did not limit pattern detection"
     
     logger.info("Learning window integration test completed")
     return detected_patterns

@@ -49,7 +49,25 @@ def create_mock_field_state():
             "coherence": 0.75,
             "turbulence": 0.3,
             "stability": 0.8
-        }
+        },
+        "density": {
+            "density_centers": [
+                {"index": 0, "position": [0.2, 0.3, 0.4], "density": 0.8, "influence_radius": 0.5},
+                {"index": 1, "position": [0.6, 0.7, 0.8], "density": 0.7, "influence_radius": 0.4}
+            ],
+            "density_map": [[0.1, 0.2, 0.3], [0.4, 0.5, 0.6], [0.7, 0.8, 0.9]],
+            "node_strengths": [0.7, 0.8, 0.6]
+        },
+        "field_properties": {
+            "coherence": 0.75,
+            "navigability_score": 0.65,
+            "stability": 0.8
+        },
+        "patterns": {
+            "pattern1": {"id": "pattern1", "tonic_value": 0.8, "phase_position": 0.3},
+            "pattern2": {"id": "pattern2", "tonic_value": 0.6, "phase_position": 0.7}
+        },
+        "resonance_relationships": {}
     }
     
     # Create field state
@@ -203,22 +221,36 @@ def test_tonic_harmonic_integration():
     field_state = create_mock_field_state()
     
     # Publish field state update
-    event_bus.publish(Event(
+    # Create a complete field state dictionary for the event
+    field_state_dict = {
+        "topology": {
+            "effective_dimensionality": field_state.effective_dimensionality,
+            "principal_dimensions": field_state.principal_dimensions,
+            "eigenvalues": field_state.eigenvalues,
+            "eigenvectors": field_state.eigenvectors
+        },
+        "metrics": {
+            "coherence": field_state.get_coherence_metric(),
+            "turbulence": field_state.get_turbulence_metric(),
+            "stability": field_state.get_stability_metric()
+        },
+        "density": {
+            "density_centers": field_state.density_centers,
+            "density_map": field_state.density_map
+        },
+        "field_properties": {
+            "coherence": field_state.coherence,
+            "navigability_score": field_state.navigability_score,
+            "stability": field_state.stability
+        },
+        "patterns": field_state.patterns,
+        "resonance_relationships": field_state.resonance_relationships
+    }
+    
+    event_bus.publish(Event.create(
         "field.state.updated",
         {
-            "field_state": {
-                "topology": {
-                    "effective_dimensionality": field_state.effective_dimensionality,
-                    "principal_dimensions": field_state.principal_dimensions,
-                    "eigenvalues": field_state.eigenvalues,
-                    "eigenvectors": field_state.eigenvectors
-                },
-                "metrics": {
-                    "coherence": field_state.get_coherence_metric(),
-                    "turbulence": field_state.get_turbulence_metric(),
-                    "stability": field_state.get_stability_metric()
-                }
-            }
+            "field_state": field_state_dict
         },
         source="test"
     ))
@@ -267,7 +299,7 @@ def test_tonic_harmonic_integration():
         evolved_pattern["predicate"] = "impacts" if original_pattern["predicate"] != "impacts" else "affects"
         
         # Publish pattern evolution event
-        event_bus.publish(Event(
+        event_bus.publish(Event.create(
             "pattern.evolved",
             {
                 "pattern_id": str(uuid.uuid4()),
@@ -283,7 +315,7 @@ def test_tonic_harmonic_integration():
         logger.info(f"Semantic boundaries detected: {semantic_boundary_count}")
     
     # Test field gradient updates
-    event_bus.publish(Event(
+    event_bus.publish(Event.create(
         "vector.gradient.updated",
         {
             "gradient": {
@@ -299,22 +331,43 @@ def test_tonic_harmonic_integration():
     time.sleep(0.1)
     
     # Test changing field state
-    event_bus.publish(Event(
+    # Create a modified field state dictionary for the second update
+    updated_field_state_dict = {
+        "topology": {
+            "effective_dimensionality": 2,
+            "principal_dimensions": [0, 1],
+            "eigenvalues": [0.9, 0.4],
+            "eigenvectors": [[0.2, 0.3, 0.4], [0.5, 0.6, 0.7]]
+        },
+        "metrics": {
+            "coherence": 0.9,
+            "turbulence": 0.1,
+            "stability": 0.95
+        },
+        "density": {
+            "density_centers": [
+                {"index": 0, "position": [0.3, 0.4, 0.5], "density": 0.9, "influence_radius": 0.6},
+                {"index": 1, "position": [0.7, 0.8, 0.9], "density": 0.8, "influence_radius": 0.5}
+            ],
+            "density_map": [[0.2, 0.3, 0.4], [0.5, 0.6, 0.7], [0.8, 0.9, 1.0]],
+            "node_strengths": [0.8, 0.9, 0.7]
+        },
+        "field_properties": {
+            "coherence": 0.9,
+            "navigability_score": 0.75,
+            "stability": 0.95
+        },
+        "patterns": {
+            "pattern1": {"id": "pattern1", "tonic_value": 0.9, "phase_position": 0.4},
+            "pattern2": {"id": "pattern2", "tonic_value": 0.7, "phase_position": 0.8}
+        },
+        "resonance_relationships": {}
+    }
+    
+    event_bus.publish(Event.create(
         "field.state.updated",
         {
-            "field_state": {
-                "topology": {
-                    "effective_dimensionality": 2,
-                    "principal_dimensions": [0, 1],
-                    "eigenvalues": [0.9, 0.4],
-                    "eigenvectors": [[0.2, 0.3, 0.4], [0.5, 0.6, 0.7]]
-                },
-                "metrics": {
-                    "coherence": 0.9,
-                    "turbulence": 0.1,
-                    "stability": 0.95
-                }
-            }
+            "field_state": updated_field_state_dict
         },
         source="test"
     ))

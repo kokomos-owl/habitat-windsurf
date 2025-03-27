@@ -117,8 +117,16 @@ class EventAwarePatternDetector(EmergentPatternDetector):
             if "turbulence" in gradients:
                 turbulence = gradients["turbulence"]
                 # Store turbulence for use in confidence calculation
-                self.adaptive_id.update_spatial_context("field_turbulence", turbulence, "field_gradient")
-                self.logger.debug(f"Updated field turbulence to {turbulence}")
+                try:
+                    self.adaptive_id.update_spatial_context("field_turbulence", turbulence, "field_gradient")
+                    self.logger.debug(f"Updated field turbulence to {turbulence}")
+                except Exception as e:
+                    # Handle the case where field_turbulence is not a valid spatial context key
+                    # This is an architectural insight: AdaptiveID has predefined spatial context keys
+                    # and field_turbulence is not one of them
+                    self.logger.debug(f"Could not update field_turbulence: {e}")
+                    # Store turbulence as a local attribute instead
+                    self._field_turbulence = turbulence
         except Exception as e:
             self.logger.error(f"Error handling field gradient update event: {e}")
     

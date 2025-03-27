@@ -146,9 +146,10 @@ class TonicHarmonicPatternDetector:
             return
         
         # Extract field metrics
-        coherence = self.field_state.get_coherence_metric()
-        turbulence = self.field_state.get_turbulence_metric()
-        stability = self.field_state.get_stability_metric()
+        coherence = self.field_state.coherence
+        # Turbulence might be derived from metrics or field_properties
+        turbulence = 1.0 - self.field_state.stability  # Estimate turbulence as inverse of stability
+        stability = self.field_state.stability
         
         # Adjust detection threshold based on field metrics
         base_threshold = self.base_detector.detector.threshold
@@ -199,10 +200,12 @@ class TonicHarmonicPatternDetector:
         
         # Schedule through harmonic I/O
         self.harmonic_io_service.schedule_operation(
-            operation_type=OperationType.PROCESS,
-            callback=self._process_pattern_analysis,
-            context=context,
-            priority=0.7  # Medium-high priority
+            operation_type=OperationType.PROCESS.value,
+            repository=self,
+            method_name="_process_pattern_analysis",
+            args=(),
+            kwargs={"context": context},
+            data_context=context
         )
     
     def _process_pattern_analysis(self, context: Dict[str, Any]) -> Dict[str, Any]:
@@ -461,7 +464,7 @@ class TonicHarmonicPatternDetector:
             logger.info(f"Pattern {pattern_id} crossed semantic boundary during evolution")
             
             # Publish semantic boundary event
-            self.event_bus.publish(Event(
+            self.event_bus.publish(Event.create(
                 "pattern.semantic_boundary",
                 {
                     "pattern_id": pattern_id,
@@ -719,9 +722,10 @@ class VectorPlusFieldBridge:
             return
         
         # Extract field metrics
-        coherence = self.field_state.get_coherence_metric()
-        turbulence = self.field_state.get_turbulence_metric()
-        stability = self.field_state.get_stability_metric()
+        coherence = self.field_state.coherence
+        # Turbulence might be derived from metrics or field_properties
+        turbulence = 1.0 - self.field_state.stability  # Estimate turbulence as inverse of stability
+        stability = self.field_state.stability
         
         # Create gradient data
         gradient_data = {
@@ -740,7 +744,7 @@ class VectorPlusFieldBridge:
             }
         
         # Publish gradient update
-        self.event_bus.publish(Event(
+        self.event_bus.publish(Event.create(
             "field.gradient.update",
             {
                 "gradients": gradient_data
@@ -769,10 +773,12 @@ class VectorPlusFieldBridge:
         }
         
         self.harmonic_io_service.schedule_operation(
-            operation_type=OperationType.UPDATE,
-            callback=self._process_field_update,
-            context=context,
-            priority=0.8  # High priority
+            operation_type=OperationType.UPDATE.value,
+            repository=self,
+            method_name="_process_field_update",
+            args=(),
+            kwargs={"context": context},
+            data_context=context
         )
     
     def _process_field_update(self, context: Dict[str, Any]) -> Dict[str, Any]:
@@ -849,10 +855,12 @@ class VectorPlusFieldBridge:
         
         # Schedule through harmonic I/O
         self.harmonic_io_service.schedule_operation(
-            operation_type=OperationType.PROCESS,
-            callback=self._process_vector_analysis,
-            context=context,
-            priority=0.6  # Medium priority
+            operation_type=OperationType.PROCESS.value,
+            repository=self,
+            method_name="_process_vector_analysis",
+            args=(),
+            kwargs={"context": context},
+            data_context=context
         )
     
     def _process_vector_analysis(self, context: Dict[str, Any]) -> Dict[str, Any]:

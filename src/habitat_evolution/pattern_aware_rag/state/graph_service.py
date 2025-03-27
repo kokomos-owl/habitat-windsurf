@@ -4,9 +4,9 @@ from typing import Dict, Any, List, Optional
 from datetime import datetime
 
 # Use relative imports to avoid module path issues
-from ....adaptive_core.persistence.neo4j.connection import Neo4jConnectionManager
-from ....adaptive_core.persistence.neo4j.pattern_repository import Neo4jPatternRepository
-from ....adaptive_core.models import Pattern
+from src.habitat_evolution.adaptive_core.persistence.neo4j.connection import Neo4jConnectionManager
+from src.habitat_evolution.adaptive_core.persistence.neo4j.pattern_repository import Neo4jPatternRepository
+from src.habitat_evolution.adaptive_core.models import Pattern
 
 class GraphService:
     """

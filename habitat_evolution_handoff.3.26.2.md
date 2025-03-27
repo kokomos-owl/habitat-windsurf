@@ -45,6 +45,38 @@ The system follows these key principles:
 - Created harmonic analysis for pattern evolution
 - Integrated with validator for comparative testing
 
+### Current Focus: Learning Window and Tonic-Harmonic Integration 🔄
+
+#### Key Architectural Insights (March 26, 2025)
+
+- **Window State Architecture**:
+  - The OPENING state serves as a critical "soak period" between detecting favorable field conditions and committing to pattern detection
+  - Current implementation uses a fixed 30-second delay which could be enhanced with progressive preparation
+  - Opportunity: Use the OPENING period to warm vector caches and adjust detection thresholds based on emerging field metrics
+
+- **Back Pressure Mechanism**:
+  - Functions as a rate limiter when the window is OPEN
+  - Controls frequency of pattern detection rather than binary allow/block
+  - Adapts based on detection history and field stability
+  - Test improvements demonstrate the multi-layered protection architecture (window state + back pressure)
+
+#### Next Steps (March 27, 2025)
+
+1. **Enhance OPENING State**:
+   - Implement progressive preparation during the OPENING state
+   - Add vector cache warming and threshold adjustment based on emerging metrics
+   - Consider adaptive soak periods based on field coherence and stability
+
+2. **Integrate Learning Control with Vector-Tonic-Harmonic**:
+   - Create tighter integration between learning_control and tonic_harmonic_integration
+   - Ensure field metrics influence both window states and harmonic analysis
+   - Implement feedback loop from harmonic analysis to learning window control
+
+3. **Refine Test Coverage**:
+   - Enhance test_learning_window_integration.py to cover adaptive soak periods
+   - Create integration tests for the full cycle from observation to pattern detection
+   - Add performance metrics to measure efficiency of the enhanced OPENING state
+
 ### Remaining Phases
 
 #### Phase 4: Persistence Layer 🔄
