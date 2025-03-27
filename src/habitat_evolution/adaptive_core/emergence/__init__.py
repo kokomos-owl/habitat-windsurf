@@ -15,10 +15,19 @@ from .pattern_integration import (
     setup_emergent_pattern_system
 )
 
+# Event bus integration components
+from .event_bus_integration import AdaptiveIDEventAdapter, PatternEventPublisher
+from .event_aware_detector import EventAwarePatternDetector
+from .integration_service import EventBusIntegrationService
+
 __all__ = [
     'SemanticCurrentObserver',
     'EmergentPatternDetector',
     'ResonanceTrailObserver',
+    'AdaptiveIDEventAdapter',
+    'PatternEventPublisher',
+    'EventAwarePatternDetector',
+    'EventBusIntegrationService',
     'integrate_with_actant_journey_tracker',
     'integrate_with_field_navigator',
     'integrate_with_field_state',
