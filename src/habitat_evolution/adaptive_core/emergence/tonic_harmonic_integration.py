@@ -15,15 +15,16 @@ from typing import Dict, List, Any, Optional, Tuple, Set, Callable
 import numpy as np
 from datetime import datetime
 
-from ...core.services.event_bus import LocalEventBus, Event
-from ..id.adaptive_id import AdaptiveID
-from ...field.field_state import TonicHarmonicFieldState
-from ...field.harmonic_field_io_bridge import HarmonicFieldIOBridge
-from ..io.harmonic_io_service import HarmonicIOService, OperationType
-from ..resonance.tonic_harmonic_metrics import TonicHarmonicMetrics
-from .learning_window_integration import LearningWindowAwareDetector
-from .event_aware_detector import EventAwarePatternDetector
-from ...pattern_aware_rag.learning.learning_control import WindowState, BackPressureController
+# Use absolute imports to avoid module path issues
+from src.habitat_evolution.core.services.event_bus import LocalEventBus, Event
+from src.habitat_evolution.adaptive_core.id.adaptive_id import AdaptiveID
+from src.habitat_evolution.field.field_state import TonicHarmonicFieldState
+from src.habitat_evolution.field.harmonic_field_io_bridge import HarmonicFieldIOBridge
+from src.habitat_evolution.adaptive_core.io.harmonic_io_service import HarmonicIOService, OperationType
+from src.habitat_evolution.adaptive_core.resonance.tonic_harmonic_metrics import TonicHarmonicMetrics
+from src.habitat_evolution.adaptive_core.emergence.learning_window_integration import LearningWindowAwareDetector
+from src.habitat_evolution.adaptive_core.emergence.event_aware_detector import EventAwarePatternDetector
+from src.habitat_evolution.pattern_aware_rag.learning.learning_control import WindowState, BackPressureController
 
 logger = logging.getLogger(__name__)
 

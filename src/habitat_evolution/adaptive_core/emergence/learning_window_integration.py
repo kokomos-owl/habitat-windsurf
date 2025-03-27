@@ -13,10 +13,11 @@ import math
 from collections import deque
 import numpy as np
 
-from ...pattern_aware_rag.learning.learning_control import LearningWindow, WindowState, BackPressureController
-from ..id.adaptive_id import AdaptiveID
-from .event_bus_integration import PatternEventPublisher
-from .event_aware_detector import EventAwarePatternDetector
+# Use absolute imports to avoid module path issues
+from src.habitat_evolution.pattern_aware_rag.learning.learning_control import LearningWindow, WindowState, BackPressureController
+from src.habitat_evolution.adaptive_core.id.adaptive_id import AdaptiveID
+from src.habitat_evolution.adaptive_core.emergence.event_bus_integration import PatternEventPublisher
+from src.habitat_evolution.adaptive_core.emergence.event_aware_detector import EventAwarePatternDetector
 
 logger = logging.getLogger(__name__)
 

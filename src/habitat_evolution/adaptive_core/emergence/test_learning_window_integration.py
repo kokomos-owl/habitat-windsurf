@@ -13,15 +13,16 @@ from datetime import datetime, timedelta
 import time
 from unittest.mock import MagicMock
 
-from ...core.services.event_bus import LocalEventBus, Event
-from ..id.adaptive_id import AdaptiveID
-from .enhanced_semantic_observer import EnhancedSemanticObserver
-from .event_bus_integration import PatternEventPublisher
-from .event_aware_detector import EventAwarePatternDetector
-from .integration_service import EventBusIntegrationService
-from .climate_data_loader import ClimateDataLoader
-from .learning_window_integration import LearningWindowAwareDetector, FieldAwarePatternController
-from ...pattern_aware_rag.learning.learning_control import WindowState, BackPressureController
+# Use absolute imports to avoid module path issues
+from src.habitat_evolution.core.services.event_bus import LocalEventBus, Event
+from src.habitat_evolution.adaptive_core.id.adaptive_id import AdaptiveID
+from src.habitat_evolution.adaptive_core.emergence.enhanced_semantic_observer import EnhancedSemanticObserver
+from src.habitat_evolution.adaptive_core.emergence.event_bus_integration import PatternEventPublisher
+from src.habitat_evolution.adaptive_core.emergence.event_aware_detector import EventAwarePatternDetector
+from src.habitat_evolution.adaptive_core.emergence.integration_service import EventBusIntegrationService
+from src.habitat_evolution.adaptive_core.emergence.climate_data_loader import ClimateDataLoader
+from src.habitat_evolution.adaptive_core.emergence.learning_window_integration import LearningWindowAwareDetector, FieldAwarePatternController
+from src.habitat_evolution.pattern_aware_rag.learning.learning_control import WindowState, BackPressureController
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, 
