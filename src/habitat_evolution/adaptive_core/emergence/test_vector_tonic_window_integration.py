@@ -118,6 +118,9 @@ class TestVectorTonicWindowIntegration:
         # Load test data
         self.relationships = self._load_test_data()
         
+        # Track detected patterns
+        self.detected_patterns = []
+        
     def _init_event_bus_integration(self):
         """Initialize event bus integration."""
         # Create integration service
@@ -284,15 +287,42 @@ class TestVectorTonicWindowIntegration:
         Args:
             event: Pattern detection event
         """
-        pattern_id = event.data.get('pattern_id', 'unknown')
-        relationship = event.data.get('relationship', {})
+        pattern_data = event.data
+        pattern_id = pattern_data.get('pattern_id', pattern_data.get('id', 'unknown'))
+        pattern_type = pattern_data.get('type', 'standard')
+        relationship = pattern_data.get('relationship', {})
         
-        source = relationship.get('source', 'None')
-        predicate = relationship.get('predicate', 'None')
-        target = relationship.get('target', 'None')
+        # Store the detected pattern for later use in topology metrics
+        self.detected_patterns.append(pattern_data)
         
-        logger.info(f"Pattern detected: {pattern_id}")
-        logger.info(f"Pattern relationship: {source} {predicate} {target}")
+        # Handle meta-patterns differently
+        if pattern_type == "meta" or pattern_id.startswith("meta_pattern"):
+            evolution_type = pattern_data.get('evolution_type', 'object_evolution')
+            frequency = pattern_data.get('frequency', 0)
+            confidence = pattern_data.get('confidence', 0.0)
+            examples = pattern_data.get('examples', [])
+            
+            logger.info(f"Detected meta-pattern: {pattern_id}")
+            logger.info(f"  Evolution type: {evolution_type}")
+            logger.info(f"  Frequency: {frequency}")
+            logger.info(f"  Confidence: {confidence}")
+            logger.info(f"  Examples: {len(examples)} instances")
+            
+            # Log examples
+            for i, example in enumerate(examples[:5]):  # Show up to 5 examples
+                logger.info(f"  Example {i+1}: {example}")
+                
+            # Apply feedback loop adjustments if we have harmonic services
+            if hasattr(self, 'harmonic_io_service') and self.harmonic_io_service is not None:
+                self._apply_meta_pattern_feedback(pattern_data)
+        else:
+            # Standard pattern detection
+            source = relationship.get('source', pattern_data.get('source', 'None'))
+            predicate = relationship.get('predicate', pattern_data.get('predicate', 'None'))
+            target = relationship.get('target', pattern_data.get('target', 'None'))
+            
+            logger.info(f"Pattern detected: {pattern_id}")
+            logger.info(f"Pattern relationship: {source} {predicate} {target}")
     
     def _publish_field_gradient(self, coherence: float, stability: float):
         """
@@ -715,6 +745,170 @@ class TestVectorTonicWindowIntegration:
         logger.info(f"Detected patterns in {detected_count} out of 5 iterations")
 
 
+    def _apply_meta_pattern_feedback(self, pattern_data):
+        """
+        Apply feedback loop adjustments based on meta-pattern detection.
+        
+        Args:
+            pattern_data: Meta-pattern data
+        """
+        pattern_id = pattern_data.get("id", pattern_data.get("pattern_id", "unknown"))
+        evolution_type = pattern_data.get("evolution_type", "object_evolution")
+        confidence = pattern_data.get("confidence", 0.0)
+        frequency = pattern_data.get("frequency", 0)
+        
+        # Calculate impact score based on confidence and frequency
+        frequency_factor = min(frequency / 10.0, 1.0)  # Normalize frequency to 0.0-1.0
+        impact_score = confidence * frequency_factor
+        
+        logger.info(f"Meta-pattern impact score: {impact_score:.4f}")
+        logger.info(f"  Based on confidence: {confidence:.2f}, frequency factor: {frequency_factor:.2f}")
+        
+        # Get current harmonic parameters
+        current_base_freq = self.harmonic_io_service.base_frequency
+        current_stability = self.harmonic_io_service.eigenspace_stability
+        current_coherence = self.harmonic_io_service.pattern_coherence
+        
+        # Adjust parameters based on pattern type and impact score
+        new_base_freq = current_base_freq
+        new_stability = current_stability
+        new_coherence = current_coherence
+        
+        if evolution_type == "object_evolution":
+            # Object evolution: increase frequency and coherence
+            new_base_freq = current_base_freq * (1.0 + (impact_score * 0.5))
+            new_stability = current_stability * (1.0 + (impact_score * 0.2))
+            new_coherence = current_coherence * (1.0 + (impact_score * 0.3))
+        elif evolution_type == "causal_cascade":
+            # Causal cascade: increase stability and coherence
+            new_base_freq = current_base_freq * (1.0 + (impact_score * 0.3))
+            new_stability = current_stability * (1.0 + (impact_score * 0.5))
+            new_coherence = current_coherence * (1.0 + (impact_score * 0.2))
+        elif evolution_type == "convergent_influence":
+            # Convergent influence: increase coherence and frequency
+            new_base_freq = current_base_freq * (1.0 + (impact_score * 0.4))
+            new_stability = current_stability * (1.0 + (impact_score * 0.1))
+            new_coherence = current_coherence * (1.0 + (impact_score * 0.4))
+        
+        # Apply the adjusted parameters
+        self.harmonic_io_service.base_frequency = new_base_freq
+        self.harmonic_io_service.eigenspace_stability = new_stability
+        self.harmonic_io_service.pattern_coherence = new_coherence
+        
+        logger.info(f"Adjusted harmonic parameters based on meta-pattern: {evolution_type}")
+        logger.info(f"  Base frequency: {current_base_freq:.4f} → {new_base_freq:.4f}")
+        logger.info(f"  Eigenspace stability: {current_stability:.4f} → {new_stability:.4f}")
+        logger.info(f"  Pattern coherence: {current_coherence:.4f} → {new_coherence:.4f}")
+        
+        # Generate and publish updated topology metrics after adjustment
+        self._publish_field_gradient_with_topology(new_coherence, new_stability)
+    
+    def _publish_field_gradient_with_topology(self, coherence: float, stability: float):
+        """
+        Publish field gradient with enhanced topology metrics.
+        
+        Args:
+            coherence: Field coherence (0.0-1.0)
+            stability: Field stability (0.0-1.0)
+        """
+        # Calculate topology metrics based on detected patterns
+        pattern_count = len(self.detected_patterns)
+        meta_pattern_count = sum(1 for p in self.detected_patterns if p.get('type') == 'meta' or str(p.get('id', '')).startswith('meta_pattern'))
+        
+        # Enhanced topology metrics
+        topology_metrics = {
+            "pattern_count": pattern_count,
+            "meta_pattern_count": meta_pattern_count,
+            "resonance_density": min(0.3 + (pattern_count * 0.05), 0.9),
+            "interference_complexity": min(0.2 + (meta_pattern_count * 0.1), 0.8),
+            "flow_coherence": coherence,
+            "stability_trend": stability,
+            "effective_dimensionality": min(3 + (pattern_count // 5), 7)
+        }
+        
+        logger.info(f"Publishing enhanced topology metrics:")
+        for key, value in topology_metrics.items():
+            logger.info(f"  {key}: {value:.4f}" if isinstance(value, float) else f"  {key}: {value}")
+        
+        # Call the standard field gradient publisher with the enhanced metrics
+        self._publish_field_gradient(coherence, stability)
+    
+    def test_feedback_loop_with_topology(self):
+        """
+        Test feedback loop with topology metrics extraction and visualization.
+        """
+        logger.info("\n=== Testing Feedback Loop with Topology Metrics ===\n")
+        
+        # Reset window to CLOSED
+        self.learning_detector.update_window_state(WindowState.CLOSED)
+        
+        # Store initial parameters
+        initial_frequency = self.harmonic_io_service.base_frequency
+        initial_stability = self.harmonic_io_service.eigenspace_stability
+        initial_coherence = self.harmonic_io_service.pattern_coherence
+        
+        logger.info(f"Initial parameters:")
+        logger.info(f"  Base frequency: {initial_frequency:.4f}")
+        logger.info(f"  Eigenspace stability: {initial_stability:.4f}")
+        logger.info(f"  Pattern coherence: {initial_coherence:.4f}")
+        
+        # Transition to OPENING
+        logger.info("\nTransitioning to OPENING state")
+        self.learning_detector.update_window_state(WindowState.OPENING)
+        
+        # Publish initial field gradient with topology
+        logger.info("\nPublishing initial field gradient with topology")
+        self._publish_field_gradient_with_topology(0.7, 0.7)
+        time.sleep(1)
+        
+        # Transition to OPEN
+        logger.info("\nTransitioning to OPEN state")
+        self.learning_detector.update_window_state(WindowState.OPEN)
+        
+        # Create and observe primary cascade relationships
+        primary_cascades = self._create_primary_cascade_relationships()
+        logger.info(f"\nObserving Primary Cascades")
+        for relationship in primary_cascades:
+            # Observe each primary cascade relationship multiple times to exceed threshold
+            for _ in range(5):  # Higher frequency for primary cascades
+                self._observe_relationships([relationship])
+                time.sleep(0.1)  # Small delay between observations
+        
+        # Test pattern detection with OPEN window (secondary cascades)
+        logger.info("\nObserving Secondary Cascades")
+        self._observe_relationships(self.relationships[5:15])
+        patterns = self.tonic_detector.detect_patterns()
+        
+        # Publish updated field gradient with topology after pattern detection
+        logger.info("\nPublishing updated field gradient with topology")
+        self._publish_field_gradient_with_topology(0.8, 0.8)
+        time.sleep(1)
+        
+        # Get final metrics
+        if hasattr(self.harmonic_io_service, 'get_metrics'):
+            final_metrics = self.harmonic_io_service.get_metrics()
+            
+            logger.info("\nFinal System State:")
+            if "system_state" in final_metrics:
+                for key, value in final_metrics["system_state"].items():
+                    logger.info(f"  {key}: {value}")
+            
+            logger.info("\nFinal Topology Metrics:")
+            if "topology" in final_metrics:
+                for key, value in final_metrics["topology"].items():
+                    logger.info(f"  {key}: {value}")
+        
+        # Verify parameter adjustments
+        logger.info("\nParameter adjustments summary:")
+        logger.info(f"  Base frequency: {initial_frequency:.4f} → {self.harmonic_io_service.base_frequency:.4f}")
+        logger.info(f"  Eigenspace stability: {initial_stability:.4f} → {self.harmonic_io_service.eigenspace_stability:.4f}")
+        logger.info(f"  Pattern coherence: {initial_coherence:.4f} → {self.harmonic_io_service.pattern_coherence:.4f}")
+        
+        # Close the window
+        logger.info("\nClosing learning window")
+        self.learning_detector.update_window_state(WindowState.CLOSED)
+
+
 if __name__ == "__main__":
     logger.info("Starting vector-tonic window integration test")
     
@@ -729,5 +923,8 @@ if __name__ == "__main__":
     
     # Test full integration
     test.test_full_integration()
+    
+    # Test feedback loop with topology metrics
+    test.test_feedback_loop_with_topology()
     
     logger.info("Vector-tonic window integration test completed")

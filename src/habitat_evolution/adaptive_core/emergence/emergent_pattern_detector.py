@@ -275,9 +275,46 @@ class EmergentPatternDetector:
         
         # Look for common evolution types
         evolution_types = defaultdict(int)
-        for evolutions in self.pattern_evolution.values():
+        evolution_examples = defaultdict(list)  # Store examples of each evolution type
+        
+        for pattern_id, evolutions in self.pattern_evolution.items():
             for evolution in evolutions:
-                evolution_types[evolution["evolution_type"]] += 1
+                evolution_type = evolution["evolution_type"]
+                evolution_types[evolution_type] += 1
+                
+                # Store detailed example (limiting to 5 examples per type to avoid excessive logging)
+                if len(evolution_examples[evolution_type]) < 5:
+                    # Extract specific fields based on evolution type
+                    details = {}
+                    if evolution_type == "object_evolution":
+                        details = {
+                            "from_object": evolution.get("from_object"),
+                            "to_object": evolution.get("to_object")
+                        }
+                    elif evolution_type == "subject_evolution":
+                        details = {
+                            "from_subject": evolution.get("from_subject"),
+                            "to_subject": evolution.get("to_subject")
+                        }
+                    elif evolution_type == "predicate_evolution":
+                        details = {
+                            "from_predicate": evolution.get("from_predicate"),
+                            "to_predicate": evolution.get("to_predicate")
+                        }
+                    
+                    evolution_examples[evolution_type].append({
+                        "from_pattern": evolution.get("from_pattern"),
+                        "to_pattern": evolution.get("to_pattern"),
+                        "details": details
+                    })
+        
+        # Log detailed evolution type statistics
+        for evolution_type, count in evolution_types.items():
+            logging.info(f"Evolution type: {evolution_type}, Count: {count}")
+            if evolution_examples[evolution_type]:
+                logging.info(f"Examples of {evolution_type}:")
+                for i, example in enumerate(evolution_examples[evolution_type]):
+                    logging.info(f"  Example {i+1}: {example}")
         
         # Detect meta-patterns based on frequent evolution types
         for evolution_type, count in evolution_types.items():
@@ -288,8 +325,16 @@ class EmergentPatternDetector:
                     "evolution_type": evolution_type,
                     "frequency": count,
                     "confidence": min(1.0, count / 10.0),  # Simple confidence calculation
-                    "detection_timestamp": datetime.now().isoformat()
+                    "detection_timestamp": datetime.now().isoformat(),
+                    "examples": evolution_examples[evolution_type]  # Include examples in the meta-pattern
                 }
+                
+                # Log detailed meta-pattern information
+                logging.info(f"Detected meta-pattern: {meta_pattern['id']}")
+                logging.info(f"  Evolution type: {evolution_type}")
+                logging.info(f"  Frequency: {count}")
+                logging.info(f"  Confidence: {meta_pattern['confidence']}")
+                logging.info(f"  Examples: {len(meta_pattern['examples'])} instances")
                 
                 # Update the AdaptiveID with this meta-pattern
                 timestamp = datetime.now().isoformat()
