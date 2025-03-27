@@ -1,12 +1,14 @@
 """
-Test for event bus integration with dynamic pattern detection.
+Test for event bus integration with dynamic pattern detection using real climate data.
 
 This module demonstrates how to integrate the dynamic pattern detection
-components with the event bus architecture of the pattern-aware RAG system.
+components with the event bus architecture of the pattern-aware RAG system,
+using real climate risk data from the data/climate_risk directory.
 """
 
 import logging
 import uuid
+import os
 from datetime import datetime
 from unittest.mock import MagicMock
 
@@ -17,6 +19,7 @@ from .enhanced_semantic_observer import EnhancedSemanticObserver
 from .event_bus_integration import AdaptiveIDEventAdapter, PatternEventPublisher
 from .event_aware_detector import EventAwarePatternDetector
 from .integration_service import EventBusIntegrationService
+from .climate_data_loader import ClimateDataLoader
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, 
@@ -36,9 +39,9 @@ def create_mock_journey_tracker():
     mock.record_state_change = MagicMock()
     return mock
 
-def test_event_integration():
-    """Test the integration of dynamic pattern detection with event bus."""
-    logger.info("Starting event integration test")
+def test_event_integration_with_climate_data():
+    """Test the integration of dynamic pattern detection with event bus using climate data."""
+    logger.info("Starting event integration test with climate data")
     
     # Create event bus
     event_bus = LocalEventBus()
@@ -68,12 +71,15 @@ def test_event_integration():
     
     # Subscribe to pattern detection events
     pattern_detected_count = 0
+    detected_patterns = []
     
     def on_pattern_detected(event):
-        nonlocal pattern_detected_count
+        nonlocal pattern_detected_count, detected_patterns
         pattern_detected_count += 1
+        pattern_data = event.data.get('pattern_data', {})
+        detected_patterns.append(pattern_data)
         logger.info(f"Pattern detected: {event.data.get('pattern_id')}")
-        logger.info(f"Pattern data: {event.data.get('pattern_data')}")
+        logger.info(f"Pattern relationship: {pattern_data.get('source')} {pattern_data.get('predicate')} {pattern_data.get('target')}")
     
     event_bus.subscribe("pattern.detected", on_pattern_detected)
     
@@ -92,22 +98,40 @@ def test_event_integration():
         metrics={"turbulence": 0.3, "coherence": 0.7}
     )
     
-    # Observe some relationships
-    for _ in range(3):
-        semantic_observer.observe_relationship(
-            source="climate_risk",
-            predicate="affects",
-            target="coastal_infrastructure",
-            context={"location": "Boston Harbor", "severity": "high"}
-        )
+    # Load climate risk data
+    climate_data_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))), 'data', 'climate_risk')
+    climate_loader = ClimateDataLoader(climate_data_dir)
     
-    for _ in range(3):
+    # Load all climate risk files
+    climate_loader.load_all_files()
+    
+    # Get extracted relationships
+    relationships = climate_loader.relationships
+    logger.info(f"Loaded {len(relationships)} relationships from climate risk data")
+    
+    # Feed relationships into the semantic observer
+    for rel in relationships[:30]:  # Use a subset for testing
         semantic_observer.observe_relationship(
-            source="sea_level_rise",
-            predicate="threatens",
-            target="Martha's Vineyard",
-            context={"timeframe": "2050", "confidence": "medium"}
+            source=rel["source"],
+            predicate=rel["predicate"],
+            target=rel["target"],
+            context=rel.get("context", {})
         )
+        logger.info(f"Observed relationship: {rel['source']} {rel['predicate']} {rel['target']}")
+    
+    # Generate and feed synthetic relationships to ensure pattern detection
+    synthetic_relationships = climate_loader.generate_synthetic_relationships(count=15)
+    logger.info(f"Generated {len(synthetic_relationships)} synthetic relationships")
+    
+    for rel in synthetic_relationships:
+        for _ in range(3):  # Observe each synthetic relationship multiple times to ensure pattern detection
+            semantic_observer.observe_relationship(
+                source=rel["source"],
+                predicate=rel["predicate"],
+                target=rel["target"],
+                context=rel.get("context", {})
+            )
+        logger.info(f"Observed synthetic relationship: {rel['source']} {rel['predicate']} {rel['target']}")
     
     # Detect patterns
     patterns = pattern_detector.detect_patterns()
@@ -127,16 +151,49 @@ def test_event_integration():
         metrics={"turbulence": 0.1, "coherence": 0.9}
     )
     
-    logger.info("Event integration test completed successfully")
-    return patterns
+    logger.info("Event integration test with climate data completed successfully")
+    return patterns, detected_patterns
 
 if __name__ == "__main__":
-    patterns = test_event_integration()
+    patterns, detected_patterns = test_event_integration_with_climate_data()
     
     # Print pattern details
+    print("\nDetected Patterns:")
     for i, pattern in enumerate(patterns):
         print(f"\nPattern {i+1}:")
         print(f"  ID: {pattern['id']}")
         print(f"  Relationship: {pattern['source']} {pattern['predicate']} {pattern['target']}")
         print(f"  Confidence: {pattern['confidence']:.2f}")
         print(f"  Frequency: {pattern['frequency']}")
+    
+    # Print pattern statistics
+    predicates = {}
+    sources = {}
+    targets = {}
+    
+    for pattern in patterns:
+        pred = pattern['predicate']
+        src = pattern['source']
+        tgt = pattern['target']
+        
+        predicates[pred] = predicates.get(pred, 0) + 1
+        sources[src] = sources.get(src, 0) + 1
+        targets[tgt] = targets.get(tgt, 0) + 1
+    
+    print("\nPattern Statistics:")
+    print(f"  Total patterns: {len(patterns)}")
+    print(f"  Unique predicates: {len(predicates)}")
+    print(f"  Unique sources: {len(sources)}")
+    print(f"  Unique targets: {len(targets)}")
+    
+    print("\nTop Predicates:")
+    for pred, count in sorted(predicates.items(), key=lambda x: x[1], reverse=True)[:5]:
+        print(f"  {pred}: {count}")
+    
+    print("\nTop Sources:")
+    for src, count in sorted(sources.items(), key=lambda x: x[1], reverse=True)[:5]:
+        print(f"  {src}: {count}")
+    
+    print("\nTop Targets:")
+    for tgt, count in sorted(targets.items(), key=lambda x: x[1], reverse=True)[:5]:
+        print(f"  {tgt}: {count}")

@@ -11,6 +11,7 @@ from datetime import datetime
 
 from ..id.adaptive_id import AdaptiveID
 from .semantic_current_observer import SemanticCurrentObserver
+from .enhanced_semantic_observer import EnhancedSemanticObserver
 from .event_aware_detector import EventAwarePatternDetector
 from .resonance_trail_observer import ResonanceTrailObserver
 from .event_bus_integration import AdaptiveIDEventAdapter, PatternEventPublisher
@@ -187,14 +188,16 @@ class EventBusIntegrationService:
     
     def integrate_semantic_observer(
         self,
-        adaptive_id: AdaptiveID,
+        field_navigator,
+        journey_tracker,
         entity_id: str = None
-    ) -> SemanticCurrentObserver:
+    ) -> EnhancedSemanticObserver:
         """
         Integrate a semantic current observer with the event bus.
         
         Args:
-            adaptive_id: The AdaptiveID to use
+            field_navigator: Navigator for the semantic field
+            journey_tracker: Tracker for actant journeys
             entity_id: Optional entity ID for the observer
             
         Returns:
@@ -202,11 +205,11 @@ class EventBusIntegrationService:
         """
         entity_id = entity_id or f"semantic_observer_{len(self.integrated_components)}"
         
-        # Create observer
-        observer = SemanticCurrentObserver(adaptive_id=adaptive_id)
+        # Create enhanced observer
+        observer = EnhancedSemanticObserver(field_navigator=field_navigator, journey_tracker=journey_tracker)
         
         # Integrate observer's AdaptiveID
-        self.integrate_adaptive_id(adaptive_id, entity_id)
+        self.integrate_adaptive_id(observer.adaptive_id, entity_id)
         
         # Store in integrated components
         self.integrated_components[entity_id] = observer
