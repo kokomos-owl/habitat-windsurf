@@ -77,13 +77,43 @@ class TonicHarmonicPatternDetector:
             "field_influence": 0.6
         }
         
+        # Field state continuity tracking
+        self._previous_field_metrics = {
+            'density': 0.5,
+            'turbulence': 0.3,
+            'coherence': 0.7,
+            'stability': 0.7
+        }
+        
+        # Pattern relationship tracking
+        self.pattern_relationships = {}
+        self.relationship_strength_history = deque(maxlen=50)
+        
+        # Adaptive receptivity learning
+        self.pattern_type_receptivity = {
+            'primary': 1.0,
+            'secondary': 0.8,
+            'meta': 0.7,
+            'emergent': 0.6
+        }
+        self.receptivity_learning_rate = 0.05
+        self.receptivity_history = {k: deque(maxlen=20) for k in self.pattern_type_receptivity.keys()}
+        
+        # Visualization data collection
+        self.visualization_data = {
+            'field_state_history': deque(maxlen=100),
+            'pattern_emergence_points': [],
+            'resonance_centers': {},
+            'interference_patterns': {}
+        }
+        
         # Register for field state updates
         self._register_field_state_handler()
         
         # Register for pattern events
         self._register_pattern_event_handlers()
         
-        logger.info("TonicHarmonicPatternDetector initialized")
+        logger.info("TonicHarmonicPatternDetector initialized with enhanced field continuity")
     
     def _register_field_state_handler(self):
         """Register handler for field state updates."""
@@ -515,7 +545,12 @@ class TonicHarmonicPatternDetector:
     
     def detect_patterns(self) -> List[Dict[str, Any]]:
         """
-        Detect patterns with tonic-harmonic awareness.
+        Detect patterns with tonic-harmonic awareness and field state modulation.
+        
+        Instead of binary back pressure, this method uses field state modulation to
+        allow for natural emergence of patterns through resonance, dissonance, and
+        field density interactions, preserving the errant, fuzzy, turbulent, and
+        dissonant characteristics of Habitat.
         
         Returns:
             List of detected patterns
@@ -524,14 +559,351 @@ class TonicHarmonicPatternDetector:
         if self.field_state:
             self._update_detection_parameters()
         
-        # Delegate to base detector
-        patterns = self.base_detector.detect_patterns()
+        # Delegate to base detector to get candidate patterns
+        raw_patterns = self.base_detector.detect_patterns()
         
-        # Apply tonic-harmonic filtering if field state is available
-        if patterns and self.field_state:
-            patterns = self._apply_harmonic_filtering(patterns)
+        # If no patterns or no field state, return as is
+        if not raw_patterns or not self.field_state:
+            return raw_patterns
         
-        return patterns
+        # Apply field state modulation
+        modulated_patterns = self._apply_field_state_modulation(raw_patterns)
+        
+        # Apply tonic-harmonic filtering to the modulated patterns
+        if modulated_patterns:
+            modulated_patterns = self._apply_harmonic_filtering(modulated_patterns)
+            
+        # Export visualization data periodically (every 5th call)
+        if hasattr(self, '_detect_call_count'):
+            self._detect_call_count += 1
+        else:
+            self._detect_call_count = 1
+            
+        if self._detect_call_count % 5 == 0:
+            self._export_visualization_data()
+        
+        return modulated_patterns
+        
+    def _apply_field_state_modulation(self, patterns: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """
+        Apply field state modulation to detected patterns.
+        
+        This replaces the binary back pressure mechanism with a more nuanced approach
+        that considers field topology, resonance patterns, and interference effects.
+        
+        Args:
+            patterns: List of detected patterns
+            
+        Returns:
+            Modulated list of patterns
+        """
+        # Extract field metrics from current state
+        coherence = self.field_state.coherence
+        stability = self.field_state.stability
+        current_turbulence = 1.0 - stability  # Estimate turbulence as inverse of stability
+        
+        # Apply field state continuity - blend current with previous state
+        # This creates a continuous flow rather than discrete snapshots
+        turbulence = (self._previous_field_metrics['turbulence'] * 0.7) + (current_turbulence * 0.3)
+        
+        # Calculate current field density based on recent pattern history
+        pattern_history = getattr(self.base_detector, 'pattern_history', [])
+        recent_pattern_count = len([p for p in pattern_history 
+                                  if hasattr(p, 'timestamp') and 
+                                  (datetime.now() - p.timestamp).total_seconds() < 10])
+        current_density = min(1.0, recent_pattern_count / 20)  # Normalize to 0-1
+        
+        # Apply field density continuity
+        field_density = (self._previous_field_metrics['density'] * 0.7) + (current_density * 0.3)
+        
+        # Update previous metrics for next cycle - maintaining continuity
+        self._previous_field_metrics['turbulence'] = turbulence
+        self._previous_field_metrics['density'] = field_density
+        self._previous_field_metrics['coherence'] = coherence
+        self._previous_field_metrics['stability'] = stability
+        
+        # Store field state history for visualization
+        self.visualization_data['field_state_history'].append({
+            'timestamp': datetime.now(),
+            'density': field_density,
+            'turbulence': turbulence,
+            'coherence': coherence,
+            'stability': stability
+        })
+        
+        # Track interference patterns from recently detected patterns
+        interference_patterns = {}
+        for p in pattern_history[-10:] if hasattr(self.base_detector, 'pattern_history') else []:
+            pattern_type = p.get('context', {}).get('cascade_type', 'secondary')
+            pattern_id = p.get('id', str(id(p)))
+            confidence = p.get('confidence', 0.5)
+            
+            # Calculate interference strength based on pattern type and confidence
+            type_factor = self.pattern_type_receptivity.get(pattern_type, 0.5)
+            
+            interference_patterns[pattern_id] = {
+                'strength': confidence * type_factor,
+                'pattern_type': pattern_type
+            }
+            
+            # Store for visualization
+            self.visualization_data['interference_patterns'][pattern_id] = {
+                'timestamp': datetime.now(),
+                'strength': confidence * type_factor,
+                'pattern_type': pattern_type,
+                'position': [np.random.random(), np.random.random()]  # Placeholder for actual field position
+            }
+        
+        # Determine if we're in a resonance window (period of high receptivity)
+        # Higher turbulence = more likely to have resonance windows
+        resonance_threshold = 0.7 - (field_density * 0.2)  # Adaptive threshold based on density
+        in_resonance_window = turbulence > resonance_threshold and np.random.random() < (turbulence * 0.3)
+        
+        if in_resonance_window:
+            logger.info(f"Field turbulence ({turbulence:.2f}) created resonance window")
+            # Record resonance window for visualization
+            window_id = f"window_{len(self.visualization_data['resonance_centers']) + 1}"
+            self.visualization_data['resonance_centers'][window_id] = {
+                'timestamp': datetime.now(),
+                'turbulence': turbulence,
+                'duration': 2 + (np.random.random() * 3),  # 2-5 seconds
+                'position': [np.random.random(), np.random.random()]  # Placeholder
+            }
+        
+        # Apply modulation to each pattern
+        modulated_patterns = []
+        detected_pattern_types = set()
+        
+        for pattern in patterns:
+            pattern_type = pattern.get('context', {}).get('cascade_type', 'secondary')
+            pattern_confidence = pattern.get('confidence', 0.5)
+            pattern_id = pattern.get('id', str(id(pattern)))
+            
+            # Use adaptive receptivity for this pattern type
+            base_receptivity = self.pattern_type_receptivity.get(pattern_type, 0.5)
+            
+            # Adjust for field density (higher density = lower receptivity)
+            density_factor = 1 - (field_density * 0.5)  # 0.5-1.0
+            
+            # Adjust for field turbulence (higher turbulence = higher receptivity for unusual patterns)
+            turbulence_factor = 1.0
+            if pattern_type in ['emergent', 'meta']:
+                turbulence_factor = 1 + (turbulence * 0.5)  # 1.0-1.5
+            
+            # Check for resonance window boost
+            window_boost = 0.3 if in_resonance_window else 0.0
+            
+            # Calculate interference from existing patterns
+            interference = 0.0
+            related_patterns = []
+            
+            for other_id, interference_data in interference_patterns.items():
+                # Check for relationship between patterns
+                relationship_key = f"{pattern_id}_{other_id}"
+                relationship_strength = self.pattern_relationships.get(relationship_key, 0.0)
+                
+                # Patterns with established relationships interfere more
+                if relationship_strength > 0:
+                    related_patterns.append(other_id)
+                    interference += interference_data['strength'] * relationship_strength
+                else:
+                    # Patterns of the same type interfere more
+                    type_match = interference_data['pattern_type'] == pattern_type
+                    type_factor = 1.2 if type_match else 0.8
+                    interference += interference_data['strength'] * type_factor
+            
+            # Cap interference
+            interference = min(0.9, interference)
+            
+            # Calculate final receptivity
+            receptivity = base_receptivity * density_factor * turbulence_factor + window_boost
+            receptivity = max(0.1, min(1.0, receptivity))
+            
+            # Calculate detection threshold - adaptive based on pattern relationships
+            relationship_factor = 0.1 if related_patterns else 0.0
+            threshold = 0.3 + (interference * 0.5) - relationship_factor
+            
+            # Adjust confidence based on receptivity
+            adjusted_confidence = pattern_confidence * receptivity
+            
+            # Determine if pattern should be detected
+            should_detect = adjusted_confidence > threshold
+            
+            # Add some randomness for errant behavior (more likely with high turbulence)
+            if turbulence > 0.5 and np.random.random() < (turbulence * 0.2):
+                # Randomly flip the decision with low probability
+                should_detect = not should_detect
+                logger.info(f"Field turbulence caused errant detection behavior")
+            
+            if should_detect:
+                # Adjust confidence based on field state
+                confidence_modifier = receptivity * (1 - interference)
+                pattern['confidence'] = pattern_confidence * confidence_modifier
+                modulated_patterns.append(pattern)
+                detected_pattern_types.add(pattern_type)
+                
+                # Record pattern emergence for visualization
+                self.visualization_data['pattern_emergence_points'].append({
+                    'pattern_id': pattern_id,
+                    'pattern_type': pattern_type,
+                    'timestamp': datetime.now(),
+                    'confidence': pattern['confidence'],
+                    'position': [np.random.random(), np.random.random()]  # Placeholder
+                })
+                
+                # Update pattern relationships
+                for other_id in interference_patterns.keys():
+                    relationship_key = f"{pattern_id}_{other_id}"
+                    # Strengthen relationship if both patterns detected together
+                    if other_id in [p.get('id', '') for p in modulated_patterns]:
+                        current_strength = self.pattern_relationships.get(relationship_key, 0.0)
+                        self.pattern_relationships[relationship_key] = min(1.0, current_strength + 0.1)
+                        
+                        # Record relationship strength for history
+                        self.relationship_strength_history.append({
+                            'key': relationship_key,
+                            'strength': self.pattern_relationships[relationship_key],
+                            'timestamp': datetime.now()
+                        })
+                
+                # Log the modulation effect
+                logger.info(f"Field state modulation: pattern {pattern_id} ({pattern_type}) "
+                           f"passed with adjusted confidence {pattern['confidence']:.2f}")
+        
+        # Update adaptive receptivity based on detected patterns
+        self._update_adaptive_receptivity(detected_pattern_types)
+        
+        return modulated_patterns
+        
+    def _update_adaptive_receptivity(self, detected_types: Set[str]):
+        """
+        Update adaptive receptivity based on detected pattern types.
+        
+        Args:
+            detected_types: Set of detected pattern types
+        """
+        # Record detection for each pattern type
+        for pattern_type in self.pattern_type_receptivity.keys():
+            # 1.0 if detected, 0.0 if not
+            detection_value = 1.0 if pattern_type in detected_types else 0.0
+            self.receptivity_history[pattern_type].append(detection_value)
+            
+            # Calculate recent detection rate
+            if len(self.receptivity_history[pattern_type]) > 5:
+                detection_rate = sum(self.receptivity_history[pattern_type]) / len(self.receptivity_history[pattern_type])
+                
+                # If rarely detected, increase receptivity
+                if detection_rate < 0.2:
+                    self.pattern_type_receptivity[pattern_type] = min(
+                        1.0, 
+                        self.pattern_type_receptivity[pattern_type] + self.receptivity_learning_rate
+                    )
+                # If frequently detected, decrease receptivity
+                elif detection_rate > 0.8:
+                    self.pattern_type_receptivity[pattern_type] = max(
+                        0.1, 
+                        self.pattern_type_receptivity[pattern_type] - self.receptivity_learning_rate
+                    )
+                    
+        # Log adaptive receptivity changes
+        logger.info(f"Updated pattern type receptivity: {self.pattern_type_receptivity}")
+        
+    def _export_visualization_data(self):
+        """
+        Export visualization data to the harmonic I/O service for external visualization tools.
+        
+        This method prepares and exports field state, pattern relationships, and other
+        visualization data to be consumed by external visualization tools.
+        """
+        try:
+            # Prepare visualization data package
+            timestamp = datetime.now().isoformat()
+            visualization_package = {
+                'timestamp': timestamp,
+                'field_state': {
+                    'current': {
+                        'density': self._previous_field_metrics['density'],
+                        'turbulence': self._previous_field_metrics['turbulence'],
+                        'coherence': self._previous_field_metrics['coherence'],
+                        'stability': self._previous_field_metrics['stability']
+                    },
+                    'history': list(self.visualization_data['field_state_history'])
+                },
+                'pattern_relationships': {
+                    'current': self.pattern_relationships,
+                    'history': list(self.relationship_strength_history)
+                },
+                'pattern_emergence': self.visualization_data['pattern_emergence_points'][-20:],
+                'resonance_centers': self.visualization_data['resonance_centers'],
+                'interference_patterns': self.visualization_data['interference_patterns'],
+                'receptivity': {
+                    'current': self.pattern_type_receptivity,
+                    'history': {k: list(v) for k, v in self.receptivity_history.items()}
+                }
+            }
+            
+            # Schedule export operation through harmonic I/O service
+            self.harmonic_io_service.schedule_operation(
+                operation_type=OperationType.WRITE,
+                repository=self.field_bridge,
+                method_name='write_visualization_data',
+                data_context={
+                    'visualization_data': visualization_package,
+                    'source': 'tonic_harmonic_detector',
+                    'timestamp': timestamp,
+                    'field_state_id': self.field_state.id if self.field_state else None
+                }
+            )
+            
+            logger.info(f"Exported field visualization data at {timestamp}")
+            
+            # Clear old data to prevent memory bloat
+            if len(self.visualization_data['pattern_emergence_points']) > 100:
+                self.visualization_data['pattern_emergence_points'] = self.visualization_data['pattern_emergence_points'][-50:]
+                
+            # Clear old interference patterns
+            current_time = datetime.now()
+            old_patterns = []
+            for pattern_id, data in self.visualization_data['interference_patterns'].items():
+                if (current_time - data['timestamp']).total_seconds() > 300:  # 5 minutes
+                    old_patterns.append(pattern_id)
+            
+            for pattern_id in old_patterns:
+                del self.visualization_data['interference_patterns'][pattern_id]
+                
+        except Exception as e:
+            logger.error(f"Error exporting visualization data: {str(e)}")
+    
+    def get_field_visualization_data(self) -> Dict[str, Any]:
+        """
+        Get the current field visualization data for external visualization tools.
+        
+        This method provides a snapshot of the current field state, pattern relationships,
+        and other visualization data for external tools to use.
+        
+        Returns:
+            Dictionary containing visualization data
+        """
+        # Prepare current visualization data snapshot
+        return {
+            'timestamp': datetime.now().isoformat(),
+            'field_state': {
+                'density': self._previous_field_metrics['density'],
+                'turbulence': self._previous_field_metrics['turbulence'],
+                'coherence': self._previous_field_metrics['coherence'],
+                'stability': self._previous_field_metrics['stability']
+            },
+            'pattern_type_receptivity': self.pattern_type_receptivity,
+            'active_relationships': {
+                k: v for k, v in self.pattern_relationships.items() 
+                if v > 0.3  # Only include significant relationships
+            },
+            'recent_patterns': self.visualization_data['pattern_emergence_points'][-10:],
+            'active_resonance_centers': {
+                k: v for k, v in self.visualization_data['resonance_centers'].items()
+                if (datetime.now() - v['timestamp']).total_seconds() < 30  # Only recent resonance centers
+            }
+        }
     
     def _apply_harmonic_filtering(self, patterns: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """
