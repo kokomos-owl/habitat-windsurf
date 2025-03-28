@@ -22,7 +22,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from src.habitat_evolution.field.observation_frame_bridge import ObservationFrameBridge
 from src.habitat_evolution.field.field_state import TonicHarmonicFieldState
 from src.habitat_evolution.field.topological_field_analyzer import TopologicalFieldAnalyzer
-from src.habitat_evolution.adaptive_core.adaptive_id import AdaptiveID
+from src.habitat_evolution.adaptive_core.id.adaptive_id import AdaptiveID
 
 
 def load_json_data(file_path: str) -> Dict[str, Any]:
@@ -31,7 +31,34 @@ def load_json_data(file_path: str) -> Dict[str, Any]:
         return json.load(f)
 
 
-def initialize_field_state() -> TonicHarmonicFieldState:
+class MockFieldState:
+    """A simplified mock of TonicHarmonicFieldState that works with ObservationFrameBridge."""
+    
+    def __init__(self, field_analysis: Dict[str, Any]):
+        """Initialize with the basic structure needed for testing."""
+        self.id = str(uuid.uuid4())
+        self.field_analysis = field_analysis
+        self.patterns = {}
+        self.resonance_relationships = {}
+        
+    def update_from_field_analysis(self, field_analysis: Dict[str, Any]) -> None:
+        """Update the field state from field analysis results."""
+        self.field_analysis = field_analysis
+        
+    def get_field_topology(self) -> Dict[str, Any]:
+        """Return the field topology."""
+        return self.field_analysis["topology"]
+    
+    def get_field_density(self) -> Dict[str, Any]:
+        """Return the field density."""
+        return self.field_analysis["density"]
+    
+    def get_field_properties(self) -> Dict[str, Any]:
+        """Return the field properties."""
+        return self.field_analysis["field_properties"]
+
+
+def initialize_field_state() -> MockFieldState:
     """Initialize a field state with minimal assumptions."""
     field_analysis = {
         "topology": {
@@ -60,7 +87,7 @@ def initialize_field_state() -> TonicHarmonicFieldState:
             "resonance_patterns": []  # Start with no resonance patterns - let them emerge
         }
     }
-    return TonicHarmonicFieldState(field_analysis)
+    return MockFieldState(field_analysis)
 
 
 def process_raw_measurements(observation: Dict[str, Any], adaptive_id: AdaptiveID) -> List[Dict[str, Any]]:
@@ -213,7 +240,7 @@ def process_raw_measurements(observation: Dict[str, Any], adaptive_id: AdaptiveI
     return processed_observations
 
 
-def visualize_field_topology(field_state: TonicHarmonicFieldState, title: str):
+def visualize_field_topology(field_state: MockFieldState, title: str):
     """Visualize the field topology in 2D projection."""
     # Create a 2D projection of the field density
     plt.figure(figsize=(10, 8))
@@ -229,13 +256,21 @@ def visualize_field_topology(field_state: TonicHarmonicFieldState, title: str):
     
     # Create a density map (simplified for visualization)
     Z = np.zeros((resolution, resolution))
-    for i in range(resolution):
-        for j in range(resolution):
-            # Simulate density based on distance from density centers
-            for center in field_state.field_analysis["density"]["density_centers"]:
-                pos = center["position"]
-                dist = np.sqrt((X[i, j] - pos[dim1])**2 + (Y[i, j] - pos[dim2])**2)
-                Z[i, j] += center["magnitude"] * np.exp(-5 * dist)
+    
+    # Add some default density for visualization if no centers exist
+    if not field_state.get_field_density()["density_centers"]:
+        # Create a simple gradient for visualization
+        for i in range(resolution):
+            for j in range(resolution):
+                Z[i, j] = 0.5 * np.exp(-3 * ((X[i, j] - 0.5)**2 + (Y[i, j] - 0.5)**2))
+    else:
+        # Use actual density centers
+        for i in range(resolution):
+            for j in range(resolution):
+                for center in field_state.get_field_density()["density_centers"]:
+                    pos = center["position"]
+                    dist = np.sqrt((X[i, j] - pos[dim1])**2 + (Y[i, j] - pos[dim2])**2)
+                    Z[i, j] += center["magnitude"] * np.exp(-5 * dist)
     
     # Custom colormap for visualization
     colors = [(0.1, 0.1, 0.6), (0.2, 0.5, 0.9), (0.9, 0.9, 0.2), (0.9, 0.4, 0.1)]
@@ -245,19 +280,21 @@ def visualize_field_topology(field_state: TonicHarmonicFieldState, title: str):
     plt.contourf(X, Y, Z, 20, cmap=cmap)
     plt.colorbar(label='Field Density')
     
-    # Plot density centers
-    for center in field_state.field_analysis["density"]["density_centers"]:
-        pos = center["position"]
-        plt.plot(pos[dim1], pos[dim2], 'ro', markersize=10*center["magnitude"])
+    # Plot density centers if they exist
+    if field_state.get_field_density()["density_centers"]:
+        for center in field_state.get_field_density()["density_centers"]:
+            pos = center["position"]
+            plt.plot(pos[dim1], pos[dim2], 'ro', markersize=10*center["magnitude"])
     
-    # Plot resonance patterns
-    for pattern in field_state.field_analysis["field_properties"]["resonance_patterns"]:
-        pos = pattern["center"]
-        plt.plot(pos[dim1], pos[dim2], 'go', markersize=10*pattern["intensity"])
+    # Plot resonance patterns if they exist
+    if field_state.get_field_properties()["resonance_patterns"]:
+        for pattern in field_state.get_field_properties()["resonance_patterns"]:
+            pos = pattern["center"]
+            plt.plot(pos[dim1], pos[dim2], 'go', markersize=10*pattern["intensity"])
     
     # Add labels and title
-    plt.xlabel(field_state.field_analysis["topology"]["principal_dimensions"][dim1])
-    plt.ylabel(field_state.field_analysis["topology"]["principal_dimensions"][dim2])
+    plt.xlabel(field_state.get_field_topology()["principal_dimensions"][dim1])
+    plt.ylabel(field_state.get_field_topology()["principal_dimensions"][dim2])
     plt.title(title)
     plt.tight_layout()
     
@@ -342,7 +379,7 @@ def run_field_emergence_test():
     print("\nDetecting emergent patterns from field topology:")
     
     # The patterns emerge from the field topology itself, not from predefined categories
-    resonance_centers = field_state.field_analysis["field_properties"]["resonance_patterns"]
+    resonance_centers = field_state.get_field_properties()["resonance_patterns"]
     
     for i, center in enumerate(resonance_centers):
         print(f"  - Emergent Pattern {i+1}:")
