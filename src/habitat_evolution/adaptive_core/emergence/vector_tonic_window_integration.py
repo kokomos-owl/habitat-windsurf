@@ -835,13 +835,26 @@ class VectorTonicWindowIntegrator:
         density = gradient_metrics.get('density', 0.5)
         variance = gradient_metrics.get('variance', 0.5)
         
-        # Adjust detector threshold based on gradient metrics
-        if hasattr(self.base_detector.detector, 'threshold'):
+        # Extract field state metrics
+        field_coherence = gradient_metrics.get('coherence', 0.5)
+        field_stability = gradient_metrics.get('stability', 0.5)
+        
+        # Update field state in the detector if it supports the new field-aware threshold system
+        if hasattr(self.base_detector.detector, 'update_field_state'):
+            # Update field state to influence threshold calculations
+            self.base_detector.detector.update_field_state(field_coherence, field_stability)
+            logger.info(f"Updated detector field state: coherence={field_coherence:.2f}, stability={field_stability:.2f}")
+        # Fall back to legacy threshold adjustment if needed
+        elif hasattr(self.base_detector.detector, 'threshold'):
             base_threshold = self.base_detector.detector.threshold
             
             # Higher density = lower threshold (more sensitive)
             # Higher variance = higher threshold (less sensitive)
-            adjusted_threshold = base_threshold * (1 - (density * 0.2) + (variance * 0.2))
+            # Higher coherence = lower threshold (more sensitive)
+            # Higher stability = lower threshold (more sensitive)
+            coherence_factor = field_coherence * 0.2
+            stability_factor = field_stability * 0.1
+            adjusted_threshold = base_threshold * (1 - (density * 0.2) - coherence_factor - stability_factor + (variance * 0.2))
             
             # Ensure threshold is within reasonable bounds
             adjusted_threshold = max(1, min(base_threshold * 1.5, adjusted_threshold))

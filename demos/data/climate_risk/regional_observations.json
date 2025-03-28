@@ -1,0 +1,490 @@
+{
+  "observations": [
+    {
+      "id": "himalaya_001",
+      "timestamp": "2025-03-27T10:15:22Z",
+      "observed_entity_a": "Traditional Crop Rotation",
+      "observed_entity_b": "Soil Fertility",
+      "observed_phenomenon": "co-occurrence",
+      "raw_data": {
+        "measured_soil_nitrogen": "+28% compared to control",
+        "measured_microbial_diversity": "+35% compared to control",
+        "crop_yield_differential": "+22% compared to monoculture",
+        "years_of_observation": 15
+      },
+      "context": {
+        "perspective": "himalayan_indigenous_knowledge",
+        "confidence": 0.92,
+        "tonic_value": 0.85,
+        "harmonic_properties": {
+          "frequency": 0.35,
+          "amplitude": 0.88,
+          "phase": 0.12
+        },
+        "vector_properties": {
+          "x": 0.72, "y": 0.31, "z": 0.65, "w": 0.45, "v": 0.38
+        }
+      }
+    },
+    {
+      "id": "himalaya_002",
+      "timestamp": "2025-03-27T10:18:45Z",
+      "source": "Traditional Crop Rotation",
+      "predicate": "reduces_dependence_on",
+      "target": "Chemical Fertilizers",
+      "context": {
+        "perspective": "himalayan_indigenous_knowledge",
+        "confidence": 0.89,
+        "tonic_value": 0.82,
+        "harmonic_properties": {
+          "frequency": 0.32,
+          "amplitude": 0.79,
+          "phase": 0.18
+        },
+        "vector_properties": {
+          "x": 0.68, "y": 0.35, "z": 0.61, "w": 0.42, "v": 0.41
+        }
+      }
+    },
+    {
+      "id": "himalaya_003",
+      "timestamp": "2025-03-27T10:22:10Z",
+      "source": "Sacred Forest Groves",
+      "predicate": "preserve",
+      "target": "Biodiversity Hotspots",
+      "context": {
+        "perspective": "himalayan_indigenous_knowledge",
+        "confidence": 0.94,
+        "tonic_value": 0.88,
+        "harmonic_properties": {
+          "frequency": 0.28,
+          "amplitude": 0.91,
+          "phase": 0.09
+        },
+        "vector_properties": {
+          "x": 0.75, "y": 0.28, "z": 0.70, "w": 0.51, "v": 0.32
+        }
+      }
+    },
+    {
+      "id": "himalaya_004",
+      "timestamp": "2025-03-27T10:25:30Z",
+      "source": "Traditional Seed Storage",
+      "predicate": "maintains",
+      "target": "Genetic Diversity",
+      "context": {
+        "perspective": "himalayan_indigenous_knowledge",
+        "confidence": 0.91,
+        "tonic_value": 0.84,
+        "harmonic_properties": {
+          "frequency": 0.31,
+          "amplitude": 0.85,
+          "phase": 0.14
+        },
+        "vector_properties": {
+          "x": 0.69, "y": 0.33, "z": 0.68, "w": 0.48, "v": 0.35
+        }
+      }
+    },
+    {
+      "id": "pacific_001",
+      "timestamp": "2025-03-27T11:05:15Z",
+      "source": "Mangrove Forests",
+      "predicate": "protect",
+      "target": "Coastal Communities",
+      "context": {
+        "perspective": "coastal_pacific_perspective",
+        "confidence": 0.95,
+        "tonic_value": 0.89,
+        "harmonic_properties": {
+          "frequency": 0.25,
+          "amplitude": 0.92,
+          "phase": 0.08
+        },
+        "vector_properties": {
+          "x": 0.78, "y": 0.25, "z": 0.72, "w": 0.55
+        }
+      }
+    },
+    {
+      "id": "pacific_002",
+      "timestamp": "2025-03-27T11:08:40Z",
+      "source": "Traditional Fishing Taboos",
+      "predicate": "regulate",
+      "target": "Marine Resource Harvesting",
+      "context": {
+        "perspective": "coastal_pacific_perspective",
+        "confidence": 0.88,
+        "tonic_value": 0.83,
+        "harmonic_properties": {
+          "frequency": 0.29,
+          "amplitude": 0.84,
+          "phase": 0.15
+        },
+        "vector_properties": {
+          "x": 0.71, "y": 0.32, "z": 0.65, "w": 0.49
+        }
+      }
+    },
+    {
+      "id": "pacific_003",
+      "timestamp": "2025-03-27T11:12:05Z",
+      "source": "Coral Reef Monitoring",
+      "predicate": "informs",
+      "target": "Climate Change Adaptation",
+      "context": {
+        "perspective": "coastal_pacific_perspective",
+        "confidence": 0.87,
+        "tonic_value": 0.81,
+        "harmonic_properties": {
+          "frequency": 0.33,
+          "amplitude": 0.82,
+          "phase": 0.17
+        },
+        "vector_properties": {
+          "x": 0.68, "y": 0.35, "z": 0.62, "w": 0.47
+        }
+      }
+    },
+    {
+      "id": "pacific_004",
+      "timestamp": "2025-03-27T11:15:30Z",
+      "source": "Traditional Weather Indicators",
+      "predicate": "predict",
+      "target": "Cyclone Patterns",
+      "context": {
+        "perspective": "coastal_pacific_perspective",
+        "confidence": 0.86,
+        "tonic_value": 0.79,
+        "harmonic_properties": {
+          "frequency": 0.36,
+          "amplitude": 0.80,
+          "phase": 0.19
+        },
+        "vector_properties": {
+          "x": 0.65, "y": 0.38, "z": 0.59, "w": 0.45
+        }
+      }
+    },
+    {
+      "id": "savanna_001",
+      "timestamp": "2025-03-27T12:10:20Z",
+      "source": "Pastoralist Mobility",
+      "predicate": "enables",
+      "target": "Grassland Regeneration",
+      "context": {
+        "perspective": "african_savanna_knowledge",
+        "confidence": 0.93,
+        "tonic_value": 0.87,
+        "harmonic_properties": {
+          "frequency": 0.27,
+          "amplitude": 0.89,
+          "phase": 0.11
+        },
+        "vector_properties": {
+          "x": 0.74, "y": 0.29, "z": 0.69, "w": 0.52, "v": 0.36
+        }
+      }
+    },
+    {
+      "id": "savanna_002",
+      "timestamp": "2025-03-27T12:14:45Z",
+      "source": "Wildlife Migration Patterns",
+      "predicate": "signal",
+      "target": "Seasonal Changes",
+      "context": {
+        "perspective": "african_savanna_knowledge",
+        "confidence": 0.90,
+        "tonic_value": 0.85,
+        "harmonic_properties": {
+          "frequency": 0.30,
+          "amplitude": 0.86,
+          "phase": 0.13
+        },
+        "vector_properties": {
+          "x": 0.71, "y": 0.32, "z": 0.66, "w": 0.49, "v": 0.39
+        }
+      }
+    },
+    {
+      "id": "savanna_003",
+      "timestamp": "2025-03-27T12:18:10Z",
+      "source": "Drought-Resistant Crops",
+      "predicate": "increase",
+      "target": "Food Security",
+      "context": {
+        "perspective": "african_savanna_knowledge",
+        "confidence": 0.92,
+        "tonic_value": 0.86,
+        "harmonic_properties": {
+          "frequency": 0.29,
+          "amplitude": 0.88,
+          "phase": 0.12
+        },
+        "vector_properties": {
+          "x": 0.73, "y": 0.30, "z": 0.67, "w": 0.50, "v": 0.37
+        }
+      }
+    },
+    {
+      "id": "savanna_004",
+      "timestamp": "2025-03-27T12:21:35Z",
+      "source": "Traditional Water Harvesting",
+      "predicate": "sustains",
+      "target": "Community Livelihoods",
+      "context": {
+        "perspective": "african_savanna_knowledge",
+        "confidence": 0.89,
+        "tonic_value": 0.83,
+        "harmonic_properties": {
+          "frequency": 0.32,
+          "amplitude": 0.84,
+          "phase": 0.15
+        },
+        "vector_properties": {
+          "x": 0.70, "y": 0.33, "z": 0.64, "w": 0.48, "v": 0.40
+        }
+      }
+    },
+    {
+      "id": "arctic_001",
+      "timestamp": "2025-03-27T13:05:50Z",
+      "source": "Sea Ice Knowledge",
+      "predicate": "ensures",
+      "target": "Safe Travel",
+      "context": {
+        "perspective": "arctic_inuit_perspective",
+        "confidence": 0.96,
+        "tonic_value": 0.90,
+        "harmonic_properties": {
+          "frequency": 0.24,
+          "amplitude": 0.93,
+          "phase": 0.07
+        },
+        "vector_properties": {
+          "x": 0.79, "y": 0.24, "z": 0.73, "w": 0.56
+        }
+      }
+    },
+    {
+      "id": "arctic_002",
+      "timestamp": "2025-03-27T13:09:15Z",
+      "source": "Animal Behavior Observation",
+      "predicate": "forecasts",
+      "target": "Weather Changes",
+      "context": {
+        "perspective": "arctic_inuit_perspective",
+        "confidence": 0.91,
+        "tonic_value": 0.85,
+        "harmonic_properties": {
+          "frequency": 0.28,
+          "amplitude": 0.87,
+          "phase": 0.12
+        },
+        "vector_properties": {
+          "x": 0.73, "y": 0.30, "z": 0.68, "w": 0.51
+        }
+      }
+    },
+    {
+      "id": "arctic_003",
+      "timestamp": "2025-03-27T13:12:40Z",
+      "source": "Traditional Food Sharing",
+      "predicate": "strengthens",
+      "target": "Community Bonds",
+      "context": {
+        "perspective": "arctic_inuit_perspective",
+        "confidence": 0.94,
+        "tonic_value": 0.88,
+        "harmonic_properties": {
+          "frequency": 0.26,
+          "amplitude": 0.90,
+          "phase": 0.09
+        },
+        "vector_properties": {
+          "x": 0.76, "y": 0.27, "z": 0.70, "w": 0.54
+        }
+      }
+    },
+    {
+      "id": "arctic_004",
+      "timestamp": "2025-03-27T13:16:05Z",
+      "source": "Traditional Hunting Practices",
+      "predicate": "maintain",
+      "target": "Ecological Balance",
+      "context": {
+        "perspective": "arctic_inuit_perspective",
+        "confidence": 0.89,
+        "tonic_value": 0.83,
+        "harmonic_properties": {
+          "frequency": 0.30,
+          "amplitude": 0.85,
+          "phase": 0.14
+        },
+        "vector_properties": {
+          "x": 0.72, "y": 0.31, "z": 0.66, "w": 0.50
+        }
+      }
+    },
+    {
+      "id": "cross_regional_001",
+      "timestamp": "2025-03-27T14:05:30Z",
+      "source": "Indigenous Knowledge Systems",
+      "predicate": "enhance",
+      "target": "Climate Adaptation Strategies",
+      "context": {
+        "perspective": "himalayan_indigenous_knowledge",
+        "confidence": 0.93,
+        "tonic_value": 0.87,
+        "harmonic_properties": {
+          "frequency": 0.28,
+          "amplitude": 0.89,
+          "phase": 0.11
+        },
+        "vector_properties": {
+          "x": 0.74, "y": 0.29, "z": 0.69, "w": 0.52, "v": 0.36
+        }
+      }
+    },
+    {
+      "id": "cross_regional_002",
+      "timestamp": "2025-03-27T14:08:55Z",
+      "source": "Indigenous Knowledge Systems",
+      "predicate": "enhance",
+      "target": "Climate Adaptation Strategies",
+      "context": {
+        "perspective": "coastal_pacific_perspective",
+        "confidence": 0.90,
+        "tonic_value": 0.84,
+        "harmonic_properties": {
+          "frequency": 0.30,
+          "amplitude": 0.86,
+          "phase": 0.13
+        },
+        "vector_properties": {
+          "x": 0.71, "y": 0.32, "z": 0.66, "w": 0.49
+        }
+      }
+    },
+    {
+      "id": "cross_regional_003",
+      "timestamp": "2025-03-27T14:12:20Z",
+      "source": "Indigenous Knowledge Systems",
+      "predicate": "enhance",
+      "target": "Climate Adaptation Strategies",
+      "context": {
+        "perspective": "african_savanna_knowledge",
+        "confidence": 0.91,
+        "tonic_value": 0.85,
+        "harmonic_properties": {
+          "frequency": 0.29,
+          "amplitude": 0.87,
+          "phase": 0.12
+        },
+        "vector_properties": {
+          "x": 0.72, "y": 0.31, "z": 0.67, "w": 0.50, "v": 0.38
+        }
+      }
+    },
+    {
+      "id": "cross_regional_004",
+      "timestamp": "2025-03-27T14:15:45Z",
+      "source": "Indigenous Knowledge Systems",
+      "predicate": "enhance",
+      "target": "Climate Adaptation Strategies",
+      "context": {
+        "perspective": "arctic_inuit_perspective",
+        "confidence": 0.92,
+        "tonic_value": 0.86,
+        "harmonic_properties": {
+          "frequency": 0.27,
+          "amplitude": 0.88,
+          "phase": 0.10
+        },
+        "vector_properties": {
+          "x": 0.75, "y": 0.28, "z": 0.70, "w": 0.53
+        }
+      }
+    },
+    {
+      "id": "cross_domain_001",
+      "timestamp": "2025-03-27T14:20:10Z",
+      "source": "Biodiversity Conservation",
+      "predicate": "contributes_to",
+      "target": "Food Security",
+      "context": {
+        "perspective": "himalayan_indigenous_knowledge",
+        "confidence": 0.88,
+        "tonic_value": 0.82,
+        "harmonic_properties": {
+          "frequency": 0.32,
+          "amplitude": 0.84,
+          "phase": 0.15
+        },
+        "vector_properties": {
+          "x": 0.70, "y": 0.33, "z": 0.64, "w": 0.48, "v": 0.40
+        }
+      }
+    },
+    {
+      "id": "cross_domain_002",
+      "timestamp": "2025-03-27T14:23:35Z",
+      "source": "Coastal Protection",
+      "predicate": "supports",
+      "target": "Community Livelihoods",
+      "context": {
+        "perspective": "coastal_pacific_perspective",
+        "confidence": 0.89,
+        "tonic_value": 0.83,
+        "harmonic_properties": {
+          "frequency": 0.31,
+          "amplitude": 0.85,
+          "phase": 0.14
+        },
+        "vector_properties": {
+          "x": 0.71, "y": 0.32, "z": 0.65, "w": 0.49
+        }
+      }
+    },
+    {
+      "id": "cross_domain_003",
+      "timestamp": "2025-03-27T14:27:00Z",
+      "source": "Traditional Ecological Knowledge",
+      "predicate": "informs",
+      "target": "Sustainable Resource Management",
+      "context": {
+        "perspective": "african_savanna_knowledge",
+        "confidence": 0.92,
+        "tonic_value": 0.86,
+        "harmonic_properties": {
+          "frequency": 0.29,
+          "amplitude": 0.88,
+          "phase": 0.12
+        },
+        "vector_properties": {
+          "x": 0.73, "y": 0.30, "z": 0.67, "w": 0.50, "v": 0.37
+        }
+      }
+    },
+    {
+      "id": "cross_domain_004",
+      "timestamp": "2025-03-27T14:30:25Z",
+      "source": "Cultural Practices",
+      "predicate": "maintain",
+      "target": "Ecological Knowledge Transfer",
+      "context": {
+        "perspective": "arctic_inuit_perspective",
+        "confidence": 0.90,
+        "tonic_value": 0.84,
+        "harmonic_properties": {
+          "frequency": 0.30,
+          "amplitude": 0.86,
+          "phase": 0.13
+        },
+        "vector_properties": {
+          "x": 0.72, "y": 0.31, "z": 0.66, "w": 0.50
+        }
+      }
+    }
+  ]
+}

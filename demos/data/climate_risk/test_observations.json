@@ -1,0 +1,304 @@
+{
+  "observations": [
+    {
+      "id": "obs_001",
+      "timestamp": "2025-03-27T14:22:18Z",
+      "source": "Mangrove Forests",
+      "predicate": "simultaneously_regulate",
+      "target": "Coastal Flooding",
+      "context": {
+        "perspective": "ecological_perspective",
+        "confidence": 0.92,
+        "tonic_value": 0.78,
+        "harmonic_properties": {
+          "frequency": 0.42,
+          "amplitude": 0.85,
+          "phase": 0.12
+        },
+        "vector_properties": {
+          "x": 0.72, "y": 0.31, "z": 0.65
+        }
+      }
+    },
+    {
+      "id": "obs_002",
+      "timestamp": "2025-03-27T14:23:45Z",
+      "source": "Mangrove Forests",
+      "predicate": "provide_habitat_for",
+      "target": "Juvenile Fish Species",
+      "context": {
+        "perspective": "ecological_perspective",
+        "confidence": 0.89,
+        "tonic_value": 0.81,
+        "harmonic_properties": {
+          "frequency": 0.38,
+          "amplitude": 0.79,
+          "phase": 0.22
+        },
+        "vector_properties": {
+          "x": 0.68, "y": 0.42, "z": 0.61
+        }
+      }
+    },
+    {
+      "id": "obs_003",
+      "timestamp": "2025-03-27T14:25:12Z",
+      "source": "Mangrove Forests",
+      "predicate": "sequester",
+      "target": "Carbon",
+      "context": {
+        "perspective": "ecological_perspective",
+        "confidence": 0.95,
+        "tonic_value": 0.76,
+        "harmonic_properties": {
+          "frequency": 0.45,
+          "amplitude": 0.88,
+          "phase": 0.09
+        },
+        "vector_properties": {
+          "x": 0.75, "y": 0.28, "z": 0.60
+        }
+      }
+    },
+    {
+      "id": "obs_004",
+      "timestamp": "2025-03-27T14:26:30Z",
+      "source": "Coastal Flooding",
+      "predicate": "threatens",
+      "target": "Coastal Communities",
+      "context": {
+        "perspective": "socioeconomic_lens",
+        "confidence": 0.87,
+        "tonic_value": 0.62,
+        "harmonic_properties": {
+          "frequency": 0.52,
+          "amplitude": 0.71,
+          "phase": 0.31
+        },
+        "vector_properties": {
+          "x": 0.41, "y": 0.82, "z": 0.39
+        }
+      }
+    },
+    {
+      "id": "obs_005",
+      "timestamp": "2025-03-27T14:28:05Z",
+      "source": "Coastal Communities",
+      "predicate": "depend_on",
+      "target": "Fishing Livelihoods",
+      "context": {
+        "perspective": "socioeconomic_lens",
+        "confidence": 0.84,
+        "tonic_value": 0.69,
+        "harmonic_properties": {
+          "frequency": 0.48,
+          "amplitude": 0.75,
+          "phase": 0.25
+        },
+        "vector_properties": {
+          "x": 0.38, "y": 0.79, "z": 0.48
+        }
+      }
+    },
+    {
+      "id": "obs_006",
+      "timestamp": "2025-03-27T14:29:45Z",
+      "source": "Juvenile Fish Species",
+      "predicate": "support",
+      "target": "Fishing Livelihoods",
+      "context": {
+        "perspective": "socioeconomic_lens",
+        "confidence": 0.81,
+        "tonic_value": 0.72,
+        "harmonic_properties": {
+          "frequency": 0.43,
+          "amplitude": 0.69,
+          "phase": 0.28
+        },
+        "vector_properties": {
+          "x": 0.51, "y": 0.75, "z": 0.43
+        }
+      }
+    },
+    {
+      "id": "obs_007",
+      "timestamp": "2025-03-27T14:31:22Z",
+      "source": "Mangrove Forests",
+      "predicate": "considered_sacred_by",
+      "target": "Indigenous Communities",
+      "context": {
+        "perspective": "indigenous_knowledge",
+        "confidence": 0.91,
+        "tonic_value": 0.88,
+        "harmonic_properties": {
+          "frequency": 0.32,
+          "amplitude": 0.92,
+          "phase": 0.05
+        },
+        "vector_properties": {
+          "x": 0.29, "y": 0.31, "z": 0.91
+        }
+      }
+    },
+    {
+      "id": "obs_008",
+      "timestamp": "2025-03-27T14:33:10Z",
+      "source": "Indigenous Communities",
+      "predicate": "practice_sustainable",
+      "target": "Mangrove Management",
+      "context": {
+        "perspective": "indigenous_knowledge",
+        "confidence": 0.89,
+        "tonic_value": 0.85,
+        "harmonic_properties": {
+          "frequency": 0.35,
+          "amplitude": 0.88,
+          "phase": 0.08
+        },
+        "vector_properties": {
+          "x": 0.32, "y": 0.28, "z": 0.88
+        }
+      }
+    },
+    {
+      "id": "obs_009",
+      "timestamp": "2025-03-27T14:35:05Z",
+      "source": "Mangrove Management",
+      "predicate": "improves",
+      "target": "Carbon Sequestration",
+      "context": {
+        "perspective": "ecological_perspective",
+        "confidence": 0.86,
+        "tonic_value": 0.79,
+        "harmonic_properties": {
+          "frequency": 0.41,
+          "amplitude": 0.82,
+          "phase": 0.15
+        },
+        "vector_properties": {
+          "x": 0.69, "y": 0.35, "z": 0.63
+        }
+      }
+    },
+    {
+      "id": "obs_010",
+      "timestamp": "2025-03-27T14:37:22Z",
+      "source": "Coastal Flooding",
+      "predicate": "increases_risk_of",
+      "target": "Waterborne Diseases",
+      "context": {
+        "perspective": "health_systems",
+        "confidence": 0.83,
+        "tonic_value": 0.61,
+        "harmonic_properties": {
+          "frequency": 0.58,
+          "amplitude": 0.72,
+          "phase": 0.33
+        },
+        "vector_properties": {
+          "x": 0.42, "y": 0.38, "z": 0.82
+        }
+      }
+    },
+    {
+      "id": "obs_011",
+      "timestamp": "2025-03-27T14:39:15Z",
+      "source": "Waterborne Diseases",
+      "predicate": "affect",
+      "target": "Community Health",
+      "context": {
+        "perspective": "health_systems",
+        "confidence": 0.88,
+        "tonic_value": 0.59,
+        "harmonic_properties": {
+          "frequency": 0.61,
+          "amplitude": 0.78,
+          "phase": 0.29
+        },
+        "vector_properties": {
+          "x": 0.45, "y": 0.41, "z": 0.79
+        }
+      }
+    },
+    {
+      "id": "obs_012",
+      "timestamp": "2025-03-27T14:41:30Z",
+      "source": "Community Health",
+      "predicate": "influences",
+      "target": "Economic Productivity",
+      "context": {
+        "perspective": "socioeconomic_lens",
+        "confidence": 0.79,
+        "tonic_value": 0.68,
+        "harmonic_properties": {
+          "frequency": 0.49,
+          "amplitude": 0.67,
+          "phase": 0.38
+        },
+        "vector_properties": {
+          "x": 0.52, "y": 0.76, "z": 0.39
+        }
+      }
+    },
+    {
+      "id": "obs_013",
+      "timestamp": "2025-03-27T14:43:45Z",
+      "source": "Indigenous Communities",
+      "predicate": "use_traditional_medicine_from",
+      "target": "Mangrove Plants",
+      "context": {
+        "perspective": "indigenous_knowledge",
+        "confidence": 0.87,
+        "tonic_value": 0.83,
+        "harmonic_properties": {
+          "frequency": 0.36,
+          "amplitude": 0.85,
+          "phase": 0.11
+        },
+        "vector_properties": {
+          "x": 0.35, "y": 0.29, "z": 0.89
+        }
+      }
+    },
+    {
+      "id": "obs_014",
+      "timestamp": "2025-03-27T14:45:20Z",
+      "source": "Mangrove Plants",
+      "predicate": "contain",
+      "target": "Bioactive Compounds",
+      "context": {
+        "perspective": "health_systems",
+        "confidence": 0.82,
+        "tonic_value": 0.75,
+        "harmonic_properties": {
+          "frequency": 0.47,
+          "amplitude": 0.73,
+          "phase": 0.21
+        },
+        "vector_properties": {
+          "x": 0.48, "y": 0.35, "z": 0.81
+        }
+      }
+    },
+    {
+      "id": "obs_015",
+      "timestamp": "2025-03-27T14:47:10Z",
+      "source": "Bioactive Compounds",
+      "predicate": "may_treat",
+      "target": "Waterborne Diseases",
+      "context": {
+        "perspective": "health_systems",
+        "confidence": 0.76,
+        "tonic_value": 0.72,
+        "harmonic_properties": {
+          "frequency": 0.51,
+          "amplitude": 0.68,
+          "phase": 0.26
+        },
+        "vector_properties": {
+          "x": 0.51, "y": 0.39, "z": 0.77
+        }
+      }
+    }
+  ]
+}

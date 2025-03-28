@@ -1,0 +1,72 @@
+{
+  "observation_frames": [
+    {
+      "name": "himalayan_indigenous_knowledge",
+      "description": "Indigenous knowledge systems in Himalayan communities",
+      "resonance_centers": ["traditional_agriculture", "seasonal_indicators", "water_management", "sacred_sites"],
+      "field_properties": {
+        "dimensionality": 5,
+        "density_centers": ["high_altitude_farming", "forest_management", "medicinal_plants"],
+        "flow_vectors": [
+          {"source": "seasonal_patterns", "target": "planting_decisions", "strength": 0.9},
+          {"source": "sacred_groves", "target": "biodiversity_conservation", "strength": 0.8},
+          {"source": "traditional_storage", "target": "food_security", "strength": 0.7}
+        ],
+        "coherence": 0.85,
+        "stability": 0.75,
+        "navigability_score": 0.8
+      }
+    },
+    {
+      "name": "coastal_pacific_perspective",
+      "description": "Pacific island communities' relationship with coastal ecosystems",
+      "resonance_centers": ["mangrove_systems", "coral_reefs", "traditional_fishing", "cyclone_adaptation"],
+      "field_properties": {
+        "dimensionality": 4,
+        "density_centers": ["reef_management", "coastal_protection", "food_systems"],
+        "flow_vectors": [
+          {"source": "mangrove_conservation", "target": "coastal_protection", "strength": 0.9},
+          {"source": "traditional_fishing_practices", "target": "marine_biodiversity", "strength": 0.7},
+          {"source": "cyclone_indicators", "target": "community_preparation", "strength": 0.8}
+        ],
+        "coherence": 0.8,
+        "stability": 0.65,
+        "navigability_score": 0.75
+      }
+    },
+    {
+      "name": "african_savanna_knowledge",
+      "description": "Indigenous knowledge systems in African savanna communities",
+      "resonance_centers": ["pastoralism", "drought_adaptation", "wildlife_coexistence", "seasonal_mobility"],
+      "field_properties": {
+        "dimensionality": 5,
+        "density_centers": ["grazing_management", "water_sources", "crop_livestock_integration"],
+        "flow_vectors": [
+          {"source": "wildlife_indicators", "target": "seasonal_forecasting", "strength": 0.8},
+          {"source": "pastoralist_mobility", "target": "ecosystem_regeneration", "strength": 0.9},
+          {"source": "traditional_crop_varieties", "target": "drought_resilience", "strength": 0.7}
+        ],
+        "coherence": 0.75,
+        "stability": 0.7,
+        "navigability_score": 0.8
+      }
+    },
+    {
+      "name": "arctic_inuit_perspective",
+      "description": "Inuit knowledge systems in Arctic regions",
+      "resonance_centers": ["sea_ice_knowledge", "hunting_practices", "seasonal_indicators", "community_sharing"],
+      "field_properties": {
+        "dimensionality": 4,
+        "density_centers": ["ice_safety", "wildlife_migration", "food_preservation"],
+        "flow_vectors": [
+          {"source": "ice_conditions", "target": "hunting_decisions", "strength": 0.9},
+          {"source": "animal_behavior", "target": "weather_prediction", "strength": 0.8},
+          {"source": "traditional_food_sharing", "target": "community_resilience", "strength": 0.9}
+        ],
+        "coherence": 0.9,
+        "stability": 0.6,
+        "navigability_score": 0.75
+      }
+    }
+  ]
+}

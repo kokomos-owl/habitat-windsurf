@@ -1,0 +1,60 @@
+{
+  "observation_frames": [
+    {
+      "name": "ecological_perspective",
+      "description": "Observations from ecological science perspective",
+      "resonance_centers": ["biodiversity", "habitat_integrity", "ecosystem_services"],
+      "field_properties": {
+        "dimensionality": 7,
+        "density_centers": ["coastal_ecosystems", "forest_systems", "urban_ecology"],
+        "flow_vectors": [
+          {"source": "climate_change", "target": "species_migration", "strength": 0.8},
+          {"source": "habitat_fragmentation", "target": "biodiversity_loss", "strength": 0.9},
+          {"source": "ecosystem_services", "target": "human_wellbeing", "strength": 0.7}
+        ]
+      }
+    },
+    {
+      "name": "indigenous_knowledge",
+      "description": "Observations from indigenous knowledge systems",
+      "resonance_centers": ["cultural_continuity", "place_relationship", "intergenerational_knowledge"],
+      "field_properties": {
+        "dimensionality": 5,
+        "density_centers": ["traditional_practices", "sacred_sites", "seasonal_indicators"],
+        "flow_vectors": [
+          {"source": "seasonal_changes", "target": "cultural_practices", "strength": 0.9},
+          {"source": "place_knowledge", "target": "adaptation_strategies", "strength": 0.8},
+          {"source": "cultural_identity", "target": "ecosystem_stewardship", "strength": 0.9}
+        ]
+      }
+    },
+    {
+      "name": "socioeconomic_lens",
+      "description": "Observations from socioeconomic analysis",
+      "resonance_centers": ["economic_activity", "social_vulnerability", "infrastructure_systems"],
+      "field_properties": {
+        "dimensionality": 6,
+        "density_centers": ["coastal_economies", "urban_centers", "agricultural_systems"],
+        "flow_vectors": [
+          {"source": "climate_impacts", "target": "economic_disruption", "strength": 0.7},
+          {"source": "adaptation_investment", "target": "community_resilience", "strength": 0.6},
+          {"source": "resource_scarcity", "target": "social_inequality", "strength": 0.8}
+        ]
+      }
+    },
+    {
+      "name": "health_systems",
+      "description": "Observations from public health perspective",
+      "resonance_centers": ["physical_wellbeing", "mental_health", "healthcare_access"],
+      "field_properties": {
+        "dimensionality": 5,
+        "density_centers": ["disease_vectors", "healthcare_infrastructure", "vulnerable_populations"],
+        "flow_vectors": [
+          {"source": "temperature_increase", "target": "heat_stress", "strength": 0.8},
+          {"source": "extreme_events", "target": "psychological_trauma", "strength": 0.7},
+          {"source": "ecosystem_degradation", "target": "emerging_diseases", "strength": 0.6}
+        ]
+      }
+    }
+  ]
+}
