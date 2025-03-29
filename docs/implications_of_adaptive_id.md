@@ -168,18 +168,12 @@ graph TD
 
 The practical implementation of AdaptiveID enables this living system:
 
-- Instead of consuming information, people become co-creators of evolving meaning fields
-- Instead of navigating predefined categories, people follow resonance patterns that emerge naturally
-- Instead of building isolated knowledge bases, people contribute to collective meaning spaces that transcend individual perspectives
+- **Component Integration**: `Integrated AdaptiveID with event bus`
+- **Pattern Attribution**: `Pattern created from relationship by [detector_id]`
+- **Version History**: `Pattern version history: {"initial": "{timestamp, origin}"}`
+- **Learning Window Management**: `Set learning window with state: WindowState.OPENING`
 
-We see this transformation in how patterns emerge in the test:
-
-```
-Pattern detected: pattern_10_Climate Change_leads_to_Sea Level Rise
-Pattern detected: pattern_11_Sea Level Rise_leads_to_Coastal Flooding
-```
-
-These aren't just connections between concepts - they're emergent understanding that forms through the interaction of different perspectives with the field.
+But these technical features aren't the point - they're the "soil in which meaning can grow." The real power of AdaptiveID is in creating conditions where understanding can evolve through the natural interaction of different perspectives. When we move beyond technical implementation to real-world applications, we see how these foundations enable entirely new ways of collaborating, learning, and creating meaning together.
 
 ### Use Case: Crisis Response Coordination
 
@@ -261,6 +255,7 @@ graph TD
     E --> B[Agent Evolves]
     E --> C[System Evolves]
     E --> F[New Possibilities Emerge]
+    F --> D
 ```
 
 This isn't just a technical system - it's a living ecology where humans, agents, and systems co-evolve through their interactions, creating conditions where meaning can grow in ways that none could achieve alone.
