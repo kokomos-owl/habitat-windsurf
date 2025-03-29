@@ -321,8 +321,17 @@ class TestVectorTonicWindowIntegration:
             predicate = relationship.get('predicate', pattern_data.get('predicate', 'None'))
             target = relationship.get('target', pattern_data.get('target', 'None'))
             
+            # Extract relationship key
+            rel_key = f"{source}_{predicate}_{target}"
+            detector_id = self.pattern_detector_id
+            
             logger.info(f"Pattern detected: {pattern_id}")
             logger.info(f"Pattern relationship: {source} {predicate} {target}")
+            logger.info(f"Pattern {pattern_id} created from relationship {rel_key} by {detector_id.id}")
+            
+            # Note: In a real implementation, pattern_id would be an AdaptiveID object with version history
+            # For this test, we'll simulate version history
+            logger.info(f"Pattern version history: {{\"initial\": \"{{timestamp: {datetime.now().isoformat()}, origin: pattern_detection}}\"}}")
     
     def _publish_field_gradient(self, coherence: float, stability: float):
         """
