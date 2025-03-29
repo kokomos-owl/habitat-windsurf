@@ -122,4 +122,97 @@ class AdaptiveIDEventAdapter:
             self.event_bus.publish(event)
             
         except Exception as e:
-            logger.error(f"Error publishing event: {e}")\n\n\nclass PatternEventPublisher:\n    """\n    Publisher for pattern-related events.\n    \n    This class provides methods to publish standardized pattern events\n    to the event bus, ensuring consistent event format.\n    """\n    \n    def __init__(self, event_bus):\n        """\n        Initialize the publisher.\n        \n        Args:\n            event_bus: The event bus to publish events to\n        """\n        self.event_bus = event_bus\n        \n    def publish_pattern_detected(self, pattern_id: str, pattern_data: Dict[str, Any], confidence: float, source: str = "pattern_detector"):\n        """\n        Publish a pattern detected event.\n        \n        Args:\n            pattern_id: ID of the detected pattern\n            pattern_data: Data about the pattern\n            confidence: Confidence level (0.0-1.0)\n            source: Source of the detection\n        """\n        event_data = {\n            "pattern_id": pattern_id,\n            "pattern_data": pattern_data,\n            "confidence": confidence,\n            "timestamp": datetime.now().isoformat()\n        }\n        \n        event = Event("pattern.detected", event_data, source=source)\n        self.event_bus.publish(event)\n        \n    def publish_pattern_evolved(self, pattern_id: str, old_state: Dict[str, Any], new_state: Dict[str, Any], source: str = "pattern_detector"):\n        """\n        Publish a pattern evolved event.\n        \n        Args:\n            pattern_id: ID of the evolved pattern\n            old_state: Previous state of the pattern\n            new_state: New state of the pattern\n            source: Source of the evolution\n        """\n        event_data = {\n            "pattern_id": pattern_id,\n            "old_state": old_state,\n            "new_state": new_state,\n            "timestamp": datetime.now().isoformat()\n        }\n        \n        event = Event("pattern.evolved", event_data, source=source)\n        self.event_bus.publish(event)\n        \n    def publish_pattern_resonance(self, pattern_id: str, position: Dict[str, float], strength: float, source: str = "resonance_observer"):\n        """\n        Publish a pattern resonance event.\n        \n        Args:\n            pattern_id: ID of the resonating pattern\n            position: Position in semantic space\n            strength: Strength of the resonance\n            source: Source of the resonance observation\n        """\n        event_data = {\n            "pattern_id": pattern_id,\n            "position": position,\n            "strength": strength,\n            "timestamp": datetime.now().isoformat()\n        }\n        \n        event = Event("pattern.resonance", event_data, source=source)\n        self.event_bus.publish(event)\n        \n    def publish_learning_window_state(self, window_id: str, state: str, metrics: Dict[str, Any], source: str = "learning_window"):\n        """\n        Publish a learning window state event.\n        \n        Args:\n            window_id: ID of the learning window\n            state: State of the window (OPEN, CLOSED, OPENING)\n            metrics: Metrics about the window state\n            source: Source of the state change\n        """\n        event_data = {\n            "window_id": window_id,\n            "state": state,\n            "metrics": metrics,\n            "timestamp": datetime.now().isoformat()\n        }\n        \n        event = Event("learning.window.state", event_data, source=source)\n        self.event_bus.publish(event)
+            logger.error(f"Error publishing event: {e}")
+
+
+
+class PatternEventPublisher:
+    """Publisher for pattern-related events.
+
+    This class provides methods to publish standardized pattern events
+    to the event bus, ensuring consistent event format.
+    """
+
+    def __init__(self, event_bus):
+        """Initialize the publisher.
+
+        Args:
+            event_bus: The event bus to publish events to
+        """
+        self.event_bus = event_bus
+
+    def publish_pattern_detected(self, pattern_id: str, pattern_data: Dict[str, Any], confidence: float, source: str = "pattern_detector"):
+        """Publish a pattern detected event.
+
+        Args:
+            pattern_id: ID of the detected pattern
+            pattern_data: Data about the pattern
+            confidence: Confidence level (0.0-1.0)
+            source: Source of the detection
+        """
+        event_data = {
+            "pattern_id": pattern_id,
+            "pattern_data": pattern_data,
+            "confidence": confidence,
+            "timestamp": datetime.now().isoformat()
+        }
+
+        event = Event("pattern.detected", event_data, source=source)
+        self.event_bus.publish(event)
+
+    def publish_pattern_evolved(self, pattern_id: str, old_state: Dict[str, Any], new_state: Dict[str, Any], source: str = "pattern_detector"):
+        """Publish a pattern evolved event.
+
+        Args:
+            pattern_id: ID of the evolved pattern
+            old_state: Previous state of the pattern
+            new_state: New state of the pattern
+            source: Source of the evolution
+        """
+        event_data = {
+            "pattern_id": pattern_id,
+            "old_state": old_state,
+            "new_state": new_state,
+            "timestamp": datetime.now().isoformat()
+        }
+
+        event = Event("pattern.evolved", event_data, source=source)
+        self.event_bus.publish(event)
+
+    def publish_pattern_resonance(self, pattern_id: str, position: Dict[str, float], strength: float, source: str = "resonance_observer"):
+        """Publish a pattern resonance event.
+
+        Args:
+            pattern_id: ID of the resonating pattern
+            position: Position in semantic space
+            strength: Strength of the resonance
+            source: Source of the resonance observation
+        """
+        event_data = {
+            "pattern_id": pattern_id,
+            "position": position,
+            "strength": strength,
+            "timestamp": datetime.now().isoformat()
+        }
+
+        event = Event("pattern.resonance", event_data, source=source)
+        self.event_bus.publish(event)
+
+    def publish_learning_window_state(self, window_id: str, state: str, metrics: Dict[str, Any], source: str = "learning_window"):
+        """Publish a learning window state event.
+
+        Args:
+            window_id: ID of the learning window
+            state: State of the window (OPEN, CLOSED, OPENING)
+            metrics: Metrics about the window state
+            source: Source of the state change
+        """
+        event_data = {
+            "window_id": window_id,
+            "state": state,
+            "metrics": metrics,
+            "timestamp": datetime.now().isoformat()
+        }
+
+        event = Event("learning.window.state", event_data, source=source)
+        self.event_bus.publish(event)
