@@ -114,10 +114,12 @@ class ArangoDBSchemaManager:
             
             # Store collection metadata
             collection = self.db.collection(name)
+            # Use current timestamp instead of server_info
+            from datetime import datetime
             metadata = {
                 "_key": "metadata",
                 "description": description,
-                "created_at": self.db.server_info()["time"]
+                "created_at": datetime.now().isoformat()
             }
             try:
                 collection.insert(metadata)

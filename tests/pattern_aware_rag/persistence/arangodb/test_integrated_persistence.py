@@ -11,6 +11,7 @@ import sys
 import json
 import logging
 from datetime import datetime
+from arango import ArangoClient
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -38,6 +39,22 @@ class TestIntegratedPersistence(unittest.TestCase):
         timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
         cls.test_db_name = f"habitat_test_{timestamp}"
         
+        # Get connection details from environment variables
+        host = os.getenv('ARANGO_HOST', 'http://localhost:8529')
+        username = os.getenv('ARANGO_USER', 'root')
+        password = os.getenv('ARANGO_PASSWORD', 'habitat')
+        
+        # Initialize the client
+        client = ArangoClient(hosts=host)
+        
+        # Connect to the system database
+        sys_db = client.db('_system', username=username, password=password)
+        
+        # Create the test database if it doesn't exist
+        if not sys_db.has_database(cls.test_db_name):
+            sys_db.create_database(cls.test_db_name)
+            logger.info(f"Created test database: {cls.test_db_name}")
+        
         # Set environment variables for test database
         os.environ["ARANGO_DB"] = cls.test_db_name
         
@@ -45,7 +62,7 @@ class TestIntegratedPersistence(unittest.TestCase):
         cls.schema_manager = ArangoDBSchemaManager()
         
         # Initialize schema
-        cls.schema_manager.initialize_schema()
+        cls.schema_manager.create_schema()
         
         # Get database connection
         cls.db = cls.schema_manager.db
@@ -68,14 +85,21 @@ class TestIntegratedPersistence(unittest.TestCase):
         # Create actants in the database
         cls.pattern_collection = cls.db.collection("Pattern")
         for actant in cls.sample_actants:
-            # Check if actant already exists
+            # Extract key from the id
             key = actant["id"].split("/")[1]
-            if not cls.pattern_collection.has(key):
+            
+            try:
+                # Try to insert the actant
                 cls.pattern_collection.insert({
                     "_key": key,
                     "name": actant["name"],
+                    "id": actant["id"],  # Include the full ID
                     "created_at": datetime.now().isoformat()
                 })
+                logger.info(f"Created actant: {actant['name']}")
+            except Exception as e:
+                # If the actant already exists, log and continue
+                logger.warning(f"Could not create actant {actant['name']}: {str(e)}")
         
         logger.info(f"Test environment set up with database: {cls.test_db_name}")
     
@@ -240,6 +264,10 @@ class TestIntegratedPersistence(unittest.TestCase):
             properties
         )
         
+        print(f"\nDEBUG - Edge ID: {edge_id}\n")
+        print(f"DEBUG - Edge ID type: {type(edge_id)}")
+        print(f"DEBUG - Edge ID parts: {edge_id.split('/')}")
+        
         # Update the relationship
         update_props = {
             "confidence": 0.95,
@@ -256,6 +284,8 @@ class TestIntegratedPersistence(unittest.TestCase):
             edge_id,
             update_props
         )
+        
+        print(f"DEBUG - Update success: {success}")
         
         # Verify the update was successful
         self.assertTrue(success)

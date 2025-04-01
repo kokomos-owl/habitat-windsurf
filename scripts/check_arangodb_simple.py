@@ -3,19 +3,24 @@ Simple script to check ArangoDB connection with hardcoded credentials.
 For testing purposes only.
 """
 
+import os
 import logging
 from arango import ArangoClient
+from dotenv import load_dotenv
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 def main():
-    # Hardcoded connection details for testing
-    host = "http://localhost:8529"
-    username = "root"  # Default ArangoDB username
-    password = ""      # Default empty password for root user
-    db_name = "habitat_evolution"
+    # Load environment variables
+    load_dotenv()
+    
+    # Get connection details from environment variables
+    host = os.getenv('ARANGO_HOST', 'http://localhost:8529')
+    username = os.getenv('ARANGO_USER', 'root')
+    password = os.getenv('ARANGO_PASSWORD', 'habitat')
+    db_name = os.getenv('ARANGO_DB', 'habitat')
     
     logger.info(f"Connecting to ArangoDB at {host} with username: {username}")
     
@@ -43,14 +48,16 @@ def main():
         # Print document collections
         logger.info("Document Collections:")
         for collection in collections:
-            if not collection['name'].startswith('_') and not collection['edge']:
-                logger.info(f"  - {collection['name']}")
+            if not collection['name'].startswith('_'):
+                if 'edge' in collection and not collection['edge']:
+                    logger.info(f"  - {collection['name']}")
         
         # Print edge collections
         logger.info("Edge Collections:")
         for collection in collections:
-            if not collection['name'].startswith('_') and collection['edge']:
-                logger.info(f"  - {collection['name']}")
+            if not collection['name'].startswith('_'):
+                if 'edge' in collection and collection['edge']:
+                    logger.info(f"  - {collection['name']}")
         
         # Print some database stats
         logger.info(f"Total collections: {len([c for c in collections if not c['name'].startswith('_')])}")
