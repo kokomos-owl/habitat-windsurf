@@ -7,10 +7,16 @@ from abc import ABC
 import json
 from datetime import datetime
 
-from ..interfaces import Repository
-from .connection import Neo4jConnectionManager
+# This is a mock implementation since we're not using Neo4j anymore
+from abc import ABC
+from typing import TypeVar, Generic, Dict, Any, List, Optional
 
 T = TypeVar('T')
+
+class Repository(Generic[T], ABC):
+    """Mock Repository interface for backward compatibility."""
+    pass
+from .connection import Neo4jConnectionManager
 
 class Neo4jBaseRepository(Repository[T], ABC):
     """

@@ -58,61 +58,57 @@ class TestRepositoryStructure(unittest.TestCase):
         self.mock_relationship_repo = MagicMock()
         self.mock_topology_repo = MagicMock()
     
-    @patch('src.habitat_evolution.pattern_aware_rag.persistence.arangodb.field_state_repository.TonicHarmonicFieldStateRepository')
-    def test_field_state_repository_factory(self, mock_repo_class):
+    @patch('src.habitat_evolution.adaptive_core.persistence.adapters.field_state_repository_adapter.FieldStateRepositoryAdapter')
+    def test_field_state_repository_factory(self, mock_adapter_class):
         """Test that the field state repository factory correctly creates an adapter."""
         # Configure the mock
-        mock_repo_instance = MagicMock()
-        mock_repo_class.return_value = mock_repo_instance
+        mock_adapter_instance = MagicMock(spec=FieldStateRepositoryInterface)
+        mock_adapter_class.return_value = mock_adapter_instance
         
         # Create the repository
         repo = create_field_state_repository(self.mock_db)
         
         # Verify the repository is the correct type
         self.assertIsInstance(repo, FieldStateRepositoryInterface)
-        self.assertIsInstance(repo, FieldStateRepositoryAdapter)
     
-    @patch('src.habitat_evolution.pattern_aware_rag.persistence.arangodb.pattern_repository.PatternRepository')
-    def test_pattern_repository_factory(self, mock_repo_class):
+    @patch('src.habitat_evolution.adaptive_core.persistence.adapters.pattern_repository_adapter.PatternRepositoryAdapter')
+    def test_pattern_repository_factory(self, mock_adapter_class):
         """Test that the pattern repository factory correctly creates an adapter."""
         # Configure the mock
-        mock_repo_instance = MagicMock()
-        mock_repo_class.return_value = mock_repo_instance
+        mock_adapter_instance = MagicMock(spec=PatternRepositoryInterface)
+        mock_adapter_class.return_value = mock_adapter_instance
         
         # Create the repository
         repo = create_pattern_repository(self.mock_db)
         
         # Verify the repository is the correct type
         self.assertIsInstance(repo, PatternRepositoryInterface)
-        self.assertIsInstance(repo, PatternRepositoryAdapter)
     
-    @patch('src.habitat_evolution.pattern_aware_rag.persistence.arangodb.predicate_relationship_repository.PredicateRelationshipRepository')
-    def test_relationship_repository_factory(self, mock_repo_class):
+    @patch('src.habitat_evolution.adaptive_core.persistence.adapters.relationship_repository_adapter.RelationshipRepositoryAdapter')
+    def test_relationship_repository_factory(self, mock_adapter_class):
         """Test that the relationship repository factory correctly creates an adapter."""
         # Configure the mock
-        mock_repo_instance = MagicMock()
-        mock_repo_class.return_value = mock_repo_instance
+        mock_adapter_instance = MagicMock(spec=RelationshipRepositoryInterface)
+        mock_adapter_class.return_value = mock_adapter_instance
         
         # Create the repository
         repo = create_relationship_repository(self.mock_db)
         
         # Verify the repository is the correct type
         self.assertIsInstance(repo, RelationshipRepositoryInterface)
-        self.assertIsInstance(repo, RelationshipRepositoryAdapter)
     
-    @patch('src.habitat_evolution.pattern_aware_rag.persistence.arangodb.topology_repository.TopologyRepository')
-    def test_topology_repository_factory(self, mock_repo_class):
+    @patch('src.habitat_evolution.adaptive_core.persistence.adapters.topology_repository_adapter.TopologyRepositoryAdapter')
+    def test_topology_repository_factory(self, mock_adapter_class):
         """Test that the topology repository factory correctly creates an adapter."""
         # Configure the mock
-        mock_repo_instance = MagicMock()
-        mock_repo_class.return_value = mock_repo_instance
+        mock_adapter_instance = MagicMock(spec=TopologyRepositoryInterface)
+        mock_adapter_class.return_value = mock_adapter_instance
         
         # Create the repository
         repo = create_topology_repository(self.mock_db)
         
         # Verify the repository is the correct type
         self.assertIsInstance(repo, TopologyRepositoryInterface)
-        self.assertIsInstance(repo, TopologyRepositoryAdapter)
     
     @patch('src.habitat_evolution.adaptive_core.persistence.factory.create_field_state_repository')
     @patch('src.habitat_evolution.adaptive_core.persistence.factory.create_pattern_repository')

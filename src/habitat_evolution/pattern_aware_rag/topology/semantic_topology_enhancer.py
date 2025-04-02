@@ -10,7 +10,7 @@ import logging
 from typing import Dict, Any, List, Optional, Union
 from datetime import datetime
 
-from habitat_evolution.pattern_aware_rag.semantic.pattern_semantic import PatternSemanticEnhancer
+from src.habitat_evolution.pattern_aware_rag.semantic.pattern_semantic import PatternSemanticEnhancer
 
 logger = logging.getLogger(__name__)
 

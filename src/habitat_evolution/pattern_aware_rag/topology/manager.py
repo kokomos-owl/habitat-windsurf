@@ -12,11 +12,11 @@ from typing import Dict, List, Optional, Any, Tuple
 from datetime import datetime, timedelta
 from neo4j import GraphDatabase
 
-from habitat_evolution.pattern_aware_rag.topology.models import (
+from src.habitat_evolution.pattern_aware_rag.topology.models import (
     TopologyState, FrequencyDomain, Boundary, ResonancePoint, FieldMetrics
 )
-from habitat_evolution.pattern_aware_rag.topology.detector import TopologyDetector
-from habitat_evolution.pattern_aware_rag.topology.semantic_topology_enhancer import SemanticTopologyEnhancer
+from src.habitat_evolution.pattern_aware_rag.topology.detector import TopologyDetector
+from src.habitat_evolution.pattern_aware_rag.topology.semantic_topology_enhancer import SemanticTopologyEnhancer
 
 logger = logging.getLogger(__name__)
 

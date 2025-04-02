@@ -10,8 +10,8 @@ import uuid
 from typing import Dict, Any, List, Optional
 from datetime import datetime
 
-from habitat_evolution.adaptive_core.persistence.interfaces.topology_repository import TopologyRepositoryInterface
-from habitat_evolution.pattern_aware_rag.persistence.arangodb.topology_repository import TopologyRepository
+from src.habitat_evolution.adaptive_core.persistence.interfaces.topology_repository import TopologyRepositoryInterface
+from src.habitat_evolution.pattern_aware_rag.persistence.arangodb.topology_repository import TopologyRepository
 
 logger = logging.getLogger(__name__)
 

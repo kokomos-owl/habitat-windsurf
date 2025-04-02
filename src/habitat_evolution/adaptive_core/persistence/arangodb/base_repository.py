@@ -8,10 +8,14 @@ import json
 from datetime import datetime
 import uuid
 
-from ..interfaces import Repository
+T = TypeVar('T')
+
+class Repository(Generic[T], ABC):
+    """Base Repository interface."""
+    pass
 from .connection import ArangoDBConnectionManager
 
-T = TypeVar('T')
+# T is already defined above
 
 class ArangoDBBaseRepository(Repository[T], ABC):
     """

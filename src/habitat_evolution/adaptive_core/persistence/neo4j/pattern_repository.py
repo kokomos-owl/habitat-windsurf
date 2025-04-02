@@ -6,10 +6,10 @@ from typing import Dict, Any, List, Optional
 from datetime import datetime
 
 from ...models.pattern import Pattern
-from ..interfaces import PatternRepository
+from src.habitat_evolution.adaptive_core.persistence.interfaces.pattern_repository import PatternRepositoryInterface
 from .base_repository import Neo4jBaseRepository
 
-class Neo4jPatternRepository(Neo4jBaseRepository[Pattern], PatternRepository):
+class Neo4jPatternRepository(Neo4jBaseRepository[Pattern], PatternRepositoryInterface):
     """
     Neo4j-specific implementation of the pattern repository.
     Handles pattern persistence and relationships in Neo4j.

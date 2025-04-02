@@ -328,3 +328,7 @@ class TopologyStateRepository(ArangoDBBaseRepository):
         
         # Set resonance points on the topology state
         topology_state.resonance_points = points
+
+
+# Alias for backward compatibility
+TopologyRepository = TopologyStateRepository
