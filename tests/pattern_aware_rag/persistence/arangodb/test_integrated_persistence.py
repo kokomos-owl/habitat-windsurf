@@ -241,51 +241,86 @@ class TestIntegratedPersistence(unittest.TestCase):
     
     def test_update_relationship(self):
         """Test updating an existing relationship."""
-        # Create a relationship
-        source_id = "Pattern/mangrove_forests"
-        target_id = "Pattern/biodiversity"
-        properties = {
-            "confidence": 0.90,
-            "harmonic_properties": {
-                "frequency": 0.28,
-                "amplitude": 0.75,
-                "phase": 0.22
-            },
-            "observation_count": 8,
-            "first_observed": datetime.now().isoformat(),
-            "last_observed": datetime.now().isoformat()
-        }
+        # Open a debug file
+        with open('/tmp/debug_output.txt', 'w') as debug_file:
+            # Create a relationship
+            source_id = "Pattern/mangrove_forests"
+            target_id = "Pattern/biodiversity"
+            properties = {
+                "confidence": 0.90,
+                "harmonic_properties": {
+                    "frequency": 0.28,
+                    "amplitude": 0.75,
+                    "phase": 0.22
+                },
+                "observation_count": 8,
+                "first_observed": datetime.now().isoformat(),
+                "last_observed": datetime.now().isoformat()
+            }
+            
+            debug_file.write(f"Source ID: {source_id}\n")
+            debug_file.write(f"Target ID: {target_id}\n")
+            debug_file.write(f"Initial properties: {properties}\n\n")
+            
+            # Save the relationship
+            edge_id = self.predicate_repo.save_relationship(
+                source_id,
+                "enhances",
+                target_id,
+                properties
+            )
+            
+            debug_file.write(f"Edge ID: {edge_id}\n")
+            debug_file.write(f"Edge ID type: {type(edge_id)}\n")
+            debug_file.write(f"Edge ID parts: {edge_id.split('/')}\n\n")
+            
+            # Verify the edge exists before updating
+            collection_name, key = edge_id.split('/')
+            debug_file.write(f"Collection name: {collection_name}, key: {key}\n")
+            collection = self.db.collection(collection_name)
+            has_edge = collection.has(key)
+            debug_file.write(f"Edge exists: {has_edge}\n")
+            
+            if has_edge:
+                edge_doc = collection.get(key)
+                debug_file.write(f"Original edge document: {edge_doc}\n\n")
         
-        # Save the relationship
-        edge_id = self.predicate_repo.save_relationship(
-            source_id,
-            "enhances",
-            target_id,
-            properties
-        )
-        
-        print(f"\nDEBUG - Edge ID: {edge_id}\n")
-        print(f"DEBUG - Edge ID type: {type(edge_id)}")
-        print(f"DEBUG - Edge ID parts: {edge_id.split('/')}")
-        
-        # Update the relationship
-        update_props = {
-            "confidence": 0.95,
-            "harmonic_properties": {
-                "frequency": 0.30,
-                "amplitude": 0.80,
-                "phase": 0.25
-            },
-            "observation_count": 12
-        }
-        
-        # Update the relationship
-        success = self.predicate_repo.update_relationship(
-            edge_id,
-            update_props
-        )
-        
-        print(f"DEBUG - Update success: {success}")
+        # Continue with the debug file
+        with open('/tmp/debug_output.txt', 'a') as debug_file:
+            # Update the relationship
+            update_props = {
+                "confidence": 0.95,
+                "harmonic_properties": {
+                    "frequency": 0.30,
+                    "amplitude": 0.80,
+                    "phase": 0.25
+                },
+                "observation_count": 12
+            }
+            
+            debug_file.write(f"Update properties: {update_props}\n\n")
+            
+            # Update the relationship
+            success = self.predicate_repo.update_relationship(
+                edge_id,
+                update_props
+            )
+            
+            debug_file.write(f"Update success: {success}\n")
+            
+            # Check if the edge still exists after the update attempt
+            collection_name, key = edge_id.split('/')
+            collection = self.db.collection(collection_name)
+            has_edge_after = collection.has(key)
+            debug_file.write(f"Edge exists after update attempt: {has_edge_after}\n")
+            
+            if has_edge_after:
+                edge_doc_after = collection.get(key)
+                debug_file.write(f"Edge document after update attempt: {edge_doc_after}\n")
+                
+                # Check if harmonic properties were updated
+                if 'harmonic_properties' in edge_doc_after:
+                    debug_file.write(f"Harmonic properties after update: {edge_doc_after['harmonic_properties']}\n")
         
         # Verify the update was successful
         self.assertTrue(success)

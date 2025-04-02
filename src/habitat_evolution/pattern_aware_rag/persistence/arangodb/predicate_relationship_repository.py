@@ -162,154 +162,213 @@ class PredicateRelationshipRepository:
         Returns:
             True if update was successful, False otherwise
         """
+        # Log the input parameters for debugging
+        logger.debug(f"Updating relationship: {edge_id} with properties: {properties}")
+        
         try:
-            # Log the incoming edge ID and properties
-            logger.info(f"Updating relationship with edge_id: {edge_id}")
-            logger.info(f"Update properties: {properties}")
-            
             # Parse the edge ID to get collection name and key
             parts = edge_id.split('/')
-            logger.info(f"Edge ID parts: {parts}")
-            
             if len(parts) != 2:
                 logger.error(f"Invalid edge ID format: {edge_id}")
                 return False
                 
             collection_name, key = parts
-            logger.info(f"Collection name: {collection_name}, key: {key}")
+            logger.debug(f"Collection name: {collection_name}, key: {key}")
             
             # Get the collection
             try:
                 collection = self.db.collection(collection_name)
-                logger.info(f"Successfully accessed collection: {collection_name}")
+                logger.debug(f"Successfully accessed collection: {collection_name}")
             except Exception as e:
                 logger.error(f"Could not access collection {collection_name}: {str(e)}")
                 return False
             
             # Check if the edge exists
-            has_key = collection.has(key)
-            logger.info(f"Collection has key {key}: {has_key}")
-            
-            if not has_key:
+            if not collection.has(key):
                 logger.error(f"Edge not found: {edge_id}")
                 return False
+            logger.debug(f"Edge exists: {edge_id}")
             
             # Get the current edge document
             try:
                 edge = collection.get(key)
-                logger.info(f"Retrieved edge document: {edge}")
+                logger.debug(f"Retrieved edge document: {edge}")
             except Exception as e:
-                logger.error(f"Error retrieving edge document: {str(e)}")
+                logger.error(f"Error retrieving edge: {str(e)}")
                 return False
+                
+            # Create a dictionary with the updates we want to apply
+            updates = {}
             
-            # Create update document with required fields
-            update_doc = {
-                "_key": key,
-                "_from": edge["_from"],
-                "_to": edge["_to"],
-                "timestamp": datetime.now().isoformat(),
-                "first_observed": edge.get("first_observed", datetime.now().isoformat()),
-                "last_observed": properties.get("last_observed", datetime.now().isoformat())
-            }
-            logger.info(f"Created update document with basic fields")
+            # Update timestamp and last_observed
+            current_time = datetime.now().isoformat()
+            updates["timestamp"] = current_time
+            updates["last_observed"] = properties.get("last_observed", current_time)
             
-            # Update confidence and observation count
-            update_doc["confidence"] = properties.get("confidence", edge.get("confidence", 1.0))
-            update_doc["observation_count"] = properties.get("observation_count", edge.get("observation_count", 1) + 1)
+            # Update confidence if provided
+            if "confidence" in properties:
+                updates["confidence"] = properties["confidence"]
+                
+            # Update observation count if provided
+            if "observation_count" in properties:
+                updates["observation_count"] = properties["observation_count"]
             
-            # Process harmonic properties - this is key for predicate resonance characteristics
+            # Process harmonic properties
             if "harmonic_properties" in properties and isinstance(properties["harmonic_properties"], dict):
                 harmonic_props = properties["harmonic_properties"]
                 
-                # Store as JSON string for compatibility
-                update_doc["harmonic_properties"] = json.dumps(harmonic_props)
+                # Store as JSON string
+                updates["harmonic_properties"] = json.dumps(harmonic_props)
+                logger.debug(f"Harmonic properties JSON: {updates['harmonic_properties']}")
                 
                 # Store flattened properties for direct querying
                 if "frequency" in harmonic_props:
-                    update_doc["harmonic_frequency"] = harmonic_props["frequency"]
+                    updates["harmonic_frequency"] = harmonic_props["frequency"]
                 if "amplitude" in harmonic_props:
-                    update_doc["harmonic_amplitude"] = harmonic_props["amplitude"]
+                    updates["harmonic_amplitude"] = harmonic_props["amplitude"]
                 if "phase" in harmonic_props:
-                    update_doc["harmonic_phase"] = harmonic_props["phase"]
-            elif "harmonic_properties" in edge:
-                # Preserve existing harmonic properties
-                update_doc["harmonic_properties"] = edge["harmonic_properties"]
-                
-                # Preserve flattened properties
-                if "harmonic_frequency" in edge:
-                    update_doc["harmonic_frequency"] = edge["harmonic_frequency"]
-                if "harmonic_amplitude" in edge:
-                    update_doc["harmonic_amplitude"] = edge["harmonic_amplitude"]
-                if "harmonic_phase" in edge:
-                    update_doc["harmonic_phase"] = edge["harmonic_phase"]
-            
-            # Update bidirectionality flag if present
-            if "is_bidirectional" in properties:
-                update_doc["is_bidirectional"] = properties["is_bidirectional"]
-            elif "is_bidirectional" in edge:
-                update_doc["is_bidirectional"] = edge["is_bidirectional"]
-            
-            # Update impact metrics
-            if "impact_strength" in properties:
-                update_doc["impact_strength"] = properties["impact_strength"]
-            elif "impact_strength" in edge:
-                update_doc["impact_strength"] = edge["impact_strength"]
-                
-            if "impact_direction" in properties:
-                update_doc["impact_direction"] = properties["impact_direction"]
-            elif "impact_direction" in edge:
-                update_doc["impact_direction"] = edge["impact_direction"]
+                    updates["harmonic_phase"] = harmonic_props["phase"]
             
             # Track property evolution
             evolution_entry = {
-                "timestamp": datetime.now().isoformat(),
-                "confidence": update_doc["confidence"],
-                "observation_count": update_doc["observation_count"]
+                "timestamp": updates["timestamp"],
+                "confidence": properties.get("confidence", edge.get("confidence")),
+                "observation_count": properties.get("observation_count", edge.get("observation_count"))
             }
             
             # Add harmonic properties to evolution tracking
-            if "harmonic_frequency" in update_doc:
-                evolution_entry["harmonic_frequency"] = update_doc["harmonic_frequency"]
-            if "harmonic_amplitude" in update_doc:
-                evolution_entry["harmonic_amplitude"] = update_doc["harmonic_amplitude"]
-            if "harmonic_phase" in update_doc:
-                evolution_entry["harmonic_phase"] = update_doc["harmonic_phase"]
-            if "impact_strength" in update_doc:
-                evolution_entry["impact_strength"] = update_doc["impact_strength"]
-            if "impact_direction" in update_doc:
-                evolution_entry["impact_direction"] = update_doc["impact_direction"]
+            if "harmonic_properties" in properties and isinstance(properties["harmonic_properties"], dict):
+                harmonic_props = properties["harmonic_properties"]
+                if "frequency" in harmonic_props:
+                    evolution_entry["harmonic_frequency"] = harmonic_props["frequency"]
+                if "amplitude" in harmonic_props:
+                    evolution_entry["harmonic_amplitude"] = harmonic_props["amplitude"]
+                if "phase" in harmonic_props:
+                    evolution_entry["harmonic_phase"] = harmonic_props["phase"]
             
             # Add evolution entry to document
             if "evolution" in edge and isinstance(edge["evolution"], list):
-                update_doc["evolution"] = edge["evolution"] + [evolution_entry]
+                updates["evolution"] = edge["evolution"] + [evolution_entry]
             else:
-                update_doc["evolution"] = [evolution_entry]
+                updates["evolution"] = [evolution_entry]
             
-            # Preserve predicate_type for generic relationships
-            if "predicate_type" in edge:
-                update_doc["predicate_type"] = edge["predicate_type"]
+            # Add any other properties from the update request
+            for k, v in properties.items():
+                if k not in updates and k != "harmonic_properties":
+                    updates[k] = v
             
-            # Preserve any other properties from the original edge
-            for k, value in edge.items():
-                if k not in update_doc and not k.startswith("_"):
-                    update_doc[k] = value
+            logger.debug(f"Final update document: {updates}")
             
-            # Add any other new properties
-            for k, value in properties.items():
-                if k not in update_doc and k != "harmonic_properties":
-                    update_doc[k] = value
-            
-            # Update the document
+            # Try three different approaches to update the document
+            # Approach 1: Using update method
             try:
-                logger.info(f"Replacing document with key: {key}")
-                collection.replace(key, update_doc)
-                logger.info(f"Successfully updated document in collection {collection_name}")
-                return True
+                logger.info(f"Approach 1: Using update method for document with key {key} in collection {collection_name}")
+                result = collection.update(key, updates)
+                logger.info(f"Update result: {result}")
+                
+                # Verify the update was successful
+                updated_doc = collection.get(key)
+                
+                # Check if any of our updates were applied
+                success = False
+                for k, v in updates.items():
+                    if k in updated_doc and updated_doc[k] == v:
+                        success = True
+                        break
+                
+                if success:
+                    logger.info("Update successful using approach 1")
+                    return True
+                else:
+                    logger.warning("Update did not apply any changes using approach 1")
             except Exception as e:
-                logger.error(f"Error replacing document: {str(e)}")
+                logger.warning(f"Approach 1 failed: {str(e)}")
+            
+            # Approach 2: Using replace method
+            try:
+                logger.info(f"Approach 2: Using replace method for document with key {key} in collection {collection_name}")
+                
+                # Create a complete document for replacement
+                replace_doc = edge.copy()
+                
+                # Remove system fields that can't be updated
+                if '_rev' in replace_doc:
+                    del replace_doc['_rev']
+                if '_id' in replace_doc:
+                    del replace_doc['_id']
+                
+                # Apply our updates
+                for k, v in updates.items():
+                    replace_doc[k] = v
+                
+                # Ensure edge attributes are present
+                if '_from' not in replace_doc or '_to' not in replace_doc:
+                    logger.error("Missing required edge attributes _from or _to")
+                    if '_from' not in replace_doc and '_from' in edge:
+                        replace_doc['_from'] = edge['_from']
+                    if '_to' not in replace_doc and '_to' in edge:
+                        replace_doc['_to'] = edge['_to']
+                
+                logger.debug(f"Replace document: {replace_doc}")
+                result = collection.replace(key, replace_doc)
+                logger.info(f"Replace result: {result}")
+                
+                # Verify the update was successful
+                updated_doc = collection.get(key)
+                
+                # Check if any of our updates were applied
+                success = False
+                for k, v in updates.items():
+                    if k in updated_doc and updated_doc[k] == v:
+                        success = True
+                        break
+                
+                if success:
+                    logger.info("Update successful using approach 2")
+                    return True
+                else:
+                    logger.warning("Update did not apply any changes using approach 2")
+            except Exception as e:
+                logger.warning(f"Approach 2 failed: {str(e)}")
+                
+            # Approach 3: Using AQL to update the document
+            try:
+                logger.info(f"Approach 3: Using AQL to update document with key {key} in collection {collection_name}")
+                
+                # Convert updates to a format suitable for AQL
+                aql_updates = {}
+                for k, v in updates.items():
+                    if isinstance(v, (int, float, bool)) or v is None:
+                        aql_updates[k] = v
+                    else:
+                        aql_updates[k] = str(v)
+                
+                # Create an AQL query to update the document
+                aql = f"FOR doc IN {collection_name} FILTER doc._key == @key UPDATE doc WITH @updates IN {collection_name} RETURN NEW"
+                bind_vars = {"key": key, "updates": aql_updates}
+                
+                logger.debug(f"AQL query: {aql}")
+                logger.debug(f"Bind variables: {bind_vars}")
+                
+                # Execute the query
+                cursor = self.db.aql.execute(aql, bind_vars=bind_vars)
+                result = list(cursor)
+                logger.info(f"AQL update result: {result}")
+                
+                if result and len(result) > 0:
+                    logger.info("Update successful using approach 3")
+                    return True
+                else:
+                    logger.warning("AQL update did not return any results")
+            except Exception as e:
+                logger.warning(f"Approach 3 failed: {str(e)}")
                 import traceback
-                logger.error(f"Traceback: {traceback.format_exc()}")
-                return False
+                logger.warning(f"Traceback: {traceback.format_exc()}")
+            
+            # If we've reached here, all approaches failed
+            logger.error("All update approaches failed")
+            return False
+            
         except Exception as e:
             logger.error(f"Error updating relationship {edge_id}: {str(e)}")
             import traceback
