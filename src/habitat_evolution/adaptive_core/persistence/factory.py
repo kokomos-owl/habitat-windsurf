@@ -8,10 +8,10 @@ that implement the repository interfaces defined in the interfaces package.
 import logging
 from typing import Optional, Dict, Any
 
-from src.habitat_evolution.adaptive_core.emergence.interfaces.field_state_repository import FieldStateRepositoryInterface
-from src.habitat_evolution.adaptive_core.emergence.interfaces.pattern_repository import PatternRepositoryInterface
-from src.habitat_evolution.adaptive_core.emergence.interfaces.relationship_repository import RelationshipRepositoryInterface
-from src.habitat_evolution.adaptive_core.emergence.interfaces.topology_repository import TopologyRepositoryInterface
+from habitat_evolution.adaptive_core.persistence.interfaces.field_state_repository import FieldStateRepositoryInterface
+from habitat_evolution.adaptive_core.persistence.interfaces.pattern_repository import PatternRepositoryInterface
+from habitat_evolution.adaptive_core.persistence.interfaces.relationship_repository import RelationshipRepositoryInterface
+from habitat_evolution.adaptive_core.persistence.interfaces.topology_repository import TopologyRepositoryInterface
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +33,7 @@ def create_field_state_repository(db_connection: Any, config: Optional[Dict[str,
     """
     try:
         # Import the adapter implementation
-        from src.habitat_evolution.adaptive_core.emergence.adapters.field_state_repository_adapter import FieldStateRepositoryAdapter
+        from habitat_evolution.adaptive_core.persistence.adapters.field_state_repository_adapter import FieldStateRepositoryAdapter
         
         # Create and return the repository instance
         return FieldStateRepositoryAdapter(db_connection, config)
@@ -62,7 +62,7 @@ def create_pattern_repository(db_connection: Any, config: Optional[Dict[str, Any
     """
     try:
         # Import the adapter implementation
-        from src.habitat_evolution.adaptive_core.emergence.adapters.pattern_repository_adapter import PatternRepositoryAdapter
+        from habitat_evolution.adaptive_core.persistence.adapters.pattern_repository_adapter import PatternRepositoryAdapter
         
         # Create and return the repository instance
         return PatternRepositoryAdapter(db_connection, config)
@@ -91,7 +91,7 @@ def create_relationship_repository(db_connection: Any, config: Optional[Dict[str
     """
     try:
         # Import the adapter implementation
-        from src.habitat_evolution.adaptive_core.emergence.adapters.relationship_repository_adapter import RelationshipRepositoryAdapter
+        from habitat_evolution.adaptive_core.persistence.adapters.relationship_repository_adapter import RelationshipRepositoryAdapter
         
         # Create and return the repository instance
         return RelationshipRepositoryAdapter(db_connection, config)
@@ -120,7 +120,7 @@ def create_topology_repository(db_connection: Any, config: Optional[Dict[str, An
     """
     try:
         # Import the adapter implementation
-        from src.habitat_evolution.adaptive_core.emergence.adapters.topology_repository_adapter import TopologyRepositoryAdapter
+        from habitat_evolution.adaptive_core.persistence.adapters.topology_repository_adapter import TopologyRepositoryAdapter
         
         # Create and return the repository instance
         return TopologyRepositoryAdapter(db_connection, config)
@@ -132,4 +132,37 @@ def create_topology_repository(db_connection: Any, config: Optional[Dict[str, An
         raise ValueError(f"Failed to create TopologyRepositoryAdapter: {str(e)}")
 
 
-
+def create_repositories(db_connection: Any, config: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    """
+    Create all repository instances.
+    
+    Args:
+        db_connection: The database connection to use.
+        config: Optional configuration for the repositories.
+        
+    Returns:
+        A dictionary containing all repository instances.
+    """
+    repositories = {}
+    
+    try:
+        repositories["field_state_repository"] = create_field_state_repository(db_connection, config)
+    except Exception as e:
+        logger.warning(f"Failed to create field_state_repository: {str(e)}")
+    
+    try:
+        repositories["pattern_repository"] = create_pattern_repository(db_connection, config)
+    except Exception as e:
+        logger.warning(f"Failed to create pattern_repository: {str(e)}")
+    
+    try:
+        repositories["relationship_repository"] = create_relationship_repository(db_connection, config)
+    except Exception as e:
+        logger.warning(f"Failed to create relationship_repository: {str(e)}")
+    
+    try:
+        repositories["topology_repository"] = create_topology_repository(db_connection, config)
+    except Exception as e:
+        logger.warning(f"Failed to create topology_repository: {str(e)}")
+    
+    return repositories
