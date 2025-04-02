@@ -12,6 +12,8 @@ import uuid
 from typing import Dict, Any, Optional, List
 from datetime import datetime
 
+from src.habitat_evolution.adaptive_core.emergence.repository_factory import create_repositories
+
 from src.habitat_evolution.core.services.event_bus import Event, LocalEventBus
 from src.habitat_evolution.adaptive_core.emergence.persistence_integration import (
     VectorTonicPersistenceIntegration,
@@ -93,26 +95,47 @@ class VectorTonicPersistenceConnector(LearningWindowObserverInterface, PatternOb
         # Track pattern cache
         self.pattern_cache = {}
     
-    def initialize(self):
-        """Initialize the connector and all persistence services."""
+    def initialize(self) -> None:
+        """Initialize the connector.
+        
+        This method initializes the persistence integration and subscribes to events.
+        It also initializes repositories if they haven't been provided.
+        """
         if self.initialized:
-            logger.warning("VectorTonicPersistenceConnector already initialized")
+            logger.info("VectorTonicPersistenceConnector already initialized")
             return
+        
+        # Initialize repositories if they haven't been provided
+        if not all([self.field_state_repository, self.pattern_repository, 
+                    self.relationship_repository, self.topology_repository]):
+            logger.info("Creating repositories using factory methods")
+            repositories = create_repositories(self.db)
             
-        # Initialize persistence integration
+            if not self.field_state_repository and "field_state_repository" in repositories:
+                self.field_state_repository = repositories["field_state_repository"]
+                
+            if not self.pattern_repository and "pattern_repository" in repositories:
+                self.pattern_repository = repositories["pattern_repository"]
+                
+            if not self.relationship_repository and "relationship_repository" in repositories:
+                self.relationship_repository = repositories["relationship_repository"]
+                
+            if not self.topology_repository and "topology_repository" in repositories:
+                self.topology_repository = repositories["topology_repository"]
+        
+        # Initialize the persistence integration
+        if not hasattr(self, "persistence_integration") or self.persistence_integration is None:
+            self.persistence_integration = VectorTonicPersistenceIntegration(self.db)
+        
         self.persistence_integration.initialize()
         
-        # Initialize repositories if they weren't provided
-        if self.field_state_repository is None:
-            self.field_state_repository = self.persistence_integration.field_state_repository
-        if self.pattern_repository is None:
-            self.pattern_repository = self.persistence_integration.pattern_repository
-        if self.relationship_repository is None:
-            self.relationship_repository = self.persistence_integration.relationship_repository
-        if self.topology_repository is None:
-            self.topology_repository = self.persistence_integration.topology_repository
+        # Get services from the persistence integration
+        self.pattern_service = self.persistence_integration.pattern_service
+        self.field_state_service = self.persistence_integration.field_state_service
+        self.relationship_service = self.persistence_integration.relationship_service
         
-        # Subscribe to events for pattern evolution
+        # Subscribe to events
+        # Pattern events
         self.event_bus.subscribe("pattern.detected", self._on_pattern_detected)
         self.event_bus.subscribe("pattern.evolved", self._on_pattern_evolution)
         self.event_bus.subscribe("pattern.quality.changed", self._on_pattern_quality_change)
@@ -120,7 +143,7 @@ class VectorTonicPersistenceConnector(LearningWindowObserverInterface, PatternOb
         self.event_bus.subscribe("pattern.merged", self._on_pattern_merge)
         self.event_bus.subscribe("pattern.split", self._on_pattern_split)
         
-        # Subscribe to events for field state changes
+        # Field state events
         self.event_bus.subscribe("field.state.changed", self._on_field_state_change)
         self.event_bus.subscribe("field.coherence.changed", self._on_field_coherence_change)
         self.event_bus.subscribe("field.stability.changed", self._on_field_stability_change)
@@ -128,15 +151,21 @@ class VectorTonicPersistenceConnector(LearningWindowObserverInterface, PatternOb
         self.event_bus.subscribe("field.eigenspace.changed", self._on_eigenspace_change)
         self.event_bus.subscribe("field.topology.changed", self._on_topology_change)
         
-        # Subscribe to events for learning windows
+        # Learning window events
         self.event_bus.subscribe("learning.window.state.changed", self._on_window_state_change)
         self.event_bus.subscribe("learning.window.opened", self._on_window_open)
         self.event_bus.subscribe("learning.window.closed", self._on_learning_window_closed)
         self.event_bus.subscribe("learning.window.back.pressure", self._on_back_pressure)
         
-        # Subscribe to additional events for bidirectional flow
+        # Legacy events
         self.event_bus.subscribe("document.processed", self._on_document_processed)
         self.event_bus.subscribe("vector.gradient.updated", self._on_vector_gradient_updated)
+        
+        # Initialize active windows dictionary
+        self.active_windows = {}
+        
+        # Initialize pattern cache
+        self.pattern_cache = {}
         
         self.initialized = True
         logger.info("VectorTonicPersistenceConnector initialized")
@@ -906,21 +935,227 @@ class VectorTonicPersistenceConnector(LearningWindowObserverInterface, PatternOb
         for pattern in patterns:
             if "id" in pattern:
                 patterns_dict[pattern["id"]] = pattern
-        
-        # Call the observer method
-        self.on_window_close(window_id, patterns_dict, window_data)
 
-
-def create_connector(event_bus=None, db=None) -> VectorTonicPersistenceConnector:
-    """Create and initialize a VectorTonicPersistenceConnector.
+def on_field_stability_change(self, field_id: str, previous_stability: float, 
+                             new_stability: float, metadata: Optional[Dict[str, Any]] = None) -> None:
+    """Called when the field stability changes.
     
     Args:
-        event_bus: Optional event bus. If not provided, a new event bus will be created.
-        db: Optional database connection. If not provided, a new connection will be created.
+        field_id: The ID of the field.
+        previous_stability: The previous stability value.
+        new_stability: The new stability value.
+        metadata: Optional metadata about the stability change.
+    """
+    if not self.initialized:
+        self.initialize()
+            
+    logger.info(f"Field stability changed: {field_id} ({previous_stability} -> {new_stability})")
+        
+    # Publish field stability changed event
+    self.event_bus.publish(Event(
+        "field.stability.changed",
+        {
+            "field_id": field_id,
+            "previous_stability": previous_stability,
+            "new_stability": new_stability,
+            "metadata": metadata or {},
+            "timestamp": datetime.now().isoformat()
+        },
+        source="persistence_connector"
+    ))
+
+def on_density_center_shift(self, field_id: str, previous_centers: List[Dict[str, Any]], 
+                           new_centers: List[Dict[str, Any]], metadata: Optional[Dict[str, Any]] = None) -> None:
+    """Called when density centers shift.
+    
+    Args:
+        field_id: The ID of the field.
+        previous_centers: The previous density centers.
+        new_centers: The new density centers.
+        metadata: Optional metadata about the shift.
+    """
+    if not self.initialized:
+        self.initialize()
+            
+    logger.info(f"Density centers shifted: {field_id} ({len(previous_centers)} -> {len(new_centers)})")
+        
+    # If we have a field state repository and the field state is available, update it
+    if self.field_state_repository:
+        try:
+            # Get current field state
+            field_state = self.field_state_repository.find_by_id(field_id)
+            if field_state:
+                # Update density centers
+                field_state["density_centers"] = new_centers
+                
+                # Save updated field state
+                self.field_state_repository.save(field_state)
+                logger.info(f"Updated density centers for field {field_id}")
+        except Exception as e:
+            logger.error(f"Failed to update density centers for field {field_id}: {str(e)}")
+        
+    # Publish density centers shifted event
+    self.event_bus.publish(Event(
+        "field.density.centers.shifted",
+        {
+            "field_id": field_id,
+            "previous_centers": previous_centers,
+            "new_centers": new_centers,
+            "metadata": metadata or {},
+            "timestamp": datetime.now().isoformat()
+        },
+        source="persistence_connector"
+    ))
+
+def on_eigenspace_change(self, field_id: str, previous_eigenspace: Dict[str, Any], 
+                        new_eigenspace: Dict[str, Any], metadata: Optional[Dict[str, Any]] = None) -> None:
+    """Called when the eigenspace changes.
+    
+    Args:
+        field_id: The ID of the field.
+        previous_eigenspace: The previous eigenspace properties.
+        new_eigenspace: The new eigenspace properties.
+        metadata: Optional metadata about the change.
+    """
+    if not self.initialized:
+        self.initialize()
+            
+    logger.info(f"Eigenspace changed: {field_id}")
+        
+    # If we have a field state repository and the field state is available, update it
+    if self.field_state_repository:
+        try:
+            # Get current field state
+            field_state = self.field_state_repository.find_by_id(field_id)
+            if field_state:
+                # Update eigenspace properties
+                field_state["eigenvalues"] = new_eigenspace.get("eigenvalues", [])
+                field_state["eigenvectors"] = new_eigenspace.get("eigenvectors", [])
+                field_state["effective_dimensionality"] = new_eigenspace.get("effective_dimensionality", 0)
+                
+                # Save updated field state
+                self.field_state_repository.save(field_state)
+                logger.info(f"Updated eigenspace for field {field_id}")
+        except Exception as e:
+            logger.error(f"Failed to update eigenspace for field {field_id}: {str(e)}")
+        
+    # Publish eigenspace changed event
+    self.event_bus.publish(Event(
+        "field.eigenspace.changed",
+        {
+            "field_id": field_id,
+            "previous_eigenspace": previous_eigenspace,
+            "new_eigenspace": new_eigenspace,
+            "metadata": metadata or {},
+            "timestamp": datetime.now().isoformat()
+        },
+        source="persistence_connector"
+    ))
+
+def on_topology_change(self, field_id: str, previous_topology: Dict[str, Any], 
+                      new_topology: Dict[str, Any], metadata: Optional[Dict[str, Any]] = None) -> None:
+    """Called when the field topology changes.
+    
+    Args:
+        field_id: The ID of the field.
+        previous_topology: The previous topology.
+        new_topology: The new topology.
+        metadata: Optional metadata about the change.
+    """
+    if not self.initialized:
+        self.initialize()
+            
+    logger.info(f"Topology changed: {field_id}")
+        
+    # Persist the topology if a repository is available
+    if self.topology_repository:
+        try:
+            # Ensure topology has an ID
+            new_topology["id"] = new_topology.get("id", str(uuid.uuid4()))
+            new_topology["field_id"] = field_id
+            
+            # Save the topology to the repository
+            self.topology_repository.save(new_topology)
+            logger.info(f"Topology for field {field_id} persisted successfully")
+        except Exception as e:
+            logger.error(f"Failed to persist topology for field {field_id}: {str(e)}")
+        
+    # Publish topology changed event
+    self.event_bus.publish(Event(
+        "field.topology.changed",
+        {
+            "field_id": field_id,
+            "previous_topology": previous_topology,
+            "new_topology": new_topology,
+            "metadata": metadata or {},
+            "timestamp": datetime.now().isoformat()
+        },
+        source="persistence_connector"
+    ))
+
+# Legacy event handler for compatibility
+def _on_learning_window_closed(self, event: Event):
+    """Handle learning window closed events.
+    
+    Args:
+        event: The learning window closed event
+    """
+    window_data = event.data
+    if not window_data or "window_id" not in window_data:
+        logger.warning("Invalid learning window data in event")
+        return
+            
+    window_id = window_data["window_id"]
+    patterns = window_data.get("patterns", [])
+        
+    # Convert to the format expected by on_window_close
+    patterns_dict = {}
+    for pattern in patterns:
+        if "id" in pattern:
+            patterns_dict[pattern["id"]] = pattern
+        
+    # Call the observer method
+    self.on_window_close(window_id, patterns_dict, window_data)
+
+
+def create_connector(event_bus=None, db=None, **kwargs):
+    """Create a VectorTonicPersistenceConnector instance.
+    
+    Args:
+        event_bus: The event bus to use. If None, a new LocalEventBus will be created.
+        db: The database connection to use.
+        **kwargs: Additional keyword arguments to pass to the connector constructor.
+            These can include:
+            - field_state_repository: A field state repository instance.
+            - pattern_repository: A pattern repository instance.
+            - relationship_repository: A relationship repository instance.
+            - topology_repository: A topology repository instance.
         
     Returns:
-        An initialized VectorTonicPersistenceConnector
+        A VectorTonicPersistenceConnector instance.
     """
-    connector = VectorTonicPersistenceConnector(event_bus, db)
+    if event_bus is None:
+        event_bus = LocalEventBus()
+    
+    # Create repositories if not provided
+    repositories = {}
+    if db is not None and not any(repo in kwargs for repo in [
+        'field_state_repository', 'pattern_repository', 
+        'relationship_repository', 'topology_repository'
+    ]):
+        repositories = create_repositories(db)
+    
+    # Create connector with repositories
+    connector = VectorTonicPersistenceConnector(
+        event_bus=event_bus, 
+        db=db,
+        field_state_repository=kwargs.get('field_state_repository', repositories.get('field_state_repository')),
+        pattern_repository=kwargs.get('pattern_repository', repositories.get('pattern_repository')),
+        relationship_repository=kwargs.get('relationship_repository', repositories.get('relationship_repository')),
+        topology_repository=kwargs.get('topology_repository', repositories.get('topology_repository'))
+    )
+    
+    # Initialize the connector
     connector.initialize()
+    
     return connector
