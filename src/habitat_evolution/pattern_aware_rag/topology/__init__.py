@@ -7,11 +7,11 @@ and field dynamics that emerge from pattern interactions, as well as persisting 
 retrieving these topological constructs.
 """
 
-from habitat_evolution.pattern_aware_rag.topology.models import (
+from src.habitat_evolution.pattern_aware_rag.topology.models import (
     FrequencyDomain, Boundary, ResonancePoint, FieldMetrics, TopologyState, TopologyDiff
 )
-from habitat_evolution.pattern_aware_rag.topology.detector import TopologyDetector
-from habitat_evolution.pattern_aware_rag.topology.manager import TopologyManager
+from src.habitat_evolution.pattern_aware_rag.topology.detector import TopologyDetector
+from src.habitat_evolution.pattern_aware_rag.topology.manager import TopologyManager
 
 __all__ = [
     'FrequencyDomain', 

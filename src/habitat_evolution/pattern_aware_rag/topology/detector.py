@@ -13,7 +13,7 @@ import logging
 from scipy import signal, fft
 from sklearn.cluster import DBSCAN
 
-from habitat_evolution.pattern_aware_rag.topology.models import (
+from src.habitat_evolution.pattern_aware_rag.topology.models import (
     FrequencyDomain, Boundary, ResonancePoint, FieldMetrics, TopologyState
 )
 
