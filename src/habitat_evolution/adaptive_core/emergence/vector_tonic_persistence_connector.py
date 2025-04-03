@@ -193,7 +193,7 @@ class VectorTonicPersistenceConnector(LearningWindowObserverInterface, PatternOb
         logger.info(f"Connected to VectorTonicWindowIntegrator {id(integrator)}")
         
         # Publish a connection event
-        self.event_bus.publish(Event(
+        self.event_bus.publish(Event.create(
             "persistence.connected",
             {
                 "integrator_id": id(integrator),
@@ -234,7 +234,7 @@ class VectorTonicPersistenceConnector(LearningWindowObserverInterface, PatternOb
         if "entities" in document_data:
             for entity in document_data["entities"]:
                 # Publish entity detected event
-                self.event_bus.publish(Event(
+                self.event_bus.publish(Event.create(
                     "entity.detected",
                     {
                         "entity_id": entity.get("id"),
@@ -250,7 +250,7 @@ class VectorTonicPersistenceConnector(LearningWindowObserverInterface, PatternOb
         if "relationships" in document_data:
             for relationship in document_data["relationships"]:
                 # Publish relationship detected event
-                self.event_bus.publish(Event(
+                self.event_bus.publish(Event.create(
                     "relationship.detected",
                     {
                         "source": relationship.get("source"),
@@ -285,7 +285,7 @@ class VectorTonicPersistenceConnector(LearningWindowObserverInterface, PatternOb
             
             # Publish field state updated event if metrics are available
             if metrics:
-                self.event_bus.publish(Event(
+                self.event_bus.publish(Event.create(
                     "field.state.updated",
                     {
                         "field_state": {
@@ -321,7 +321,7 @@ class VectorTonicPersistenceConnector(LearningWindowObserverInterface, PatternOb
         }
         
         # Publish window state change event
-        self.event_bus.publish(Event(
+        self.event_bus.publish(Event.create(
             "learning.window.state.changed",
             {
                 "window_id": window_id,
@@ -353,7 +353,7 @@ class VectorTonicPersistenceConnector(LearningWindowObserverInterface, PatternOb
         }
         
         # Publish window opened event
-        self.event_bus.publish(Event(
+        self.event_bus.publish(Event.create(
             "learning.window.opened",
             {
                 "window_id": window_id,
@@ -389,7 +389,7 @@ class VectorTonicPersistenceConnector(LearningWindowObserverInterface, PatternOb
             self.pattern_cache[pattern_id] = pattern_data
             
             # Publish pattern detected event
-            self.event_bus.publish(Event(
+            self.event_bus.publish(Event.create(
                 "pattern.detected",
                 {
                     "pattern_id": pattern_id,
@@ -405,7 +405,7 @@ class VectorTonicPersistenceConnector(LearningWindowObserverInterface, PatternOb
             field_state = metadata["field_state"]
             
             # Publish field state updated event
-            self.event_bus.publish(Event(
+            self.event_bus.publish(Event.create(
                 "field.state.updated",
                 {
                     "field_state": field_state,
@@ -435,7 +435,7 @@ class VectorTonicPersistenceConnector(LearningWindowObserverInterface, PatternOb
             self.active_windows[window_id]["pressure_detected_at"] = datetime.now().isoformat()
         
         # Publish back pressure event
-        self.event_bus.publish(Event(
+        self.event_bus.publish(Event.create(
             "learning.window.back.pressure",
             {
                 "window_id": window_id,
@@ -474,7 +474,7 @@ class VectorTonicPersistenceConnector(LearningWindowObserverInterface, PatternOb
                 logger.error(f"Failed to persist pattern {pattern_id}: {str(e)}")
         
         # Publish pattern detected event
-        self.event_bus.publish(Event(
+        self.event_bus.publish(Event.create(
             "pattern.detected",
             {
                 "pattern_id": pattern_id,
@@ -513,7 +513,7 @@ class VectorTonicPersistenceConnector(LearningWindowObserverInterface, PatternOb
                 logger.error(f"Failed to persist pattern evolution {pattern_id}: {str(e)}")
         
         # Publish pattern evolved event
-        self.event_bus.publish(Event(
+        self.event_bus.publish(Event.create(
             "pattern.evolved",
             {
                 "pattern_id": pattern_id,
@@ -554,7 +554,7 @@ class VectorTonicPersistenceConnector(LearningWindowObserverInterface, PatternOb
                     logger.error(f"Failed to persist pattern quality change {pattern_id}: {str(e)}")
         
         # Publish pattern quality changed event
-        self.event_bus.publish(Event(
+        self.event_bus.publish(Event.create(
             "pattern.quality.changed",
             {
                 "pattern_id": pattern_id,
@@ -596,7 +596,7 @@ class VectorTonicPersistenceConnector(LearningWindowObserverInterface, PatternOb
                 logger.error(f"Failed to persist relationship {source_id} -> {target_id}: {str(e)}")
         
         # Publish relationship detected event
-        self.event_bus.publish(Event(
+        self.event_bus.publish(Event.create(
             "pattern.relationship.detected",
             {
                 "source_id": source_id,
@@ -636,7 +636,7 @@ class VectorTonicPersistenceConnector(LearningWindowObserverInterface, PatternOb
                 logger.error(f"Failed to persist merged pattern {merged_pattern_id}: {str(e)}")
         
         # Publish pattern merged event
-        self.event_bus.publish(Event(
+        self.event_bus.publish(Event.create(
             "pattern.merged",
             {
                 "merged_pattern_id": merged_pattern_id,
@@ -677,7 +677,7 @@ class VectorTonicPersistenceConnector(LearningWindowObserverInterface, PatternOb
                     logger.error(f"Failed to persist split result pattern {pattern_id}: {str(e)}")
         
         # Publish pattern split event
-        self.event_bus.publish(Event(
+        self.event_bus.publish(Event.create(
             "pattern.split",
             {
                 "source_pattern_id": source_pattern_id,
@@ -718,7 +718,7 @@ class VectorTonicPersistenceConnector(LearningWindowObserverInterface, PatternOb
                 logger.error(f"Failed to persist field state {field_id}: {str(e)}")
         
         # Publish field state changed event
-        self.event_bus.publish(Event(
+        self.event_bus.publish(Event.create(
             "field.state.changed",
             {
                 "field_id": field_id,
@@ -746,7 +746,7 @@ class VectorTonicPersistenceConnector(LearningWindowObserverInterface, PatternOb
         logger.info(f"Field coherence changed: {field_id} ({previous_coherence} -> {new_coherence})")
         
         # Publish field coherence changed event
-        self.event_bus.publish(Event(
+        self.event_bus.publish(Event.create(
             "field.coherence.changed",
             {
                 "field_id": field_id,
@@ -774,7 +774,7 @@ class VectorTonicPersistenceConnector(LearningWindowObserverInterface, PatternOb
         logger.info(f"Field stability changed: {field_id} ({previous_stability} -> {new_stability})")
         
         # Publish field stability changed event
-        self.event_bus.publish(Event(
+        self.event_bus.publish(Event.create(
             "field.stability.changed",
             {
                 "field_id": field_id,
@@ -817,7 +817,7 @@ class VectorTonicPersistenceConnector(LearningWindowObserverInterface, PatternOb
                 logger.error(f"Failed to update density centers for field {field_id}: {str(e)}")
         
         # Publish density centers shifted event
-        self.event_bus.publish(Event(
+        self.event_bus.publish(Event.create(
             "field.density.centers.shifted",
             {
                 "field_id": field_id,
@@ -862,7 +862,7 @@ class VectorTonicPersistenceConnector(LearningWindowObserverInterface, PatternOb
                 logger.error(f"Failed to update eigenspace for field {field_id}: {str(e)}")
         
         # Publish eigenspace changed event
-        self.event_bus.publish(Event(
+        self.event_bus.publish(Event.create(
             "field.eigenspace.changed",
             {
                 "field_id": field_id,
@@ -903,7 +903,7 @@ class VectorTonicPersistenceConnector(LearningWindowObserverInterface, PatternOb
                 logger.error(f"Failed to persist topology for field {field_id}: {str(e)}")
         
         # Publish topology changed event
-        self.event_bus.publish(Event(
+        self.event_bus.publish(Event.create(
             "field.topology.changed",
             {
                 "field_id": field_id,
@@ -952,7 +952,7 @@ def on_field_stability_change(self, field_id: str, previous_stability: float,
     logger.info(f"Field stability changed: {field_id} ({previous_stability} -> {new_stability})")
         
     # Publish field stability changed event
-    self.event_bus.publish(Event(
+    self.event_bus.publish(Event.create(
         "field.stability.changed",
         {
             "field_id": field_id,
@@ -995,7 +995,7 @@ def on_density_center_shift(self, field_id: str, previous_centers: List[Dict[str
             logger.error(f"Failed to update density centers for field {field_id}: {str(e)}")
         
     # Publish density centers shifted event
-    self.event_bus.publish(Event(
+    self.event_bus.publish(Event.create(
         "field.density.centers.shifted",
         {
             "field_id": field_id,
@@ -1040,7 +1040,7 @@ def on_eigenspace_change(self, field_id: str, previous_eigenspace: Dict[str, Any
             logger.error(f"Failed to update eigenspace for field {field_id}: {str(e)}")
         
     # Publish eigenspace changed event
-    self.event_bus.publish(Event(
+    self.event_bus.publish(Event.create(
         "field.eigenspace.changed",
         {
             "field_id": field_id,
@@ -1081,7 +1081,7 @@ def on_topology_change(self, field_id: str, previous_topology: Dict[str, Any],
             logger.error(f"Failed to persist topology for field {field_id}: {str(e)}")
         
     # Publish topology changed event
-    self.event_bus.publish(Event(
+    self.event_bus.publish(Event.create(
         "field.topology.changed",
         {
             "field_id": field_id,

@@ -11,7 +11,7 @@ import logging
 import os
 import sys
 from unittest.mock import MagicMock, patch, call
-from datetime import datetime
+from datetime import datetime, timedelta
 import uuid
 
 # Add the project root to the Python path
@@ -84,6 +84,9 @@ class TestVectorTonicConnectorWithRefactoredPersistence(unittest.TestCase):
         
         # Configure the mock to return our repositories
         mock_create_repositories.return_value = self.repositories
+        
+        # Configure the Event mock
+        mock_event.return_value = MagicMock()
         logger.debug(f"Configured mock_create_repositories to return: {self.repositories}")
         
         # Create the connector
@@ -114,6 +117,9 @@ class TestVectorTonicConnectorWithRefactoredPersistence(unittest.TestCase):
         
         # Configure the mock to return our repositories
         mock_create_repositories.return_value = self.repositories
+        
+        # Configure the Event mock
+        mock_event.return_value = MagicMock()
         
         # Create the connector
         connector = create_connector(
@@ -153,12 +159,15 @@ class TestVectorTonicConnectorWithRefactoredPersistence(unittest.TestCase):
     
     @patch('src.habitat_evolution.adaptive_core.persistence.factory.create_repositories')
     @patch('src.habitat_evolution.core.services.event_bus.Event')
-    def test_field_state_updated_event_persistence(self, mock_event, mock_create_repositories):
-        """Test that field state updated events are correctly persisted using the refactored repositories."""
-        logger.debug("Starting test_field_state_updated_event_persistence")
+    def test_field_state_change_event_persistence(self, mock_event, mock_create_repositories):
+        """Test that field state change events are correctly persisted using the refactored repositories."""
+        logger.debug("Starting test_field_state_change_event_persistence")
         
         # Configure the mock to return our repositories
         mock_create_repositories.return_value = self.repositories
+        
+        # Configure the Event mock
+        mock_event.return_value = MagicMock()
         
         # Create the connector
         connector = create_connector(
@@ -166,20 +175,43 @@ class TestVectorTonicConnectorWithRefactoredPersistence(unittest.TestCase):
             db=self.mock_db
         )
         
-        # Create a test field state
-        field_id = str(uuid.uuid4())
-        field_state = {
+        # Define test data
+        field_id = "test_field_123"
+        previous_state = {
             "id": field_id,
-            "name": "Test Field",
-            "state_vector": [0.4, 0.5, 0.6],
+            "coherence": 0.65,
             "stability": 0.75,
+            "density_centers": [
+                {"x": 0.2, "y": 0.3},
+                {"x": 0.7, "y": 0.8}
+            ],
+            "eigenspace": {
+                "eigenvalues": [1.0, 0.7],
+                "eigenvectors": [[0.6, 0.4], [0.3, 0.7]]
+            },
+            "timestamp": (datetime.now() - timedelta(minutes=5)).isoformat()
+        }
+        
+        new_state = {
+            "id": field_id,
+            "coherence": 0.75,
+            "stability": 0.85,
+            "density_centers": [
+                {"x": 0.1, "y": 0.2},
+                {"x": 0.8, "y": 0.9}
+            ],
+            "eigenspace": {
+                "eigenvalues": [1.2, 0.8],
+                "eigenvectors": [[0.7, 0.3], [0.4, 0.6]]
+            },
             "timestamp": datetime.now().isoformat()
         }
         
-        # Call the on_field_state_updated method
-        connector.on_field_state_updated(
+        # Call the on_field_state_change method
+        connector.on_field_state_change(
             field_id=field_id,
-            field_state=field_state,
+            previous_state=previous_state,
+            new_state=new_state,
             metadata={"source": "test"}
         )
         
@@ -194,7 +226,7 @@ class TestVectorTonicConnectorWithRefactoredPersistence(unittest.TestCase):
         self.assertEqual(saved_field_state.id, field_id)
         logger.debug("Verified saved field state has correct ID")
         
-        logger.debug("test_field_state_updated_event_persistence completed successfully")
+        logger.debug("test_field_state_change_event_persistence completed successfully")
     
     @patch('src.habitat_evolution.adaptive_core.persistence.factory.create_repositories')
     @patch('src.habitat_evolution.core.services.event_bus.Event')
@@ -204,6 +236,9 @@ class TestVectorTonicConnectorWithRefactoredPersistence(unittest.TestCase):
         
         # Configure the mock to return our repositories
         mock_create_repositories.return_value = self.repositories
+        
+        # Configure the Event mock
+        mock_event.return_value = MagicMock()
         
         # Create the connector
         connector = create_connector(
@@ -231,7 +266,6 @@ class TestVectorTonicConnectorWithRefactoredPersistence(unittest.TestCase):
         connector.on_pattern_relationship_detected(
             source_id=source_pattern_id,
             target_id=target_pattern_id,
-            relationship_type="resonance",
             relationship_data=relationship_data,
             metadata={"source": "test"}
         )
@@ -259,6 +293,9 @@ class TestVectorTonicConnectorWithRefactoredPersistence(unittest.TestCase):
         
         # Configure the mock to return our repositories
         mock_create_repositories.return_value = self.repositories
+        
+        # Configure the Event mock
+        mock_event.return_value = MagicMock()
         
         # Create the connector
         connector = create_connector(
