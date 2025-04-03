@@ -283,6 +283,7 @@ class PatternExtractionDebugger:
                 
             # Analyze entity extraction
             entity_analysis = self.analyze_entity_extraction(paragraph)
+            # Extract just the entity names from the valid_entities tuples
             valid_entities = [e[0] for e in entity_analysis["valid_entities"]]
             
             # Analyze relationships
@@ -296,10 +297,10 @@ class PatternExtractionDebugger:
             })
             
             # Update file summary
-            file_analysis["summary"]["total_entities"] += len(entity_analysis["entity_analysis"][0]["basic_entities"])
-            file_analysis["summary"]["valid_entities"] += len(entity_analysis["entity_analysis"][0]["valid_entities"])
-            file_analysis["summary"]["invalid_entities"] += len(entity_analysis["entity_analysis"][0]["invalid_entities"])
-            file_analysis["summary"]["uncertain_entities"] += len(entity_analysis["entity_analysis"][0]["uncertain_entities"])
+            file_analysis["summary"]["total_entities"] += len(entity_analysis["basic_entities"])
+            file_analysis["summary"]["valid_entities"] += len(entity_analysis["valid_entities"])
+            file_analysis["summary"]["invalid_entities"] += len(entity_analysis["invalid_entities"])
+            file_analysis["summary"]["uncertain_entities"] += len(entity_analysis["uncertain_entities"])
             file_analysis["summary"]["relationships"]["total"] += len(relationship_analysis.get("relationships", []))
             file_analysis["summary"]["relationships"]["good"] += len(relationship_analysis.get("quality_assessment", {}).get("good", []))
             file_analysis["summary"]["relationships"]["uncertain"] += len(relationship_analysis.get("quality_assessment", {}).get("uncertain", []))
@@ -377,14 +378,15 @@ class PatternExtractionDebugger:
             # Output results
             logger.info("=== Pattern Extraction Analysis Results ===")
             logger.info(f"Total patterns analyzed: {self.stats['total_patterns']}")
-            logger.info(f"Valid entities: {self.stats['valid_entities']} ({self.stats['valid_entities']/max(1, self.stats['total_patterns'])*100:.1f}%)")
-            logger.info(f"Invalid entities: {self.stats['invalid_entities']} ({self.stats['invalid_entities']/max(1, self.stats['total_patterns'])*100:.1f}%)")
+            logger.info(f"Valid patterns: {self.stats['valid_patterns']} ({self.stats['valid_patterns']/max(1, self.stats['total_patterns'])*100:.1f}%)")
+            logger.info(f"Invalid patterns: {self.stats['invalid_patterns']} ({self.stats['invalid_patterns']/max(1, self.stats['total_patterns'])*100:.1f}%)")
+            logger.info(f"Uncertain patterns: {self.stats['uncertain_patterns']} ({self.stats['uncertain_patterns']/max(1, self.stats['total_patterns'])*100:.1f}%)")
             
             logger.info("\n=== Relationship Quality ===")
             total_rels = sum(self.stats["relationship_quality"].values())
             logger.info(f"Good relationships: {self.stats['relationship_quality']['good']} ({self.stats['relationship_quality']['good']/max(1, total_rels)*100:.1f}%)")
-            logger.info(f"Ambiguous relationships: {self.stats['relationship_quality']['ambiguous']} ({self.stats['relationship_quality']['ambiguous']/max(1, total_rels)*100:.1f}%)")
-            logger.info(f"Incorrect relationships: {self.stats['relationship_quality']['incorrect']} ({self.stats['relationship_quality']['incorrect']/max(1, total_rels)*100:.1f}%)")
+            logger.info(f"Uncertain relationships: {self.stats['relationship_quality']['uncertain']} ({self.stats['relationship_quality']['uncertain']/max(1, total_rels)*100:.1f}%)")
+            logger.info(f"Poor relationships: {self.stats['relationship_quality']['poor']} ({self.stats['relationship_quality']['poor']/max(1, total_rels)*100:.1f}%)")
             
             logger.info("\n=== Improvement Recommendations ===")
             logger.info("Entity Extraction:")
