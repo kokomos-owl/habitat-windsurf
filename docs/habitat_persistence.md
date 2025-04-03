@@ -9,6 +9,9 @@ The persistence layer follows clean architecture principles with:
 - **Adapters**: Implement interfaces for specific databases
 - **Factory**: Create appropriate repository instances
 - **Query Capabilities**: Support for semantic, vector, and temporal queries
+- **Event-Driven Integration**: Connect with the vector-tonic-window system through events
+
+This architecture supports the pattern evolution and co-evolution principles that are core to Habitat Evolution, enabling detection of coherent patterns and observation of semantic change across the system.
 
 ## Architecture
 
@@ -17,14 +20,22 @@ The persistence layer follows clean architecture principles with:
 ```
 habitat_evolution/
 ├── adaptive_core/
+│   ├── emergence/
+│   │   ├── vector_tonic_persistence_connector.py  # Connects vector-tonic events to persistence
+│   │   ├── repository_factory.py                  # Creates repository instances
+│   │   └── interfaces/                            # Repository interfaces
 │   └── persistence/
-│       ├── interfaces/            # Repository interfaces
-│       ├── adapters/              # Concrete implementations
-│       └── factory.py             # Factory for creating repositories
+│       ├── interfaces/                            # Repository interfaces
+│       ├── adapters/                              # Concrete implementations
+│       └── factory.py                             # Factory for creating repositories
 └── pattern_aware_rag/
     └── persistence/
-        └── arangodb/              # ArangoDB-specific implementations
+        └── arangodb/                              # ArangoDB-specific implementations
 ```
+
+### Integration with Vector-Tonic-Window System
+
+The `VectorTonicPersistenceConnector` serves as the bridge between the vector-tonic-window system's events and the persistence layer. It subscribes to events such as pattern detection, field state changes, and topology updates, then persists this data using the appropriate repositories.
 
 ### Repository Interfaces
 
@@ -35,52 +46,70 @@ The persistence layer defines several key interfaces:
 - **RelationshipRepositoryInterface**: For relationship management
 - **TopologyRepositoryInterface**: For topology constructs
 - **SemanticSignatureRepositoryInterface**: For semantic signatures
+- **BoundaryRepositoryInterface**: For storing and retrieving boundary constructs
+- **PredicateRelationshipRepositoryInterface**: For managing predicate relationships
+
+These interfaces define contracts that concrete implementations must fulfill, enabling dependency injection and making the system more testable and maintainable.
 
 ## Data Operations
 
 ### Storing Data
 
-Each repository provides a `save` method for persisting entities:
+Each repository provides a `save` method for persisting entities. The repositories work with dictionaries rather than strict object models to provide flexibility in the data structures:
 
 ```python
 # Example: Saving a pattern
-from habitat_evolution.adaptive_core.persistence.factory import create_pattern_repository
-from habitat_evolution.adaptive_core.models.pattern import Pattern
+from src.habitat_evolution.adaptive_core.persistence.factory import create_repositories
 
-# Create repository
+# Create repositories using the factory
 db_connection = get_db_connection()
-pattern_repo = create_pattern_repository(db_connection)
+repositories = create_repositories(db_connection)
+pattern_repo = repositories["pattern_repository"]
 
-# Create and save pattern
-pattern = Pattern(
-    id="pattern-123",
-    name="Emerging Concept",
-    vector=[0.1, 0.2, 0.3, 0.4],
-    metadata={
+# Create pattern as a dictionary
+pattern_data = {
+    "id": "pattern-123",
+    "name": "Emerging Concept",
+    "vector": [0.1, 0.2, 0.3, 0.4],
+    "confidence": 0.87,
+    "metadata": {
         "source": "document-456",
-        "confidence": 0.87
+        "timestamp": "2025-04-02T21:00:00Z"
     }
-)
+}
 
 # Save to database
-pattern_id = pattern_repo.save(pattern)
+pattern_id = pattern_repo.save(pattern_data)
 print(f"Saved pattern with ID: {pattern_id}")
 # Output: Saved pattern with ID: pattern-123
 ```
 
+#### Benefits of Dictionary-Based Approach
+
+The use of dictionaries for data storage provides several advantages:
+
+1. **Dynamic Schema Evolution**: Allows the schema to evolve without requiring code changes to model classes
+2. **ArangoDB Integration**: Naturally works with ArangoDB's document-oriented structure
+3. **Flexible Attribute Sets**: Different entities can have varying sets of attributes based on context
+4. **Simplified Serialization**: Easier to serialize/deserialize for storage and transmission
+
 ### Retrieving Data
 
-Basic retrieval operations:
+Basic retrieval operations return data as dictionaries:
 
 ```python
 # Example: Retrieving a pattern by ID
 pattern = pattern_repo.find_by_id("pattern-123")
 
-print(f"Retrieved pattern: {pattern.name}")
+print(f"Retrieved pattern: {pattern['name']}")
 # Output: Retrieved pattern: Emerging Concept
 
-print(f"Pattern vector: {pattern.vector[:3]}...")
+print(f"Pattern vector: {pattern['vector'][:3]}...")
 # Output: Pattern vector: [0.1, 0.2, 0.3]...
+
+# Access metadata
+print(f"Source: {pattern['metadata']['source']}")
+# Output: Source: document-456
 ```
 
 ## Query Capabilities
@@ -98,6 +127,9 @@ all_entities = repo.find_all()
 
 # Find by type
 patterns = pattern_repo.find_by_type("concept")
+
+# Find by metadata attribute
+patterns = pattern_repo.find_by_metadata("source", "document-456")
 ```
 
 ### Advanced Queries
@@ -197,7 +229,72 @@ print(f"Relationship: {relationship}")
 The persistence layer supports making and verifying assertions about patterns:
 
 ```python
-from habitat_evolution.adaptive_core.assertion.pattern_assertion import PatternAssertion
+## Event-Driven Persistence
+
+The `VectorTonicPersistenceConnector` provides event-driven persistence capabilities:
+
+```python
+from src.habitat_evolution.adaptive_core.emergence.vector_tonic_persistence_connector import create_connector
+from src.habitat_evolution.core.services.event_bus import LocalEventBus
+
+# Create event bus and connector
+event_bus = LocalEventBus()
+db_connection = get_db_connection()
+connector = create_connector(event_bus=event_bus, db=db_connection)
+
+# The connector automatically subscribes to relevant events
+# When events occur, data is persisted to the appropriate repositories
+
+# Example: Manually trigger pattern detection event
+pattern_data = {
+    "id": "pattern-456",
+    "name": "Emerging Theme",
+    "vector": [0.2, 0.3, 0.4, 0.5],
+    "confidence": 0.92
+}
+
+connector.on_pattern_detected(
+    pattern_id="pattern-456",
+    pattern_data=pattern_data,
+    metadata={"source": "manual-trigger"}
+)
+# This will persist the pattern and publish a pattern.detected event
+```
+
+### Event Handlers
+
+The connector implements handlers for various events:
+
+```python
+# Pattern events
+connector.on_pattern_detected(pattern_id, pattern_data, metadata)
+connector.on_pattern_evolution(pattern_id, previous_state, new_state, metadata)
+connector.on_pattern_quality_change(pattern_id, previous_quality, new_quality, metadata)
+connector.on_pattern_relationship_detected(source_id, target_id, relationship_data, metadata)
+connector.on_pattern_merge(merged_pattern_id, source_pattern_ids, merged_pattern_data, metadata)
+connector.on_pattern_split(source_pattern_id, result_pattern_ids, result_pattern_data, metadata)
+
+# Field state events
+connector.on_field_state_change(field_id, previous_state, new_state, metadata)
+connector.on_field_coherence_change(field_id, previous_coherence, new_coherence, metadata)
+connector.on_field_stability_change(field_id, previous_stability, new_stability, metadata)
+connector.on_density_center_shift(field_id, previous_centers, new_centers, metadata)
+connector.on_eigenspace_change(field_id, previous_eigenspace, new_eigenspace, metadata)
+connector.on_topology_change(field_id, previous_topology, new_topology, metadata)
+
+# Learning window events
+connector.on_window_state_change(window_id, previous_state, new_state, metadata)
+connector.on_window_open(window_id, window_data, metadata)
+connector.on_window_close(window_id, window_data, metadata)
+connector.on_back_pressure(window_id, pressure_data, metadata)
+```
+
+## Assertion Capabilities
+
+The persistence layer supports making and verifying assertions about patterns:
+
+```python
+from src.habitat_evolution.adaptive_core.assertion.pattern_assertion import PatternAssertion
 
 # Create an assertion about a pattern
 assertion = PatternAssertion(
