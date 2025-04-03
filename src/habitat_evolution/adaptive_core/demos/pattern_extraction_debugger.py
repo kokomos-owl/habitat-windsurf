@@ -50,14 +50,13 @@ class PatternExtractionDebugger:
         # Statistics
         self.stats = {
             "total_patterns": 0,
-            "valid_entities": 0,
-            "invalid_entities": 0,
-            "missed_entities": 0,
-            "entity_types": Counter(),
+            "valid_patterns": 0,
+            "invalid_patterns": 0,
+            "uncertain_patterns": 0,
             "relationship_quality": {
                 "good": 0,
-                "ambiguous": 0,
-                "incorrect": 0
+                "uncertain": 0,
+                "poor": 0
             }
         }
         
@@ -131,7 +130,7 @@ class PatternExtractionDebugger:
             return False, "too_short"
             
         # Check for common false positives
-        common_false_positives = ["The", "A", "An", "This", "That", "These", "Those", "It", "They", "I", "We", "You"]
+        common_false_positives = {"The", "A", "An", "This", "That", "These", "Those", "It", "They", "I", "We", "You"}
         if entity in common_false_positives:
             return False, "common_word"
             
@@ -169,8 +168,8 @@ class PatternExtractionDebugger:
         
         # Update statistics
         self.stats["total_patterns"] += len(all_entities)
-        self.stats["valid_entities"] += len(valid_entities)
-        self.stats["invalid_entities"] += len(invalid_entities)
+        self.stats["valid_patterns"] += len(valid_entities)
+        self.stats["invalid_patterns"] += len(invalid_entities)
         
         # Return analysis results
         return {
@@ -297,14 +296,14 @@ class PatternExtractionDebugger:
             })
             
             # Update file summary
-            file_analysis["summary"]["total_entities"] += len(entity_analysis["basic_entities"])
-            file_analysis["summary"]["valid_entities"] += len(entity_analysis["valid_entities"])
-            file_analysis["summary"]["invalid_entities"] += len(entity_analysis["invalid_entities"])
-            file_analysis["summary"]["uncertain_entities"] += len(entity_analysis["uncertain_entities"])
-            file_analysis["summary"]["relationships"]["total"] += len(relationship_analysis["relationships"])
-            file_analysis["summary"]["relationships"]["good"] += len(relationship_analysis["quality_assessment"].get("good", []))
-            file_analysis["summary"]["relationships"]["uncertain"] += len(relationship_analysis["quality_assessment"].get("uncertain", []))
-            file_analysis["summary"]["relationships"]["poor"] += len(relationship_analysis["quality_assessment"].get("poor", []))
+            file_analysis["summary"]["total_entities"] += len(entity_analysis["entity_analysis"][0]["basic_entities"])
+            file_analysis["summary"]["valid_entities"] += len(entity_analysis["entity_analysis"][0]["valid_entities"])
+            file_analysis["summary"]["invalid_entities"] += len(entity_analysis["entity_analysis"][0]["invalid_entities"])
+            file_analysis["summary"]["uncertain_entities"] += len(entity_analysis["entity_analysis"][0]["uncertain_entities"])
+            file_analysis["summary"]["relationships"]["total"] += len(relationship_analysis.get("relationships", []))
+            file_analysis["summary"]["relationships"]["good"] += len(relationship_analysis.get("quality_assessment", {}).get("good", []))
+            file_analysis["summary"]["relationships"]["uncertain"] += len(relationship_analysis.get("quality_assessment", {}).get("uncertain", []))
+            file_analysis["summary"]["relationships"]["poor"] += len(relationship_analysis.get("quality_assessment", {}).get("poor", []))
         
         return file_analysis
     
@@ -317,7 +316,7 @@ class PatternExtractionDebugger:
         }
         
         # Entity extraction recommendations
-        valid_ratio = self.stats["valid_entities"] / max(1, self.stats["total_patterns"])
+        valid_ratio = self.stats["valid_patterns"] / max(1, self.stats["total_patterns"])
         if valid_ratio < 0.5:
             recommendations["entity_extraction"].append(
                 "Improve entity validation by incorporating domain-specific terminology"
@@ -330,14 +329,19 @@ class PatternExtractionDebugger:
         
         # Relationship extraction recommendations
         good_ratio = self.stats["relationship_quality"]["good"] / max(1, sum(self.stats["relationship_quality"].values()))
-        if good_ratio < 0.3:
+        if good_ratio < 0.5:
             recommendations["relationship_extraction"].append(
-                "Improve relationship predicate extraction with more sophisticated NLP techniques"
+                "Improve relationship extraction by considering syntactic parsing"
             )
         
-        if self.stats["relationship_quality"]["ambiguous"] > self.stats["relationship_quality"]["good"]:
+        if self.stats["relationship_quality"]["uncertain"] > self.stats["relationship_quality"]["good"]:
             recommendations["relationship_extraction"].append(
-                "Reduce ambiguous 'related_to' relationships by implementing dependency parsing"
+                "Reduce uncertain relationships by implementing better predicate extraction"
+            )
+        
+        if self.stats["relationship_quality"]["poor"] > 0:
+            recommendations["relationship_extraction"].append(
+                "Filter out poor relationships by validating context length and relevance"
             )
         
         # General recommendations
