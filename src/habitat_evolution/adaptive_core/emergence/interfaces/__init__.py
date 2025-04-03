@@ -11,10 +11,10 @@ This module now imports from there for backward compatibility.
 """
 
 # Import repository interfaces from their new location
-from habitat_evolution.adaptive_core.persistence.interfaces.field_state_repository import FieldStateRepositoryInterface
-from habitat_evolution.adaptive_core.persistence.interfaces.pattern_repository import PatternRepositoryInterface
-from habitat_evolution.adaptive_core.persistence.interfaces.relationship_repository import RelationshipRepositoryInterface
-from habitat_evolution.adaptive_core.persistence.interfaces.topology_repository import TopologyRepositoryInterface
+from src.habitat_evolution.adaptive_core.persistence.interfaces.field_state_repository import FieldStateRepositoryInterface
+from src.habitat_evolution.adaptive_core.persistence.interfaces.pattern_repository import PatternRepositoryInterface
+from src.habitat_evolution.adaptive_core.persistence.interfaces.relationship_repository import RelationshipRepositoryInterface
+from src.habitat_evolution.adaptive_core.persistence.interfaces.topology_repository import TopologyRepositoryInterface
 
 # Import observer interfaces from their current location
 from src.habitat_evolution.adaptive_core.emergence.interfaces.learning_window_observer import LearningWindowObserverInterface, LearningWindowState

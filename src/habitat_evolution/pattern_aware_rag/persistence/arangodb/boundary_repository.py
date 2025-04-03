@@ -13,7 +13,7 @@ import logging
 
 from src.habitat_evolution.adaptive_core.persistence.arangodb.base_repository import ArangoDBBaseRepository
 from src.habitat_evolution.adaptive_core.persistence.arangodb.connection import ArangoDBConnectionManager
-from src.habitat_evolution.pattern_aware_rag.topology.boundary import Boundary
+from src.habitat_evolution.pattern_aware_rag.topology.models import Boundary
 
 logger = logging.getLogger(__name__)
 

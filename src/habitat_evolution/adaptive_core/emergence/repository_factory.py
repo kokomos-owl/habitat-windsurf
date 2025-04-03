@@ -12,7 +12,7 @@ import logging
 from typing import Optional, Dict, Any
 
 # Import from the new location
-from habitat_evolution.adaptive_core.persistence.factory import (
+from src.habitat_evolution.adaptive_core.persistence.factory import (
     create_field_state_repository,
     create_pattern_repository,
     create_relationship_repository,
