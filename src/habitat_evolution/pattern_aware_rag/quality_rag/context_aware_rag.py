@@ -9,13 +9,11 @@ from typing import Dict, List, Any, Optional, Tuple
 import logging
 from pathlib import Path
 
-from src.habitat_evolution.pattern_aware_rag.pattern_aware_rag import PatternAwareRAG
-from src.habitat_evolution.adaptive_core.emergence.context_aware_extraction.context_aware_extractor import ContextAwareExtractor
-from src.habitat_evolution.adaptive_core.emergence.context_aware_extraction.quality_assessment import QualityAssessment
-from src.habitat_evolution.pattern_aware_rag.context.quality_aware_context import QualityAwarePatternContext
-from src.habitat_evolution.adaptive_core.models import Pattern, Relationship
-from src.habitat_evolution.adaptive_core.persistence.interfaces.pattern_repository import PatternRepository
-from src.habitat_evolution.core.pattern import PatternState
+from .import_adapter import (
+    PatternAwareRAG, ContextAwareExtractor, QualityAssessment,
+    QualityAwarePatternContext, Pattern, Relationship,
+    PatternRepository, PatternState
+)
 
 from .quality_enhanced_retrieval import QualityEnhancedRetrieval, RetrievalResult
 
