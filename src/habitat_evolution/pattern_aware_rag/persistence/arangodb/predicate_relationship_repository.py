@@ -24,10 +24,17 @@ class PredicateRelationshipRepository:
     and the generic PredicateRelationship collection for dynamic predicate handling.
     """
     
-    def __init__(self):
-        """Initialize the repository with a database connection."""
-        self.connection_manager = ArangoDBConnectionManager()
-        self.db = self.connection_manager.get_db()
+    def __init__(self, db_connection=None):
+        """Initialize the repository with a database connection.
+        
+        Args:
+            db_connection: The database connection to use. If None, a new connection will be created.
+        """
+        if db_connection is None:
+            self.connection_manager = ArangoDBConnectionManager()
+            self.db = self.connection_manager.get_db()
+        else:
+            self.db = db_connection
         
         # Define the specific predicate collections
         self.specific_predicates = [
