@@ -77,7 +77,7 @@ class TestVectorTonicConnectorWithRefactoredPersistence(unittest.TestCase):
         
         logger.debug("Test fixtures set up complete")
     
-    @patch('src.habitat_evolution.adaptive_core.persistence.factory.create_repositories')
+    @patch('src.habitat_evolution.adaptive_core.emergence.vector_tonic_persistence_connector.create_repositories')
     def test_connector_uses_refactored_repositories(self, mock_create_repositories):
         """Test that the connector correctly uses the refactored repositories."""
         logger.debug("Starting test_connector_uses_refactored_repositories")
@@ -107,7 +107,8 @@ class TestVectorTonicConnectorWithRefactoredPersistence(unittest.TestCase):
         logger.debug("test_connector_uses_refactored_repositories completed successfully")
     
     @patch('src.habitat_evolution.adaptive_core.persistence.factory.create_repositories')
-    def test_pattern_detected_event_persistence(self, mock_create_repositories):
+    @patch('src.habitat_evolution.core.services.event_bus.Event')
+    def test_pattern_detected_event_persistence(self, mock_event, mock_create_repositories):
         """Test that pattern detected events are correctly persisted using the refactored repositories."""
         logger.debug("Starting test_pattern_detected_event_persistence")
         
@@ -151,7 +152,8 @@ class TestVectorTonicConnectorWithRefactoredPersistence(unittest.TestCase):
         logger.debug("test_pattern_detected_event_persistence completed successfully")
     
     @patch('src.habitat_evolution.adaptive_core.persistence.factory.create_repositories')
-    def test_field_state_updated_event_persistence(self, mock_create_repositories):
+    @patch('src.habitat_evolution.core.services.event_bus.Event')
+    def test_field_state_updated_event_persistence(self, mock_event, mock_create_repositories):
         """Test that field state updated events are correctly persisted using the refactored repositories."""
         logger.debug("Starting test_field_state_updated_event_persistence")
         
@@ -195,7 +197,8 @@ class TestVectorTonicConnectorWithRefactoredPersistence(unittest.TestCase):
         logger.debug("test_field_state_updated_event_persistence completed successfully")
     
     @patch('src.habitat_evolution.adaptive_core.persistence.factory.create_repositories')
-    def test_pattern_relationship_detected_event_persistence(self, mock_create_repositories):
+    @patch('src.habitat_evolution.core.services.event_bus.Event')
+    def test_pattern_relationship_detected_event_persistence(self, mock_event, mock_create_repositories):
         """Test that pattern relationship detected events are correctly persisted using the refactored repositories."""
         logger.debug("Starting test_pattern_relationship_detected_event_persistence")
         
@@ -226,8 +229,8 @@ class TestVectorTonicConnectorWithRefactoredPersistence(unittest.TestCase):
         
         # Call the on_pattern_relationship_detected method
         connector.on_pattern_relationship_detected(
-            source_pattern_id=source_pattern_id,
-            target_pattern_id=target_pattern_id,
+            source_id=source_pattern_id,
+            target_id=target_pattern_id,
             relationship_type="resonance",
             relationship_data=relationship_data,
             metadata={"source": "test"}
@@ -249,7 +252,8 @@ class TestVectorTonicConnectorWithRefactoredPersistence(unittest.TestCase):
         logger.debug("test_pattern_relationship_detected_event_persistence completed successfully")
     
     @patch('src.habitat_evolution.adaptive_core.persistence.factory.create_repositories')
-    def test_topology_change_event_persistence(self, mock_create_repositories):
+    @patch('src.habitat_evolution.core.services.event_bus.Event')
+    def test_topology_change_event_persistence(self, mock_event, mock_create_repositories):
         """Test that topology change events are correctly persisted using the refactored repositories."""
         logger.debug("Starting test_topology_change_event_persistence")
         

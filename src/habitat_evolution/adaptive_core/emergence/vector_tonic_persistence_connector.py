@@ -136,26 +136,26 @@ class VectorTonicPersistenceConnector(LearningWindowObserverInterface, PatternOb
         
         # Subscribe to events
         # Pattern events
-        self.event_bus.subscribe("pattern.detected", self._on_pattern_detected)
-        self.event_bus.subscribe("pattern.evolved", self._on_pattern_evolution)
-        self.event_bus.subscribe("pattern.quality.changed", self._on_pattern_quality_change)
-        self.event_bus.subscribe("pattern.relationship.detected", self._on_pattern_relationship_detected)
-        self.event_bus.subscribe("pattern.merged", self._on_pattern_merge)
-        self.event_bus.subscribe("pattern.split", self._on_pattern_split)
+        self.event_bus.subscribe("pattern.detected", self.on_pattern_detected)
+        self.event_bus.subscribe("pattern.evolved", self.on_pattern_evolution)
+        self.event_bus.subscribe("pattern.quality.changed", self.on_pattern_quality_change)
+        self.event_bus.subscribe("pattern.relationship.detected", self.on_pattern_relationship_detected)
+        self.event_bus.subscribe("pattern.merged", self.on_pattern_merge)
+        self.event_bus.subscribe("pattern.split", self.on_pattern_split)
         
         # Field state events
-        self.event_bus.subscribe("field.state.changed", self._on_field_state_change)
-        self.event_bus.subscribe("field.coherence.changed", self._on_field_coherence_change)
-        self.event_bus.subscribe("field.stability.changed", self._on_field_stability_change)
-        self.event_bus.subscribe("field.density.centers.shifted", self._on_density_center_shift)
-        self.event_bus.subscribe("field.eigenspace.changed", self._on_eigenspace_change)
-        self.event_bus.subscribe("field.topology.changed", self._on_topology_change)
+        self.event_bus.subscribe("field.state.changed", self.on_field_state_change)
+        self.event_bus.subscribe("field.coherence.changed", self.on_field_coherence_change)
+        self.event_bus.subscribe("field.stability.changed", self.on_field_stability_change)
+        self.event_bus.subscribe("field.density.centers.shifted", self.on_density_center_shift)
+        self.event_bus.subscribe("field.eigenspace.changed", self.on_eigenspace_change)
+        self.event_bus.subscribe("field.topology.changed", self.on_topology_change)
         
         # Learning window events
-        self.event_bus.subscribe("learning.window.state.changed", self._on_window_state_change)
-        self.event_bus.subscribe("learning.window.opened", self._on_window_open)
-        self.event_bus.subscribe("learning.window.closed", self._on_learning_window_closed)
-        self.event_bus.subscribe("learning.window.back.pressure", self._on_back_pressure)
+        self.event_bus.subscribe("learning.window.state.changed", self.on_window_state_change)
+        self.event_bus.subscribe("learning.window.opened", self.on_window_open)
+        self.event_bus.subscribe("learning.window.closed", self.on_window_close)
+        self.event_bus.subscribe("learning.window.back.pressure", self.on_back_pressure)
         
         # Legacy events
         self.event_bus.subscribe("document.processed", self._on_document_processed)
