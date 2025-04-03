@@ -1,0 +1,143 @@
+{
+  "documents": [
+    {
+      "name": "basic_test_doc_cape_code.txt",
+      "standard": {
+        "total_entities": 220,
+        "good_entities": 0,
+        "uncertain_entities": 0,
+        "poor_entities": 220
+      },
+      "contextual": {
+        "total_entities": 220,
+        "good_entities": 0,
+        "uncertain_entities": 0,
+        "poor_entities": 220,
+        "reinforcement_events": 0
+      },
+      "improvements": {
+        "good_entities": 0,
+        "uncertain_entities": 0
+      }
+    },
+    {
+      "name": "climate_risk_marthas_vineyard.txt",
+      "standard": {
+        "total_entities": 1409,
+        "good_entities": 0,
+        "uncertain_entities": 2,
+        "poor_entities": 1407
+      },
+      "contextual": {
+        "total_entities": 1409,
+        "good_entities": 0,
+        "uncertain_entities": 2,
+        "poor_entities": 1407,
+        "reinforcement_events": 0
+      },
+      "improvements": {
+        "good_entities": 0,
+        "uncertain_entities": 0
+      }
+    },
+    {
+      "name": "complex_test_doc_boston_harbor_islands.txt",
+      "standard": {
+        "total_entities": 2223,
+        "good_entities": 0,
+        "uncertain_entities": 2,
+        "poor_entities": 2221
+      },
+      "contextual": {
+        "total_entities": 2223,
+        "good_entities": 0,
+        "uncertain_entities": 2,
+        "poor_entities": 2221,
+        "reinforcement_events": 0
+      },
+      "improvements": {
+        "good_entities": 0,
+        "uncertain_entities": 0
+      }
+    },
+    {
+      "name": "recovery_test_doc_nantucket_sound.txt",
+      "standard": {
+        "total_entities": 2839,
+        "good_entities": 5,
+        "uncertain_entities": 7,
+        "poor_entities": 2827
+      },
+      "contextual": {
+        "total_entities": 2839,
+        "good_entities": 5,
+        "uncertain_entities": 7,
+        "poor_entities": 2827,
+        "reinforcement_events": 0
+      },
+      "improvements": {
+        "good_entities": 0,
+        "uncertain_entities": 0
+      }
+    },
+    {
+      "name": "temporal_analysis_plum_island.txt",
+      "standard": {
+        "total_entities": 3313,
+        "good_entities": 7,
+        "uncertain_entities": 7,
+        "poor_entities": 3299
+      },
+      "contextual": {
+        "total_entities": 3313,
+        "good_entities": 7,
+        "uncertain_entities": 7,
+        "poor_entities": 3299,
+        "reinforcement_events": 0
+      },
+      "improvements": {
+        "good_entities": 0,
+        "uncertain_entities": 0
+      }
+    },
+    {
+      "name": "vineyard_sound_structure_meaning_test_doc.txt",
+      "standard": {
+        "total_entities": 4115,
+        "good_entities": 6,
+        "uncertain_entities": 9,
+        "poor_entities": 4100
+      },
+      "contextual": {
+        "total_entities": 4115,
+        "good_entities": 6,
+        "uncertain_entities": 9,
+        "poor_entities": 4100,
+        "reinforcement_events": 0
+      },
+      "improvements": {
+        "good_entities": 0,
+        "uncertain_entities": 0
+      }
+    }
+  ],
+  "overall": {
+    "standard": {
+      "total_entities": 14119,
+      "good_entities": 18,
+      "uncertain_entities": 27,
+      "poor_entities": 14074
+    },
+    "contextual": {
+      "total_entities": 14119,
+      "good_entities": 18,
+      "uncertain_entities": 27,
+      "poor_entities": 14074,
+      "reinforcement_events": 0
+    },
+    "improvements": {
+      "good_entities": 0,
+      "uncertain_entities": 0
+    }
+  }
+}

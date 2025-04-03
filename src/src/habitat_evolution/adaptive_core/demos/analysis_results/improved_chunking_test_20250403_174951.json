@@ -1,0 +1,176 @@
+{
+  "documents": [
+    {
+      "name": "basic_test_doc_cape_code.txt",
+      "standard": {
+        "total_entities": 220,
+        "good_entities": 0,
+        "uncertain_entities": 0,
+        "poor_entities": 220,
+        "fragmented_entities": 27,
+        "complete_entities": 193,
+        "fragmentation_rate": 12.272727272727273
+      },
+      "improved": {
+        "total_entities": 354,
+        "good_entities": 0,
+        "uncertain_entities": 0,
+        "poor_entities": 354,
+        "fragmented_entities": 50,
+        "complete_entities": 304,
+        "fragmentation_rate": 14.124293785310735
+      },
+      "comparison": {
+        "complete_entity_improvement": 111,
+        "fragmentation_rate_improvement": -1.8515665125834622
+      }
+    },
+    {
+      "name": "climate_risk_marthas_vineyard.txt",
+      "standard": {
+        "total_entities": 1409,
+        "good_entities": 0,
+        "uncertain_entities": 2,
+        "poor_entities": 1407,
+        "fragmented_entities": 297,
+        "complete_entities": 1112,
+        "fragmentation_rate": 21.078779276082326
+      },
+      "improved": {
+        "total_entities": 2333,
+        "good_entities": 0,
+        "uncertain_entities": 2,
+        "poor_entities": 2331,
+        "fragmented_entities": 510,
+        "complete_entities": 1823,
+        "fragmentation_rate": 21.86026575225032
+      },
+      "comparison": {
+        "complete_entity_improvement": 711,
+        "fragmentation_rate_improvement": -0.7814864761679946
+      }
+    },
+    {
+      "name": "complex_test_doc_boston_harbor_islands.txt",
+      "standard": {
+        "total_entities": 2223,
+        "good_entities": 0,
+        "uncertain_entities": 2,
+        "poor_entities": 2221,
+        "fragmented_entities": 374,
+        "complete_entities": 1849,
+        "fragmentation_rate": 16.824111560953668
+      },
+      "improved": {
+        "total_entities": 3640,
+        "good_entities": 0,
+        "uncertain_entities": 2,
+        "poor_entities": 3638,
+        "fragmented_entities": 618,
+        "complete_entities": 3022,
+        "fragmentation_rate": 16.978021978021978
+      },
+      "comparison": {
+        "complete_entity_improvement": 1173,
+        "fragmentation_rate_improvement": -0.153910417068312
+      }
+    },
+    {
+      "name": "recovery_test_doc_nantucket_sound.txt",
+      "standard": {
+        "total_entities": 2839,
+        "good_entities": 5,
+        "uncertain_entities": 7,
+        "poor_entities": 2827,
+        "fragmented_entities": 484,
+        "complete_entities": 2355,
+        "fragmentation_rate": 17.04825642831983
+      },
+      "improved": {
+        "total_entities": 4657,
+        "good_entities": 6,
+        "uncertain_entities": 7,
+        "poor_entities": 4644,
+        "fragmented_entities": 802,
+        "complete_entities": 3855,
+        "fragmentation_rate": 17.22138715911531
+      },
+      "comparison": {
+        "complete_entity_improvement": 1500,
+        "fragmentation_rate_improvement": -0.1731307307954788
+      }
+    },
+    {
+      "name": "temporal_analysis_plum_island.txt",
+      "standard": {
+        "total_entities": 3313,
+        "good_entities": 7,
+        "uncertain_entities": 7,
+        "poor_entities": 3299,
+        "fragmented_entities": 566,
+        "complete_entities": 2747,
+        "fragmentation_rate": 17.08421370359191
+      },
+      "improved": {
+        "total_entities": 5436,
+        "good_entities": 8,
+        "uncertain_entities": 7,
+        "poor_entities": 5421,
+        "fragmented_entities": 918,
+        "complete_entities": 4518,
+        "fragmentation_rate": 16.887417218543046
+      },
+      "comparison": {
+        "complete_entity_improvement": 1771,
+        "fragmentation_rate_improvement": 0.19679648504886404
+      }
+    },
+    {
+      "name": "vineyard_sound_structure_meaning_test_doc.txt",
+      "standard": {
+        "total_entities": 4115,
+        "good_entities": 6,
+        "uncertain_entities": 9,
+        "poor_entities": 4100,
+        "fragmented_entities": 628,
+        "complete_entities": 3487,
+        "fragmentation_rate": 15.26123936816525
+      },
+      "improved": {
+        "total_entities": 6730,
+        "good_entities": 7,
+        "uncertain_entities": 9,
+        "poor_entities": 6714,
+        "fragmented_entities": 1023,
+        "complete_entities": 5707,
+        "fragmentation_rate": 15.200594353640415
+      },
+      "comparison": {
+        "complete_entity_improvement": 2220,
+        "fragmentation_rate_improvement": 0.06064501452483495
+      }
+    }
+  ],
+  "overall": {
+    "standard": {
+      "total_entities": 14119,
+      "good_entities": 18,
+      "uncertain_entities": 27,
+      "poor_entities": 14074,
+      "fragmented_entities": 2376,
+      "complete_entities": 11743
+    },
+    "improved": {
+      "total_entities": 23150,
+      "good_entities": 21,
+      "uncertain_entities": 27,
+      "poor_entities": 23102,
+      "fragmented_entities": 3921,
+      "complete_entities": 19229
+    },
+    "comparison": {
+      "complete_entity_improvement": 7486,
+      "fragmentation_rate_improvement": -0.1089777312467568
+    }
+  }
+}
