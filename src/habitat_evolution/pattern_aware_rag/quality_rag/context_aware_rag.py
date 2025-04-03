@@ -169,19 +169,19 @@ class ContextAwareRAG:
         stored_patterns = []
         for pattern in high_quality_patterns:
             # Check if pattern already exists
-            existing = self.pattern_repository.find_by_text(pattern.text)
+            existing = self.pattern_repository.find_by_text(pattern.base_concept)
             
             if existing:
                 # Update existing pattern with new quality information
-                existing.metadata.update(pattern.metadata)
+                existing.properties.update(pattern.properties)
                 self.pattern_repository.update(existing)
                 stored_patterns.append(existing)
-                logger.info(f"Updated existing pattern '{pattern.text}' with new quality information")
+                logger.info(f"Updated existing pattern '{pattern.base_concept}' with new quality information")
             else:
                 # Store new pattern
                 self.pattern_repository.store(pattern)
                 stored_patterns.append(pattern)
-                logger.info(f"Stored new high-quality pattern '{pattern.text}'")
+                logger.info(f"Stored new high-quality pattern '{pattern.base_concept}'")
         
         return stored_patterns
     

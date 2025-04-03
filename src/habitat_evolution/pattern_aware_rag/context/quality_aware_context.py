@@ -52,10 +52,12 @@ class QualityAwarePatternContext(RAGPatternContext):
     
     # Pattern state distributions
     pattern_state_distribution: Dict[PatternState, int] = field(default_factory=lambda: {
-        PatternState.EMERGENT: 0,
-        PatternState.COHERENT: 0,
+        PatternState.EMERGING: 0,
         PatternState.STABLE: 0,
-        PatternState.DEGRADING: 0
+        PatternState.DECLINING: 0,
+        PatternState.TRANSFORMING: 0,
+        PatternState.NOISE: 0,
+        PatternState.MERGED: 0
     })
     
     # Quality state distributions
@@ -104,13 +106,15 @@ class QualityAwarePatternContext(RAGPatternContext):
             
             # Convert to Pattern for RAG
             pattern = Pattern(
-                text=entity,
-                pattern_type="entity",
-                metadata={
+                id=f"pattern_{entity.lower().replace(' ', '_')}",
+                base_concept=entity,
+                creator_id="context_aware_rag",
+                coherence=data["metrics"]["coherence"],
+                phase_stability=data["metrics"]["stability"],
+                properties={
                     "quality_state": "good",
                     "pattern_state": pattern_state.name,
-                    "coherence": data["metrics"]["coherence"],
-                    "stability": data["metrics"]["stability"]
+                    "pattern_type": "entity"
                 }
             )
             
@@ -132,13 +136,15 @@ class QualityAwarePatternContext(RAGPatternContext):
             
             # Convert to Pattern for RAG with lower priority
             pattern = Pattern(
-                text=entity,
-                pattern_type="entity",
-                metadata={
+                id=f"pattern_{entity.lower().replace(' ', '_')}_uncertain",
+                base_concept=entity,
+                creator_id="context_aware_rag",
+                coherence=data["metrics"]["coherence"],
+                signal_strength=data["metrics"]["emergence_rate"],
+                properties={
                     "quality_state": "uncertain",
                     "pattern_state": pattern_state.name,
-                    "coherence": data["metrics"]["coherence"],
-                    "emergence_rate": data["metrics"]["emergence_rate"]
+                    "pattern_type": "entity"
                 }
             )
             
@@ -179,7 +185,7 @@ class QualityAwarePatternContext(RAGPatternContext):
             List of high-quality patterns
         """
         return [p for p in self.retrieval_patterns 
-                if p.metadata.get("quality_state") == "good"]
+                if p.properties.get("quality_state") == "good"]
     
     def get_emerging_patterns(self) -> List[Pattern]:
         """Get emerging patterns that show potential.
@@ -188,8 +194,8 @@ class QualityAwarePatternContext(RAGPatternContext):
             List of emerging patterns
         """
         return [p for p in self.retrieval_patterns 
-                if p.metadata.get("pattern_state") == PatternState.EMERGENT.name
-                and p.metadata.get("emergence_rate", 0) > 0.6]
+                if p.properties.get("pattern_state") == PatternState.EMERGING.name
+                and p.signal_strength > 0.6]
     
     def get_quality_summary(self) -> Dict[str, Any]:
         """Get a summary of quality assessment.
@@ -216,9 +222,9 @@ class QualityAwarePatternContext(RAGPatternContext):
         return sorted(
             self.retrieval_patterns,
             key=lambda p: (
-                1 if p.metadata.get("quality_state") == "good" else 0,
-                p.metadata.get("coherence", 0),
-                p.metadata.get("stability", 0) if p.metadata.get("quality_state") == "good" else p.metadata.get("emergence_rate", 0)
+                1 if p.properties.get("quality_state") == "good" else 0,
+                p.coherence,
+                p.phase_stability if p.properties.get("quality_state") == "good" else p.signal_strength
             ),
             reverse=True
         )

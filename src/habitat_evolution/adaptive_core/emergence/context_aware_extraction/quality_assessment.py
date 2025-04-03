@@ -529,8 +529,10 @@ class QualityAssessment:
             "poor_metrics": poor_metrics,
             "pattern_states": {
                 PatternState.STABLE.name: sum(1 for e in self.quality_states["good"].values() if e["pattern_state"] == PatternState.STABLE.name),
-                PatternState.COHERENT.name: sum(1 for e in self.quality_states["good"].values() if e["pattern_state"] == PatternState.COHERENT.name),
-                PatternState.EMERGENT.name: sum(1 for e in self.quality_states["uncertain"].values() if e["pattern_state"] == PatternState.EMERGENT.name),
-                PatternState.DEGRADING.name: sum(1 for e in self.quality_states["poor"].values() if e["pattern_state"] == PatternState.DEGRADING.name)
+                PatternState.EMERGING.name: sum(1 for e in self.quality_states["uncertain"].values() if e["pattern_state"] == PatternState.EMERGING.name),
+                PatternState.DECLINING.name: sum(1 for e in self.quality_states["poor"].values() if e["pattern_state"] == PatternState.DECLINING.name),
+                PatternState.TRANSFORMING.name: sum(1 for e in self.quality_states["uncertain"].values() if e["pattern_state"] == PatternState.TRANSFORMING.name),
+                PatternState.NOISE.name: sum(1 for e in self.quality_states["poor"].values() if e["pattern_state"] == PatternState.NOISE.name),
+                PatternState.MERGED.name: sum(1 for e in self.quality_states["good"].values() if e["pattern_state"] == PatternState.MERGED.name)
             }
         }
