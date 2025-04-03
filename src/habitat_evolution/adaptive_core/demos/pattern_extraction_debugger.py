@@ -12,7 +12,7 @@ import os
 import json
 import logging
 import re
-import spacy
+# import spacy - removed due to dependency issues
 import numpy as np
 from collections import Counter, defaultdict
 from pathlib import Path
@@ -43,13 +43,9 @@ class PatternExtractionDebugger:
         # Data paths
         self.data_dir = Path(__file__).parent.parent.parent.parent.parent / "data" / "climate_risk"
         
-        # Load spaCy model for NLP analysis
-        try:
-            self.nlp = spacy.load("en_core_web_sm")
-            self.spacy_available = True
-        except:
-            logger.warning("spaCy model not available. Using basic NLP techniques.")
-            self.spacy_available = False
+        # spaCy model loading removed due to dependency issues
+        self.spacy_available = False
+        logger.info("Using basic NLP techniques for entity extraction.")
         
         # Statistics
         self.stats = {
@@ -119,25 +115,10 @@ class PatternExtractionDebugger:
         return entities
     
     def extract_entities_spacy(self, paragraph):
-        """Extract entities using spaCy NLP."""
-        if not self.spacy_available:
-            return []
-            
-        doc = self.nlp(paragraph)
-        entities = []
-        
-        # Extract named entities
-        for ent in doc.ents:
-            if ent.label_ in ["ORG", "GPE", "LOC", "PRODUCT", "EVENT", "FAC", "NORP"]:
-                entities.append(ent.text)
-        
-        # Extract noun phrases that might be domain concepts
-        for chunk in doc.noun_chunks:
-            # Check if the chunk starts with a capital letter and isn't already in entities
-            if chunk.text[0].isupper() and chunk.text not in entities:
-                entities.append(chunk.text)
-        
-        return list(set(entities))
+        """Extract entities using advanced NLP (placeholder)."""
+        # This method is a placeholder since spaCy is not available
+        # In a real implementation, this would use more sophisticated NLP
+        return []
     
     def validate_entity(self, entity):
         """Validate if an entity is likely to be relevant."""
@@ -159,12 +140,12 @@ class PatternExtractionDebugger:
     
     def analyze_entity_extraction(self, paragraph):
         """Analyze entity extraction quality for a paragraph."""
-        # Get entities from both methods
+        # Get entities using basic method only
         basic_entities = self.extract_entities_basic(paragraph)
-        spacy_entities = self.extract_entities_spacy(paragraph) if self.spacy_available else []
+        spacy_entities = []
         
-        # Combine unique entities
-        all_entities = list(set(basic_entities + spacy_entities))
+        # Use only basic entities
+        all_entities = basic_entities
         
         # Validate each entity
         valid_entities = []
@@ -181,10 +162,10 @@ class PatternExtractionDebugger:
             else:
                 uncertain_entities.append((entity, reason))
         
-        # Calculate metrics
-        only_in_basic = [e for e in basic_entities if e not in spacy_entities]
-        only_in_spacy = [e for e in spacy_entities if e not in basic_entities]
-        in_both = [e for e in basic_entities if e in spacy_entities]
+        # Calculate metrics (simplified since we only have basic entities)
+        only_in_basic = basic_entities
+        only_in_spacy = []
+        in_both = []
         
         # Update statistics
         self.stats["total_patterns"] += len(all_entities)
@@ -204,72 +185,66 @@ class PatternExtractionDebugger:
             "in_both": in_both
         }
     
-    def analyze_relationship_extraction(self, paragraph, entities):
-        """Analyze relationship extraction quality."""
-        # Original relationship extraction method
+    def extract_relationships(self, paragraph, entities):
+        """Extract relationships between entities in a paragraph."""
         relationships = []
         
-        if len(entities) < 2:
-            return {"relationships": [], "quality_assessment": {}}
-            
-        # Extract relationships using original method
-        for i in range(len(entities) - 1):
-            for j in range(i + 1, len(entities)):
-                source = entities[i]
-                target = entities[j]
+        # Simple relationship extraction based on proximity
+        for i, entity1 in enumerate(entities):
+            for entity2 in entities[i+1:]:
+                # Find positions of entities in the paragraph
+                pos1 = paragraph.find(entity1)
+                pos2 = paragraph.find(entity2)
                 
-                # Check if both entities appear in the paragraph
-                if source in paragraph and target in paragraph:
-                    # Extract text between entities to infer relationship
-                    pattern = f"{re.escape(source)}(.*?){re.escape(target)}"
-                    matches = re.findall(pattern, paragraph)
+                if pos1 >= 0 and pos2 >= 0:
+                    # Extract text between entities if they're close enough
+                    start = min(pos1 + len(entity1), pos2 + len(entity2))
+                    end = max(pos1, pos2)
                     
-                    if matches:
-                        # Use connecting text as predicate, or default to "related_to"
-                        predicate = matches[0].strip()
-                        if len(predicate) > 50 or len(predicate) < 2:
-                            predicate = "related_to"
-                        else:
-                            # Clean up predicate
-                            predicate = re.sub(r'[^\w\s]', '', predicate).strip()
-                            predicate = re.sub(r'\s+', '_', predicate)
+                    if abs(end - start) < 100:  # Arbitrary threshold
+                        between_text = paragraph[start:end].strip()
                         
-                        relationships.append({
-                            "source": source,
-                            "predicate": predicate,
-                            "target": target,
-                            "context": matches[0]
-                        })
+                        # Look for relationship verbs
+                        for verb in ["is", "was", "are", "were", "has", "have", "causes", "affects", "impacts", "increases", "decreases"]:
+                            if verb in between_text.lower():
+                                if pos1 < pos2:
+                                    relationships.append((entity1, verb, entity2))
+                                else:
+                                    relationships.append((entity2, verb, entity1))
+                                break
         
-        # Analyze relationship quality
+        return {"relationships": relationships, "quality_assessment": {"good": [], "uncertain": [], "poor": []}}
+    
+    def analyze_relationship_extraction(self, paragraph, entities):
+        """Analyze relationship extraction quality for a paragraph."""
+        relationships = self.extract_relationships(paragraph, entities)
+        
+        # Assess quality of each relationship
         quality_assessment = {
             "good": [],
-            "ambiguous": [],
-            "incorrect": []
+            "uncertain": [],
+            "poor": []
         }
         
-        for rel in relationships:
-            # Assess relationship quality
-            predicate = rel["predicate"]
-            context = rel["context"]
-            
-            # Simple heuristics for quality assessment
-            if predicate == "related_to":
-                quality_assessment["ambiguous"].append(rel)
-            elif len(predicate.split('_')) <= 1:
-                quality_assessment["ambiguous"].append(rel)
-            elif len(context) > 50:
-                quality_assessment["incorrect"].append(rel)
-            else:
+        for rel in relationships["relationships"]:
+            # Simple heuristic for relationship quality
+            if rel[0] in entities and rel[2] in entities:
+                # Both entities are valid
                 quality_assessment["good"].append(rel)
+            elif rel[0] in entities or rel[2] in entities:
+                # One entity is valid
+                quality_assessment["uncertain"].append(rel)
+            else:
+                # Neither entity is valid
+                quality_assessment["poor"].append(rel)
         
         # Update statistics
         self.stats["relationship_quality"]["good"] += len(quality_assessment["good"])
-        self.stats["relationship_quality"]["ambiguous"] += len(quality_assessment["ambiguous"])
-        self.stats["relationship_quality"]["incorrect"] += len(quality_assessment["incorrect"])
+        self.stats["relationship_quality"]["uncertain"] += len(quality_assessment["uncertain"])
+        self.stats["relationship_quality"]["poor"] += len(quality_assessment["poor"])
         
         return {
-            "relationships": relationships,
+            "relationships": relationships["relationships"],
             "quality_assessment": quality_assessment
         }
     
@@ -286,8 +261,7 @@ class PatternExtractionDebugger:
         file_analysis = {
             "filename": filename,
             "paragraph_count": len(paragraphs),
-            "entity_analysis": [],
-            "relationship_analysis": [],
+            "paragraph_analyses": [],
             "summary": {
                 "total_entities": 0,
                 "valid_entities": 0,
@@ -296,8 +270,8 @@ class PatternExtractionDebugger:
                 "relationships": {
                     "total": 0,
                     "good": 0,
-                    "ambiguous": 0,
-                    "incorrect": 0
+                    "uncertain": 0,
+                    "poor": 0
                 }
             }
         }
@@ -310,25 +284,27 @@ class PatternExtractionDebugger:
                 
             # Analyze entity extraction
             entity_analysis = self.analyze_entity_extraction(paragraph)
-            file_analysis["entity_analysis"].append(entity_analysis)
+            valid_entities = [e[0] for e in entity_analysis["valid_entities"]]
             
-            # Get all entities for relationship analysis
-            all_entities = entity_analysis["basic_entities"] + entity_analysis["spacy_entities"]
-            all_entities = list(set(all_entities))
+            # Analyze relationships
+            relationship_analysis = self.analyze_relationship_extraction(paragraph, valid_entities)
             
-            # Analyze relationship extraction
-            relationship_analysis = self.analyze_relationship_extraction(paragraph, all_entities)
-            file_analysis["relationship_analysis"].append(relationship_analysis)
+            # Return analysis results
+            file_analysis["paragraph_analyses"].append({
+                "entity_analysis": entity_analysis,
+                "relationship_analysis": relationship_analysis,
+                "quality_assessment": relationship_analysis.get("quality_assessment", {"good": [], "uncertain": [], "poor": []})
+            })
             
             # Update file summary
-            file_analysis["summary"]["total_entities"] += len(all_entities)
+            file_analysis["summary"]["total_entities"] += len(entity_analysis["basic_entities"])
             file_analysis["summary"]["valid_entities"] += len(entity_analysis["valid_entities"])
             file_analysis["summary"]["invalid_entities"] += len(entity_analysis["invalid_entities"])
             file_analysis["summary"]["uncertain_entities"] += len(entity_analysis["uncertain_entities"])
             file_analysis["summary"]["relationships"]["total"] += len(relationship_analysis["relationships"])
-            file_analysis["summary"]["relationships"]["good"] += len(relationship_analysis["quality_assessment"]["good"])
-            file_analysis["summary"]["relationships"]["ambiguous"] += len(relationship_analysis["quality_assessment"]["ambiguous"])
-            file_analysis["summary"]["relationships"]["incorrect"] += len(relationship_analysis["quality_assessment"]["incorrect"])
+            file_analysis["summary"]["relationships"]["good"] += len(relationship_analysis["quality_assessment"].get("good", []))
+            file_analysis["summary"]["relationships"]["uncertain"] += len(relationship_analysis["quality_assessment"].get("uncertain", []))
+            file_analysis["summary"]["relationships"]["poor"] += len(relationship_analysis["quality_assessment"].get("poor", []))
         
         return file_analysis
     
@@ -347,18 +323,10 @@ class PatternExtractionDebugger:
                 "Improve entity validation by incorporating domain-specific terminology"
             )
         
-        if self.spacy_available and len(analysis_results) > 0:
-            spacy_only_count = sum(len(file["entity_analysis"][0]["only_in_spacy"]) for file in analysis_results)
-            basic_only_count = sum(len(file["entity_analysis"][0]["only_in_basic"]) for file in analysis_results)
-            
-            if spacy_only_count > basic_only_count:
-                recommendations["entity_extraction"].append(
-                    "Prioritize spaCy-based entity extraction as it identifies more valid entities"
-                )
-            else:
-                recommendations["entity_extraction"].append(
-                    "Combine regex and spaCy approaches for better entity coverage"
-                )
+        # Add recommendation for advanced NLP
+        recommendations["entity_extraction"].append(
+            "Implement advanced NLP using libraries like spaCy or NLTK for better entity extraction"
+        )
         
         # Relationship extraction recommendations
         good_ratio = self.stats["relationship_quality"]["good"] / max(1, sum(self.stats["relationship_quality"].values()))
