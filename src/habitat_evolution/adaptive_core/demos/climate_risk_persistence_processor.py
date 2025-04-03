@@ -51,8 +51,16 @@ class ClimateRiskPersistenceProcessor:
             field_state_repository=self.repositories["field_state_repository"],
             pattern_repository=self.repositories["pattern_repository"],
             relationship_repository=self.repositories["relationship_repository"],
-            topology_repository=self.repositories["topology_repository"]
+            topology_repository=self.repositories["topology_repository"],
+            boundary_repository=self.repositories.get("boundary_repository"),
+            predicate_relationship_repository=self.repositories.get("predicate_relationship_repository")
         )
+        
+        # Subscribe connector to events
+        self.event_bus.subscribe("pattern.detected", self.connector.on_pattern_detected)
+        self.event_bus.subscribe("pattern.relationship.detected", self.connector.on_pattern_relationship_detected)
+        self.event_bus.subscribe("field.state.changed", self.connector.on_field_state_change)
+        self.event_bus.subscribe("topology.changed", self.connector.on_topology_change)
         
         # Create metrics service for tonic-harmonic analysis
         self.metrics = TonicHarmonicMetrics()
@@ -151,6 +159,24 @@ class ClimateRiskPersistenceProcessor:
         vector = [float(b) / 255.0 for b in hash_bytes[:5]]
         
         return vector
+        
+    def calculate_tonic_value(self, vector):
+        """Calculate a tonic value from a vector."""
+        # Simple calculation based on vector values
+        # In a real system, this would use more sophisticated metrics
+        if not vector:
+            return 0.5
+            
+        # Calculate average of vector components
+        avg = sum(vector) / len(vector)
+        
+        # Calculate variance
+        variance = sum((x - avg) ** 2 for x in vector) / len(vector)
+        
+        # Combine average and variance for tonic value
+        tonic_value = (avg + (1.0 - variance)) / 2.0
+        
+        return min(1.0, max(0.0, tonic_value))
     
     def generate_harmonic_properties(self, text):
         """Generate harmonic properties from text."""
@@ -217,12 +243,15 @@ class ClimateRiskPersistenceProcessor:
         }
         
         # Process field state through connector
-        self.connector.on_field_state_change(
-            field_id=field_id,
-            previous_state={},  # No previous state for new fields
-            new_state=field_state,
-            metadata={"source": "climate_risk_processor"}
-        )
+        self.event_bus.publish(Event.create(
+            "field.state.changed",
+            {
+                "field_id": field_id,
+                "previous_state": {},  # No previous state for new fields
+                "new_state": field_state,
+                "metadata": {"source": "climate_risk_processor"}
+            }
+        ))
         
         # Create topology from flow vectors
         topology = {
@@ -240,12 +269,15 @@ class ClimateRiskPersistenceProcessor:
         }
         
         # Process topology through connector
-        self.connector.on_topology_change(
-            field_id=field_id,
-            previous_topology={},
-            new_topology=topology,
-            metadata={"source": "climate_risk_processor"}
-        )
+        self.event_bus.publish(Event.create(
+            "topology.changed",
+            {
+                "field_id": field_id,
+                "previous_topology": {},
+                "new_topology": topology,
+                "metadata": {"source": "climate_risk_processor"}
+            }
+        ))
         
         self.stats["field_states_updated"] += 1
         
@@ -279,8 +311,8 @@ class ClimateRiskPersistenceProcessor:
                     "description": paragraph[:100] + "...",
                     "vector": vector,
                     "harmonic_properties": harmonic_properties,
-                    "confidence": 0.7 + (0.2 * self.metrics.calculate_tonic_value(vector)),
-                    "tonic_value": self.metrics.calculate_tonic_value(vector),
+                    "confidence": 0.7 + (0.2 * self.calculate_tonic_value(vector)),
+                    "tonic_value": self.calculate_tonic_value(vector),
                     "perspective": "climate_risk_assessment",
                     "timestamp": datetime.now().isoformat(),
                     "source_file": filename,
@@ -288,11 +320,14 @@ class ClimateRiskPersistenceProcessor:
                 }
                 
                 # Process pattern through connector
-                self.connector.on_pattern_detected(
-                    pattern_id=pattern_id,
-                    pattern_data=pattern_data,
-                    metadata={"source": "climate_risk_processor"}
-                )
+                self.event_bus.publish(Event.create(
+                    "pattern.detected",
+                    {
+                        "pattern_id": pattern_id,
+                        "pattern_data": pattern_data,
+                        "metadata": {"source": "climate_risk_processor"}
+                    }
+                ))
                 
                 self.stats["patterns_detected"] += 1
             
@@ -353,12 +388,15 @@ class ClimateRiskPersistenceProcessor:
                 }
                 
                 # Process relationship through connector
-                self.connector.on_pattern_relationship_detected(
-                    source_id=source_id,
-                    target_id=target_id,
-                    relationship_data=relationship_data,
-                    metadata={"source": "climate_risk_processor"}
-                )
+                self.event_bus.publish(Event.create(
+                    "pattern.relationship.detected",
+                    {
+                        "source_id": source_id,
+                        "target_id": target_id,
+                        "relationship_data": relationship_data,
+                        "metadata": {"source": "climate_risk_processor"}
+                    }
+                ))
                 
                 self.stats["patterns_detected"] += 2
                 self.stats["relationships_detected"] += 1
