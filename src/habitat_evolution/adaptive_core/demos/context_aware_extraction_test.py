@@ -12,12 +12,18 @@ import json
 from pathlib import Path
 from typing import Dict, List, Any
 from datetime import datetime
+import os
 
-from habitat_evolution.adaptive_core.emergence.context_aware_extraction.context_aware_extractor import ContextAwareExtractor
-from habitat_evolution.pattern_aware_rag.context.quality_aware_context import QualityAwarePatternContext
-from habitat_evolution.pattern_aware_rag.quality_rag.context_aware_rag import ContextAwareRAG
-from habitat_evolution.pattern_aware_rag.quality_rag.quality_enhanced_retrieval import QualityEnhancedRetrieval
-from habitat_evolution.adaptive_core.persistence.adapters.in_memory_pattern_repository import InMemoryPatternRepository
+# Add the src directory to the Python path
+src_dir = str(Path(__file__).parent.parent.parent.parent.parent)
+if src_dir not in sys.path:
+    sys.path.insert(0, src_dir)
+
+from src.habitat_evolution.adaptive_core.emergence.context_aware_extraction.context_aware_extractor import ContextAwareExtractor
+from src.habitat_evolution.pattern_aware_rag.context.quality_aware_context import QualityAwarePatternContext
+from src.habitat_evolution.pattern_aware_rag.quality_rag.context_aware_rag import ContextAwareRAG
+from src.habitat_evolution.pattern_aware_rag.quality_rag.quality_enhanced_retrieval import QualityEnhancedRetrieval
+from src.habitat_evolution.adaptive_core.persistence.adapters.in_memory_pattern_repository import InMemoryPatternRepository
 
 # Configure logging
 logging.basicConfig(
