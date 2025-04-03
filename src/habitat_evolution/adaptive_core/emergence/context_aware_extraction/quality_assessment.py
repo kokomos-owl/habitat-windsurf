@@ -11,8 +11,8 @@ import logging
 import math
 
 from .entity_context_manager import EntityContextManager
-from habitat_evolution.adaptive_core.resonance.tonic_harmonic_metrics import TonicHarmonicMetrics
-from habitat_evolution.core.pattern import PatternState, SignalMetrics, FlowMetrics
+from src.habitat_evolution.adaptive_core.resonance.tonic_harmonic_metrics import TonicHarmonicMetrics
+from src.habitat_evolution.core.pattern import PatternState, SignalMetrics, FlowMetrics
 
 logger = logging.getLogger(__name__)
 
