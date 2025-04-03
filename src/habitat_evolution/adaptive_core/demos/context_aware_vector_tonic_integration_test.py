@@ -27,9 +27,62 @@ sys.path.insert(0, str(src_path))
 from habitat_evolution.adaptive_core.transformation.semantic_current_observer import SemanticCurrentObserver, SemanticRelationship
 from habitat_evolution.adaptive_core.emergence.vector_tonic_window_integration import VectorTonicWindowIntegrator, create_vector_tonic_window_integrator
 from habitat_evolution.adaptive_core.emergence.tonic_harmonic_integration import TonicHarmonicPatternDetector
-from habitat_evolution.adaptive_core.io.harmonic_io_service import HarmonicIOService, OperationType
+from habitat_evolution.adaptive_core.io.harmonic_io_service import HarmonicIOService as BaseHarmonicIOService, OperationType
+
+# Create a mock version of HarmonicIOService with the process_operation method
+class MockHarmonicIOService(BaseHarmonicIOService):
+    """Mock implementation of HarmonicIOService with process_operation method."""
+    
+    def __init__(self, event_bus):
+        """Initialize the mock service."""
+        super().__init__(event_bus)
+        self.operations = []
+    
+    def process_operation(self, operation):
+        """Process a field operation."""
+        self.operations.append(operation)
+        
+        # Publish a field update event
+        event = MockEvent(
+            event_type="vector.field.updated",
+            source="harmonic_io_service",
+            data={
+                'operation': operation,
+                'stability': 0.7,  # Mock stability value
+                'coherence': 0.75  # Mock coherence value
+            }
+        )
+        self.event_bus.publish(event)
+        
+        return True
 from habitat_evolution.field.harmonic_field_io_bridge import HarmonicFieldIOBridge
-from habitat_evolution.adaptive_core.resonance.tonic_harmonic_metrics import TonicHarmonicMetrics
+from habitat_evolution.adaptive_core.resonance.tonic_harmonic_metrics import TonicHarmonicMetrics as BaseTonicHarmonicMetrics
+
+# Create an extended version of TonicHarmonicMetrics with additional methods for our integration
+class TonicHarmonicMetrics(BaseTonicHarmonicMetrics):
+    """Extended version of TonicHarmonicMetrics with additional methods for integration testing."""
+    
+    def __init__(self):
+        """Initialize the extended metrics."""
+        super().__init__()
+        self.coherence_scores = [0.5]  # Start with a neutral coherence
+        self.stability_scores = [0.5]  # Start with a neutral stability
+    
+    def get_average_coherence(self):
+        """Get the average coherence score."""
+        return sum(self.coherence_scores) / max(1, len(self.coherence_scores))
+    
+    def get_field_stability(self):
+        """Get the current field stability score."""
+        return self.stability_scores[-1] if self.stability_scores else 0.5
+    
+    def record_coherence(self, coherence_score):
+        """Record a new coherence score."""
+        self.coherence_scores.append(coherence_score)
+        
+    def record_stability(self, stability_score):
+        """Record a new stability score."""
+        self.stability_scores.append(stability_score)
 from habitat_evolution.pattern_aware_rag.learning.learning_control import WindowState, BackPressureController, LearningWindow
 
 # Configure logging
@@ -163,7 +216,7 @@ class ContextAwareVectorTonicIntegration:
         self.semantic_observer = SemanticCurrentObserver(self.observer_id)
         
         # Create harmonic services for vector-tonic integration
-        self.harmonic_io_service = HarmonicIOService(self.event_bus)
+        self.harmonic_io_service = MockHarmonicIOService(self.event_bus)
         self.metrics = TonicHarmonicMetrics()
         self.field_bridge = HarmonicFieldIOBridge(self.harmonic_io_service)
         
@@ -211,13 +264,20 @@ class ContextAwareVectorTonicIntegration:
         # Initialize entity network
         self.entity_network = nx.DiGraph()
         
-        # Initialize learning window
+        # Initialize learning window with parameters aligned with our quality assessment state machine
         self.learning_window = LearningWindow(
             start_time=datetime.now(),
             end_time=datetime.now() + timedelta(minutes=30),
-            window_state=WindowState.OPENING,
-            back_pressure_controller=BackPressureController()
+            stability_threshold=0.65,  # Threshold for considering the window stable
+            coherence_threshold=0.70,   # Threshold for considering patterns coherent
+            max_changes_per_window=50   # Maximum number of changes allowed per window
         )
+        
+        # Set initial window state
+        self.learning_window.window_state = WindowState.OPENING
+        
+        # Create back pressure controller
+        self.back_pressure_controller = BackPressureController()
         
         # Subscribe to events
         self._setup_event_subscriptions()
@@ -351,6 +411,16 @@ class ContextAwareVectorTonicIntegration:
         
         # Send to harmonic IO service
         self.harmonic_io_service.process_operation(operation)
+        
+        # Update metrics based on quality change
+        # Higher quality transitions lead to higher coherence and stability
+        if quality_change > 0:
+            # Improvement in quality increases coherence and stability
+            new_coherence = min(0.95, self.metrics.get_average_coherence() + quality_change * 0.1)
+            new_stability = min(0.95, self.metrics.get_field_stability() + quality_change * 0.05)
+            
+            self.metrics.record_coherence(new_coherence)
+            self.metrics.record_stability(new_stability)
         
         self.logger.info(f"Notified vector-tonic integrator of quality change for {entity}")
     
