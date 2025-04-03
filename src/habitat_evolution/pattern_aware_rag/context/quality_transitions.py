@@ -10,7 +10,7 @@ from datetime import datetime
 import logging
 from collections import defaultdict
 
-from .quality_transitions_import_adapter import PatternState
+from src.habitat_evolution.core.pattern import PatternState
 
 logger = logging.getLogger(__name__)
 

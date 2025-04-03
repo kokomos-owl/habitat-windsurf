@@ -10,10 +10,14 @@ from src.habitat_evolution.adaptive_core.persistence.interfaces.field_state_repo
 from src.habitat_evolution.adaptive_core.persistence.interfaces.pattern_repository import PatternRepositoryInterface
 from src.habitat_evolution.adaptive_core.persistence.interfaces.relationship_repository import RelationshipRepositoryInterface
 from src.habitat_evolution.adaptive_core.persistence.interfaces.topology_repository import TopologyRepositoryInterface
+from src.habitat_evolution.adaptive_core.persistence.interfaces.metrics_repository import MetricsRepository
+from src.habitat_evolution.adaptive_core.persistence.interfaces.event_repository import EventRepository
 
 __all__ = [
     'FieldStateRepositoryInterface',
     'PatternRepositoryInterface',
     'RelationshipRepositoryInterface',
-    'TopologyRepositoryInterface'
+    'TopologyRepositoryInterface',
+    'MetricsRepository',
+    'EventRepository'
 ]

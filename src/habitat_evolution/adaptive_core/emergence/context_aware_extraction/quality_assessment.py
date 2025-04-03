@@ -11,7 +11,8 @@ import logging
 import math
 
 from .entity_context_manager import EntityContextManager
-from .import_adapter import TonicHarmonicMetrics, PatternState, SignalMetrics, FlowMetrics
+from src.habitat_evolution.adaptive_core.resonance.tonic_harmonic_metrics import TonicHarmonicMetrics
+from src.habitat_evolution.core.pattern import PatternState, SignalMetrics, FlowMetrics
 
 logger = logging.getLogger(__name__)
 
@@ -54,15 +55,27 @@ class QualityAssessment:
         
         # Pattern state mapping
         self.pattern_state_mapping = {
-            PatternState.EMERGENT: "uncertain",
-            PatternState.COHERENT: "good",
-            PatternState.DEGRADING: "poor",
-            PatternState.STABLE: "good"
+            PatternState.EMERGING: "uncertain",
+            PatternState.STABLE: "good",
+            PatternState.DECLINING: "poor",
+            PatternState.TRANSFORMING: "uncertain",
+            PatternState.NOISE: "poor",
+            PatternState.MERGED: "good"
         }
         
         # Initialize metrics for quality assessment
-        self.signal_metrics = SignalMetrics()
-        self.flow_metrics = FlowMetrics()
+        self.signal_metrics = SignalMetrics(
+            strength=0.0,
+            noise_ratio=0.0,
+            persistence=0.0,
+            reproducibility=0.0
+        )
+        self.flow_metrics = FlowMetrics(
+            viscosity=0.0,
+            back_pressure=0.0,
+            volume=0.0,
+            current=0.0
+        )
     
     def assess_entities(self, entities: List[str], context_manager: EntityContextManager) -> None:
         """Assess the quality of entities based on their contexts.
@@ -461,13 +474,13 @@ class QualityAssessment:
         if coherence > 0.7 and stability > 0.6:
             return PatternState.STABLE, "high coherence and stability"
         elif coherence > 0.7 and energy_state > 0.5:
-            return PatternState.COHERENT, "high coherence with good energy"
+            return PatternState.STABLE, "high coherence with good energy"
         elif emergence_rate > 0.6 and energy_state > 0.4:
-            return PatternState.EMERGENT, "high emergence rate"
+            return PatternState.EMERGING, "high emergence rate"
         elif stability < 0.3 or energy_state < 0.2:
-            return PatternState.DEGRADING, "low stability or energy"
+            return PatternState.DECLINING, "low stability or energy"
         else:
-            return PatternState.EMERGENT, "default emergent state"
+            return PatternState.EMERGING, "default emergent state"
     
     def _get_current_state(self, entity: str) -> Optional[str]:
         """Get the current quality state for an entity.

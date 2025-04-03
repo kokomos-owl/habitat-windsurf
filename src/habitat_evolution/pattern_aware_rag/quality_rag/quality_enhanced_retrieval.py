@@ -9,7 +9,9 @@ from typing import Dict, List, Any, Optional, Tuple
 import logging
 from dataclasses import dataclass, field
 
-from .import_adapter import QualityAwarePatternContext, Pattern, Relationship, PatternState
+from src.habitat_evolution.pattern_aware_rag.context.quality_aware_context import QualityAwarePatternContext
+from src.habitat_evolution.adaptive_core.models import Pattern, Relationship
+from src.habitat_evolution.core.pattern import PatternState
 
 logger = logging.getLogger(__name__)
 

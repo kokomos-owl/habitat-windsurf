@@ -9,22 +9,24 @@ from typing import Dict, List, Any, Optional, Tuple
 import logging
 from pathlib import Path
 
-from .import_adapter import (
-    PatternAwareRAG, ContextAwareExtractor, QualityAssessment,
-    QualityAwarePatternContext, Pattern, Relationship,
-    PatternRepository, PatternState
-)
+from src.habitat_evolution.pattern_aware_rag.pattern_aware_rag import PatternAwareRAG
+from src.habitat_evolution.adaptive_core.emergence.context_aware_extraction.context_aware_extractor import ContextAwareExtractor
+from src.habitat_evolution.adaptive_core.emergence.context_aware_extraction.quality_assessment import QualityAssessment
+from src.habitat_evolution.pattern_aware_rag.context.quality_aware_context import QualityAwarePatternContext
+from src.habitat_evolution.adaptive_core.models import Pattern, Relationship
+from src.habitat_evolution.adaptive_core.persistence.interfaces.repository_adapter import PatternRepository
+from src.habitat_evolution.core.pattern import PatternState
 
 from .quality_enhanced_retrieval import QualityEnhancedRetrieval, RetrievalResult
 
 logger = logging.getLogger(__name__)
 
-class ContextAwareRAG(PatternAwareRAG):
+class ContextAwareRAG:
     """Context-aware RAG with quality assessment paths.
     
-    This class extends PatternAwareRAG with context-aware pattern extraction
-    and quality assessment capabilities, creating a self-reinforcing feedback
-    mechanism that improves pattern extraction and retrieval capabilities over time.
+    This class implements context-aware pattern extraction and quality assessment
+    capabilities, creating a self-reinforcing feedback mechanism that improves
+    pattern extraction and retrieval capabilities over time.
     """
     
     def __init__(
@@ -46,7 +48,8 @@ class ContextAwareRAG(PatternAwareRAG):
             coherence_threshold: Threshold for coherence filtering
             data_dir: Optional directory for climate risk data
         """
-        super().__init__(pattern_repository)
+        # Store the pattern repository
+        self.pattern_repository = pattern_repository
         
         # Initialize context-aware extraction components
         self.context_aware_extractor = ContextAwareExtractor(
