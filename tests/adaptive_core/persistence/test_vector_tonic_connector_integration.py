@@ -92,7 +92,11 @@ class TestVectorTonicConnectorWithRefactoredPersistence(unittest.TestCase):
         # Create the connector
         connector = create_connector(
             event_bus=self.mock_event_bus,
-            db=self.mock_db
+            db=self.mock_db,
+            field_state_repository=self.mock_field_state_repo,
+            pattern_repository=self.mock_pattern_repo,
+            relationship_repository=self.mock_relationship_repo,
+            topology_repository=self.mock_topology_repo
         )
         logger.debug(f"Created connector: {connector}")
         
@@ -124,7 +128,11 @@ class TestVectorTonicConnectorWithRefactoredPersistence(unittest.TestCase):
         # Create the connector
         connector = create_connector(
             event_bus=self.mock_event_bus,
-            db=self.mock_db
+            db=self.mock_db,
+            field_state_repository=self.mock_field_state_repo,
+            pattern_repository=self.mock_pattern_repo,
+            relationship_repository=self.mock_relationship_repo,
+            topology_repository=self.mock_topology_repo
         )
         
         # Create a test pattern
@@ -172,7 +180,11 @@ class TestVectorTonicConnectorWithRefactoredPersistence(unittest.TestCase):
         # Create the connector
         connector = create_connector(
             event_bus=self.mock_event_bus,
-            db=self.mock_db
+            db=self.mock_db,
+            field_state_repository=self.mock_field_state_repo,
+            pattern_repository=self.mock_pattern_repo,
+            relationship_repository=self.mock_relationship_repo,
+            topology_repository=self.mock_topology_repo
         )
         
         # Define test data
@@ -243,7 +255,11 @@ class TestVectorTonicConnectorWithRefactoredPersistence(unittest.TestCase):
         # Create the connector
         connector = create_connector(
             event_bus=self.mock_event_bus,
-            db=self.mock_db
+            db=self.mock_db,
+            field_state_repository=self.mock_field_state_repo,
+            pattern_repository=self.mock_pattern_repo,
+            relationship_repository=self.mock_relationship_repo,
+            topology_repository=self.mock_topology_repo
         )
         
         # Create test pattern IDs
@@ -300,7 +316,11 @@ class TestVectorTonicConnectorWithRefactoredPersistence(unittest.TestCase):
         # Create the connector
         connector = create_connector(
             event_bus=self.mock_event_bus,
-            db=self.mock_db
+            db=self.mock_db,
+            field_state_repository=self.mock_field_state_repo,
+            pattern_repository=self.mock_pattern_repo,
+            relationship_repository=self.mock_relationship_repo,
+            topology_repository=self.mock_topology_repo
         )
         
         # Create test field ID
