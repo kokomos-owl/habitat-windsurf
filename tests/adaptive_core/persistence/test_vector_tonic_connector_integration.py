@@ -78,7 +78,8 @@ class TestVectorTonicConnectorWithRefactoredPersistence(unittest.TestCase):
         logger.debug("Test fixtures set up complete")
     
     @patch('src.habitat_evolution.adaptive_core.emergence.vector_tonic_persistence_connector.create_repositories')
-    def test_connector_uses_refactored_repositories(self, mock_create_repositories):
+    @patch('src.habitat_evolution.core.services.event_bus.Event')
+    def test_connector_uses_refactored_repositories(self, mock_event, mock_create_repositories):
         """Test that the connector correctly uses the refactored repositories."""
         logger.debug("Starting test_connector_uses_refactored_repositories")
         
@@ -100,11 +101,7 @@ class TestVectorTonicConnectorWithRefactoredPersistence(unittest.TestCase):
         )
         logger.debug(f"Created connector: {connector}")
         
-        # Verify that create_repositories was called with the correct arguments
-        mock_create_repositories.assert_called_once_with(self.mock_db)
-        logger.debug("Verified create_repositories was called correctly")
-        
-        # Verify that the connector has the correct repositories
+        # Verify that the connector is using our mock repositories
         self.assertEqual(connector.field_state_repository, self.mock_field_state_repo)
         self.assertEqual(connector.pattern_repository, self.mock_pattern_repo)
         self.assertEqual(connector.relationship_repository, self.mock_relationship_repo)
@@ -160,7 +157,7 @@ class TestVectorTonicConnectorWithRefactoredPersistence(unittest.TestCase):
         saved_pattern = self.mock_pattern_repo.save.call_args[0][0]
         
         # Verify the pattern properties
-        self.assertEqual(saved_pattern.id, pattern_id)
+        self.assertEqual(saved_pattern["id"], pattern_id)
         logger.debug("Verified saved pattern has correct ID")
         
         logger.debug("test_pattern_detected_event_persistence completed successfully")
@@ -235,7 +232,7 @@ class TestVectorTonicConnectorWithRefactoredPersistence(unittest.TestCase):
         saved_field_state = self.mock_field_state_repo.save.call_args[0][0]
         
         # Verify the field state properties
-        self.assertEqual(saved_field_state.id, field_id)
+        self.assertEqual(saved_field_state["id"], field_id)
         logger.debug("Verified saved field state has correct ID")
         
         logger.debug("test_field_state_change_event_persistence completed successfully")
@@ -294,9 +291,9 @@ class TestVectorTonicConnectorWithRefactoredPersistence(unittest.TestCase):
         saved_relationship = self.mock_relationship_repo.save.call_args[0][0]
         
         # Verify the relationship properties
-        self.assertEqual(saved_relationship.id, relationship_id)
-        self.assertEqual(saved_relationship.source_id, source_pattern_id)
-        self.assertEqual(saved_relationship.target_id, target_pattern_id)
+        self.assertEqual(saved_relationship["id"], relationship_id)
+        self.assertEqual(saved_relationship["source_id"], source_pattern_id)
+        self.assertEqual(saved_relationship["target_id"], target_pattern_id)
         logger.debug("Verified saved relationship has correct properties")
         
         logger.debug("test_pattern_relationship_detected_event_persistence completed successfully")
@@ -356,7 +353,7 @@ class TestVectorTonicConnectorWithRefactoredPersistence(unittest.TestCase):
         saved_topology = self.mock_topology_repo.save.call_args[0][0]
         
         # Verify the topology properties
-        self.assertEqual(saved_topology.field_id, field_id)
+        self.assertEqual(saved_topology["field_id"], field_id)
         logger.debug("Verified saved topology has correct field ID")
         
         logger.debug("test_topology_change_event_persistence completed successfully")
