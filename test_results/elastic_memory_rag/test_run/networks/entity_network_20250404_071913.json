@@ -1,0 +1,72 @@
+{
+  "timestamp": "2025-04-04T07:19:13.411889",
+  "nodes": [
+    {
+      "id": "entity_1"
+    },
+    {
+      "id": "entity_4"
+    },
+    {
+      "id": "entity_2"
+    },
+    {
+      "id": "entity_3"
+    },
+    {
+      "id": "entity_0"
+    }
+  ],
+  "edges": [
+    {
+      "source": "entity_1",
+      "target": "entity_4",
+      "predicate": "causes"
+    },
+    {
+      "source": "entity_1",
+      "target": "entity_3",
+      "predicate": "causes"
+    },
+    {
+      "source": "entity_4",
+      "target": "entity_2",
+      "predicate": "contains"
+    },
+    {
+      "source": "entity_4",
+      "target": "entity_1",
+      "predicate": "affects"
+    },
+    {
+      "source": "entity_2",
+      "target": "entity_3",
+      "predicate": "related_to"
+    },
+    {
+      "source": "entity_2",
+      "target": "entity_1",
+      "predicate": "related_to"
+    },
+    {
+      "source": "entity_3",
+      "target": "entity_1",
+      "predicate": "part_of"
+    },
+    {
+      "source": "entity_3",
+      "target": "entity_0",
+      "predicate": "affects"
+    },
+    {
+      "source": "entity_3",
+      "target": "entity_4",
+      "predicate": "contains"
+    },
+    {
+      "source": "entity_0",
+      "target": "entity_2",
+      "predicate": "contains"
+    }
+  ]
+}
