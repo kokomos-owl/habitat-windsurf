@@ -1,0 +1,931 @@
+{
+  "timestamp": "2025-04-03T19:56:56.167103",
+  "metrics": {
+    "documents_processed": 6,
+    "entities": {
+      "total": 27,
+      "by_quality": {
+        "good": 27,
+        "uncertain": 0,
+        "poor": 0
+      },
+      "by_category": {
+        "CLIMATE_HAZARD": 5,
+        "ECOSYSTEM": 6,
+        "INFRASTRUCTURE": 5,
+        "ADAPTATION_STRATEGY": 4,
+        "ASSESSMENT_COMPONENT": 7
+      }
+    },
+    "relationships": {
+      "total": 137,
+      "by_quality": {
+        "good": 137,
+        "uncertain": -137,
+        "poor": 0
+      },
+      "by_type": {
+        "part_of": 8,
+        "contains": 15,
+        "component_of": 8,
+        "located_in": 3,
+        "adjacent_to": 10,
+        "causes": 20,
+        "affects": 11,
+        "damages": 13,
+        "mitigates": 5,
+        "prevents": 4,
+        "protects_against": 1,
+        "analyzes": 4,
+        "evaluates": 2,
+        "monitors": 5,
+        "implements": 2,
+        "precedes": 4,
+        "follows": 7,
+        "concurrent_with": 10,
+        "during": 4,
+        "after": 1
+      },
+      "cross_category": {
+        "CLIMATE_HAZARD_to_CLIMATE_HAZARD": 9,
+        "CLIMATE_HAZARD_to_ECOSYSTEM": 14,
+        "CLIMATE_HAZARD_to_INFRASTRUCTURE": 16,
+        "CLIMATE_HAZARD_to_ADAPTATION_STRATEGY": 15,
+        "CLIMATE_HAZARD_to_ASSESSMENT_COMPONENT": 20,
+        "ECOSYSTEM_to_INFRASTRUCTURE": 10,
+        "ECOSYSTEM_to_ADAPTATION_STRATEGY": 7,
+        "ECOSYSTEM_to_ASSESSMENT_COMPONENT": 11,
+        "ECOSYSTEM_to_ECOSYSTEM": 6,
+        "INFRASTRUCTURE_to_INFRASTRUCTURE": 3,
+        "INFRASTRUCTURE_to_ADAPTATION_STRATEGY": 6,
+        "INFRASTRUCTURE_to_ASSESSMENT_COMPONENT": 6,
+        "ADAPTATION_STRATEGY_to_ADAPTATION_STRATEGY": 1,
+        "ADAPTATION_STRATEGY_to_ASSESSMENT_COMPONENT": 10,
+        "ASSESSMENT_COMPONENT_to_ASSESSMENT_COMPONENT": 3
+      }
+    },
+    "quality_transitions": {
+      "poor_to_uncertain": 0,
+      "uncertain_to_good": 27,
+      "poor_to_good": 0
+    },
+    "vector_tonic_metrics": {
+      "window_states": [
+        {
+          "timestamp": "2025-04-03T19:56:53.793252",
+          "state": "opening",
+          "metrics": {
+            "local_density": 0.0,
+            "global_density": 0.0,
+            "coherence": 0.5,
+            "stability": 0.5
+          }
+        },
+        {
+          "timestamp": "2025-04-03T19:56:53.795115",
+          "state": "open",
+          "metrics": {
+            "local_density": 0.0,
+            "global_density": 0.0,
+            "coherence": 0.5,
+            "stability": 0.5
+          }
+        },
+        {
+          "timestamp": "2025-04-03T19:56:53.796469",
+          "state": "closed",
+          "metrics": {
+            "local_density": 4.5,
+            "global_density": 1.0,
+            "coherence": 0.5605963203463205,
+            "stability": 0.6500000000000001
+          }
+        },
+        {
+          "timestamp": "2025-04-03T19:56:53.796514",
+          "state": "opening",
+          "metrics": {
+            "local_density": 4.5,
+            "global_density": 1.0,
+            "coherence": 0.5605963203463205,
+            "stability": 0.6500000000000001
+          }
+        },
+        {
+          "timestamp": "2025-04-03T19:56:53.797063",
+          "state": "open",
+          "metrics": {
+            "local_density": 2.8125,
+            "global_density": 1.0,
+            "coherence": 0.5605963203463205,
+            "stability": 0.6500000000000001
+          }
+        },
+        {
+          "timestamp": "2025-04-03T19:56:53.798375",
+          "state": "closed",
+          "metrics": {
+            "local_density": 4.875,
+            "global_density": 1.0,
+            "coherence": 0.5731865756792228,
+            "stability": 0.7400000000000002
+          }
+        },
+        {
+          "timestamp": "2025-04-03T19:56:53.798594",
+          "state": "opening",
+          "metrics": {
+            "local_density": 4.875,
+            "global_density": 1.0,
+            "coherence": 0.5731865756792228,
+            "stability": 0.7400000000000002
+          }
+        },
+        {
+          "timestamp": "2025-04-03T19:56:53.800663",
+          "state": "open",
+          "metrics": {
+            "local_density": 3.9,
+            "global_density": 1.0,
+            "coherence": 0.5731865756792228,
+            "stability": 0.7400000000000002
+          }
+        },
+        {
+          "timestamp": "2025-04-03T19:56:53.807078",
+          "state": "closed",
+          "metrics": {
+            "local_density": 5.4,
+            "global_density": 1.0,
+            "coherence": 0.5793607611428819,
+            "stability": 0.8000000000000003
+          }
+        },
+        {
+          "timestamp": "2025-04-03T19:56:53.807127",
+          "state": "opening",
+          "metrics": {
+            "local_density": 5.4,
+            "global_density": 1.0,
+            "coherence": 0.5793607611428819,
+            "stability": 0.8000000000000003
+          }
+        },
+        {
+          "timestamp": "2025-04-03T19:56:53.807435",
+          "state": "open",
+          "metrics": {
+            "local_density": 5.4,
+            "global_density": 1.0,
+            "coherence": 0.5793607611428819,
+            "stability": 0.8000000000000003
+          }
+        },
+        {
+          "timestamp": "2025-04-03T19:56:53.812839",
+          "state": "closed",
+          "metrics": {
+            "local_density": 5.5,
+            "global_density": 1.0,
+            "coherence": 0.5793607611428819,
+            "stability": 0.8000000000000003
+          }
+        },
+        {
+          "timestamp": "2025-04-03T19:56:53.812884",
+          "state": "opening",
+          "metrics": {
+            "local_density": 5.5,
+            "global_density": 1.0,
+            "coherence": 0.5793607611428819,
+            "stability": 0.8000000000000003
+          }
+        },
+        {
+          "timestamp": "2025-04-03T19:56:53.813224",
+          "state": "open",
+          "metrics": {
+            "local_density": 4.782608695652174,
+            "global_density": 1.0,
+            "coherence": 0.5793607611428819,
+            "stability": 0.8000000000000003
+          }
+        },
+        {
+          "timestamp": "2025-04-03T19:56:53.813821",
+          "state": "closed",
+          "metrics": {
+            "local_density": 5.304347826086956,
+            "global_density": 1.0,
+            "coherence": 0.5832787453326053,
+            "stability": 0.8450000000000003
+          }
+        },
+        {
+          "timestamp": "2025-04-03T19:56:53.813860",
+          "state": "opening",
+          "metrics": {
+            "local_density": 5.304347826086956,
+            "global_density": 1.0,
+            "coherence": 0.5832787453326053,
+            "stability": 0.8450000000000003
+          }
+        },
+        {
+          "timestamp": "2025-04-03T19:56:53.814167",
+          "state": "open",
+          "metrics": {
+            "local_density": 4.518518518518518,
+            "global_density": 1.0,
+            "coherence": 0.5832787453326053,
+            "stability": 0.8450000000000003
+          }
+        },
+        {
+          "timestamp": "2025-04-03T19:56:53.814952",
+          "state": "closed",
+          "metrics": {
+            "local_density": 5.074074074074074,
+            "global_density": 1.0,
+            "coherence": 0.5878151311689911,
+            "stability": 0.9050000000000004
+          }
+        }
+      ],
+      "coherence_scores": [
+        {
+          "timestamp": "2025-04-03T19:56:53.795886",
+          "coherence": 0.75
+        },
+        {
+          "timestamp": "2025-04-03T19:56:53.795948",
+          "coherence": 0.75
+        },
+        {
+          "timestamp": "2025-04-03T19:56:53.796012",
+          "coherence": 0.75
+        },
+        {
+          "timestamp": "2025-04-03T19:56:53.796052",
+          "coherence": 0.75
+        },
+        {
+          "timestamp": "2025-04-03T19:56:53.796089",
+          "coherence": 0.75
+        },
+        {
+          "timestamp": "2025-04-03T19:56:53.796124",
+          "coherence": 0.75
+        },
+        {
+          "timestamp": "2025-04-03T19:56:53.796159",
+          "coherence": 0.75
+        },
+        {
+          "timestamp": "2025-04-03T19:56:53.796206",
+          "coherence": 0.75
+        },
+        {
+          "timestamp": "2025-04-03T19:56:53.796241",
+          "coherence": 0.75
+        },
+        {
+          "timestamp": "2025-04-03T19:56:53.796274",
+          "coherence": 0.75
+        },
+        {
+          "timestamp": "2025-04-03T19:56:53.797994",
+          "coherence": 0.75
+        },
+        {
+          "timestamp": "2025-04-03T19:56:53.798035",
+          "coherence": 0.75
+        },
+        {
+          "timestamp": "2025-04-03T19:56:53.798068",
+          "coherence": 0.75
+        },
+        {
+          "timestamp": "2025-04-03T19:56:53.798100",
+          "coherence": 0.75
+        },
+        {
+          "timestamp": "2025-04-03T19:56:53.798132",
+          "coherence": 0.75
+        },
+        {
+          "timestamp": "2025-04-03T19:56:53.798163",
+          "coherence": 0.75
+        },
+        {
+          "timestamp": "2025-04-03T19:56:53.806165",
+          "coherence": 0.75
+        },
+        {
+          "timestamp": "2025-04-03T19:56:53.806222",
+          "coherence": 0.75
+        },
+        {
+          "timestamp": "2025-04-03T19:56:53.806260",
+          "coherence": 0.75
+        },
+        {
+          "timestamp": "2025-04-03T19:56:53.806790",
+          "coherence": 0.75
+        },
+        {
+          "timestamp": "2025-04-03T19:56:53.813496",
+          "coherence": 0.75
+        },
+        {
+          "timestamp": "2025-04-03T19:56:53.813534",
+          "coherence": 0.75
+        },
+        {
+          "timestamp": "2025-04-03T19:56:53.813567",
+          "coherence": 0.75
+        },
+        {
+          "timestamp": "2025-04-03T19:56:53.814437",
+          "coherence": 0.75
+        },
+        {
+          "timestamp": "2025-04-03T19:56:53.814473",
+          "coherence": 0.75
+        },
+        {
+          "timestamp": "2025-04-03T19:56:53.814507",
+          "coherence": 0.75
+        },
+        {
+          "timestamp": "2025-04-03T19:56:53.814580",
+          "coherence": 0.75
+        }
+      ],
+      "pattern_emergence": [],
+      "topological_stability": [
+        {
+          "timestamp": "2025-04-03T19:56:53.795884",
+          "stability": 0.7
+        },
+        {
+          "timestamp": "2025-04-03T19:56:53.795945",
+          "stability": 0.7
+        },
+        {
+          "timestamp": "2025-04-03T19:56:53.796011",
+          "stability": 0.7
+        },
+        {
+          "timestamp": "2025-04-03T19:56:53.796051",
+          "stability": 0.7
+        },
+        {
+          "timestamp": "2025-04-03T19:56:53.796088",
+          "stability": 0.7
+        },
+        {
+          "timestamp": "2025-04-03T19:56:53.796122",
+          "stability": 0.7
+        },
+        {
+          "timestamp": "2025-04-03T19:56:53.796158",
+          "stability": 0.7
+        },
+        {
+          "timestamp": "2025-04-03T19:56:53.796204",
+          "stability": 0.7
+        },
+        {
+          "timestamp": "2025-04-03T19:56:53.796240",
+          "stability": 0.7
+        },
+        {
+          "timestamp": "2025-04-03T19:56:53.796273",
+          "stability": 0.7
+        },
+        {
+          "timestamp": "2025-04-03T19:56:53.797992",
+          "stability": 0.7
+        },
+        {
+          "timestamp": "2025-04-03T19:56:53.798034",
+          "stability": 0.7
+        },
+        {
+          "timestamp": "2025-04-03T19:56:53.798067",
+          "stability": 0.7
+        },
+        {
+          "timestamp": "2025-04-03T19:56:53.798099",
+          "stability": 0.7
+        },
+        {
+          "timestamp": "2025-04-03T19:56:53.798131",
+          "stability": 0.7
+        },
+        {
+          "timestamp": "2025-04-03T19:56:53.798162",
+          "stability": 0.7
+        },
+        {
+          "timestamp": "2025-04-03T19:56:53.806163",
+          "stability": 0.7
+        },
+        {
+          "timestamp": "2025-04-03T19:56:53.806221",
+          "stability": 0.7
+        },
+        {
+          "timestamp": "2025-04-03T19:56:53.806259",
+          "stability": 0.7
+        },
+        {
+          "timestamp": "2025-04-03T19:56:53.806788",
+          "stability": 0.7
+        },
+        {
+          "timestamp": "2025-04-03T19:56:53.813495",
+          "stability": 0.7
+        },
+        {
+          "timestamp": "2025-04-03T19:56:53.813533",
+          "stability": 0.7
+        },
+        {
+          "timestamp": "2025-04-03T19:56:53.813566",
+          "stability": 0.7
+        },
+        {
+          "timestamp": "2025-04-03T19:56:53.814436",
+          "stability": 0.7
+        },
+        {
+          "timestamp": "2025-04-03T19:56:53.814472",
+          "stability": 0.7
+        },
+        {
+          "timestamp": "2025-04-03T19:56:53.814506",
+          "stability": 0.7
+        },
+        {
+          "timestamp": "2025-04-03T19:56:53.814542",
+          "stability": 0.7
+        }
+      ],
+      "temporal_evolution": []
+    },
+    "domain_relevance": {
+      "initial": 0.0,
+      "final": 0.0
+    }
+  },
+  "document_results": [
+    {
+      "document": "basic_test_doc_cape_code.txt",
+      "entities": {
+        "total": 10,
+        "by_category": {
+          "CLIMATE_HAZARD": 4,
+          "ECOSYSTEM": 1,
+          "INFRASTRUCTURE": 2,
+          "ADAPTATION_STRATEGY": 2,
+          "ASSESSMENT_COMPONENT": 1
+        }
+      },
+      "relationships": {
+        "total": 45,
+        "by_type": {
+          "part_of": 0,
+          "contains": 7,
+          "component_of": 2,
+          "located_in": 1,
+          "adjacent_to": 4,
+          "causes": 6,
+          "affects": 4,
+          "damages": 3,
+          "mitigates": 1,
+          "prevents": 1,
+          "protects_against": 0,
+          "analyzes": 1,
+          "evaluates": 1,
+          "monitors": 3,
+          "implements": 1,
+          "precedes": 1,
+          "follows": 6,
+          "concurrent_with": 2,
+          "during": 1,
+          "after": 0
+        }
+      },
+      "vector_tonic_metrics": {
+        "window_state": "open",
+        "coherence": 0.5605963203463205,
+        "stability": 0.6500000000000001
+      }
+    },
+    {
+      "document": "climate_risk_marthas_vineyard.txt",
+      "entities": {
+        "total": 9,
+        "by_category": {
+          "CLIMATE_HAZARD": 4,
+          "ECOSYSTEM": 1,
+          "INFRASTRUCTURE": 2,
+          "ADAPTATION_STRATEGY": 1,
+          "ASSESSMENT_COMPONENT": 1
+        }
+      },
+      "relationships": {
+        "total": 36,
+        "by_type": {
+          "part_of": 2,
+          "contains": 4,
+          "component_of": 2,
+          "located_in": 0,
+          "adjacent_to": 2,
+          "causes": 6,
+          "affects": 5,
+          "damages": 5,
+          "mitigates": 0,
+          "prevents": 1,
+          "protects_against": 0,
+          "analyzes": 3,
+          "evaluates": 1,
+          "monitors": 1,
+          "implements": 0,
+          "precedes": 1,
+          "follows": 1,
+          "concurrent_with": 1,
+          "during": 1,
+          "after": 0
+        }
+      },
+      "vector_tonic_metrics": {
+        "window_state": "open",
+        "coherence": 0.5731865756792228,
+        "stability": 0.7400000000000002
+      }
+    },
+    {
+      "document": "complex_test_doc_boston_harbor_islands.txt",
+      "entities": {
+        "total": 10,
+        "by_category": {
+          "CLIMATE_HAZARD": 3,
+          "ECOSYSTEM": 3,
+          "INFRASTRUCTURE": 0,
+          "ADAPTATION_STRATEGY": 2,
+          "ASSESSMENT_COMPONENT": 2
+        }
+      },
+      "relationships": {
+        "total": 45,
+        "by_type": {
+          "part_of": 6,
+          "contains": 4,
+          "component_of": 3,
+          "located_in": 1,
+          "adjacent_to": 4,
+          "causes": 5,
+          "affects": 4,
+          "damages": 4,
+          "mitigates": 3,
+          "prevents": 1,
+          "protects_against": 0,
+          "analyzes": 0,
+          "evaluates": 0,
+          "monitors": 1,
+          "implements": 1,
+          "precedes": 0,
+          "follows": 1,
+          "concurrent_with": 4,
+          "during": 1,
+          "after": 2
+        }
+      },
+      "vector_tonic_metrics": {
+        "window_state": "open",
+        "coherence": 0.5793607611428819,
+        "stability": 0.8000000000000003
+      }
+    },
+    {
+      "document": "recovery_test_doc_nantucket_sound.txt",
+      "entities": {
+        "total": 5,
+        "by_category": {
+          "CLIMATE_HAZARD": 2,
+          "ECOSYSTEM": 0,
+          "INFRASTRUCTURE": 0,
+          "ADAPTATION_STRATEGY": 1,
+          "ASSESSMENT_COMPONENT": 2
+        }
+      },
+      "relationships": {
+        "total": 10,
+        "by_type": {
+          "part_of": 1,
+          "contains": 0,
+          "component_of": 2,
+          "located_in": 0,
+          "adjacent_to": 1,
+          "causes": 1,
+          "affects": 0,
+          "damages": 0,
+          "mitigates": 1,
+          "prevents": 0,
+          "protects_against": 0,
+          "analyzes": 0,
+          "evaluates": 0,
+          "monitors": 2,
+          "implements": 0,
+          "precedes": 0,
+          "follows": 0,
+          "concurrent_with": 0,
+          "during": 2,
+          "after": 0
+        }
+      },
+      "vector_tonic_metrics": {
+        "window_state": "open",
+        "coherence": 0.5793607611428819,
+        "stability": 0.8000000000000003
+      }
+    },
+    {
+      "document": "temporal_analysis_plum_island.txt",
+      "entities": {
+        "total": 6,
+        "by_category": {
+          "CLIMATE_HAZARD": 3,
+          "ECOSYSTEM": 0,
+          "INFRASTRUCTURE": 0,
+          "ADAPTATION_STRATEGY": 1,
+          "ASSESSMENT_COMPONENT": 2
+        }
+      },
+      "relationships": {
+        "total": 15,
+        "by_type": {
+          "part_of": 2,
+          "contains": 2,
+          "component_of": 1,
+          "located_in": 0,
+          "adjacent_to": 0,
+          "causes": 3,
+          "affects": 0,
+          "damages": 2,
+          "mitigates": 0,
+          "prevents": 1,
+          "protects_against": 0,
+          "analyzes": 0,
+          "evaluates": 0,
+          "monitors": 0,
+          "implements": 1,
+          "precedes": 0,
+          "follows": 0,
+          "concurrent_with": 2,
+          "during": 1,
+          "after": 0
+        }
+      },
+      "vector_tonic_metrics": {
+        "window_state": "open",
+        "coherence": 0.5832787453326053,
+        "stability": 0.8450000000000003
+      }
+    },
+    {
+      "document": "vineyard_sound_structure_meaning_test_doc.txt",
+      "entities": {
+        "total": 6,
+        "by_category": {
+          "CLIMATE_HAZARD": 0,
+          "ECOSYSTEM": 3,
+          "INFRASTRUCTURE": 2,
+          "ADAPTATION_STRATEGY": 0,
+          "ASSESSMENT_COMPONENT": 1
+        }
+      },
+      "relationships": {
+        "total": 15,
+        "by_type": {
+          "part_of": 2,
+          "contains": 3,
+          "component_of": 1,
+          "located_in": 1,
+          "adjacent_to": 1,
+          "causes": 1,
+          "affects": 0,
+          "damages": 0,
+          "mitigates": 0,
+          "prevents": 0,
+          "protects_against": 1,
+          "analyzes": 0,
+          "evaluates": 0,
+          "monitors": 1,
+          "implements": 0,
+          "precedes": 2,
+          "follows": 0,
+          "concurrent_with": 1,
+          "during": 0,
+          "after": 1
+        }
+      },
+      "vector_tonic_metrics": {
+        "window_state": "open",
+        "coherence": 0.5878151311689911,
+        "stability": 0.9050000000000004
+      }
+    }
+  ],
+  "entity_count": 27,
+  "relationship_count": 137,
+  "vector_tonic_metrics": {
+    "coherence": 0.5878151311689911,
+    "stability": 0.9050000000000004,
+    "window_states": [
+      {
+        "timestamp": "2025-04-03T19:56:53.793252",
+        "state": "opening",
+        "metrics": {
+          "local_density": 0.0,
+          "global_density": 0.0,
+          "coherence": 0.5,
+          "stability": 0.5
+        }
+      },
+      {
+        "timestamp": "2025-04-03T19:56:53.795115",
+        "state": "open",
+        "metrics": {
+          "local_density": 0.0,
+          "global_density": 0.0,
+          "coherence": 0.5,
+          "stability": 0.5
+        }
+      },
+      {
+        "timestamp": "2025-04-03T19:56:53.796469",
+        "state": "closed",
+        "metrics": {
+          "local_density": 4.5,
+          "global_density": 1.0,
+          "coherence": 0.5605963203463205,
+          "stability": 0.6500000000000001
+        }
+      },
+      {
+        "timestamp": "2025-04-03T19:56:53.796514",
+        "state": "opening",
+        "metrics": {
+          "local_density": 4.5,
+          "global_density": 1.0,
+          "coherence": 0.5605963203463205,
+          "stability": 0.6500000000000001
+        }
+      },
+      {
+        "timestamp": "2025-04-03T19:56:53.797063",
+        "state": "open",
+        "metrics": {
+          "local_density": 2.8125,
+          "global_density": 1.0,
+          "coherence": 0.5605963203463205,
+          "stability": 0.6500000000000001
+        }
+      },
+      {
+        "timestamp": "2025-04-03T19:56:53.798375",
+        "state": "closed",
+        "metrics": {
+          "local_density": 4.875,
+          "global_density": 1.0,
+          "coherence": 0.5731865756792228,
+          "stability": 0.7400000000000002
+        }
+      },
+      {
+        "timestamp": "2025-04-03T19:56:53.798594",
+        "state": "opening",
+        "metrics": {
+          "local_density": 4.875,
+          "global_density": 1.0,
+          "coherence": 0.5731865756792228,
+          "stability": 0.7400000000000002
+        }
+      },
+      {
+        "timestamp": "2025-04-03T19:56:53.800663",
+        "state": "open",
+        "metrics": {
+          "local_density": 3.9,
+          "global_density": 1.0,
+          "coherence": 0.5731865756792228,
+          "stability": 0.7400000000000002
+        }
+      },
+      {
+        "timestamp": "2025-04-03T19:56:53.807078",
+        "state": "closed",
+        "metrics": {
+          "local_density": 5.4,
+          "global_density": 1.0,
+          "coherence": 0.5793607611428819,
+          "stability": 0.8000000000000003
+        }
+      },
+      {
+        "timestamp": "2025-04-03T19:56:53.807127",
+        "state": "opening",
+        "metrics": {
+          "local_density": 5.4,
+          "global_density": 1.0,
+          "coherence": 0.5793607611428819,
+          "stability": 0.8000000000000003
+        }
+      },
+      {
+        "timestamp": "2025-04-03T19:56:53.807435",
+        "state": "open",
+        "metrics": {
+          "local_density": 5.4,
+          "global_density": 1.0,
+          "coherence": 0.5793607611428819,
+          "stability": 0.8000000000000003
+        }
+      },
+      {
+        "timestamp": "2025-04-03T19:56:53.812839",
+        "state": "closed",
+        "metrics": {
+          "local_density": 5.5,
+          "global_density": 1.0,
+          "coherence": 0.5793607611428819,
+          "stability": 0.8000000000000003
+        }
+      },
+      {
+        "timestamp": "2025-04-03T19:56:53.812884",
+        "state": "opening",
+        "metrics": {
+          "local_density": 5.5,
+          "global_density": 1.0,
+          "coherence": 0.5793607611428819,
+          "stability": 0.8000000000000003
+        }
+      },
+      {
+        "timestamp": "2025-04-03T19:56:53.813224",
+        "state": "open",
+        "metrics": {
+          "local_density": 4.782608695652174,
+          "global_density": 1.0,
+          "coherence": 0.5793607611428819,
+          "stability": 0.8000000000000003
+        }
+      },
+      {
+        "timestamp": "2025-04-03T19:56:53.813821",
+        "state": "closed",
+        "metrics": {
+          "local_density": 5.304347826086956,
+          "global_density": 1.0,
+          "coherence": 0.5832787453326053,
+          "stability": 0.8450000000000003
+        }
+      },
+      {
+        "timestamp": "2025-04-03T19:56:53.813860",
+        "state": "opening",
+        "metrics": {
+          "local_density": 5.304347826086956,
+          "global_density": 1.0,
+          "coherence": 0.5832787453326053,
+          "stability": 0.8450000000000003
+        }
+      },
+      {
+        "timestamp": "2025-04-03T19:56:53.814167",
+        "state": "open",
+        "metrics": {
+          "local_density": 4.518518518518518,
+          "global_density": 1.0,
+          "coherence": 0.5832787453326053,
+          "stability": 0.8450000000000003
+        }
+      },
+      {
+        "timestamp": "2025-04-03T19:56:53.814952",
+        "state": "closed",
+        "metrics": {
+          "local_density": 5.074074074074074,
+          "global_density": 1.0,
+          "coherence": 0.5878151311689911,
+          "stability": 0.9050000000000004
+        }
+      }
+    ]
+  }
+}
