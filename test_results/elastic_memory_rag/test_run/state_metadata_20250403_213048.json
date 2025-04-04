@@ -1,0 +1,10 @@
+{
+  "timestamp": "2025-04-03T21:30:48.592921",
+  "entity_quality_path": "/Users/prphillips/Documents/GitHub/habitat-windsurf/test_results/elastic_memory_rag/test_run/entities/entity_quality_20250403_213048.json",
+  "predicate_quality_path": "/Users/prphillips/Documents/GitHub/habitat-windsurf/test_results/elastic_memory_rag/test_run/predicates/predicate_quality_20250403_213048.json",
+  "entity_network_path": "/Users/prphillips/Documents/GitHub/habitat-windsurf/test_results/elastic_memory_rag/test_run/networks/entity_network_20250403_213048.json",
+  "vector_field_path": "/Users/prphillips/Documents/GitHub/habitat-windsurf/test_results/elastic_memory_rag/test_run/vector_field/vector_field_20250403_213048.json",
+  "entity_count": 9,
+  "predicate_count": 0,
+  "relationship_count": 7
+}

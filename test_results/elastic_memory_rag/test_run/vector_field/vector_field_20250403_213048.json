@@ -1,0 +1,15 @@
+{
+  "timestamp": "2025-04-03T21:30:48.592792",
+  "field_metrics": {
+    "local_density": 0.5,
+    "global_density": 0.7,
+    "stability": 1.0,
+    "coherence": 0.5
+  },
+  "field_stability": 1.0,
+  "field_coherence": 0.5,
+  "field_density": {
+    "global": 0.7,
+    "local": 0.5
+  }
+}

@@ -12,12 +12,12 @@ from datetime import datetime
 import os
 from pathlib import Path
 
-from habitat_evolution.pattern_aware_rag.quality_rag.quality_enhanced_retrieval import QualityEnhancedRetrieval, RetrievalResult
-from habitat_evolution.pattern_aware_rag.context.quality_aware_context import QualityAwarePatternContext
-from habitat_evolution.adaptive_core.quality.predicate_quality_tracker import PredicateQualityTracker
-from habitat_evolution.adaptive_core.persistence.semantic_memory_persistence import SemanticMemoryPersistence
-from habitat_evolution.adaptive_core.models import Pattern, Relationship
-from habitat_evolution.core.pattern import PatternState
+from src.habitat_evolution.pattern_aware_rag.quality_rag.quality_enhanced_retrieval import QualityEnhancedRetrieval, RetrievalResult
+from src.habitat_evolution.pattern_aware_rag.context.quality_aware_context import QualityAwarePatternContext
+from src.habitat_evolution.adaptive_core.quality.predicate_quality_tracker import PredicateQualityTracker
+from src.habitat_evolution.adaptive_core.persistence.semantic_memory_persistence import SemanticMemoryPersistence
+from src.habitat_evolution.adaptive_core.models import Pattern, Relationship
+from src.habitat_evolution.core.pattern import PatternState
 
 logger = logging.getLogger(__name__)
 

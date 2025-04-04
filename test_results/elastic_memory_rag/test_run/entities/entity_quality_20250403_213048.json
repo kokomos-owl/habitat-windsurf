@@ -1,0 +1,59 @@
+{
+  "timestamp": "2025-04-03T21:30:48.592060",
+  "entity_quality": {
+    "entity_3": "uncertain",
+    "entity_2": "uncertain",
+    "entity_1": "uncertain",
+    "entity_0": "uncertain",
+    "entity_4": "uncertain",
+    "salt marshes": "good",
+    "coastal communities": "good",
+    "sea level rise": "good",
+    "erosion": "good"
+  },
+  "entity_confidence": {
+    "entity_3": 0.5,
+    "entity_2": 0.5,
+    "entity_1": 0.5,
+    "entity_0": 0.5,
+    "entity_4": 0.5,
+    "salt marshes": 0.8,
+    "coastal communities": 0.8,
+    "sea level rise": 0.8,
+    "erosion": 0.8
+  },
+  "quality_transition_history": {
+    "salt marshes": [
+      {
+        "timestamp": "2025-04-03T21:30:48.591915",
+        "from_quality": "uncertain",
+        "to_quality": "good",
+        "evidence": "Contextual reinforcement: entity involved in 6 relationships"
+      }
+    ],
+    "coastal communities": [
+      {
+        "timestamp": "2025-04-03T21:30:48.591933",
+        "from_quality": "uncertain",
+        "to_quality": "good",
+        "evidence": "Contextual reinforcement: entity involved in 3 relationships"
+      }
+    ],
+    "sea level rise": [
+      {
+        "timestamp": "2025-04-03T21:30:48.591949",
+        "from_quality": "uncertain",
+        "to_quality": "good",
+        "evidence": "Contextual reinforcement: entity involved in 3 relationships"
+      }
+    ],
+    "erosion": [
+      {
+        "timestamp": "2025-04-03T21:30:48.591963",
+        "from_quality": "uncertain",
+        "to_quality": "good",
+        "evidence": "Contextual reinforcement: entity involved in 2 relationships"
+      }
+    ]
+  }
+}
