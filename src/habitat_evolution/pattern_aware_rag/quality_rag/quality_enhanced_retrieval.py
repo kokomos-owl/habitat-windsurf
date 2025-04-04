@@ -268,57 +268,32 @@ class QualityEnhancedRetrieval:
             for rel in pattern.metadata.get('relationships', []):
                 if isinstance(rel, dict) and 'predicate' in rel:
                     predicates.add(rel['predicate'])
-        "good": sum(1 for p in top_patterns if p.metadata.get("quality_state") == "good"),
-        "uncertain": sum(1 for p in top_patterns if p.metadata.get("quality_state") == "uncertain"),
-        "poor": sum(1 for p in top_patterns if p.metadata.get("quality_state") == "poor")
-    }
-        
-    # Calculate overall confidence
-    confidence = self._calculate_confidence(top_patterns)
-        
-    # Generate retrieval explanation
-    explanation = self._generate_explanation(query, top_patterns, confidence)
-        
-    # Prepare quality context
-    quality_context = {
-        "high_quality_ratio": quality_distribution["good"] / max(1, len(top_patterns)),
-        "coherence_level": context.coherence_level,
-        "pattern_state_distribution": {k.name: v for k, v in context.pattern_state_distribution.items()},
-        "quality_transitions": context.quality_transitions.get_transition_summary() if hasattr(context, "quality_transitions") else {}
-    }
-        
-    # Extract entity relationships from patterns
-    entity_relationships = self._extract_entity_relationships(top_patterns)
-        
-    # Update entity network with relationships
-    self._update_entity_network(entity_relationships)
-        
-    # Get predicate quality information
-    predicate_quality = {pred: self.predicate_quality_tracker.get_predicate_quality(pred) 
-                       for pred in self._get_predicates_from_relationships(entity_relationships)}
-        
-    # Persistence information
-    persistence_info = {}
-    if use_persistence:
-        # Save current state to persistence layer
-        persistence_info = self._save_to_persistence(top_patterns, context)
-        
-    logger.info(f"Retrieved {len(top_patterns)} patterns with quality enhancement, confidence: {confidence:.2f}")
-        
-    return RetrievalResult(
-        patterns=top_patterns,
-        quality_distribution=quality_distribution,
-        confidence=confidence,
-        retrieval_explanation=explanation,
-        quality_context=quality_context,
-        predicate_quality=predicate_quality,
-        entity_relationships=entity_relationships,
-        persistence_info=persistence_info
-    )
-
-def _calculate_relevance(self, query: str, pattern_text: str) -> float:
-    """Calculate relevance score between query and pattern.
+                    
+        if predicates:
+            explanation += f"Relationships involve predicates: {', '.join(predicates)}.\n"
+            
         return explanation
+
+    def _calculate_relevance(self, query: str, pattern_text: str) -> float:
+        """Calculate relevance score between query and pattern.
+        
+        Args:
+            query: Query string
+            pattern_text: Pattern text
+            
+        Returns:
+            Relevance score between 0 and 1
+        """
+        # Simple word overlap for demonstration
+        # In a real implementation, this would use semantic similarity
+        query_words = set(query.lower().split())
+        pattern_words = set(pattern_text.lower().split())
+        
+        if not query_words or not pattern_words:
+            return 0.0
+        
+        overlap = len(query_words.intersection(pattern_words))
+        return min(1.0, overlap / max(len(query_words), 1))
     
     def get_related_patterns(self, pattern: Pattern, context: QualityAwarePatternContext, 
                            max_results: int = 5) -> List[Tuple[Pattern, str, float]]:
@@ -347,6 +322,4 @@ def _calculate_relevance(self, query: str, pattern_text: str) -> float:
             
             if related_pattern:
                 related.append((related_pattern, relation_type, confidence))
-        
-        # Sort by confidence and take top results
         return sorted(related, key=lambda x: x[2], reverse=True)[:max_results]

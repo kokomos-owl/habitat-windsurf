@@ -351,3 +351,69 @@ class TestPatternAwareSequence:
             'average_coherence': sum(r[1].coherence_level for r in results) / len(results),
             'emergence_points': len(self.emergence_points)
         }
+    
+    @pytest.mark.asyncio
+    async def test_quality_state_transitions(self, pattern_aware_rag, test_pattern):
+        """Test pattern quality state transitions from uncertain to stable."""
+        # Define quality states for testing
+        quality_states = ["uncertain", "emerging", "good", "stable"]
+        
+        # Create test patterns with different quality states
+        test_patterns = []
+        for state in quality_states:
+            pattern = PatternState(
+                id=str(AdaptiveID(base_concept=f"test_{state}", creator_id="test")),
+                content=f"Test pattern in {state} state",
+                metadata={"quality_state": state, "source": "test"},
+                timestamp=datetime.now(timezone.utc),
+                confidence=0.3 if state == "uncertain" else 
+                           0.5 if state == "emerging" else
+                           0.8 if state == "good" else 0.95
+            )
+            test_patterns.append(pattern)
+        
+        # Process each pattern and track transitions
+        transitions = []
+        for pattern in test_patterns:
+            # Process the pattern
+            result = await pattern_aware_rag.process_with_patterns(
+                query=pattern.content,
+                context={
+                    'test_pattern': pattern,
+                    'mode': 'quality_transition_test',
+                    'initial_quality_state': pattern.metadata["quality_state"]
+                }
+            )
+            response, pattern_context = result
+            
+            # Record the transition
+            transitions.append({
+                'pattern_id': pattern.id,
+                'initial_state': pattern.metadata["quality_state"],
+                'confidence': pattern.confidence,
+                'coherence_level': pattern_context.coherence_level,
+                'stability': pattern_context.evolution_metrics.stability if pattern_context.evolution_metrics else None
+            })
+            
+            # Record emergence point
+            self.record_emergence_point(f'quality_transition_{pattern.metadata["quality_state"]}', {
+                'pattern': pattern.content,
+                'initial_state': pattern.metadata["quality_state"],
+                'confidence': pattern.confidence,
+                'context': pattern_context
+            })
+        
+        # Verify quality transitions
+        assert len(transitions) == len(quality_states), "Should have a transition for each quality state"
+        
+        # Verify that patterns with higher quality states have higher coherence
+        coherence_values = [t['coherence_level'] for t in transitions]
+        for i in range(1, len(coherence_values)):
+            assert coherence_values[i] >= coherence_values[i-1], \
+                f"Coherence should increase or stay the same with higher quality states"
+        
+        # Return transition data for analysis
+        return {
+            'transitions': transitions,
+            'emergence_points': self.emergence_points
+        }
