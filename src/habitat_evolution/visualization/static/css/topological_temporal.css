@@ -1,0 +1,309 @@
+/* Topological-Temporal Expression Visualizer Styles - Dark Mode */
+
+:root {
+    --bg-color: #1a1a1a;
+    --card-bg: #242424;
+    --text-color: #e0e0e0;
+    --text-muted: #a0a0a0;
+    --border-color: #333;
+    --primary-color: #3a9d3e;
+    --primary-color-muted: rgba(58, 157, 62, 0.15);
+    --secondary-color: #1e88e5;
+    --warning-color: #f57c00;
+    --danger-color: #e53935;
+    --info-color: #00acc1;
+    --social-color: #5c6bc0;
+    --environmental-color: #26a69a;
+    --progress-bg: rgba(255, 255, 255, 0.08);
+}
+
+body {
+    font-family: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    margin: 0;
+    padding: 0;
+    font-weight: 300;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 400;
+}
+
+/* Visualization container */
+#visualization-container {
+    width: 100%;
+    height: 600px;
+    background-color: var(--card-bg);
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+    border: 1px solid var(--border-color);
+}
+
+/* SVG styles */
+svg {
+    width: 100%;
+    height: 100%;
+}
+
+/* Node styles */
+.node {
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.node circle {
+    stroke: var(--card-bg);
+    stroke-width: 1px;
+}
+
+.node:hover circle {
+    stroke: var(--text-color);
+    stroke-width: 1.5px;
+    filter: brightness(1.2);
+}
+
+.node text {
+    font-size: 10px;
+    font-family: 'Inter', sans-serif;
+    fill: var(--text-color);
+    pointer-events: none;
+}
+
+.node.selected circle {
+    stroke: var(--text-color);
+    stroke-width: 2px;
+    stroke-dasharray: 4, 2;
+}
+
+/* Edge styles */
+.link {
+    stroke: #555;
+    stroke-opacity: 0.4;
+    stroke-width: 1px;
+}
+
+/* Potential gradient styles */
+.potential-gradient {
+    opacity: 0.15;
+}
+
+/* Intentionality vector styles */
+.intentionality-vector {
+    stroke: var(--primary-color);
+    stroke-width: 1.5px;
+    stroke-dasharray: 4, 2;
+}
+
+/* Constructive dissonance zone styles */
+.dissonance-zone {
+    fill: var(--warning-color);
+    opacity: 0.1;
+    mix-blend-mode: screen;
+}
+
+/* Expression card styles */
+.expression-card {
+    transition: all 0.3s ease;
+    margin-bottom: 0.75rem;
+}
+
+.expression-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.expression-card .card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+}
+
+.expression-text {
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+    color: var(--text-color);
+}
+
+/* Tooltip styles */
+.tooltip {
+    position: absolute;
+    padding: 8px 12px;
+    background: rgba(30, 30, 30, 0.9);
+    color: var(--text-color);
+    border-radius: 4px;
+    pointer-events: none;
+    font-size: 12px;
+    z-index: 10;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    font-weight: 300;
+}
+
+/* Domain color coding */
+.domain-social circle {
+    fill: var(--social-color);
+    opacity: 0.85;
+}
+
+.domain-environmental circle {
+    fill: var(--environmental-color);
+    opacity: 0.85;
+}
+
+/* Node type styling */
+.type-concept circle {
+    fill-opacity: 0.85;
+}
+
+.type-predicate circle {
+    fill-opacity: 0.65;
+}
+
+/* Accessibility - High contrast mode */
+.high-contrast .node circle {
+    stroke-width: 3px;
+}
+
+.high-contrast .link {
+    stroke-width: 2px;
+}
+
+/* Loading indicator */
+.loading-indicator {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: var(--text-muted);
+}
+
+.loading-indicator .spinner-border {
+    width: 2.5rem;
+    height: 2.5rem;
+    color: var(--primary-color);
+    opacity: 0.8;
+}
+
+/* Card styles */
+.card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+    background-color: rgba(0, 0, 0, 0.15);
+    border-bottom: 1px solid var(--border-color);
+    padding: 0.75rem 1rem;
+}
+
+.card-header h5 {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 400;
+}
+
+.card-body {
+    padding: 1rem;
+}
+
+/* Form controls */
+.form-label {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+    font-weight: 300;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.metric-value {
+    color: var(--text-color);
+    font-weight: 400;
+}
+
+.form-range {
+    height: 6px;
+}
+
+.form-range::-webkit-slider-thumb {
+    background: var(--primary-color);
+}
+
+.btn-outline-primary {
+    border-color: var(--border-color);
+    color: var(--text-color);
+    font-weight: 300;
+}
+
+.btn-outline-primary:hover, .btn-check:checked + .btn-outline-primary {
+    background-color: var(--primary-color) !important;
+    opacity: 0.85;
+}
+
+.btn-outline-secondary {
+    border-color: var(--border-color);
+    color: var(--text-muted);
+    font-weight: 300;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    font-weight: 300;
+}
+
+.bg-success {
+    background-color: var(--success-color) !important;
+    opacity: 0.85;
+}
+
+.bg-warning {
+    background-color: var(--warning-color) !important;
+    opacity: 0.85;
+}
+
+.bg-info {
+    background-color: var(--info-color) !important;
+    opacity: 0.85;
+}
+
+.bg-primary {
+    background-color: var(--secondary-color) !important;
+    opacity: 0.85;
+}
+
+.progress {
+    background-color: var(--progress-bg);
+    height: 4px;
+    border-radius: 2px;
+}
+
+/* Alerts */
+.alert-info, .alert-secondary {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-color: var(--border-color);
+    color: var(--text-muted);
+}
+
+/* Badge */
+.badge {
+    font-weight: 500;
+    padding: 0.35em 0.65em;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    #visualization-container {
+        height: 400px;
+    }
+    
+    .card {
+        margin-bottom: 1rem;
+    }
+}

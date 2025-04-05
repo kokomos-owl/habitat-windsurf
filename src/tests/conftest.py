@@ -2,7 +2,12 @@
 
 import pytest
 import asyncio
+import sys
+import os
 from typing import Dict, Any, Generator
+
+# Add the src directory to the Python path
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
 from src.tests.mocks.mock_db import MockMongoClient, MockNeo4jClient
 from src.tests.mocks.mock_websocket import MockWebSocket, MockConnectionManager
