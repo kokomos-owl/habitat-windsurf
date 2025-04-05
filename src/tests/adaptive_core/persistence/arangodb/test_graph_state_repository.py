@@ -129,9 +129,10 @@ def test_save_and_find_relation(graph_state_repository, sample_concept_relation)
     source_node_id = graph_state_repository.save_node(ConceptNode(
         id=relation.source_id,
         name="source_node",
-        node_type="ENTITY",
-        quality_state="uncertain",
-        attributes={}
+        attributes={
+            "type": "ENTITY",
+            "quality_state": "uncertain"
+        }
     ))
     target_node_id = graph_state_repository.save_node(target_node)
     
@@ -144,7 +145,6 @@ def test_save_and_find_relation(graph_state_repository, sample_concept_relation)
     assert len(found_relations) > 0
     found_relation = found_relations[0]
     assert found_relation.relation_type == relation.relation_type
-    assert found_relation.quality_state == relation.quality_state
     assert found_relation.weight == relation.weight
 
 

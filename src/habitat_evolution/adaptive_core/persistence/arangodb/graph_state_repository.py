@@ -250,53 +250,112 @@ class ArangoDBGraphStateRepository(ArangoDBBaseRepository, GraphStateRepositoryI
             )
             
         except Exception as e:
-    
-    cursor = self.db.aql.execute(query, bind_vars=bind_vars)
-    
-    # Return first match
-    doc = next(cursor, None)
-    if doc:
-        return ConceptRelation(
-            source_id=doc["source_id"],
-            target_id=doc["target_id"],
-            relation_type=doc["relation_type"],
-            weight=doc["weight"]
-        )
-    
-    return None
+            print(f"Error finding relation: {str(e)}")
+            return None
 
-def find_relations_by_nodes(self, source_id: str, target_id: str) -> List[ConceptRelation]:
-    """
-    Find relations between two nodes.
-    
-    Args:
-        source_id: The source node ID
-        target_id: The target node ID
+    def save_relation(self, relation: ConceptRelation, quality_state: str = "uncertain") -> str:
+        """
+        Save a concept relation.
         
-    Returns:
-        A list of concept relations between the nodes
-    """
-    query = """
-    FOR e IN @@collection
-        FILTER e._from == @from_id AND e._to == @to_id
-        LET source_id = SUBSTRING(e._from, LENGTH(@nodes_prefix))
-        LET target_id = SUBSTRING(e._to, LENGTH(@nodes_prefix))
-        RETURN {
-            source_id: source_id,
-            target_id: target_id,
-            relation_type: e.relation_type,
-            weight: e.weight
+        Args:
+            relation: The concept relation to save
+            quality_state: Optional quality state for the relation
+            
+        Returns:
+            The ID of the saved relation
+        """
+        collection = self.db.collection(self.relations_collection)
+        
+        # Create edge document
+        edge_dict = {
+            "_from": f"{self.nodes_collection}/{relation.source_id}",
+            "_to": f"{self.nodes_collection}/{relation.target_id}",
+            "relation_type": relation.relation_type,
+            "weight": relation.weight,
+            "quality_state": quality_state,
+            "created_at": datetime.now().isoformat()
         }
-    """
+        
+        # Generate a unique ID for the edge
+        edge_id = f"{relation.source_id}_{relation.target_id}_{relation.relation_type}"
+        edge_dict["_key"] = edge_id
+        
+        # Check if relation already exists
+        try:
+            existing = collection.get(edge_id)
+            if existing:
+                # Check if we need to track a quality state transition
+                if "quality_state" in existing and existing["quality_state"] != quality_state:
+                    self.track_quality_transition(
+                        entity_id=edge_id,
+                        from_quality=existing["quality_state"],
+                        to_quality=quality_state
+                    )
+                
+                # Update existing relation
+                collection.update(edge_id, edge_dict)
+            else:
+                # Insert new relation
+                collection.insert(edge_dict)
+        except Exception as e:
+            print(f"Error saving relation: {str(e)}")
+            # Try inserting as new if update failed
+            try:
+                collection.insert(edge_dict)
+            except Exception as e2:
+                print(f"Error inserting relation: {str(e2)}")
+        
+        return edge_id
+        
+    def find_relations_by_nodes(self, source_id: str, target_id: str) -> List[ConceptRelation]:
+        """
+        Find relations between two nodes.
+        
+        Args:
+            source_id: The source node ID
+            target_id: The target node ID
+            
+        Returns:
+            A list of concept relations between the nodes
+        """
+        query = """
+        FOR e IN @@collection
+            FILTER e._from == @from_id AND e._to == @to_id
+            LET source_id = SUBSTRING(e._from, LENGTH(@nodes_prefix))
+            LET target_id = SUBSTRING(e._to, LENGTH(@nodes_prefix))
+            RETURN {
+                source_id: source_id,
+                target_id: target_id,
+                relation_type: e.relation_type,
+                weight: e.weight
+            }
+        """
+        
+        bind_vars = {
+            "@collection": self.relations_collection,
+            "from_id": f"{self.nodes_collection}/{source_id}",
+            "to_id": f"{self.nodes_collection}/{target_id}",
+            "nodes_prefix": f"{self.nodes_collection}/"
+        }
     
-    bind_vars = {
-        "@collection": self.relations_collection,
-        "from_id": f"{self.nodes_collection}/{source_id}",
-        "to_id": f"{self.nodes_collection}/{target_id}",
-        "nodes_prefix": f"{self.nodes_collection}/"
-    }
+        cursor = self.db.aql.execute(query, bind_vars=bind_vars)
+        
+        relations = []
+        for doc in cursor:
+            relation = ConceptRelation(
+                source_id=doc["source_id"],
+                target_id=doc["target_id"],
+                relation_type=doc["relation_type"],
+                weight=doc["weight"]
+            )
+            relations.append(relation)
+            
+        return relations
     
-    cursor = self.db.aql.execute(query, bind_vars=bind_vars)
+    def find_nodes_by_category(self, category: str) -> List[ConceptNode]:
+        """
+        Find nodes by category.
+        
         Args:
             category: The category to filter by
             
@@ -395,6 +454,49 @@ def find_relations_by_nodes(self, source_id: str, target_id: str) -> List[Concep
         cursor = self.db.aql.execute(query, bind_vars=bind_vars)
         
         return list(cursor)
+    
+    def find_relations_by_quality(self, quality_state: str) -> List[ConceptRelation]:
+        """
+        Find relations by quality state.
+        
+        Args:
+            quality_state: The quality state to filter by
+            
+        Returns:
+            A list of concept relations with the specified quality state
+        """
+        query = """
+        FOR e IN @@collection
+            FILTER e.quality_state == @quality_state
+            LET source_id = SUBSTRING(e._from, LENGTH(@nodes_prefix))
+            LET target_id = SUBSTRING(e._to, LENGTH(@nodes_prefix))
+            RETURN {
+                source_id: source_id,
+                target_id: target_id,
+                relation_type: e.relation_type,
+                weight: e.weight
+            }
+        """
+        
+        bind_vars = {
+            "@collection": self.relations_collection,
+            "quality_state": quality_state,
+            "nodes_prefix": f"{self.nodes_collection}/"
+        }
+        
+        cursor = self.db.aql.execute(query, bind_vars=bind_vars)
+        
+        relations = []
+        for doc in cursor:
+            relation = ConceptRelation(
+                source_id=doc["source_id"],
+                target_id=doc["target_id"],
+                relation_type=doc["relation_type"],
+                weight=doc["weight"]
+            )
+            relations.append(relation)
+            
+        return relations
     
     def _update_node_quality_state(self, node_id: str, quality_state: str, confidence: float = None) -> None:
         """
