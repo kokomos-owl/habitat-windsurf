@@ -9,7 +9,8 @@ from typing import Dict, List, Optional, Any, Union
 from datetime import datetime
 import uuid
 
-from src.habitat_evolution.pattern_aware_rag.state.test_states import (
+# Use the simplified test state models to avoid import path issues
+from src.tests.adaptive_core.persistence.arangodb.test_state_models import (
     GraphStateSnapshot, ConceptNode, ConceptRelation, PatternState
 )
 from src.habitat_evolution.adaptive_core.persistence.interfaces.graph_state_repository import GraphStateRepositoryInterface
@@ -183,8 +184,11 @@ class ArangoDBGraphStateRepository(ArangoDBBaseRepository, GraphStateRepositoryI
             "_key": node.id,
             "name": node.name,
             "quality_state": quality_state,
-            "attributes": node.attributes
+            "attributes": node.attributes.copy()  # Create a copy to avoid modifying the original
         }
+        
+        # Ensure quality_state is also in attributes
+        node_dict["attributes"]["quality_state"] = quality_state
         
         # Add created_at timestamp if available
         if node.created_at:
@@ -208,7 +212,7 @@ class ArangoDBGraphStateRepository(ArangoDBBaseRepository, GraphStateRepositoryI
                 )
             
             # Update existing node
-            collection.update(node.id, node_dict)
+            collection.update({"_key": node.id}, node_dict)
         else:
             # Insert new node
             collection.insert(node_dict)
@@ -455,6 +459,49 @@ class ArangoDBGraphStateRepository(ArangoDBBaseRepository, GraphStateRepositoryI
         
         return list(cursor)
     
+    def find_nodes_by_quality(self, quality_state: str) -> List[ConceptNode]:
+        """
+        Find nodes by quality state.
+        
+        Args:
+            quality_state: The quality state to filter by
+            
+        Returns:
+            A list of concept nodes with the specified quality state
+        """
+        query = """
+        FOR doc IN @@collection
+            FILTER doc.quality_state == @quality_state
+            RETURN doc
+        """
+        
+        bind_vars = {
+            "@collection": self.nodes_collection,
+            "quality_state": quality_state
+        }
+        
+        cursor = self.db.aql.execute(query, bind_vars=bind_vars)
+        
+        nodes = []
+        for doc in cursor:
+            # Get created_at if available
+            created_at = None
+            if "created_at" in doc:
+                try:
+                    created_at = datetime.fromisoformat(doc["created_at"])
+                except (ValueError, TypeError):
+                    pass
+                    
+            node = ConceptNode(
+                id=doc["_key"],
+                name=doc["name"],
+                attributes=doc["attributes"],
+                created_at=created_at
+            )
+            nodes.append(node)
+            
+        return nodes
+        
     def find_relations_by_quality(self, quality_state: str) -> List[ConceptRelation]:
         """
         Find relations by quality state.
@@ -508,25 +555,44 @@ class ArangoDBGraphStateRepository(ArangoDBBaseRepository, GraphStateRepositoryI
             confidence: Optional confidence score (0.0-1.0)
         """
         try:
-            # Get the node collection
-            collection = self.db.collection(self.nodes_collection)
+            # Direct AQL update to ensure both document and attributes are updated
+            query = """
+            FOR doc IN @@collection
+                FILTER doc._key == @node_id
+                UPDATE doc WITH { 
+                    quality_state: @quality_state, 
+                    attributes: MERGE(doc.attributes, { quality_state: @quality_state })
+                } IN @@collection
+                RETURN NEW
+            """
             
-            # Get the current node
-            node_doc = collection.get(node_id)
-            if not node_doc:
-                return
-                
-            # Update quality state
-            node_doc["quality_state"] = quality_state
+            bind_vars = {
+                "@collection": self.nodes_collection,
+                "node_id": node_id,
+                "quality_state": quality_state
+            }
+            
+            # Execute the update query
+            cursor = self.db.aql.execute(query, bind_vars=bind_vars)
+            updated_doc = next(cursor, None)
             
             # Update confidence if provided
-            if confidence is not None:
-                if "attributes" not in node_doc:
-                    node_doc["attributes"] = {}
-                node_doc["attributes"]["confidence"] = str(confidence)
+            if confidence is not None and updated_doc:
+                confidence_query = """
+                FOR doc IN @@collection
+                    FILTER doc._key == @node_id
+                    UPDATE doc WITH { 
+                        attributes: MERGE(doc.attributes, { confidence: @confidence })
+                    } IN @@collection
+                """
                 
-            # Update the node
-            collection.update(node_id, node_doc)
+                confidence_bind_vars = {
+                    "@collection": self.nodes_collection,
+                    "node_id": node_id,
+                    "confidence": str(confidence)
+                }
+                
+                self.db.aql.execute(confidence_query, bind_vars=confidence_bind_vars)
         except Exception as e:
             print(f"Error updating node quality state: {str(e)}")
     
@@ -559,7 +625,7 @@ class ArangoDBGraphStateRepository(ArangoDBBaseRepository, GraphStateRepositoryI
                 node_doc["attributes"]["confidence"] = str(confidence)
                 
             # Update the node
-            collection.update(node_id, node_doc)
+            collection.update({"_key": node_id}, node_doc)
         except Exception as e:
             print(f"Error assigning category: {str(e)}")
     
@@ -586,6 +652,70 @@ class ArangoDBGraphStateRepository(ArangoDBBaseRepository, GraphStateRepositoryI
         result = next(cursor, {"poor": 0, "uncertain": 0, "good": 0})
         
         return result
+    
+    def save_pattern(self, pattern: PatternState) -> str:
+        """
+        Save a pattern state.
+        
+        Args:
+            pattern: The pattern state to save
+            
+        Returns:
+            The ID of the saved pattern
+        """
+        collection = self.db.collection(self.patterns_collection)
+        
+        # Convert to dictionary
+        pattern_dict = {
+            "_key": pattern.id,
+            "content": pattern.content,
+            "metadata": pattern.metadata,
+            "timestamp": pattern.timestamp.isoformat(),
+            "confidence": pattern.confidence
+        }
+        
+        # Check if pattern already exists
+        existing = collection.get(pattern.id)
+        if existing:
+            # Update existing pattern
+            collection.update(pattern.id, pattern_dict)
+        else:
+            # Insert new pattern
+            collection.insert(pattern_dict)
+            
+        return pattern.id
+    
+    def find_pattern_by_id(self, id: str) -> Optional[PatternState]:
+        """
+        Find a pattern by ID.
+        
+        Args:
+            id: The ID of the pattern to find
+            
+        Returns:
+            The pattern state if found, None otherwise
+        """
+        collection = self.db.collection(self.patterns_collection)
+        
+        try:
+            # Get document by key
+            doc = collection.get(id)
+            if not doc:
+                return None
+                
+            # Convert to PatternState
+            timestamp = datetime.fromisoformat(doc["timestamp"])
+            return PatternState(
+                id=doc["_key"],
+                content=doc["content"],
+                metadata=doc["metadata"],
+                timestamp=timestamp,
+                confidence=doc["confidence"]
+            )
+            
+        except Exception as e:
+            print(f"Error finding pattern: {str(e)}")
+            return None
     
     def _dict_to_entity(self, entity_dict: Dict[str, Any]) -> Any:
         """
