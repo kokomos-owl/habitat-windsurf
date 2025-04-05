@@ -218,5 +218,12 @@ class PatternEventPublisher:
             "timestamp": datetime.now().isoformat()
         }
         
-        event = Event("learning.window.state", event_data, source=source)
+        # Add timestamp to event creation
+        timestamp = datetime.now().isoformat()
+        try:
+            # Try to create event with timestamp parameter
+            event = Event("learning.window.state", event_data, source=source, timestamp=timestamp)
+        except TypeError:
+            # Fall back to original implementation if timestamp is not a parameter
+            event = Event("learning.window.state", event_data, source=source)
         self.event_bus.publish(event)

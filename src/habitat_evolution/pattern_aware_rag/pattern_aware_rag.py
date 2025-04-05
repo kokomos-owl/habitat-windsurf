@@ -36,13 +36,14 @@ from habitat_evolution.adaptive_core.services.interfaces import (
 )
 from habitat_evolution.adaptive_core.id.adaptive_id import AdaptiveID
 from habitat_evolution.adaptive_core.models import Pattern, Relationship
+from habitat_evolution.pattern_aware_rag.services.graph_service import GraphService
 
 from .interfaces.pattern_emergence import PatternEmergenceInterface as EmergenceFlow
 from .learning.learning_control import WindowState as StateSpaceCondition
 from .interfaces.pattern_emergence import PatternMetrics as EvolutionMetrics
 from .monitoring.vector_attention_monitor import VectorAttentionMonitor
 from .core.coherence_interface import CoherenceInterface as FlowDynamics, StateAlignment as FlowState
-from .state.test_states import GraphStateSnapshot as PatternGraphService
+from .state.test_states import GraphStateSnapshot
 from .superceeded.coherence_embeddings import EmbeddingContext, CoherenceEmbeddings
 
 logger = logging.getLogger(__name__)
@@ -102,7 +103,7 @@ class PatternAwareRAG:
         coherence_analyzer: Any,
         emergence_flow: EmergenceFlow,
         settings: Any,
-        graph_service: Optional[PatternGraphService] = None
+        graph_service: Optional[GraphService] = None
     ):
         # Core services
         self.pattern_evolution = pattern_evolution_service
@@ -147,7 +148,7 @@ class PatternAwareRAG:
         )
         
         # Graph integration
-        self.graph = graph_service or PatternGraphService()
+        self.graph = graph_service or GraphService()
         
         # Pattern-specific prompts
         self._initialize_pattern_prompts()
@@ -405,7 +406,7 @@ class PatternAwareRAG:
         await self.graph.store_pattern(pattern)
         
         # Track relationships
-        if pattern.metrics.cross_pattern_flow > 0:
+        if hasattr(pattern, 'metrics') and hasattr(pattern.metrics, 'cross_pattern_flow') and pattern.metrics.cross_pattern_flow > 0:
             related_patterns = await self.pattern_evolution.get_related_patterns(pattern_id)
             await self.graph.track_relationships(
                 pattern_id,
@@ -413,7 +414,9 @@ class PatternAwareRAG:
             )
             
         # Map density centers if coherence is high
-        if pattern.metrics.coherence >= self.config["thresholds"]["coherence"]:
+        if hasattr(pattern, 'metrics') and hasattr(pattern.metrics, 'coherence') and \
+           hasattr(self, 'config') and 'thresholds' in self.config and 'coherence' in self.config['thresholds'] and \
+           pattern.metrics.coherence >= self.config["thresholds"]["coherence"]:
             centers = await self.graph.map_density_centers(
                 coherence_threshold=self.config["thresholds"]["coherence"]
             )

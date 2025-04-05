@@ -23,7 +23,7 @@ src_path = Path(__file__).parent.parent.parent.parent.parent
 sys.path.insert(0, str(src_path))
 
 # Import the semantic current observer
-from habitat_evolution.adaptive_core.transformation.semantic_current_observer import SemanticCurrentObserver, SemanticRelationship
+from src.habitat_evolution.adaptive_core.transformation.semantic_current_observer import SemanticCurrentObserver, SemanticRelationship
 
 # Configure logging
 def setup_logging():

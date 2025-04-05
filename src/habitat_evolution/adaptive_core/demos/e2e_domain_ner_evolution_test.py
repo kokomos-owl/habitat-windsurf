@@ -18,6 +18,16 @@ import uuid
 import networkx as nx
 import matplotlib.pyplot as plt
 
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s [%(levelname)s] %(message)s',
+    handlers=[
+        logging.StreamHandler()
+    ]
+)
+logger = logging.getLogger(__name__)
+
 # Import the fix for handling both import styles
 from .import_fix import *
 
@@ -180,6 +190,9 @@ class E2EDomainNEREvolutionTest:
         
         # Initialize visualization data
         self.entity_network = nx.DiGraph()
+        
+        # Set logger
+        self.logger = logger
         
         logger.info("Initialized E2E Domain NER Evolution Test")
     
@@ -407,18 +420,28 @@ class E2EDomainNEREvolutionTest:
         learning_window = LearningWindow(
             start_time=start_time,
             end_time=end_time,
-            window_id=f"window_{len(self.learning_windows) + 1}",
-            description=f"Learning window for {document_name}"
+            stability_threshold=0.7,
+            coherence_threshold=0.6,
+            max_changes_per_window=20
         )
+        
+        # Add custom attributes for tracking
+        learning_window.window_id = f"window_{len(self.learning_windows) + 1}"
+        learning_window.description = f"Learning window for {document_name}"
         
         self.learning_windows.append(learning_window)
         
         # Set the current learning window
-        self.learning_detector.set_current_window(learning_window)
+        self.learning_detector.set_learning_window(learning_window)
         
         # Process document through context-aware RAG
         logger.info(f"Processing document through context-aware RAG: {document_name}")
-        rag_results = self.context_rag.process_with_context_aware_patterns(document_text)
+        # Create a default query based on the document name
+        default_query = f"Extract key information from {document_name}"
+        rag_results = self.context_rag.process_with_context_aware_patterns(
+            query=default_query,
+            document=document_text
+        )
         
         # Extract entities and relationships
         entities = rag_results.get('entities', {})
