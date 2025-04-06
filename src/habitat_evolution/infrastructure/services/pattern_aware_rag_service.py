@@ -161,23 +161,311 @@ class PatternAwareRAGService(PatternAwareRAGInterface):
             
         logger.info(f"Processing query through pattern-aware RAG: {query[:50]}...")
         
-        # Get relevant patterns based on query
+        # Initialize context if not provided
+        if context is None:
+            context = {}
+            
+        # Get relevant patterns
         relevant_patterns = self._retrieve_relevant_patterns(query, context)
         
         # Generate response
         response = self._generate_response(query, relevant_patterns, context)
         
-        # Publish query processed event
-        self._event_service.publish("pattern_aware_rag.query_processed", {
-            "query_id": str(uuid.uuid4()),
-            "relevant_pattern_count": len(relevant_patterns)
-        })
-        
+        # Track query in event service
+        if self._event_service:
+            self._event_service.publish("pattern_aware_rag.query", {
+                "query": query,
+                "pattern_count": len(relevant_patterns),
+                "timestamp": datetime.now().isoformat()
+            })
+            
         return {
             "query": query,
-            "relevant_patterns": relevant_patterns,
-            "response": response
+            "patterns": [p.to_dict() for p in relevant_patterns],
+            "response": response,
+            "context": context
         }
+    
+    def get_patterns(self, filter_criteria: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
+        """
+        Get patterns from the pattern-aware RAG system.
+        
+        Args:
+            filter_criteria: Optional criteria to filter patterns by
+            
+        Returns:
+            A list of matching patterns
+        """
+        # Get all patterns from repository
+        all_patterns = self._pattern_repository.find_all()
+        
+        # Enhance patterns with metadata using the bridge
+        enhanced_patterns = self._pattern_bridge.enhance_patterns(all_patterns)
+        
+        # Apply filters if provided
+        if filter_criteria:
+            filtered_patterns = []
+            for pattern in enhanced_patterns:
+                match = True
+                for key, value in filter_criteria.items():
+                    # Handle nested properties with dot notation
+                    if '.' in key:
+                        parts = key.split('.')
+                        current = pattern.to_dict()
+                        for part in parts[:-1]:
+                            if part not in current:
+                                match = False
+                                break
+                            current = current[part]
+                        if match and parts[-1] in current and current[parts[-1]] != value:
+                            match = False
+                    # Handle direct properties
+                    elif hasattr(pattern, key):
+                        if getattr(pattern, key) != value:
+                            match = False
+                    # Handle metadata properties
+                    elif hasattr(pattern, 'metadata') and key in pattern.metadata:
+                        if pattern.metadata[key] != value:
+                            match = False
+                if match:
+                    filtered_patterns.append(pattern)
+            return [p.to_dict() for p in filtered_patterns]
+        
+        # Return all patterns if no filter criteria
+        return [p.to_dict() for p in enhanced_patterns]
+    
+    def get_field_state(self) -> Dict[str, Any]:
+        """
+        Get the current state of the semantic field.
+        
+        Returns:
+            The current field state
+        """
+        # Get all patterns
+        patterns = self._pattern_repository.find_all()
+        enhanced_patterns = self._pattern_bridge.enhance_patterns(patterns)
+        
+        # Get vector space information from vector tonic service
+        vector_space_info = self._vector_tonic_service.get_vector_space_info()
+        
+        # Calculate field metrics
+        pattern_count = len(patterns)
+        avg_coherence = sum(p.metadata.get("coherence", 0) for p in enhanced_patterns) / max(1, pattern_count)
+        avg_quality = sum(p.metadata.get("quality", 0) for p in enhanced_patterns) / max(1, pattern_count)
+        
+        return {
+            "pattern_count": pattern_count,
+            "average_coherence": avg_coherence,
+            "average_quality": avg_quality,
+            "vector_space": vector_space_info,
+            "timestamp": datetime.now().isoformat()
+        }
+    
+    def add_pattern(self, pattern: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Add a pattern to the pattern-aware RAG system.
+        
+        Args:
+            pattern: The pattern to add
+            
+        Returns:
+            The added pattern with any generated IDs or timestamps
+        """
+        # Generate ID if not provided
+        if "id" not in pattern:
+            pattern["id"] = f"pattern-{uuid.uuid4()}"
+        
+        # Add timestamps if not provided
+        now = datetime.now().isoformat()
+        if "created_at" not in pattern:
+            pattern["created_at"] = now
+        if "last_modified" not in pattern:
+            pattern["last_modified"] = now
+        
+        # Create Pattern object
+        pattern_obj = Pattern(**pattern)
+        
+        # Save to repository
+        saved_pattern = self._pattern_repository.save(pattern_obj)
+        
+        # Publish event
+        if self._event_service:
+            self._event_service.publish("pattern_aware_rag.pattern_added", {
+                "pattern_id": saved_pattern.id,
+                "timestamp": now
+            })
+        
+        return saved_pattern.to_dict()
+    
+    def update_pattern(self, pattern_id: str, updates: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Update a pattern in the pattern-aware RAG system.
+        
+        Args:
+            pattern_id: The ID of the pattern to update
+            updates: The updates to apply to the pattern
+            
+        Returns:
+            The updated pattern
+        """
+        # Get existing pattern
+        pattern = self._pattern_repository.find_by_id(pattern_id)
+        if not pattern:
+            raise ValueError(f"Pattern not found: {pattern_id}")
+        
+        # Update last_modified timestamp
+        updates["last_modified"] = datetime.now().isoformat()
+        
+        # Apply updates
+        for key, value in updates.items():
+            if hasattr(pattern, key):
+                setattr(pattern, key, value)
+        
+        # Save updated pattern
+        updated_pattern = self._pattern_repository.save(pattern)
+        
+        # Publish event
+        if self._event_service:
+            self._event_service.publish("pattern_aware_rag.pattern_updated", {
+                "pattern_id": pattern_id,
+                "timestamp": updates["last_modified"]
+            })
+        
+        return updated_pattern.to_dict()
+    
+    def delete_pattern(self, pattern_id: str) -> bool:
+        """
+        Delete a pattern from the pattern-aware RAG system.
+        
+        Args:
+            pattern_id: The ID of the pattern to delete
+            
+        Returns:
+            True if the pattern was deleted, False otherwise
+        """
+        # Delete from repository
+        success = self._pattern_repository.delete(pattern_id)
+        
+        # Publish event if successful
+        if success and self._event_service:
+            self._event_service.publish("pattern_aware_rag.pattern_deleted", {
+                "pattern_id": pattern_id,
+                "timestamp": datetime.now().isoformat()
+            })
+        
+        return success
+    
+    def create_relationship(self, source_id: str, target_id: str, 
+                           relationship_type: str, 
+                           metadata: Optional[Dict[str, Any]] = None) -> str:
+        """
+        Create a relationship between two patterns.
+        
+        Args:
+            source_id: The ID of the source pattern
+            target_id: The ID of the target pattern
+            relationship_type: The type of relationship
+            metadata: Optional metadata for the relationship
+            
+        Returns:
+            The ID of the created relationship
+        """
+        # Verify patterns exist
+        source_pattern = self._pattern_repository.find_by_id(source_id)
+        if not source_pattern:
+            raise ValueError(f"Source pattern not found: {source_id}")
+            
+        target_pattern = self._pattern_repository.find_by_id(target_id)
+        if not target_pattern:
+            raise ValueError(f"Target pattern not found: {target_id}")
+        
+        # Generate relationship ID
+        relationship_id = f"rel-{uuid.uuid4()}"
+        
+        # Prepare relationship data
+        relationship_data = {
+            "_id": relationship_id,
+            "_from": source_id,
+            "_to": target_id,
+            "type": relationship_type,
+            "created_at": datetime.now().isoformat()
+        }
+        
+        # Add metadata if provided
+        if metadata:
+            relationship_data.update(metadata)
+        
+        # Create edge in graph
+        self._db_connection.create_edge(
+            "patterns_graph",
+            "pattern_relationships",
+            source_id,
+            target_id,
+            relationship_data
+        )
+        
+        # Update patterns to reference the relationship
+        source_pattern.add_relationship(relationship_id)
+        target_pattern.add_relationship(relationship_id)
+        
+        # Save updated patterns
+        self._pattern_repository.save(source_pattern)
+        self._pattern_repository.save(target_pattern)
+        
+        # Publish event
+        if self._event_service:
+            self._event_service.publish("pattern_aware_rag.relationship_created", {
+                "relationship_id": relationship_id,
+                "source_id": source_id,
+                "target_id": target_id,
+                "type": relationship_type,
+                "timestamp": relationship_data["created_at"]
+            })
+        
+        return relationship_id
+    
+    def get_metrics(self) -> Dict[str, Any]:
+        """
+        Get metrics from the pattern-aware RAG system.
+        
+        Returns:
+            Current system metrics
+        """
+        # Get all patterns
+        patterns = self._pattern_repository.find_all()
+        enhanced_patterns = self._pattern_bridge.enhance_patterns(patterns)
+        
+        # Calculate pattern metrics
+        pattern_count = len(patterns)
+        coherent_patterns = sum(1 for p in enhanced_patterns if p.metadata.get("coherence", 0) >= self._coherence_threshold)
+        quality_patterns = sum(1 for p in enhanced_patterns if p.metadata.get("quality", 0) >= self._quality_threshold)
+        
+        # Get vector metrics
+        vector_metrics = self._vector_tonic_service.get_metrics()
+        
+        return {
+            "pattern_count": pattern_count,
+            "coherent_pattern_count": coherent_patterns,
+            "quality_pattern_count": quality_patterns,
+            "coherence_threshold": self._coherence_threshold,
+            "quality_threshold": self._quality_threshold,
+            "vector_metrics": vector_metrics,
+            "timestamp": datetime.now().isoformat()
+        }
+    
+    def shutdown(self) -> None:
+        """
+        Release resources when shutting down the service.
+        """
+        logger.info("Shutting down PatternAwareRAGService")
+        
+        # Publish shutdown event
+        if self._event_service:
+            self._event_service.publish("pattern_aware_rag.shutdown", {
+                "timestamp": datetime.now().isoformat()
+            })
+        
+        logger.info("PatternAwareRAGService shut down")
     
     def update_pattern_metadata(self, pattern_id: str, metadata: Dict[str, Any]) -> Optional[Pattern]:
         """

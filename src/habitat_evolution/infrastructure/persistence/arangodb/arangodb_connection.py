@@ -414,3 +414,211 @@ class ArangoDBConnection(ArangoDBConnectionInterface):
         transaction = self._db.transaction(transaction_id)
         transaction.abort()
         return True
+        
+    def connect(self) -> bool:
+        """
+        Connect to the ArangoDB server.
+        
+        Returns:
+            True if connected successfully, False otherwise
+        """
+        try:
+            if self._initialized:
+                logger.debug("Already connected to ArangoDB")
+                return True
+                
+            self.initialize()
+            return True
+        except Exception as e:
+            logger.error(f"Failed to connect to ArangoDB: {e}")
+            return False
+    
+    def disconnect(self) -> bool:
+        """
+        Disconnect from the ArangoDB server.
+        
+        Returns:
+            True if disconnected successfully, False otherwise
+        """
+        try:
+            self.shutdown()
+            return True
+        except Exception as e:
+            logger.error(f"Failed to disconnect from ArangoDB: {e}")
+            return False
+    
+    def is_connected(self) -> bool:
+        """
+        Check if connected to the ArangoDB server.
+        
+        Returns:
+            True if connected, False otherwise
+        """
+        if not self._initialized or not self._db:
+            return False
+            
+        try:
+            # Simple ping to check connection
+            self._db.ping()
+            return True
+        except Exception:
+            return False
+    
+    def create_collection(self, collection_name: str, edge: bool = False) -> Any:
+        """
+        Create a collection in ArangoDB.
+        
+        Args:
+            collection_name: The name of the collection to create
+            edge: Whether the collection is an edge collection
+            
+        Returns:
+            The created collection
+        """
+        if not self._initialized:
+            self.initialize()
+            
+        if edge:
+            return self.ensure_edge_collection(collection_name)
+        else:
+            return self.ensure_collection(collection_name)
+    
+    def get_collection(self, collection_name: str) -> Any:
+        """
+        Get a collection from ArangoDB.
+        
+        Args:
+            collection_name: The name of the collection to get
+            
+        Returns:
+            The collection
+        """
+        if not self._initialized:
+            self.initialize()
+            
+        return self._db.collection(collection_name)
+    
+    def create_index(self, collection_name: str, index_type: str, fields: List[str], 
+                     unique: bool = False, sparse: bool = False, name: Optional[str] = None) -> Dict[str, Any]:
+        """
+        Create an index on a collection.
+        
+        Args:
+            collection_name: The name of the collection
+            index_type: The type of index (e.g., 'hash', 'skiplist', 'fulltext')
+            fields: The fields to index
+            unique: Whether the index is unique
+            sparse: Whether the index is sparse
+            name: Optional name for the index
+            
+        Returns:
+            The index information
+        """
+        if not self._initialized:
+            self.initialize()
+            
+        collection = self._db.collection(collection_name)
+        
+        if index_type == "hash":
+            return collection.add_hash_index(fields, unique=unique, sparse=sparse, name=name)
+        elif index_type == "skiplist":
+            return collection.add_skiplist_index(fields, unique=unique, sparse=sparse, name=name)
+        elif index_type == "fulltext":
+            return collection.add_fulltext_index(fields, name=name)
+        elif index_type == "geo":
+            return collection.add_geo_index(fields, name=name)
+        elif index_type == "persistent":
+            return collection.add_persistent_index(fields, unique=unique, sparse=sparse, name=name)
+        else:
+            raise ValueError(f"Unsupported index type: {index_type}")
+    
+    def create_graph(self, graph_name: str, edge_definitions: List[Dict[str, Any]]) -> Any:
+        """
+        Create a graph in ArangoDB.
+        
+        Args:
+            graph_name: The name of the graph to create
+            edge_definitions: The edge definitions for the graph
+            
+        Returns:
+            The created graph
+        """
+        return self.ensure_graph(graph_name, edge_definitions)
+    
+    def get_graph(self, graph_name: str) -> Any:
+        """
+        Get a graph from ArangoDB.
+        
+        Args:
+            graph_name: The name of the graph to get
+            
+        Returns:
+            The graph
+        """
+        if not self._initialized:
+            self.initialize()
+            
+        return self._db.graph(graph_name)
+    
+    def create_vertex(self, graph_name: str, collection_name: str, vertex: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Create a vertex in a graph.
+        
+        Args:
+            graph_name: The name of the graph
+            collection_name: The name of the vertex collection
+            vertex: The vertex data
+            
+        Returns:
+            The created vertex
+        """
+        if not self._initialized:
+            self.initialize()
+            
+        graph = self._db.graph(graph_name)
+        vertex_collection = graph.vertex_collection(collection_name)
+        meta = vertex_collection.insert(vertex, return_new=True)
+        return meta["new"]
+    
+    def create_edge(self, graph_name: str, edge_collection: str, from_id: str, to_id: str, 
+                   edge: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Create an edge in a graph.
+        
+        Args:
+            graph_name: The name of the graph
+            edge_collection: The name of the edge collection
+            from_id: The ID of the source vertex
+            to_id: The ID of the target vertex
+            edge: The edge data
+            
+        Returns:
+            The created edge
+        """
+        if not self._initialized:
+            self.initialize()
+            
+        graph = self._db.graph(graph_name)
+        edge_col = graph.edge_collection(edge_collection)
+        
+        # Add _from and _to if not present
+        if "_from" not in edge:
+            edge["_from"] = from_id
+        if "_to" not in edge:
+            edge["_to"] = to_id
+            
+        meta = edge_col.insert(edge, return_new=True)
+        return meta["new"]
+    
+    def execute_aql(self, query: str, bind_vars: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
+        """
+        Execute an AQL query.
+        
+        Args:
+            query: The AQL query to execute
+            bind_vars: Optional bind variables for the query
+            
+        Returns:
+            The query results
+        """
+        return self.execute_query(query, bind_vars)

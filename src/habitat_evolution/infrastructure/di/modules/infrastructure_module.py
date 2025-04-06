@@ -48,9 +48,14 @@ def create_infrastructure_module() -> Module:
     )
     
     # Register ArangoDBGraphService as the implementation of UnifiedGraphServiceInterface
+    def create_graph_service(container):
+        db_connection = container.resolve(ArangoDBConnectionInterface)
+        event_service = container.resolve(EventServiceInterface)
+        return ArangoDBGraphService(db_connection, event_service)
+    
     module.register_singleton(
         UnifiedGraphServiceInterface,
-        factory=lambda container: ArangoDBGraphService(container.resolve(ArangoDBConnectionInterface))
+        factory=create_graph_service
     )
     
     # Register VectorTonicService
