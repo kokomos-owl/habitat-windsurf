@@ -27,7 +27,8 @@ from src.habitat_evolution.infrastructure.persistence.arangodb.arangodb_connecti
 from src.habitat_evolution.infrastructure.services.event_service import EventService
 from src.habitat_evolution.pattern_aware_rag.pattern_aware_rag import PatternAwareRAG
 from src.habitat_evolution.pattern_aware_rag.services.claude_integration_service import ClaudeRAGService
-from src.habitat_evolution.core.services.field.field_state_service import FieldStateService
+from src.habitat_evolution.core.services.field.field_state_service import ConcreteFieldStateService
+from src.habitat_evolution.core.storage.field_repository import ArangoFieldRepository
 from src.habitat_evolution.core.services.field.gradient_service import GradientService
 from src.habitat_evolution.core.services.field.flow_dynamics_service import FlowDynamicsService
 from src.habitat_evolution.adaptive_core.services.metrics_service import MetricsService
@@ -64,8 +65,14 @@ class QueriesAsActantsTest(unittest.TestCase):
             event_service=cls.event_service
         )
         
+        # Initialize field repository
+        cls.field_repository = ArangoFieldRepository(cls.arangodb_connection)
+        
         # Initialize field services
-        cls.field_state_service = FieldStateService()
+        cls.field_state_service = ConcreteFieldStateService(
+            field_repository=cls.field_repository,
+            event_bus=cls.event_service
+        )
         cls.gradient_service = GradientService()
         cls.flow_dynamics_service = FlowDynamicsService()
         
