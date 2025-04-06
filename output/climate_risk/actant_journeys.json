@@ -1,0 +1,926 @@
+[
+  {
+    "id": "a0d3bf7f-50a4-4aa9-9f5f-7d0b05abaa69",
+    "actant_name": "d082c621-0e05-419f-a702-14461edf850e",
+    "journey_points": [
+      {
+        "id": "6fd38336-044d-46f1-b52d-1ffe9af32769",
+        "actant_name": "d082c621-0e05-419f-a702-14461edf850e",
+        "domain_id": "basic_test_doc_cape_code",
+        "predicate_id": "predicate_0",
+        "role": "vulnerability",
+        "timestamp": "2025-03-24T22:06:59.521508",
+        "confidence": 0.8
+      },
+      {
+        "id": "2a29314d-9bb6-4d89-b69f-907a8f3f6edc",
+        "actant_name": "d082c621-0e05-419f-a702-14461edf850e",
+        "domain_id": "vineyard_sound_structure_meaning_test_doc",
+        "predicate_id": "predicate_1",
+        "role": "vulnerability",
+        "timestamp": "2025-03-24T22:06:59.521535",
+        "confidence": 0.8
+      },
+      {
+        "id": "c084c14a-430e-47e4-a60c-7c39e6754218",
+        "actant_name": "d082c621-0e05-419f-a702-14461edf850e",
+        "domain_id": "complex_test_doc_boston_harbor_islands",
+        "predicate_id": "predicate_2",
+        "role": "vulnerability",
+        "timestamp": "2025-03-24T22:06:59.521555",
+        "confidence": 0.8
+      },
+      {
+        "id": "92688663-9311-4487-8746-c028e45b0da1",
+        "actant_name": "d082c621-0e05-419f-a702-14461edf850e",
+        "domain_id": "climate_risk_marthas_vineyard",
+        "predicate_id": "predicate_3",
+        "role": "hazard",
+        "timestamp": "2025-03-24T22:06:59.521570",
+        "confidence": 0.8
+      },
+      {
+        "id": "b3013272-d16d-4709-aa9d-b56891ba5c2c",
+        "actant_name": "d082c621-0e05-419f-a702-14461edf850e",
+        "domain_id": "recovery_test_doc_nantucket_sound",
+        "predicate_id": "predicate_4",
+        "role": "vulnerability",
+        "timestamp": "2025-03-24T22:06:59.521588",
+        "confidence": 0.8
+      },
+      {
+        "id": "89c68be3-5af0-4212-8a75-e50d94718101",
+        "actant_name": "d082c621-0e05-419f-a702-14461edf850e",
+        "domain_id": "temporal_analysis_plum_island",
+        "predicate_id": "predicate_5",
+        "role": "vulnerability",
+        "timestamp": "2025-03-24T22:06:59.521604",
+        "confidence": 0.8
+      }
+    ],
+    "domain_transitions": [
+      {
+        "id": "c1f8fab2-d4aa-4e55-9d1d-5d5d465ea800",
+        "actant_name": "d082c621-0e05-419f-a702-14461edf850e",
+        "source_domain_id": "basic_test_doc_cape_code",
+        "target_domain_id": "vineyard_sound_structure_meaning_test_doc",
+        "source_predicate_id": "predicate_0",
+        "target_predicate_id": "predicate_1",
+        "source_role": "stressor",
+        "target_role": "vulnerability",
+        "timestamp": "2025-03-24T22:06:59.521621",
+        "transformation_id": null
+      },
+      {
+        "id": "b57c97f4-fbcb-4975-8290-fd86ed2f242c",
+        "actant_name": "d082c621-0e05-419f-a702-14461edf850e",
+        "source_domain_id": "vineyard_sound_structure_meaning_test_doc",
+        "target_domain_id": "complex_test_doc_boston_harbor_islands",
+        "source_predicate_id": "predicate_1",
+        "target_predicate_id": "predicate_2",
+        "source_role": "stressor",
+        "target_role": "vulnerability",
+        "timestamp": "2025-03-24T22:06:59.521655",
+        "transformation_id": null
+      },
+      {
+        "id": "13444054-1010-429e-a7bf-9cf60206df86",
+        "actant_name": "d082c621-0e05-419f-a702-14461edf850e",
+        "source_domain_id": "complex_test_doc_boston_harbor_islands",
+        "target_domain_id": "climate_risk_marthas_vineyard",
+        "source_predicate_id": "predicate_2",
+        "target_predicate_id": "predicate_3",
+        "source_role": "stressor",
+        "target_role": "vulnerability",
+        "timestamp": "2025-03-24T22:06:59.521682",
+        "transformation_id": null
+      },
+      {
+        "id": "0a3fb573-9dbd-4a7d-864c-66bd766d659f",
+        "actant_name": "d082c621-0e05-419f-a702-14461edf850e",
+        "source_domain_id": "climate_risk_marthas_vineyard",
+        "target_domain_id": "recovery_test_doc_nantucket_sound",
+        "source_predicate_id": "predicate_3",
+        "target_predicate_id": "predicate_4",
+        "source_role": "hazard",
+        "target_role": "vulnerability",
+        "timestamp": "2025-03-24T22:06:59.521707",
+        "transformation_id": null
+      },
+      {
+        "id": "7b3855d5-da3b-4a22-b918-6c86a9acc66b",
+        "actant_name": "d082c621-0e05-419f-a702-14461edf850e",
+        "source_domain_id": "recovery_test_doc_nantucket_sound",
+        "target_domain_id": "temporal_analysis_plum_island",
+        "source_predicate_id": "predicate_4",
+        "target_predicate_id": "predicate_5",
+        "source_role": "stressor",
+        "target_role": "vulnerability",
+        "timestamp": "2025-03-24T22:06:59.521733",
+        "transformation_id": null
+      }
+    ],
+    "adaptive_id": {
+      "id": "718cdb21-78bd-4060-946c-99690fbf5c4e",
+      "base_concept": "d082c621-0e05-419f-a702-14461edf850e",
+      "confidence": 0.8,
+      "uncertainty": 0.2,
+      "version_count": 1
+    },
+    "pattern_propensity": {
+      "directionality": {
+        "basic_test_doc_cape_code_to_vineyard_sound_structure_meaning_test_doc": 0.2,
+        "vineyard_sound_structure_meaning_test_doc_to_complex_test_doc_boston_harbor_islands": 0.2,
+        "complex_test_doc_boston_harbor_islands_to_climate_risk_marthas_vineyard": 0.2,
+        "climate_risk_marthas_vineyard_to_recovery_test_doc_nantucket_sound": 0.2,
+        "recovery_test_doc_nantucket_sound_to_temporal_analysis_plum_island": 0.2
+      },
+      "capaciousness": 1.0,
+      "coherence": 0.55
+    },
+    "journey_state": {
+      "journey_points": 6,
+      "domain_transitions": 5,
+      "role_shifts": 5,
+      "domains_visited": [
+        "basic_test_doc_cape_code",
+        "vineyard_sound_structure_meaning_test_doc",
+        "temporal_analysis_plum_island",
+        "climate_risk_marthas_vineyard",
+        "recovery_test_doc_nantucket_sound",
+        "complex_test_doc_boston_harbor_islands"
+      ],
+      "version": 6
+    }
+  },
+  {
+    "id": "411fcca3-fa8a-4c58-b5eb-afa85692b095",
+    "actant_name": "fc4956c8-2a51-4cce-98a4-48f12c254ea8",
+    "journey_points": [
+      {
+        "id": "02a08542-d76a-4ec4-ad27-2f5503168e49",
+        "actant_name": "fc4956c8-2a51-4cce-98a4-48f12c254ea8",
+        "domain_id": "basic_test_doc_cape_code",
+        "predicate_id": "predicate_0",
+        "role": "vulnerability",
+        "timestamp": "2025-03-24T22:06:59.521784",
+        "confidence": 0.8
+      },
+      {
+        "id": "7d0764b2-40a5-4636-b94d-bfd6d0dacb33",
+        "actant_name": "fc4956c8-2a51-4cce-98a4-48f12c254ea8",
+        "domain_id": "vineyard_sound_structure_meaning_test_doc",
+        "predicate_id": "predicate_1",
+        "role": "vulnerability",
+        "timestamp": "2025-03-24T22:06:59.521799",
+        "confidence": 0.8
+      },
+      {
+        "id": "d143556c-44b7-4f41-81a1-9add7b7db61d",
+        "actant_name": "fc4956c8-2a51-4cce-98a4-48f12c254ea8",
+        "domain_id": "complex_test_doc_boston_harbor_islands",
+        "predicate_id": "predicate_2",
+        "role": "vulnerability",
+        "timestamp": "2025-03-24T22:06:59.521815",
+        "confidence": 0.8
+      },
+      {
+        "id": "ed32b5e4-74d2-4c65-83d5-6f41af8f2144",
+        "actant_name": "fc4956c8-2a51-4cce-98a4-48f12c254ea8",
+        "domain_id": "climate_risk_marthas_vineyard",
+        "predicate_id": "predicate_3",
+        "role": "hazard",
+        "timestamp": "2025-03-24T22:06:59.521829",
+        "confidence": 0.8
+      },
+      {
+        "id": "ba4ea068-6b2a-4675-83a2-3c2da1aea589",
+        "actant_name": "fc4956c8-2a51-4cce-98a4-48f12c254ea8",
+        "domain_id": "recovery_test_doc_nantucket_sound",
+        "predicate_id": "predicate_4",
+        "role": "vulnerability",
+        "timestamp": "2025-03-24T22:06:59.521842",
+        "confidence": 0.8
+      },
+      {
+        "id": "bce1496c-2420-4e7b-a51e-25d6bc0906d3",
+        "actant_name": "fc4956c8-2a51-4cce-98a4-48f12c254ea8",
+        "domain_id": "temporal_analysis_plum_island",
+        "predicate_id": "predicate_5",
+        "role": "vulnerability",
+        "timestamp": "2025-03-24T22:06:59.521856",
+        "confidence": 0.8
+      }
+    ],
+    "domain_transitions": [
+      {
+        "id": "725f7735-27f2-40aa-bda5-7c97df79e196",
+        "actant_name": "fc4956c8-2a51-4cce-98a4-48f12c254ea8",
+        "source_domain_id": "basic_test_doc_cape_code",
+        "target_domain_id": "vineyard_sound_structure_meaning_test_doc",
+        "source_predicate_id": "predicate_0",
+        "target_predicate_id": "predicate_1",
+        "source_role": "stressor",
+        "target_role": "vulnerability",
+        "timestamp": "2025-03-24T22:06:59.521870",
+        "transformation_id": null
+      },
+      {
+        "id": "81fefcb2-7fd5-4fa8-9b0d-105a1bcc8955",
+        "actant_name": "fc4956c8-2a51-4cce-98a4-48f12c254ea8",
+        "source_domain_id": "vineyard_sound_structure_meaning_test_doc",
+        "target_domain_id": "complex_test_doc_boston_harbor_islands",
+        "source_predicate_id": "predicate_1",
+        "target_predicate_id": "predicate_2",
+        "source_role": "stressor",
+        "target_role": "vulnerability",
+        "timestamp": "2025-03-24T22:06:59.521892",
+        "transformation_id": null
+      },
+      {
+        "id": "6196a38d-caa5-48a8-ab5e-c45c8449a45d",
+        "actant_name": "fc4956c8-2a51-4cce-98a4-48f12c254ea8",
+        "source_domain_id": "complex_test_doc_boston_harbor_islands",
+        "target_domain_id": "climate_risk_marthas_vineyard",
+        "source_predicate_id": "predicate_2",
+        "target_predicate_id": "predicate_3",
+        "source_role": "stressor",
+        "target_role": "vulnerability",
+        "timestamp": "2025-03-24T22:06:59.521912",
+        "transformation_id": null
+      },
+      {
+        "id": "3faff8f5-8b3d-4115-827d-d80d44b63279",
+        "actant_name": "fc4956c8-2a51-4cce-98a4-48f12c254ea8",
+        "source_domain_id": "climate_risk_marthas_vineyard",
+        "target_domain_id": "recovery_test_doc_nantucket_sound",
+        "source_predicate_id": "predicate_3",
+        "target_predicate_id": "predicate_4",
+        "source_role": "hazard",
+        "target_role": "vulnerability",
+        "timestamp": "2025-03-24T22:06:59.521937",
+        "transformation_id": null
+      },
+      {
+        "id": "15899cd6-c3a4-4ea7-a347-3615a1c7047b",
+        "actant_name": "fc4956c8-2a51-4cce-98a4-48f12c254ea8",
+        "source_domain_id": "recovery_test_doc_nantucket_sound",
+        "target_domain_id": "temporal_analysis_plum_island",
+        "source_predicate_id": "predicate_4",
+        "target_predicate_id": "predicate_5",
+        "source_role": "stressor",
+        "target_role": "vulnerability",
+        "timestamp": "2025-03-24T22:06:59.521959",
+        "transformation_id": null
+      }
+    ],
+    "adaptive_id": {
+      "id": "d27bd678-cc8b-47c4-ace1-3fd5ac688c2c",
+      "base_concept": "fc4956c8-2a51-4cce-98a4-48f12c254ea8",
+      "confidence": 0.8,
+      "uncertainty": 0.2,
+      "version_count": 1
+    },
+    "pattern_propensity": {
+      "directionality": {
+        "basic_test_doc_cape_code_to_vineyard_sound_structure_meaning_test_doc": 0.2,
+        "vineyard_sound_structure_meaning_test_doc_to_complex_test_doc_boston_harbor_islands": 0.2,
+        "complex_test_doc_boston_harbor_islands_to_climate_risk_marthas_vineyard": 0.2,
+        "climate_risk_marthas_vineyard_to_recovery_test_doc_nantucket_sound": 0.2,
+        "recovery_test_doc_nantucket_sound_to_temporal_analysis_plum_island": 0.2
+      },
+      "capaciousness": 1.0,
+      "coherence": 0.55
+    },
+    "journey_state": {
+      "journey_points": 6,
+      "domain_transitions": 5,
+      "role_shifts": 5,
+      "domains_visited": [
+        "basic_test_doc_cape_code",
+        "vineyard_sound_structure_meaning_test_doc",
+        "temporal_analysis_plum_island",
+        "climate_risk_marthas_vineyard",
+        "recovery_test_doc_nantucket_sound",
+        "complex_test_doc_boston_harbor_islands"
+      ],
+      "version": 6
+    }
+  },
+  {
+    "id": "0a4ea632-e850-48b8-9521-b60e7d6a3c82",
+    "actant_name": "cdf30096-a47c-4560-b71f-dd0d71828992",
+    "journey_points": [
+      {
+        "id": "1be6eebe-e88c-4f5d-a679-a2e73ca60b1c",
+        "actant_name": "cdf30096-a47c-4560-b71f-dd0d71828992",
+        "domain_id": "basic_test_doc_cape_code",
+        "predicate_id": "predicate_0",
+        "role": "vulnerability",
+        "timestamp": "2025-03-24T22:06:59.522007",
+        "confidence": 0.8
+      },
+      {
+        "id": "8ea54856-2792-4275-be36-34f9c7f5590d",
+        "actant_name": "cdf30096-a47c-4560-b71f-dd0d71828992",
+        "domain_id": "vineyard_sound_structure_meaning_test_doc",
+        "predicate_id": "predicate_1",
+        "role": "vulnerability",
+        "timestamp": "2025-03-24T22:06:59.522019",
+        "confidence": 0.8
+      },
+      {
+        "id": "bb98228d-0a55-4171-ba2f-ee7c32457fe9",
+        "actant_name": "cdf30096-a47c-4560-b71f-dd0d71828992",
+        "domain_id": "complex_test_doc_boston_harbor_islands",
+        "predicate_id": "predicate_2",
+        "role": "vulnerability",
+        "timestamp": "2025-03-24T22:06:59.522031",
+        "confidence": 0.8
+      },
+      {
+        "id": "d3583c5d-ac77-4d5a-bb43-95b83babdbb5",
+        "actant_name": "cdf30096-a47c-4560-b71f-dd0d71828992",
+        "domain_id": "climate_risk_marthas_vineyard",
+        "predicate_id": "predicate_3",
+        "role": "hazard",
+        "timestamp": "2025-03-24T22:06:59.522096",
+        "confidence": 0.8
+      },
+      {
+        "id": "4b6172f3-e41f-43e7-9bca-8892c4b40edc",
+        "actant_name": "cdf30096-a47c-4560-b71f-dd0d71828992",
+        "domain_id": "recovery_test_doc_nantucket_sound",
+        "predicate_id": "predicate_4",
+        "role": "vulnerability",
+        "timestamp": "2025-03-24T22:06:59.522110",
+        "confidence": 0.8
+      },
+      {
+        "id": "be8b34ee-5a25-4218-9ee0-24800028ba48",
+        "actant_name": "cdf30096-a47c-4560-b71f-dd0d71828992",
+        "domain_id": "temporal_analysis_plum_island",
+        "predicate_id": "predicate_5",
+        "role": "vulnerability",
+        "timestamp": "2025-03-24T22:06:59.522125",
+        "confidence": 0.8
+      }
+    ],
+    "domain_transitions": [
+      {
+        "id": "95529739-f51e-4a44-b5a4-6c28f03bd4d8",
+        "actant_name": "cdf30096-a47c-4560-b71f-dd0d71828992",
+        "source_domain_id": "basic_test_doc_cape_code",
+        "target_domain_id": "vineyard_sound_structure_meaning_test_doc",
+        "source_predicate_id": "predicate_0",
+        "target_predicate_id": "predicate_1",
+        "source_role": "stressor",
+        "target_role": "vulnerability",
+        "timestamp": "2025-03-24T22:06:59.522140",
+        "transformation_id": null
+      },
+      {
+        "id": "623ba18a-da77-441e-915f-a324b69bcf7d",
+        "actant_name": "cdf30096-a47c-4560-b71f-dd0d71828992",
+        "source_domain_id": "vineyard_sound_structure_meaning_test_doc",
+        "target_domain_id": "complex_test_doc_boston_harbor_islands",
+        "source_predicate_id": "predicate_1",
+        "target_predicate_id": "predicate_2",
+        "source_role": "stressor",
+        "target_role": "vulnerability",
+        "timestamp": "2025-03-24T22:06:59.522160",
+        "transformation_id": null
+      },
+      {
+        "id": "dfc20630-0318-47c6-989d-32059e2a5397",
+        "actant_name": "cdf30096-a47c-4560-b71f-dd0d71828992",
+        "source_domain_id": "complex_test_doc_boston_harbor_islands",
+        "target_domain_id": "climate_risk_marthas_vineyard",
+        "source_predicate_id": "predicate_2",
+        "target_predicate_id": "predicate_3",
+        "source_role": "stressor",
+        "target_role": "vulnerability",
+        "timestamp": "2025-03-24T22:06:59.522181",
+        "transformation_id": null
+      },
+      {
+        "id": "f663adba-458d-4a46-b18c-789396023f3a",
+        "actant_name": "cdf30096-a47c-4560-b71f-dd0d71828992",
+        "source_domain_id": "climate_risk_marthas_vineyard",
+        "target_domain_id": "recovery_test_doc_nantucket_sound",
+        "source_predicate_id": "predicate_3",
+        "target_predicate_id": "predicate_4",
+        "source_role": "hazard",
+        "target_role": "vulnerability",
+        "timestamp": "2025-03-24T22:06:59.522201",
+        "transformation_id": null
+      },
+      {
+        "id": "e401ec8e-1577-4a59-ae73-5b61db8a2ab8",
+        "actant_name": "cdf30096-a47c-4560-b71f-dd0d71828992",
+        "source_domain_id": "recovery_test_doc_nantucket_sound",
+        "target_domain_id": "temporal_analysis_plum_island",
+        "source_predicate_id": "predicate_4",
+        "target_predicate_id": "predicate_5",
+        "source_role": "stressor",
+        "target_role": "vulnerability",
+        "timestamp": "2025-03-24T22:06:59.522223",
+        "transformation_id": null
+      }
+    ],
+    "adaptive_id": {
+      "id": "5ed292ee-31ee-4850-9e4c-e5525e2a4b0b",
+      "base_concept": "cdf30096-a47c-4560-b71f-dd0d71828992",
+      "confidence": 0.8,
+      "uncertainty": 0.2,
+      "version_count": 1
+    },
+    "pattern_propensity": {
+      "directionality": {
+        "basic_test_doc_cape_code_to_vineyard_sound_structure_meaning_test_doc": 0.2,
+        "vineyard_sound_structure_meaning_test_doc_to_complex_test_doc_boston_harbor_islands": 0.2,
+        "complex_test_doc_boston_harbor_islands_to_climate_risk_marthas_vineyard": 0.2,
+        "climate_risk_marthas_vineyard_to_recovery_test_doc_nantucket_sound": 0.2,
+        "recovery_test_doc_nantucket_sound_to_temporal_analysis_plum_island": 0.2
+      },
+      "capaciousness": 1.0,
+      "coherence": 0.55
+    },
+    "journey_state": {
+      "journey_points": 6,
+      "domain_transitions": 5,
+      "role_shifts": 5,
+      "domains_visited": [
+        "basic_test_doc_cape_code",
+        "vineyard_sound_structure_meaning_test_doc",
+        "temporal_analysis_plum_island",
+        "climate_risk_marthas_vineyard",
+        "recovery_test_doc_nantucket_sound",
+        "complex_test_doc_boston_harbor_islands"
+      ],
+      "version": 6
+    }
+  },
+  {
+    "id": "03bc5c1b-f1cd-4d3d-88f4-61df186df9ea",
+    "actant_name": "7099d6cd-21fd-47bd-9da4-34e637aa6c52",
+    "journey_points": [
+      {
+        "id": "680d17bb-30d5-4812-a709-b127ef4f2b1b",
+        "actant_name": "7099d6cd-21fd-47bd-9da4-34e637aa6c52",
+        "domain_id": "basic_test_doc_cape_code",
+        "predicate_id": "predicate_0",
+        "role": "vulnerability",
+        "timestamp": "2025-03-24T22:06:59.522270",
+        "confidence": 0.8
+      },
+      {
+        "id": "d2869a4c-3d54-49ca-8f0f-80047653bd7d",
+        "actant_name": "7099d6cd-21fd-47bd-9da4-34e637aa6c52",
+        "domain_id": "vineyard_sound_structure_meaning_test_doc",
+        "predicate_id": "predicate_1",
+        "role": "vulnerability",
+        "timestamp": "2025-03-24T22:06:59.522283",
+        "confidence": 0.8
+      },
+      {
+        "id": "437f0c17-0d9d-4691-b176-9b7847a133e7",
+        "actant_name": "7099d6cd-21fd-47bd-9da4-34e637aa6c52",
+        "domain_id": "complex_test_doc_boston_harbor_islands",
+        "predicate_id": "predicate_2",
+        "role": "vulnerability",
+        "timestamp": "2025-03-24T22:06:59.522296",
+        "confidence": 0.8
+      },
+      {
+        "id": "a438fd66-4984-4a73-9177-c66123eceff2",
+        "actant_name": "7099d6cd-21fd-47bd-9da4-34e637aa6c52",
+        "domain_id": "climate_risk_marthas_vineyard",
+        "predicate_id": "predicate_3",
+        "role": "hazard",
+        "timestamp": "2025-03-24T22:06:59.522308",
+        "confidence": 0.8
+      },
+      {
+        "id": "0a14b478-2c07-4939-9edb-c3c6030b977a",
+        "actant_name": "7099d6cd-21fd-47bd-9da4-34e637aa6c52",
+        "domain_id": "recovery_test_doc_nantucket_sound",
+        "predicate_id": "predicate_4",
+        "role": "vulnerability",
+        "timestamp": "2025-03-24T22:06:59.522320",
+        "confidence": 0.8
+      },
+      {
+        "id": "67cecca1-b5bc-433e-8bb1-51af1fbe862d",
+        "actant_name": "7099d6cd-21fd-47bd-9da4-34e637aa6c52",
+        "domain_id": "temporal_analysis_plum_island",
+        "predicate_id": "predicate_5",
+        "role": "vulnerability",
+        "timestamp": "2025-03-24T22:06:59.522333",
+        "confidence": 0.8
+      }
+    ],
+    "domain_transitions": [
+      {
+        "id": "97f8918f-adc4-42c3-a5d5-e51ad1631fb2",
+        "actant_name": "7099d6cd-21fd-47bd-9da4-34e637aa6c52",
+        "source_domain_id": "basic_test_doc_cape_code",
+        "target_domain_id": "vineyard_sound_structure_meaning_test_doc",
+        "source_predicate_id": "predicate_0",
+        "target_predicate_id": "predicate_1",
+        "source_role": "stressor",
+        "target_role": "vulnerability",
+        "timestamp": "2025-03-24T22:06:59.522347",
+        "transformation_id": null
+      },
+      {
+        "id": "4e246d9a-d4b2-4b6a-9001-cc0815397944",
+        "actant_name": "7099d6cd-21fd-47bd-9da4-34e637aa6c52",
+        "source_domain_id": "vineyard_sound_structure_meaning_test_doc",
+        "target_domain_id": "complex_test_doc_boston_harbor_islands",
+        "source_predicate_id": "predicate_1",
+        "target_predicate_id": "predicate_2",
+        "source_role": "stressor",
+        "target_role": "vulnerability",
+        "timestamp": "2025-03-24T22:06:59.522366",
+        "transformation_id": null
+      },
+      {
+        "id": "3d958578-a606-4ca7-926c-ac20ee8cf419",
+        "actant_name": "7099d6cd-21fd-47bd-9da4-34e637aa6c52",
+        "source_domain_id": "complex_test_doc_boston_harbor_islands",
+        "target_domain_id": "climate_risk_marthas_vineyard",
+        "source_predicate_id": "predicate_2",
+        "target_predicate_id": "predicate_3",
+        "source_role": "stressor",
+        "target_role": "vulnerability",
+        "timestamp": "2025-03-24T22:06:59.522385",
+        "transformation_id": null
+      },
+      {
+        "id": "08981c53-5443-47db-925e-d01108074013",
+        "actant_name": "7099d6cd-21fd-47bd-9da4-34e637aa6c52",
+        "source_domain_id": "climate_risk_marthas_vineyard",
+        "target_domain_id": "recovery_test_doc_nantucket_sound",
+        "source_predicate_id": "predicate_3",
+        "target_predicate_id": "predicate_4",
+        "source_role": "hazard",
+        "target_role": "vulnerability",
+        "timestamp": "2025-03-24T22:06:59.522405",
+        "transformation_id": null
+      },
+      {
+        "id": "f316cb3a-dd34-4b2a-8a00-da525d2c7bc3",
+        "actant_name": "7099d6cd-21fd-47bd-9da4-34e637aa6c52",
+        "source_domain_id": "recovery_test_doc_nantucket_sound",
+        "target_domain_id": "temporal_analysis_plum_island",
+        "source_predicate_id": "predicate_4",
+        "target_predicate_id": "predicate_5",
+        "source_role": "stressor",
+        "target_role": "vulnerability",
+        "timestamp": "2025-03-24T22:06:59.522426",
+        "transformation_id": null
+      }
+    ],
+    "adaptive_id": {
+      "id": "af8311fd-f72d-41dd-9020-f9f74428c05c",
+      "base_concept": "7099d6cd-21fd-47bd-9da4-34e637aa6c52",
+      "confidence": 0.8,
+      "uncertainty": 0.2,
+      "version_count": 1
+    },
+    "pattern_propensity": {
+      "directionality": {
+        "basic_test_doc_cape_code_to_vineyard_sound_structure_meaning_test_doc": 0.2,
+        "vineyard_sound_structure_meaning_test_doc_to_complex_test_doc_boston_harbor_islands": 0.2,
+        "complex_test_doc_boston_harbor_islands_to_climate_risk_marthas_vineyard": 0.2,
+        "climate_risk_marthas_vineyard_to_recovery_test_doc_nantucket_sound": 0.2,
+        "recovery_test_doc_nantucket_sound_to_temporal_analysis_plum_island": 0.2
+      },
+      "capaciousness": 1.0,
+      "coherence": 0.55
+    },
+    "journey_state": {
+      "journey_points": 6,
+      "domain_transitions": 5,
+      "role_shifts": 5,
+      "domains_visited": [
+        "basic_test_doc_cape_code",
+        "vineyard_sound_structure_meaning_test_doc",
+        "temporal_analysis_plum_island",
+        "climate_risk_marthas_vineyard",
+        "recovery_test_doc_nantucket_sound",
+        "complex_test_doc_boston_harbor_islands"
+      ],
+      "version": 6
+    }
+  },
+  {
+    "id": "220b0183-64f6-4fd9-81c6-7c6ecb29830c",
+    "actant_name": "a670bca6-5cca-4621-b72d-e5ab31c667fa",
+    "journey_points": [
+      {
+        "id": "6d291cb9-a1d8-4cf0-a005-80aef0fac93c",
+        "actant_name": "a670bca6-5cca-4621-b72d-e5ab31c667fa",
+        "domain_id": "basic_test_doc_cape_code",
+        "predicate_id": "predicate_0",
+        "role": "vulnerability",
+        "timestamp": "2025-03-24T22:06:59.522473",
+        "confidence": 0.8
+      },
+      {
+        "id": "54458449-7834-4282-abae-6e06dbb4d3f9",
+        "actant_name": "a670bca6-5cca-4621-b72d-e5ab31c667fa",
+        "domain_id": "vineyard_sound_structure_meaning_test_doc",
+        "predicate_id": "predicate_1",
+        "role": "vulnerability",
+        "timestamp": "2025-03-24T22:06:59.522485",
+        "confidence": 0.8
+      },
+      {
+        "id": "23cb4847-bdb8-4a16-bcc4-999da1e8ab86",
+        "actant_name": "a670bca6-5cca-4621-b72d-e5ab31c667fa",
+        "domain_id": "complex_test_doc_boston_harbor_islands",
+        "predicate_id": "predicate_2",
+        "role": "vulnerability",
+        "timestamp": "2025-03-24T22:06:59.522496",
+        "confidence": 0.8
+      },
+      {
+        "id": "874fec4e-004d-4193-b037-35e78c449721",
+        "actant_name": "a670bca6-5cca-4621-b72d-e5ab31c667fa",
+        "domain_id": "climate_risk_marthas_vineyard",
+        "predicate_id": "predicate_3",
+        "role": "hazard",
+        "timestamp": "2025-03-24T22:06:59.522508",
+        "confidence": 0.8
+      },
+      {
+        "id": "9a351199-f4f8-496c-896b-5ab1bfe7599a",
+        "actant_name": "a670bca6-5cca-4621-b72d-e5ab31c667fa",
+        "domain_id": "recovery_test_doc_nantucket_sound",
+        "predicate_id": "predicate_4",
+        "role": "vulnerability",
+        "timestamp": "2025-03-24T22:06:59.522520",
+        "confidence": 0.8
+      },
+      {
+        "id": "f36fe26e-87a2-4f27-a1fc-afdbeaf8a582",
+        "actant_name": "a670bca6-5cca-4621-b72d-e5ab31c667fa",
+        "domain_id": "temporal_analysis_plum_island",
+        "predicate_id": "predicate_5",
+        "role": "vulnerability",
+        "timestamp": "2025-03-24T22:06:59.522532",
+        "confidence": 0.8
+      }
+    ],
+    "domain_transitions": [
+      {
+        "id": "42a5853a-755c-4f37-917c-051b53fd5d66",
+        "actant_name": "a670bca6-5cca-4621-b72d-e5ab31c667fa",
+        "source_domain_id": "basic_test_doc_cape_code",
+        "target_domain_id": "vineyard_sound_structure_meaning_test_doc",
+        "source_predicate_id": "predicate_0",
+        "target_predicate_id": "predicate_1",
+        "source_role": "stressor",
+        "target_role": "vulnerability",
+        "timestamp": "2025-03-24T22:06:59.522546",
+        "transformation_id": null
+      },
+      {
+        "id": "b837d61a-c88b-4d27-b107-ff93168f86be",
+        "actant_name": "a670bca6-5cca-4621-b72d-e5ab31c667fa",
+        "source_domain_id": "vineyard_sound_structure_meaning_test_doc",
+        "target_domain_id": "complex_test_doc_boston_harbor_islands",
+        "source_predicate_id": "predicate_1",
+        "target_predicate_id": "predicate_2",
+        "source_role": "stressor",
+        "target_role": "vulnerability",
+        "timestamp": "2025-03-24T22:06:59.522564",
+        "transformation_id": null
+      },
+      {
+        "id": "33a740d4-bcfe-4f21-82db-c85a30460e62",
+        "actant_name": "a670bca6-5cca-4621-b72d-e5ab31c667fa",
+        "source_domain_id": "complex_test_doc_boston_harbor_islands",
+        "target_domain_id": "climate_risk_marthas_vineyard",
+        "source_predicate_id": "predicate_2",
+        "target_predicate_id": "predicate_3",
+        "source_role": "stressor",
+        "target_role": "vulnerability",
+        "timestamp": "2025-03-24T22:06:59.522586",
+        "transformation_id": null
+      },
+      {
+        "id": "14f6dc03-5969-4b21-9fce-fac6caae438b",
+        "actant_name": "a670bca6-5cca-4621-b72d-e5ab31c667fa",
+        "source_domain_id": "climate_risk_marthas_vineyard",
+        "target_domain_id": "recovery_test_doc_nantucket_sound",
+        "source_predicate_id": "predicate_3",
+        "target_predicate_id": "predicate_4",
+        "source_role": "hazard",
+        "target_role": "vulnerability",
+        "timestamp": "2025-03-24T22:06:59.522606",
+        "transformation_id": null
+      },
+      {
+        "id": "f8c29426-fafb-4487-b72b-05fd186522ae",
+        "actant_name": "a670bca6-5cca-4621-b72d-e5ab31c667fa",
+        "source_domain_id": "recovery_test_doc_nantucket_sound",
+        "target_domain_id": "temporal_analysis_plum_island",
+        "source_predicate_id": "predicate_4",
+        "target_predicate_id": "predicate_5",
+        "source_role": "stressor",
+        "target_role": "vulnerability",
+        "timestamp": "2025-03-24T22:06:59.522626",
+        "transformation_id": null
+      }
+    ],
+    "adaptive_id": {
+      "id": "b9740a4c-7432-4c24-a604-1508a634b114",
+      "base_concept": "a670bca6-5cca-4621-b72d-e5ab31c667fa",
+      "confidence": 0.8,
+      "uncertainty": 0.2,
+      "version_count": 1
+    },
+    "pattern_propensity": {
+      "directionality": {
+        "basic_test_doc_cape_code_to_vineyard_sound_structure_meaning_test_doc": 0.2,
+        "vineyard_sound_structure_meaning_test_doc_to_complex_test_doc_boston_harbor_islands": 0.2,
+        "complex_test_doc_boston_harbor_islands_to_climate_risk_marthas_vineyard": 0.2,
+        "climate_risk_marthas_vineyard_to_recovery_test_doc_nantucket_sound": 0.2,
+        "recovery_test_doc_nantucket_sound_to_temporal_analysis_plum_island": 0.2
+      },
+      "capaciousness": 1.0,
+      "coherence": 0.55
+    },
+    "journey_state": {
+      "journey_points": 6,
+      "domain_transitions": 5,
+      "role_shifts": 5,
+      "domains_visited": [
+        "basic_test_doc_cape_code",
+        "vineyard_sound_structure_meaning_test_doc",
+        "temporal_analysis_plum_island",
+        "climate_risk_marthas_vineyard",
+        "recovery_test_doc_nantucket_sound",
+        "complex_test_doc_boston_harbor_islands"
+      ],
+      "version": 6
+    }
+  },
+  {
+    "id": "d3b5d8ca-f0f3-49a7-a983-10e33fb3bc90",
+    "actant_name": "cf2fa5c8-d4a1-431c-9c48-a22d4eee888e",
+    "journey_points": [
+      {
+        "id": "11729631-830e-4e01-b4da-50ec216b7f1f",
+        "actant_name": "cf2fa5c8-d4a1-431c-9c48-a22d4eee888e",
+        "domain_id": "basic_test_doc_cape_code",
+        "predicate_id": "predicate_0",
+        "role": "vulnerability",
+        "timestamp": "2025-03-24T22:06:59.522672",
+        "confidence": 0.8
+      },
+      {
+        "id": "196721d7-3e9b-468d-9f29-dc9a4b4ccc1d",
+        "actant_name": "cf2fa5c8-d4a1-431c-9c48-a22d4eee888e",
+        "domain_id": "vineyard_sound_structure_meaning_test_doc",
+        "predicate_id": "predicate_1",
+        "role": "vulnerability",
+        "timestamp": "2025-03-24T22:06:59.522683",
+        "confidence": 0.8
+      },
+      {
+        "id": "152817d7-dfdb-4a8f-a0da-6e62bfc9016c",
+        "actant_name": "cf2fa5c8-d4a1-431c-9c48-a22d4eee888e",
+        "domain_id": "complex_test_doc_boston_harbor_islands",
+        "predicate_id": "predicate_2",
+        "role": "vulnerability",
+        "timestamp": "2025-03-24T22:06:59.522695",
+        "confidence": 0.8
+      },
+      {
+        "id": "b86cbe61-4361-4516-95a5-bdb55242fdfa",
+        "actant_name": "cf2fa5c8-d4a1-431c-9c48-a22d4eee888e",
+        "domain_id": "climate_risk_marthas_vineyard",
+        "predicate_id": "predicate_3",
+        "role": "hazard",
+        "timestamp": "2025-03-24T22:06:59.522707",
+        "confidence": 0.8
+      },
+      {
+        "id": "706b3517-ac69-453a-a1bb-237516171b8e",
+        "actant_name": "cf2fa5c8-d4a1-431c-9c48-a22d4eee888e",
+        "domain_id": "recovery_test_doc_nantucket_sound",
+        "predicate_id": "predicate_4",
+        "role": "vulnerability",
+        "timestamp": "2025-03-24T22:06:59.522719",
+        "confidence": 0.8
+      },
+      {
+        "id": "b331454f-a7fc-4a5a-99ec-12194683ce36",
+        "actant_name": "cf2fa5c8-d4a1-431c-9c48-a22d4eee888e",
+        "domain_id": "temporal_analysis_plum_island",
+        "predicate_id": "predicate_5",
+        "role": "vulnerability",
+        "timestamp": "2025-03-24T22:06:59.522731",
+        "confidence": 0.8
+      }
+    ],
+    "domain_transitions": [
+      {
+        "id": "80548d4a-c3dd-49b6-8f85-6e9689225cf3",
+        "actant_name": "cf2fa5c8-d4a1-431c-9c48-a22d4eee888e",
+        "source_domain_id": "basic_test_doc_cape_code",
+        "target_domain_id": "vineyard_sound_structure_meaning_test_doc",
+        "source_predicate_id": "predicate_0",
+        "target_predicate_id": "predicate_1",
+        "source_role": "stressor",
+        "target_role": "vulnerability",
+        "timestamp": "2025-03-24T22:06:59.522747",
+        "transformation_id": null
+      },
+      {
+        "id": "ebac8a43-817a-4a9e-a81c-2aa9edf4bc61",
+        "actant_name": "cf2fa5c8-d4a1-431c-9c48-a22d4eee888e",
+        "source_domain_id": "vineyard_sound_structure_meaning_test_doc",
+        "target_domain_id": "complex_test_doc_boston_harbor_islands",
+        "source_predicate_id": "predicate_1",
+        "target_predicate_id": "predicate_2",
+        "source_role": "stressor",
+        "target_role": "vulnerability",
+        "timestamp": "2025-03-24T22:06:59.522766",
+        "transformation_id": null
+      },
+      {
+        "id": "b9eb7a0b-f48a-4280-9ddb-99ea316c1085",
+        "actant_name": "cf2fa5c8-d4a1-431c-9c48-a22d4eee888e",
+        "source_domain_id": "complex_test_doc_boston_harbor_islands",
+        "target_domain_id": "climate_risk_marthas_vineyard",
+        "source_predicate_id": "predicate_2",
+        "target_predicate_id": "predicate_3",
+        "source_role": "stressor",
+        "target_role": "vulnerability",
+        "timestamp": "2025-03-24T22:06:59.522784",
+        "transformation_id": null
+      },
+      {
+        "id": "033cfa25-0142-4831-a946-a19bc61ccc9c",
+        "actant_name": "cf2fa5c8-d4a1-431c-9c48-a22d4eee888e",
+        "source_domain_id": "climate_risk_marthas_vineyard",
+        "target_domain_id": "recovery_test_doc_nantucket_sound",
+        "source_predicate_id": "predicate_3",
+        "target_predicate_id": "predicate_4",
+        "source_role": "hazard",
+        "target_role": "vulnerability",
+        "timestamp": "2025-03-24T22:06:59.522804",
+        "transformation_id": null
+      },
+      {
+        "id": "3373ed1e-514e-49f4-9373-1622b842a6e8",
+        "actant_name": "cf2fa5c8-d4a1-431c-9c48-a22d4eee888e",
+        "source_domain_id": "recovery_test_doc_nantucket_sound",
+        "target_domain_id": "temporal_analysis_plum_island",
+        "source_predicate_id": "predicate_4",
+        "target_predicate_id": "predicate_5",
+        "source_role": "stressor",
+        "target_role": "vulnerability",
+        "timestamp": "2025-03-24T22:06:59.522825",
+        "transformation_id": null
+      }
+    ],
+    "adaptive_id": {
+      "id": "baab532e-ccf5-41d7-86e7-7cacbe2d6184",
+      "base_concept": "cf2fa5c8-d4a1-431c-9c48-a22d4eee888e",
+      "confidence": 0.8,
+      "uncertainty": 0.2,
+      "version_count": 1
+    },
+    "pattern_propensity": {
+      "directionality": {
+        "basic_test_doc_cape_code_to_vineyard_sound_structure_meaning_test_doc": 0.2,
+        "vineyard_sound_structure_meaning_test_doc_to_complex_test_doc_boston_harbor_islands": 0.2,
+        "complex_test_doc_boston_harbor_islands_to_climate_risk_marthas_vineyard": 0.2,
+        "climate_risk_marthas_vineyard_to_recovery_test_doc_nantucket_sound": 0.2,
+        "recovery_test_doc_nantucket_sound_to_temporal_analysis_plum_island": 0.2
+      },
+      "capaciousness": 1.0,
+      "coherence": 0.55
+    },
+    "journey_state": {
+      "journey_points": 6,
+      "domain_transitions": 5,
+      "role_shifts": 5,
+      "domains_visited": [
+        "basic_test_doc_cape_code",
+        "vineyard_sound_structure_meaning_test_doc",
+        "temporal_analysis_plum_island",
+        "climate_risk_marthas_vineyard",
+        "recovery_test_doc_nantucket_sound",
+        "complex_test_doc_boston_harbor_islands"
+      ],
+      "version": 6
+    }
+  }
+]

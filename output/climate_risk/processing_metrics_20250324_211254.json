@@ -1,0 +1,39 @@
+{
+  "files_processed": 6,
+  "entities_discovered": 0,
+  "domains_discovered": 0,
+  "relationships_discovered": 0,
+  "processing_time_seconds": 3.035946,
+  "files": [
+    {
+      "name": "complex_test_doc_boston_harbor_islands.txt",
+      "size_bytes": 5032,
+      "last_modified": "2024-12-12T16:23:40.699725"
+    },
+    {
+      "name": "recovery_test_doc_nantucket_sound.txt",
+      "size_bytes": 3866,
+      "last_modified": "2024-12-12T19:12:35.562359"
+    },
+    {
+      "name": "climate_risk_marthas_vineyard.txt",
+      "size_bytes": 14129,
+      "last_modified": "2025-02-06T12:49:28.515707"
+    },
+    {
+      "name": "basic_test_doc_cape_code.txt",
+      "size_bytes": 1713,
+      "last_modified": "2024-12-12T16:25:18.305236"
+    },
+    {
+      "name": "temporal_analysis_plum_island.txt",
+      "size_bytes": 3872,
+      "last_modified": "2024-12-12T16:31:46.121858"
+    },
+    {
+      "name": "vineyard_sound_structure_meaning_test_doc.txt",
+      "size_bytes": 5005,
+      "last_modified": "2024-12-12T19:28:02.827506"
+    }
+  ]
+}
