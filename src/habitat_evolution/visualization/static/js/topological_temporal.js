@@ -17,6 +17,8 @@ class TopologicalTemporalVisualizer {
         this.expressionContainer = document.getElementById('expression-container');
         this.expressionTemplate = document.getElementById('expression-template');
         this.conceptInfo = document.getElementById('concept-info');
+        this.expressionCount = document.getElementById('expression-count');
+        this.conceptTypeBadge = document.getElementById('concept-type-badge');
         
         // Visualization state
         this.width = this.container.clientWidth;
@@ -52,20 +54,35 @@ class TopologicalTemporalVisualizer {
             .append('svg')
             .attr('width', '100%')
             .attr('height', '100%')
-            .attr('viewBox', [0, 0, this.width, this.height]);
+            .attr('viewBox', [0, 0, this.width, this.height])
+            .attr('class', 'visualization-svg');
+            
+        // Add zoom behavior
+        const zoom = d3.zoom()
+            .scaleExtent([0.5, 5])
+            .on('zoom', (event) => {
+                this.zoomGroup.attr('transform', event.transform);
+            });
+            
+        this.svg.call(zoom);
         
-        // Create groups for different elements
-        this.svg.append('g').attr('class', 'dissonance-zones');
-        this.svg.append('g').attr('class', 'links');
-        this.svg.append('g').attr('class', 'nodes');
+        // Create a group for zooming
+        this.zoomGroup = this.svg.append('g');
+        
+        // Create groups for different elements within the zoom group
+        this.zoomGroup.append('g').attr('class', 'dissonance-zones');
+        this.zoomGroup.append('g').attr('class', 'links');
+        this.zoomGroup.append('g').attr('class', 'nodes');
         this.svg.append('g').attr('class', 'intentionality-vectors');
         
         // Create force simulation
         this.simulation = d3.forceSimulation()
-            .force('link', d3.forceLink().id(d => d.id).distance(100))
-            .force('charge', d3.forceManyBody().strength(-300))
+            .force('link', d3.forceLink().id(d => d.id).distance(150))
+            .force('charge', d3.forceManyBody().strength(-400))
             .force('center', d3.forceCenter(this.width / 2, this.height / 2))
-            .force('collision', d3.forceCollide().radius(30));
+            .force('collision', d3.forceCollide().radius(60))
+            .force('x', d3.forceX(this.width / 2).strength(0.03))
+            .force('y', d3.forceY(this.height / 2).strength(0.03));
     }
     
     /**
@@ -162,10 +179,20 @@ class TopologicalTemporalVisualizer {
             'Food Security', 'Education Access', 'Land Rights', 'Technological Innovation'
         ];
         
+        // Calculate center and radius for initial positioning
+        const centerX = this.width / 2;
+        const centerY = this.height / 2;
+        const radius = Math.min(this.width, this.height) * 0.4;
+        
         // Generate nodes
         for (let i = 0; i < conceptNames.length; i++) {
             const domain = domains[i % 2];
             const type = types[i % 3 === 0 ? 1 : 0]; // Make some predicates
+            
+            // Position nodes in a circle initially
+            const angle = (i / conceptNames.length) * 2 * Math.PI;
+            const x = centerX + radius * Math.cos(angle);
+            const y = centerY + radius * Math.sin(angle);
             
             this.nodes.push({
                 id: `node-${i}`,
@@ -174,8 +201,8 @@ class TopologicalTemporalVisualizer {
                 domain: domain,
                 potential: 0.3 + Math.random() * 0.7,
                 constructive_dissonance: Math.random() * 0.5,
-                x: 100 + Math.random() * (this.width - 200),
-                y: 100 + Math.random() * (this.height - 200)
+                x: x,
+                y: y
             });
         }
         
@@ -219,6 +246,11 @@ class TopologicalTemporalVisualizer {
             nodeIds.has(link.target.id || link.target)
         );
         
+        // Adjust simulation forces based on node count
+        const nodeCount = filteredNodes.length;
+        const chargeStrength = -250 - (nodeCount * 5);
+        this.simulation.force('charge').strength(chargeStrength);
+        
         // Update links
         this.linkElements = this.svg.select('.links')
             .selectAll('.link')
@@ -261,8 +293,8 @@ class TopologicalTemporalVisualizer {
         
         // Update node appearance based on potential
         this.nodeElements.select('circle')
-            .attr('r', d => 5 + d.potential * 15)
-            .style('opacity', d => 0.7 + d.potential * 0.3);
+            .attr('r', d => 6 + d.potential * 14)
+            .style('opacity', d => 0.6 + d.potential * 0.3);
             
         // Update constructive dissonance zones
         if (this.showDissonance) {
@@ -281,8 +313,8 @@ class TopologicalTemporalVisualizer {
             this.dissonanceZones = dissonanceEnter.merge(this.dissonanceZones)
                 .attr('cx', d => d.x)
                 .attr('cy', d => d.y)
-                .attr('r', d => 20 + d.constructive_dissonance * 50)
-                .style('opacity', d => d.constructive_dissonance * 0.3);
+                .attr('r', d => 25 + d.constructive_dissonance * 40)
+                .style('opacity', d => d.constructive_dissonance * 0.2);
         } else {
             this.svg.select('.dissonance-zones').selectAll('.dissonance-zone').remove();
         }
@@ -346,13 +378,47 @@ class TopologicalTemporalVisualizer {
      * Update the concept info panel with details about the selected node
      */
     updateConceptInfo(node) {
-        // Create concept info HTML
+        // Capitalize first letter of type and domain
+        const typeFormatted = node.type.charAt(0).toUpperCase() + node.type.slice(1);
+        const domainFormatted = node.domain.charAt(0).toUpperCase() + node.domain.slice(1);
+        
+        // Update the concept type badge
+        this.conceptTypeBadge.textContent = typeFormatted;
+        this.conceptTypeBadge.classList.remove('bg-dark-subtle', 'text-dark-emphasis');
+        
+        // Apply appropriate styling based on type
+        if (node.type === 'concept') {
+            this.conceptTypeBadge.classList.add('bg-primary-subtle', 'text-primary-emphasis');
+        } else if (node.type === 'predicate') {
+            this.conceptTypeBadge.classList.add('bg-success-subtle', 'text-success-emphasis');
+        } else {
+            this.conceptTypeBadge.classList.add('bg-dark-subtle', 'text-dark-emphasis');
+        }
+        
+        // Create concept info HTML with improved formatting
         const html = `
-            <h6>${node.name}</h6>
-            <p class="mb-1"><strong>Type:</strong> ${node.type}</p>
-            <p class="mb-1"><strong>Domain:</strong> ${node.domain}</p>
-            <p class="mb-1"><strong>Potential:</strong> ${node.potential.toFixed(2)}</p>
-            <p class="mb-0"><strong>Constructive Dissonance:</strong> ${node.constructive_dissonance.toFixed(2)}</p>
+            <h6 class="fw-normal mb-3">${node.name}</h6>
+            <div class="d-flex justify-content-between mb-2">
+                <span class="text-muted">Domain</span>
+                <span class="fw-medium">${domainFormatted}</span>
+            </div>
+            <div class="d-flex justify-content-between mb-2">
+                <span class="text-muted">Potential</span>
+                <span class="fw-medium">${node.potential.toFixed(2)}</span>
+            </div>
+            <div class="d-flex justify-content-between mb-2">
+                <span class="text-muted">Constructive Dissonance</span>
+                <span class="fw-medium">${node.constructive_dissonance.toFixed(2)}</span>
+            </div>
+            <div class="progress mt-3 mb-1" style="height: 4px;">
+                <div class="progress-bar" role="progressbar" 
+                     style="width: ${node.potential * 100}%; background-color: var(--${node.domain}-color)" 
+                     aria-valuenow="${node.potential * 100}" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+            <div class="d-flex justify-content-between">
+                <small class="text-muted">Semantic Energy</small>
+                <small class="text-muted">${(node.potential * 100).toFixed(0)}%</small>
+            </div>
         `;
         
         this.conceptInfo.innerHTML = html;
@@ -411,18 +477,22 @@ class TopologicalTemporalVisualizer {
      * Add a generated expression to the UI
      */
     addExpression(data) {
-        // Clone the expression template
-        const expressionElement = this.expressionTemplate.cloneNode(true);
-        expressionElement.id = '';
-        expressionElement.classList.remove('d-none');
+        // Clone the template
+        const expressionCard = this.expressionTemplate.cloneNode(true);
+        expressionCard.id = `expression-${Date.now()}`;
+        expressionCard.classList.remove('d-none');
         
-        // Fill in expression data
-        expressionElement.querySelector('.expression-text').textContent = data.expression;
-        expressionElement.querySelector('.expression-intentionality').textContent = data.intentionality;
-        expressionElement.querySelector('.expression-potential').textContent = `Potential: ${data.potential.toFixed(2)}`;
+        // Fill in the data
+        expressionCard.querySelector('.expression-text').textContent = data.text || data.expression;
+        expressionCard.querySelector('.expression-intentionality').textContent = data.intentionality;
+        expressionCard.querySelector('.expression-potential').textContent = `Potential: ${data.potential.toFixed(2)}`;
         
-        // Add to container
-        this.expressionContainer.insertBefore(expressionElement, this.expressionContainer.firstChild);
+        // Add to the container
+        this.expressionContainer.insertBefore(expressionCard, this.expressionContainer.firstChild.nextSibling);
+        
+        // Update expression count
+        const expressionCards = this.expressionContainer.querySelectorAll('.expression-card:not(.d-none)');
+        this.expressionCount.textContent = expressionCards.length;
     }
     
     /**
@@ -584,14 +654,32 @@ class TopologicalTemporalVisualizer {
         tooltip.className = 'tooltip';
         tooltip.innerHTML = `
             <div><strong>${d.name}</strong></div>
-            <div>Type: ${d.type}</div>
-            <div>Domain: ${d.domain}</div>
+            <div>Type: ${d.type.charAt(0).toUpperCase() + d.type.slice(1)}</div>
+            <div>Domain: ${d.domain.charAt(0).toUpperCase() + d.domain.slice(1)}</div>
             <div>Potential: ${d.potential.toFixed(2)}</div>
         `;
         
-        // Position tooltip near mouse
-        tooltip.style.left = `${event.pageX + 10}px`;
-        tooltip.style.top = `${event.pageY + 10}px`;
+        // Position tooltip near mouse but ensure it stays in viewport
+        const tooltipWidth = 180; // Approximate width
+        const tooltipHeight = 100; // Approximate height
+        const windowWidth = window.innerWidth;
+        const windowHeight = window.innerHeight;
+        
+        let left = event.pageX + 15;
+        let top = event.pageY + 15;
+        
+        // Adjust if tooltip would go off right edge
+        if (left + tooltipWidth > windowWidth) {
+            left = event.pageX - tooltipWidth - 10;
+        }
+        
+        // Adjust if tooltip would go off bottom edge
+        if (top + tooltipHeight > windowHeight) {
+            top = event.pageY - tooltipHeight - 10;
+        }
+        
+        tooltip.style.left = `${left}px`;
+        tooltip.style.top = `${top}px`;
         
         // Add to document
         document.body.appendChild(tooltip);
@@ -636,9 +724,13 @@ class TopologicalTemporalVisualizer {
         // Reset concept info
         this.conceptInfo.innerHTML = `
             <div class="alert alert-secondary">
-                Click on a concept to see details.
+                <small>Click on a concept in the visualization to see its semantic details and potential metrics.</small>
             </div>
         `;
+        
+        // Reset concept type badge
+        this.conceptTypeBadge.textContent = 'None';
+        this.conceptTypeBadge.className = 'badge bg-dark-subtle text-dark-emphasis small';
         
         // Update visualization
         this.updateVisualization();
@@ -646,10 +738,6 @@ class TopologicalTemporalVisualizer {
         // Disable generate button
         this.generateButton.disabled = true;
     }
-    
-    /**
-     * Create D3 drag behavior
-     */
     drag() {
         return d3.drag()
             .on('start', (event, d) => {

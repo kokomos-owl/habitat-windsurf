@@ -27,12 +27,33 @@ Traditional machine learning systems typically focus on pattern recognition with
 
 ### 2.1 Multi-dimensional Potential Sensing
 
-The framework enables Habitat to "sense" potential across four key dimensions:
+The framework enables Habitat to "sense" potential across four key dimensions, creating a comprehensive multi-dimensional field that captures both the static and dynamic aspects of semantic patterns:
 
 1. **Semantic Space**: Through coherence and stability metrics that measure the quality and reliability of patterns
+   - **Coherence Metrics**: Quantifies how consistently a pattern maintains its meaning across different contexts
+   - **Stability Index**: Measures resistance to semantic drift over time
+   - **Contextual Reinforcement**: Tracks how patterns are strengthened through repeated contextual evidence
+   - **Semantic Density**: Calculates the concentration of related meanings around a pattern
+
 2. **Statistical Space**: Through transition rates and pattern emergence metrics that capture the quantitative aspects of pattern evolution
+   - **Emergence Rate**: The velocity at which patterns move through quality states
+   - **Transition Probability Matrix**: Captures the likelihood of transitions between quality states
+   - **Occurrence Frequency**: Tracks pattern appearances across contexts
+   - **Statistical Significance**: Measures deviation from expected random distribution
+
 3. **Correlated Field**: Through gradient fields that span both semantic and statistical spaces, showing the directional forces of pattern evolution
+   - **Field Gradients**: Vector representations of the directional forces acting on patterns
+   - **Mutual Information**: Quantifies shared information between patterns
+   - **Co-evolution Coefficients**: Measures how patterns influence each other's evolution
+   - **Resonance Patterns**: Identifies harmonics in the semantic field where patterns amplify each other
+
 4. **Topological Space**: Through connectivity, centrality, and manifold curvature metrics that capture the structural relationships between patterns
+   - **Network Centrality**: Identifies hub patterns that connect multiple semantic clusters
+   - **Manifold Curvature**: Measures how the semantic space is warped by pattern relationships
+   - **Topological Persistence**: Tracks how long structural features persist in the semantic topology
+   - **Boundary Detection**: Identifies the edges of semantic domains
+
+These dimensions are not isolated but form an integrated field where changes in one dimension propagate to others. The system calculates field equations that describe how potential flows across these dimensions, creating a dynamic model of semantic evolution that can predict emerging patterns before they fully materialize.
 
 ### 2.2 Co-evolutionary Language Model
 
@@ -44,12 +65,33 @@ The framework implements a co-evolutionary model of language where:
 
 ### 2.3 Key Metrics
 
-The framework calculates several key metrics:
+The framework calculates several key metrics that provide insights into the current state and future evolution of the semantic field:
 
 1. **Evolutionary Potential**: The capacity for future pattern evolution based on stability, coherence, and emergence rate
+   - Calculated as: `EP = (stability_index * coherence_score + emergence_rate) / 2`
+   - High values indicate patterns likely to evolve into more complex or refined forms
+   - Serves as a predictive indicator of which patterns will become central to the semantic ecosystem
+   - Ranges from 0 (static, unlikely to evolve) to 1 (highly dynamic, rapid evolution)
+
 2. **Constructive Dissonance**: The productive tension that drives innovation in the semantic field
+   - Calculated as: `CD = (1 - stability_index) * coherence_score * gradient_magnitude`
+   - Identifies areas where semantic tension creates opportunities for novel pattern emergence
+   - High values indicate zones where creative recombination of patterns is likely
+   - Functions as an "innovation detector" in the semantic space
+
 3. **Topological Energy**: The stored potential energy in the pattern topology itself
+   - Calculated from network metrics including centrality, clustering coefficient, and edge weights
+   - Measures how much "semantic energy" is stored in the relationships between patterns
+   - Higher values indicate a more structured and interconnected semantic field
+   - Serves as an indicator of the field's capacity to maintain coherent structure
+
 4. **Manifold Curvature**: How the semantic space is warped by pattern relationships, creating "gravity wells" that influence pattern evolution
+   - Calculated using differential geometry techniques applied to the semantic network
+   - Positive curvature indicates semantic attractors that pull related patterns together
+   - Negative curvature indicates semantic repellers that push patterns apart
+   - Zero curvature indicates flat regions where patterns evolve independently
+
+These metrics are calculated at both the individual pattern level and the field level, providing a multi-scale view of the semantic ecosystem. They form the basis for the system's ability to detect emerging patterns, predict semantic evolution, and identify areas of high innovative potential.
 
 ## 3. Core Components
 
@@ -57,11 +99,35 @@ The implementation consists of three key components that work together to create
 
 ### 3.1 SemanticPotentialCalculator
 
-This component calculates potential metrics across the four dimensions. It provides methods for:
+This component calculates potential metrics across the four dimensions. It serves as the mathematical core of the framework, implementing the field equations that govern semantic potential.
 
-- Calculating pattern potential
-- Calculating field potential
-- Calculating topological potential
+#### Key Capabilities:
+
+- **Pattern Potential Calculation**: Computes the potential metrics for individual patterns
+  - Analyzes pattern history through quality state transitions
+  - Calculates stability based on temporal coherence
+  - Determines evolutionary trajectory based on contextual reinforcement
+  - Identifies constructive dissonance within the pattern's semantic neighborhood
+
+- **Field Potential Calculation**: Computes the overall potential of the semantic field
+  - Aggregates individual pattern potentials into field-level metrics
+  - Calculates gradient fields showing directional forces of evolution
+  - Identifies high-potential regions in the semantic space
+  - Detects emergent patterns at the field level
+
+- **Topological Potential Calculation**: Analyzes the structural aspects of the semantic network
+  - Maps the connectivity patterns between semantic entities
+  - Calculates network centrality and clustering metrics
+  - Identifies topological features like bridges, hubs, and clusters
+  - Computes manifold curvature to detect semantic attractors
+
+- **Temporal Analysis**: Tracks how potential metrics evolve over time
+  - Calculates rate of change for key metrics
+  - Identifies acceleration and deceleration in pattern evolution
+  - Predicts future states based on current trajectories
+  - Detects phase transitions in the semantic field
+
+The SemanticPotentialCalculator integrates with the graph persistence layer to access historical pattern data and with the vector-tonic window system to synchronize with learning windows.
 
 #### 3.1.1 Pattern Potential Calculation
 
