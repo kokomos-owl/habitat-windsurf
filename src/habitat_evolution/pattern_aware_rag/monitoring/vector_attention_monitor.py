@@ -16,7 +16,7 @@ from datetime import datetime
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple
 import logging
-from habitat_evolution.core.pattern.attention import AttentionFilter
+from src.habitat_evolution.core.pattern.attention import AttentionFilter
 from .metrics_logger import MetricsLogger
 
 @dataclass

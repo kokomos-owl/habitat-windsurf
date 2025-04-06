@@ -203,6 +203,45 @@ We've implemented a complete system for processing real climate risk documents, 
 
 This implementation represents a significant advancement in the Habitat Evolution system's ability to process real-world climate risk data, extract meaningful patterns, and track their evolution over time. The system can now ingest documents like `climate_risk_marthas_vineyard.txt`, extract patterns related to sea level rise, extreme drought, wildfire risk, and storm risk, and store them in ArangoDB with full versioning and relationship tracking.
 
+### Optimal Repository Structure for Pattern Persistence
+
+After extensive analysis of the codebase and requirements, we've identified the optimal repository structure for persisting pattern data:
+
+#### Core Repository Components
+
+1. **PatternRepository** ✅
+   - Primary repository for storing and retrieving pattern data
+   - Handles versioning through AdaptiveID integration
+   - Key methods: save, find_by_id, find_by_base_concept, find_by_quality_state, find_related_patterns
+
+2. **PatternQualityTransitionRepository** ✅
+   - Tracks transitions between quality states (hypothetical → emergent → stable → declining)
+   - Key methods: save_transition, find_transitions_by_pattern, find_patterns_with_recent_transitions
+
+3. **PatternRelationshipRepository** ✅
+   - Stores relationships between patterns
+   - Key methods: save_relationship, find_relationships_by_pattern, find_patterns_by_relationship_type
+
+4. **PatternUsageRepository** ✅
+   - Tracks pattern usage statistics
+   - Key methods: record_usage, get_usage_statistics, find_most_used_patterns
+
+5. **PatternFeedbackRepository** ✅
+   - Stores feedback on pattern quality and relevance
+   - Key methods: save_feedback, get_feedback_by_pattern
+
+#### ArangoDB Collections Structure
+
+For optimal performance and organization, the following collection structure is implemented:
+
+1. **patterns**: Document collection for pattern data
+2. **pattern_quality_transitions**: Document collection for quality state transitions
+3. **pattern_relationships**: Edge collection connecting patterns
+4. **pattern_usage**: Document collection for usage statistics
+5. **pattern_feedback**: Document collection for feedback data
+
+This repository structure provides a robust foundation for pattern persistence while supporting the key requirements of pattern evolution, versioning, relationship tracking, and context management needed for processing climate risk documents.
+
 - **Document Ingestion** ✅
   - ✅ Implemented the `ClimateDataLoader` to process climate risk documents from the data/climate_risk directory
   - ✅ Added metadata extraction for document provenance tracking (source, timestamp, location, time periods)

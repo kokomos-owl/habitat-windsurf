@@ -18,11 +18,11 @@ from typing import Dict, List, Optional
 from dataclasses import dataclass
 from datetime import datetime
 
-from habitat_evolution.pattern_aware_rag.pattern_aware_rag import PatternAwareRAG
-from habitat_evolution.core.models.learning_window import LearningWindowState
-from habitat_evolution.core.models.pattern import Pattern, PatternMetrics
-from habitat_evolution.core.services.graph_service import GraphService
-from habitat_evolution.core.services.pattern_evolution import PatternEvolutionService
+from src.habitat_evolution.pattern_aware_rag.pattern_aware_rag import PatternAwareRAG
+from src.habitat_evolution.core.models.learning_window import LearningWindowState
+from src.habitat_evolution.core.models.pattern import Pattern, PatternMetrics
+from src.habitat_evolution.core.services.graph_service import GraphService
+from src.habitat_evolution.core.services.pattern_evolution import PatternEvolutionService
 
 # Test Data Models
 @dataclass

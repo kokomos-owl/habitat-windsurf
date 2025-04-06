@@ -8,13 +8,13 @@ and demonstrate the AdaptiveID integration in a real-world scenario.
 
 import os
 import pytest
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Optional
 
 from src.habitat_evolution.infrastructure.services.pattern_evolution_service import PatternEvolutionService
-from src.habitat_evolution.infrastructure.services.document_processing_service import DocumentProcessingService
+from src.habitat_evolution.climate_risk.document_processing_service import DocumentProcessingService
 from src.habitat_evolution.infrastructure.services.event_service import EventService
 from src.habitat_evolution.infrastructure.services.bidirectional_flow_service import BidirectionalFlowService
-from src.habitat_evolution.infrastructure.persistence.arangodb_connection import ArangoDBConnection
+from src.habitat_evolution.infrastructure.persistence.arangodb.arangodb_connection import ArangoDBConnection
 from src.habitat_evolution.infrastructure.di.container import DIContainer
 
 
@@ -22,7 +22,90 @@ from src.habitat_evolution.infrastructure.di.container import DIContainer
 def di_container():
     """Create and configure the DI container for testing."""
     container = DIContainer()
-    container.initialize()
+    
+    # Import necessary interfaces
+    from src.habitat_evolution.infrastructure.interfaces.services.event_service_interface import EventServiceInterface
+    from src.habitat_evolution.infrastructure.interfaces.services.bidirectional_flow_interface import BidirectionalFlowInterface
+    from src.habitat_evolution.infrastructure.interfaces.services.pattern_evolution_service_interface import PatternEvolutionServiceInterface
+    from src.habitat_evolution.infrastructure.interfaces.persistence.arangodb_connection_interface import ArangoDBConnectionInterface
+    from src.habitat_evolution.infrastructure.interfaces.services.pattern_aware_rag_interface import PatternAwareRAGInterface
+    from src.habitat_evolution.infrastructure.interfaces.services.vector_tonic_service_interface import VectorTonicServiceInterface
+    
+    # Create a properly configured ArangoDBConnection with Docker credentials
+    arangodb_connection = ArangoDBConnection(
+        host="localhost",
+        port=8529,
+        username="root",
+        password="habitat",  # From docker-compose.yml
+        database_name="habitat_evolution"
+    )
+    
+    # Register services with their interfaces
+    container.register(EventServiceInterface, EventService)
+    container.register(BidirectionalFlowInterface, BidirectionalFlowService)
+    container.register(PatternEvolutionServiceInterface, PatternEvolutionService)
+    container.register(ArangoDBConnectionInterface, lambda: arangodb_connection)
+    
+    # Import and register additional services
+    from src.habitat_evolution.infrastructure.services.pattern_aware_rag_service import PatternAwareRAGService
+    from src.habitat_evolution.infrastructure.services.vector_tonic_service import VectorTonicService
+    
+    # Create mock implementations for testing
+    class MockPatternAwareRAGService(PatternAwareRAGService):
+        def __init__(self, event_service: EventServiceInterface = None, vector_tonic_service: VectorTonicServiceInterface = None):
+            self.event_service = event_service
+            self.vector_tonic_service = vector_tonic_service
+    
+    class MockVectorTonicService(VectorTonicServiceInterface):
+        def initialize(self, config: Optional[Dict[str, Any]] = None) -> None:
+            pass
+            
+        def register_vector_space(self, name: str, dimensions: int, metadata: Optional[Dict[str, Any]] = None) -> str:
+            return "mock_vector_space_id"
+            
+        def store_vector(self, vector_space_id: str, vector: List[float], entity_id: str, metadata: Optional[Dict[str, Any]] = None) -> str:
+            return "mock_vector_id"
+            
+        def find_similar_vectors(self, vector_space_id: str, query_vector: List[float], limit: int = 10, threshold: float = 0.0) -> List[Dict[str, Any]]:
+            return [{"id": "mock_vector_id", "similarity": 0.95, "metadata": {}}]
+            
+        def detect_tonic_patterns(self, vector_space_id: str, vectors: List[List[float]], threshold: float = 0.7) -> List[Dict[str, Any]]:
+            return [{"pattern_id": "mock_pattern_id", "vectors": []}]
+            
+        def validate_harmonic_coherence(self, pattern_id: str, vectors: List[List[float]]) -> float:
+            return 0.9
+            
+        def calculate_vector_gradient(self, vector_space_id: str, vector1: List[float], vector2: List[float]) -> Dict[str, Any]:
+            return {"gradient": 0.1, "direction": [0.01, 0.01, 0.01]}
+            
+        def get_pattern_vectors(self, pattern_id: str) -> List[List[float]]:
+            return [[0.1, 0.2, 0.3]]
+            
+        def get_pattern_centroid(self, pattern_id: str) -> List[float]:
+            return [0.1, 0.2, 0.3]
+            
+        def update_pattern_with_vector(self, pattern_id: str, vector: List[float], metadata: Optional[Dict[str, Any]] = None) -> bool:
+            return True
+            
+        def get_vector(self, text: str) -> List[float]:
+            return [0.1, 0.2, 0.3]  # Mock vector
+            
+        def get_similarity(self, vector1: List[float], vector2: List[float]) -> float:
+            return 0.95  # Mock high similarity
+    
+    # Register mock services
+    container.register(VectorTonicServiceInterface, MockVectorTonicService)
+    container.register(PatternAwareRAGInterface, MockPatternAwareRAGService)
+    
+    # Register DocumentProcessingService
+    container.register(DocumentProcessingService, DocumentProcessingService)
+    
+    # Also register concrete implementations for direct resolution
+    container.register(EventService, EventService)
+    container.register(BidirectionalFlowService, BidirectionalFlowService)
+    container.register(PatternEvolutionService, PatternEvolutionService)
+    container.register(ArangoDBConnection, lambda: arangodb_connection)
+    
     return container
 
 
@@ -88,7 +171,7 @@ class TestPatternEvolutionE2E:
         """
         # Step 1: Initialize services
         pattern_evolution_service.initialize()
-        document_processing_service.initialize()
+        # DocumentProcessingService doesn't need initialization
         
         # Step 2: Process the document to extract patterns
         document_id = os.path.basename(test_document_path)

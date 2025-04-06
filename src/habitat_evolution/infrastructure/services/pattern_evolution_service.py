@@ -115,7 +115,7 @@ class PatternEvolutionService(PatternEvolutionInterface):
                 
             # Create pattern_relationships collection if it doesn't exist
             if not self.arangodb_connection.collection_exists("pattern_relationships"):
-                self.arangodb_connection.create_collection("pattern_relationships", is_edge=True)
+                self.arangodb_connection.create_collection("pattern_relationships", edge=True)
                 logger.info("Created pattern_relationships collection")
                 
             # Create pattern_evolution_graph if it doesn't exist

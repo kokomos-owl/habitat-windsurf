@@ -464,6 +464,23 @@ class ArangoDBConnection(ArangoDBConnectionInterface):
         except Exception:
             return False
     
+    def collection_exists(self, collection_name: str) -> bool:
+        """
+        Check if a collection exists in ArangoDB.
+        
+        Args:
+            collection_name: The name of the collection
+            
+        Returns:
+            True if the collection exists, False otherwise
+        """
+        self.initialize()
+        try:
+            return self._db.has_collection(collection_name)
+        except Exception as e:
+            logger.error(f"Error checking if collection exists: {e}")
+            return False
+    
     def create_collection(self, collection_name: str, edge: bool = False) -> Any:
         """
         Create a collection in ArangoDB.

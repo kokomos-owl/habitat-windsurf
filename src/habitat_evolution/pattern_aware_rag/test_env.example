@@ -1,7 +1,7 @@
 # Pattern-Aware RAG Test Environment Configuration
 
 # Claude API Configuration
-CLAUDE_API_KEY=your_claude_api_key
+CLAUDE_API_KEY=y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
 CLAUDE_MODEL=claude-2
 
 # LangChain Configuration
@@ -9,9 +9,9 @@ LANGCHAIN_CACHE_DIR=./.habitat/cache
 LANGCHAIN_EMBEDDING_DIR=./.habitat/embeddings
 
 # Graph Database Configuration
-NEO4J_URI=bolt://localhost:7687
-NEO4J_USER=neo4j
-NEO4J_PASSWORD=your_password
+ARANGODB_URI=bolt://localhost:8529
+ARANGODB_USER=root
+ARANGODB_PASSWORD=habitat
 
 # Test Configuration
 TEST_PERSIST_DIR=./.habitat/test_data

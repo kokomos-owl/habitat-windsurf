@@ -11,32 +11,34 @@ from langchain.chains import LLMChain
 from langchain_community.vectorstores import Chroma
 from langchain.memory import ConversationBufferMemory
 
-from habitat_evolution.core.pattern import (
+from src.habitat_evolution.core.pattern import (
     FieldDrivenPatternManager,
     PatternQualityAnalyzer,
     SignalMetrics,
     FlowMetrics,
     PatternState
 )
-from habitat_evolution.core.services.field.interfaces import (
+from src.habitat_evolution.core.services.field.interfaces import (
     FieldStateService,
     GradientService,
     FlowDynamicsService
 )
-from habitat_evolution.adaptive_core.persistence.interfaces import (
+from src.habitat_evolution.adaptive_core.persistence.interfaces import (
     MetricsRepository,
     EventRepository
 )
-from habitat_evolution.core.services.event_bus import LocalEventBus
-from habitat_evolution.adaptive_core.services.interfaces import (
+from src.habitat_evolution.core.services.event_bus import LocalEventBus
+from src.habitat_evolution.adaptive_core.services.interfaces import (
     PatternEvolutionService,
     MetricsService,
     QualityMetricsService,
     EventManagementService
 )
-from habitat_evolution.adaptive_core.id.adaptive_id import AdaptiveID
-from habitat_evolution.adaptive_core.models import Pattern, Relationship
-from habitat_evolution.pattern_aware_rag.services.graph_service import GraphService
+from src.habitat_evolution.adaptive_core.id.adaptive_id import AdaptiveID
+from src.habitat_evolution.adaptive_core.models import Pattern, Relationship
+from src.habitat_evolution.pattern_aware_rag.services.graph_service import GraphService
+from src.habitat_evolution.pattern_aware_rag.services.claude_integration_service import ClaudeRAGService
+from src.habitat_evolution.infrastructure.interfaces.services.pattern_aware_rag_interface import PatternAwareRAGInterface
 
 from .interfaces.pattern_emergence import PatternEmergenceInterface as EmergenceFlow
 from .learning.learning_control import WindowState as StateSpaceCondition
@@ -88,7 +90,7 @@ class PatternMetrics:
     adaptation_rate: float
     stability: float
 
-class PatternAwareRAG:
+class PatternAwareRAG(PatternAwareRAGInterface):
     """RAG controller with integrated service management and pattern awareness."""
     
     def __init__(
@@ -103,7 +105,8 @@ class PatternAwareRAG:
         coherence_analyzer: Any,
         emergence_flow: EmergenceFlow,
         settings: Any,
-        graph_service: Optional[GraphService] = None
+        graph_service: Optional[GraphService] = None,
+        claude_api_key: Optional[str] = None
     ):
         # Core services
         self.pattern_evolution = pattern_evolution_service
@@ -118,6 +121,9 @@ class PatternAwareRAG:
         self.coherence_analyzer = coherence_analyzer
         self.emergence_flow = emergence_flow
         self.settings = settings
+        
+        # Claude LLM integration
+        self.claude_service = ClaudeRAGService(api_key=claude_api_key)
         
         # Initialize coherence-aware embeddings
         self.embeddings = CoherenceEmbeddings()
@@ -170,6 +176,18 @@ class PatternAwareRAG:
             "field.state.updated",
             self._handle_field_state_update
         )
+        self.events.subscribe(
+            "document.processed",
+            self._handle_document_processed
+        )
+        self.events.subscribe(
+            "pattern.created",
+            self._handle_pattern_created
+        )
+        self.events.subscribe(
+            "pattern.updated",
+            self._handle_pattern_updated
+        )
 
     async def process_with_patterns(
         self,
@@ -182,9 +200,9 @@ class PatternAwareRAG:
         window_metrics = await self._calculate_window_metrics(field_state)
         window_state = await self._determine_window_state(window_metrics)
         
-        # Let emergence flow guide pattern extraction
+        # Let emergence flow guide pattern extraction and use Claude for enhanced extraction
         state_space = self.emergence_flow.context.state_space
-        query_patterns = await self._extract_query_patterns(query)
+        query_patterns = await self.claude_service.extract_patterns_from_query(query)
         
         # Create embedding context with window awareness
         embedding_context = EmbeddingContext(
@@ -204,9 +222,12 @@ class PatternAwareRAG:
             embedding_context
         )
         
+        # Enhance retrieval with Claude
+        enhanced_docs = await self.claude_service.enhance_retrieval(query, query_patterns, docs)
+        
         # Update evolution metrics based on retrieval
         evolution_metrics = self._calculate_evolution_metrics(
-            docs,
+            enhanced_docs,
             query_patterns,
             retrieval_patterns
         )
@@ -217,11 +238,21 @@ class PatternAwareRAG:
         # Augment with updated context
         result, augmentation_patterns = await self._augment_with_patterns(
             query,
-            docs,
+            enhanced_docs,
             query_patterns,
             retrieval_patterns,
             embedding_context
         )
+        
+        # Generate response with Claude
+        claude_response = await self.claude_service.generate_response(
+            query, 
+            query_patterns + retrieval_patterns + augmentation_patterns, 
+            enhanced_docs
+        )
+        
+        # Update result with Claude's response
+        result.update(claude_response)
         
         # Update pattern evolution
         pattern_id = await self._update_pattern_evolution(
@@ -244,10 +275,10 @@ class PatternAwareRAG:
             evolution_metrics=evolution_metrics
         )
         
-        # Let coherence emerge naturally
-        coherence_insight = await self.coherence_analyzer.analyze_coherence(
+        # Let coherence emerge naturally using Claude
+        coherence_insight = await self.claude_service.analyze_coherence(
             pattern_context,
-            result["content"]
+            result.get("response", "")
         )
         
         # Update result with emergence insights
@@ -268,7 +299,188 @@ class PatternAwareRAG:
             {"rag_state": coherence_insight.flow_state}
         )
         
+        # Publish pattern usage event
+        self._publish_pattern_usage_event(query_patterns, retrieval_patterns, result)
+        
         return result, pattern_context
+        
+    def _publish_pattern_usage_event(self, query_patterns: List[str], retrieval_patterns: List[str], result: Dict[str, Any]) -> None:
+        """Publish pattern usage event for bidirectional flow."""
+        if not self.events:
+            return
+            
+        # Combine all patterns used in the query
+        all_patterns = set(query_patterns + retrieval_patterns)
+        
+        # Publish usage event for each pattern
+        for pattern_id in all_patterns:
+            try:
+                self.events.publish(
+                    "pattern.usage",
+                    {
+                        "pattern_id": pattern_id,
+                        "usage_type": "query",
+                        "usage_data": {
+                            "query_context": result.get("query", ""),
+                            "relevance_score": result.get("confidence", 0.5),
+                            "coherence_score": result.get("coherence", {}).get("confidence", 0.5) if isinstance(result.get("coherence"), dict) else 0.5
+                        },
+                        "timestamp": datetime.now().isoformat()
+                    }
+                )
+            except Exception as e:
+                logger.warning(f"Error publishing pattern usage event: {e}")
+                
+    def _handle_document_processed(self, event: Dict[str, Any]) -> None:
+        """Handle document processed event."""
+        document_id = event.get("document_id")
+        content = event.get("content")
+        patterns = event.get("patterns", [])
+        
+        if not document_id or not content:
+            return
+            
+        # Process document in RAG system
+        try:
+            context = RAGPatternContext(
+                query_patterns=[],
+                retrieval_patterns=[p.get("id") for p in patterns if isinstance(p, dict) and "id" in p],
+                augmentation_patterns=[],
+                coherence_level=0.5,
+                temporal_context=None,
+                state_space=None,
+                evolution_metrics=None
+            )
+            
+            asyncio.create_task(self.process_document(content, context))
+            logger.info(f"Processing document {document_id} in RAG system")
+        except Exception as e:
+            logger.error(f"Error processing document in RAG system: {e}")
+            
+    def _handle_pattern_created(self, event: Dict[str, Any]) -> None:
+        """Handle pattern created event."""
+        pattern = event.get("pattern")
+        if not pattern:
+            return
+            
+        # Update pattern in RAG system
+        try:
+            pattern_id = pattern.get("id")
+            if pattern_id:
+                # Sync with graph
+                asyncio.create_task(self._sync_with_graph(pattern_id, pattern))
+                logger.info(f"Synced new pattern {pattern_id} with graph")
+        except Exception as e:
+            logger.error(f"Error handling pattern created event: {e}")
+            
+    def _handle_pattern_updated(self, event: Dict[str, Any]) -> None:
+        """Handle pattern updated event."""
+        pattern = event.get("pattern")
+        if not pattern:
+            return
+            
+        # Update pattern in RAG system
+        try:
+            pattern_id = pattern.get("id")
+            if pattern_id:
+                # Sync with graph
+                asyncio.create_task(self._sync_with_graph(pattern_id, pattern))
+                logger.info(f"Synced updated pattern {pattern_id} with graph")
+        except Exception as e:
+            logger.error(f"Error handling pattern updated event: {e}")
+            
+    # Implement PatternAwareRAGInterface methods
+    
+    def process_document(self, document: str, metadata: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """Process a document through the pattern-aware RAG system."""
+        # Create a context object if metadata is provided as a dict
+        if isinstance(metadata, dict):
+            context = RAGPatternContext(
+                query_patterns=metadata.get("query_patterns", []),
+                retrieval_patterns=metadata.get("retrieval_patterns", []),
+                augmentation_patterns=metadata.get("augmentation_patterns", []),
+                coherence_level=metadata.get("coherence_level", 0.5),
+                temporal_context=metadata.get("temporal_context"),
+                state_space=metadata.get("state_space"),
+                evolution_metrics=metadata.get("evolution_metrics")
+            )
+        else:
+            context = metadata or RAGPatternContext(
+                query_patterns=[],
+                retrieval_patterns=[],
+                augmentation_patterns=[],
+                coherence_level=0.5,
+                temporal_context=None,
+                state_space=None,
+                evolution_metrics=None
+            )
+        
+        # Process document asynchronously
+        asyncio.create_task(self.enhance_patterns(document, context))
+        
+        return {
+            "status": "processing",
+            "document_length": len(document),
+            "timestamp": datetime.now().isoformat()
+        }
+    
+    def query(self, query: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """Query the pattern-aware RAG system."""
+        # Process query asynchronously
+        future = asyncio.ensure_future(self.process_with_patterns(query, context))
+        
+        # Wait for result
+        try:
+            loop = asyncio.get_event_loop()
+            result, pattern_context = loop.run_until_complete(future)
+            return result
+        except Exception as e:
+            logger.error(f"Error processing query: {e}")
+            return {
+                "status": "error",
+                "error": str(e),
+                "query": query,
+                "timestamp": datetime.now().isoformat()
+            }
+    
+    def get_patterns(self, filter_criteria: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
+        """Get patterns from the pattern-aware RAG system."""
+        # Get patterns from pattern evolution service
+        try:
+            patterns = self.pattern_evolution.get_patterns(filter_criteria)
+            return patterns
+        except Exception as e:
+            logger.error(f"Error getting patterns: {e}")
+            return []
+    
+    def get_field_state(self) -> Dict[str, Any]:
+        """Get the current state of the semantic field."""
+        # Get field state asynchronously
+        future = asyncio.ensure_future(self._get_current_field_state(None))
+        
+        # Wait for result
+        try:
+            loop = asyncio.get_event_loop()
+            field_state = loop.run_until_complete(future)
+            return field_state
+        except Exception as e:
+            logger.error(f"Error getting field state: {e}")
+            return {
+                "status": "error",
+                "error": str(e),
+                "timestamp": datetime.now().isoformat()
+            }
+    
+    def shutdown(self) -> None:
+        """Release resources when shutting down the service."""
+        # Close vector store if it exists
+        if self.vector_store:
+            try:
+                self.vector_store.persist()
+            except Exception as e:
+                logger.error(f"Error persisting vector store: {e}")
+        
+        logger.info("PatternAwareRAG service shutdown complete")
         
     def _initialize_pattern_prompts(self) -> None:
         """Initialize pattern-specific prompt templates."""
@@ -661,13 +873,19 @@ class PatternAwareRAG:
         self,
         query: str
     ) -> List[str]:
-        """Extract patterns from query."""
-        chain = LLMChain(
-            llm=self.rag.llm,
-            prompt=self.pattern_prompts["extraction"]
-        )
-        result = await chain.arun(query=query)
-        return self._parse_patterns(result)
+        """Extract patterns from query using Claude LLM."""
+        # Use Claude to extract patterns from the query
+        patterns = await self.claude_service.extract_patterns_from_query(query)
+        
+        # Convert to list of pattern IDs or base concepts
+        pattern_identifiers = []
+        for pattern in patterns:
+            if isinstance(pattern, dict):
+                pattern_identifiers.append(pattern.get("id") or pattern.get("base_concept") or query)
+            else:
+                pattern_identifiers.append(str(pattern))
+                
+        return pattern_identifiers
         
     async def _retrieve_with_patterns(
         self,

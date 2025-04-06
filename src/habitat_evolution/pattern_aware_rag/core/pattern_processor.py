@@ -5,7 +5,7 @@ from typing import Dict, Optional, List, Any
 from datetime import datetime, timezone
 from dataclasses import dataclass
 from ..state.test_states import PatternState, GraphStateSnapshot, ConceptNode, ConceptRelation
-from habitat_evolution.adaptive_core.id.adaptive_id import AdaptiveID
+from src.habitat_evolution.adaptive_core.id.adaptive_id import AdaptiveID
 from .exceptions import InvalidStateError, StateValidationError
 
 @dataclass
