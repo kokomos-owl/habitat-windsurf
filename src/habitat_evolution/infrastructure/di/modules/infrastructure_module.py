@@ -22,7 +22,9 @@ from src.habitat_evolution.infrastructure.services.arangodb_document_service imp
 from src.habitat_evolution.infrastructure.services.arangodb_graph_service import ArangoDBGraphService
 from src.habitat_evolution.infrastructure.services.vector_tonic_service import VectorTonicService
 from src.habitat_evolution.infrastructure.adapters.pattern_bridge import PatternBridge
+from src.habitat_evolution.infrastructure.adapters.pattern_adaptive_id_adapter import PatternAdaptiveIDAdapter, PatternAdaptiveIDFactory
 from src.habitat_evolution.adaptive_core.models.pattern import Pattern as AdaptiveCorePattern
+from src.habitat_evolution.adaptive_core.id.adaptive_id import AdaptiveID
 from src.habitat_evolution.infrastructure.persistence.arangodb.arangodb_pattern_repository import ArangoDBPatternRepository
 from src.habitat_evolution.infrastructure.services.event_service import EventService
 from src.habitat_evolution.infrastructure.services.pattern_aware_rag_service import PatternAwareRAGService
@@ -125,6 +127,23 @@ def create_infrastructure_module() -> Module:
     module.register_singleton(
         DocumentServiceInterface,
         ArangoDBDocumentService
+    )
+    
+    # Register the PatternAdaptiveIDFactory as a singleton
+    module.register_singleton(
+        PatternAdaptiveIDFactory,
+        PatternAdaptiveIDFactory
+    )
+    
+    # Register a factory method for creating PatternAdaptiveIDAdapter instances
+    def create_pattern_adaptive_id_adapter(container):
+        # This factory will be used when a PatternAdaptiveIDAdapter is requested
+        # It can create adapters for existing patterns or create new ones
+        return PatternAdaptiveIDFactory
+    
+    module.register_singleton(
+        PatternAdaptiveIDAdapter,
+        factory=create_pattern_adaptive_id_adapter
     )
     
     return module

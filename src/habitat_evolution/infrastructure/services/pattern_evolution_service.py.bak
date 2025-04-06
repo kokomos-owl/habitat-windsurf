@@ -403,6 +403,69 @@ class PatternEvolutionService(PatternEvolutionInterface):
             # Get the adapter for the pattern to leverage AdaptiveID capabilities
             adapter = PatternAdaptiveIDAdapter(pattern)
             
+            # Update the pattern quality metrics
+            updated_pattern_dict = pattern_doc.copy()
+            
+            # Update the quality metrics
+            if "quality" not in updated_pattern_dict:
+                updated_pattern_dict["quality"] = {}
+                
+            for key, value in quality_metrics.items():
+                updated_pattern_dict["quality"][key] = value
+                
+            # Create a new version to track this quality update
+            adapter.create_version({"quality": updated_pattern_dict["quality"]}, "quality_update")
+            
+            # Check if the pattern should transition to a new quality state
+            self._check_quality_transition(updated_pattern_dict)
+            
+            # Update the pattern in ArangoDB
+            self._update_pattern(pattern_id, updated_pattern_dict)
+            
+            # Publish the updated pattern
+            self.bidirectional_flow_service.publish_pattern(updated_pattern_dict)
+        except Exception as e:
+            logger.error(f"Error updating pattern quality: {e}")
+            
+    def identify_emerging_patterns(self, threshold: float = 0.7) -> List[Dict[str, Any]]:
+        """
+        Identify emerging patterns based on usage and quality metrics.
+        
+        Args:
+            threshold: The confidence threshold for emerging patterns
+            
+        Returns:
+            A list of emerging patterns
+        """
+        try:
+            # Query for patterns that might be emerging
+            query = """
+            FOR p IN patterns
+                FILTER p.quality_state == "hypothetical"
+                FILTER p.confidence >= @threshold
+                SORT p.confidence DESC
+                RETURN p
+            """
+            bind_vars = {"threshold": threshold}
+            
+            result = list(self.arangodb_connection.execute_aql(query, bind_vars))
+            
+            # Filter for patterns with significant usage
+            emerging_patterns = []
+            for pattern in result:
+                quality = pattern.get("quality", {})
+                usage_count = quality.get("usage_count", 0)
+                feedback_count = quality.get("feedback_count", 0)
+                
+                # Consider patterns with some usage and feedback
+                if usage_count >= 2 and feedback_count >= 1:
+                    emerging_patterns.append(pattern)
+            
+            return emerging_patterns
+        except Exception as e:
+            logger.error(f"Error identifying emerging patterns: {e}")
+            return []
+            
             # Create the usage document
             usage = {
                 "_key": str(uuid.uuid4()),
@@ -506,6 +569,69 @@ class PatternEvolutionService(PatternEvolutionInterface):
             # Get the adapter for the pattern to leverage AdaptiveID capabilities
             adapter = PatternAdaptiveIDAdapter(pattern)
             
+            # Update the pattern quality metrics
+            updated_pattern_dict = pattern_doc.copy()
+            
+            # Update the quality metrics
+            if "quality" not in updated_pattern_dict:
+                updated_pattern_dict["quality"] = {}
+                
+            for key, value in quality_metrics.items():
+                updated_pattern_dict["quality"][key] = value
+                
+            # Create a new version to track this quality update
+            adapter.create_version({"quality": updated_pattern_dict["quality"]}, "quality_update")
+            
+            # Check if the pattern should transition to a new quality state
+            self._check_quality_transition(updated_pattern_dict)
+            
+            # Update the pattern in ArangoDB
+            self._update_pattern(pattern_id, updated_pattern_dict)
+            
+            # Publish the updated pattern
+            self.bidirectional_flow_service.publish_pattern(updated_pattern_dict)
+        except Exception as e:
+            logger.error(f"Error updating pattern quality: {e}")
+            
+    def identify_emerging_patterns(self, threshold: float = 0.7) -> List[Dict[str, Any]]:
+        """
+        Identify emerging patterns based on usage and quality metrics.
+        
+        Args:
+            threshold: The confidence threshold for emerging patterns
+            
+        Returns:
+            A list of emerging patterns
+        """
+        try:
+            # Query for patterns that might be emerging
+            query = """
+            FOR p IN patterns
+                FILTER p.quality_state == "hypothetical"
+                FILTER p.confidence >= @threshold
+                SORT p.confidence DESC
+                RETURN p
+            """
+            bind_vars = {"threshold": threshold}
+            
+            result = list(self.arangodb_connection.execute_aql(query, bind_vars))
+            
+            # Filter for patterns with significant usage
+            emerging_patterns = []
+            for pattern in result:
+                quality = pattern.get("quality", {})
+                usage_count = quality.get("usage_count", 0)
+                feedback_count = quality.get("feedback_count", 0)
+                
+                # Consider patterns with some usage and feedback
+                if usage_count >= 2 and feedback_count >= 1:
+                    emerging_patterns.append(pattern)
+            
+            return emerging_patterns
+        except Exception as e:
+            logger.error(f"Error identifying emerging patterns: {e}")
+            return []
+            
             # Create the feedback document
             feedback_doc = {
                 "_key": str(uuid.uuid4()),
@@ -524,7 +650,7 @@ class PatternEvolutionService(PatternEvolutionInterface):
                 "timestamp": datetime.now().isoformat()
             })
             
-                        # Create a new version to track this feedback
+            # Create a new version to track this feedback
             version_data = {
                 "feedback_count": pattern.metrics.get("feedback_count", 0) + 1,
                 "last_feedback": datetime.now().isoformat()
@@ -608,6 +734,69 @@ class PatternEvolutionService(PatternEvolutionInterface):
                 
             # Get the adapter for the pattern to leverage AdaptiveID capabilities
             adapter = PatternAdaptiveIDAdapter(pattern)
+            
+            # Update the pattern quality metrics
+            updated_pattern_dict = pattern_doc.copy()
+            
+            # Update the quality metrics
+            if "quality" not in updated_pattern_dict:
+                updated_pattern_dict["quality"] = {}
+                
+            for key, value in quality_metrics.items():
+                updated_pattern_dict["quality"][key] = value
+                
+            # Create a new version to track this quality update
+            adapter.create_version({"quality": updated_pattern_dict["quality"]}, "quality_update")
+            
+            # Check if the pattern should transition to a new quality state
+            self._check_quality_transition(updated_pattern_dict)
+            
+            # Update the pattern in ArangoDB
+            self._update_pattern(pattern_id, updated_pattern_dict)
+            
+            # Publish the updated pattern
+            self.bidirectional_flow_service.publish_pattern(updated_pattern_dict)
+        except Exception as e:
+            logger.error(f"Error updating pattern quality: {e}")
+            
+    def identify_emerging_patterns(self, threshold: float = 0.7) -> List[Dict[str, Any]]:
+        """
+        Identify emerging patterns based on usage and quality metrics.
+        
+        Args:
+            threshold: The confidence threshold for emerging patterns
+            
+        Returns:
+            A list of emerging patterns
+        """
+        try:
+            # Query for patterns that might be emerging
+            query = """
+            FOR p IN patterns
+                FILTER p.quality_state == "hypothetical"
+                FILTER p.confidence >= @threshold
+                SORT p.confidence DESC
+                RETURN p
+            """
+            bind_vars = {"threshold": threshold}
+            
+            result = list(self.arangodb_connection.execute_aql(query, bind_vars))
+            
+            # Filter for patterns with significant usage
+            emerging_patterns = []
+            for pattern in result:
+                quality = pattern.get("quality", {})
+                usage_count = quality.get("usage_count", 0)
+                feedback_count = quality.get("feedback_count", 0)
+                
+                # Consider patterns with some usage and feedback
+                if usage_count >= 2 and feedback_count >= 1:
+                    emerging_patterns.append(pattern)
+            
+            return emerging_patterns
+        except Exception as e:
+            logger.error(f"Error identifying emerging patterns: {e}")
+            return []
             
             # Get quality transitions
             query = """
