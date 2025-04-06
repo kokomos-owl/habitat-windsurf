@@ -11,11 +11,14 @@ from datetime import datetime
 class FieldState:
     """Represents the state of a field at a point in time"""
     field_id: str
-    timestamp: datetime
-    potential: float
-    gradient: Dict[str, float]
-    stability: float
-    metadata: Dict[str, any]
+    timestamp: datetime = datetime.now()
+    state_vector: Dict[str, float] = None
+    pressure: float = 0.0
+    stability: float = 0.0
+    
+    def __post_init__(self):
+        if self.state_vector is None:
+            self.state_vector = {}
 
 @dataclass
 class GradientVector:

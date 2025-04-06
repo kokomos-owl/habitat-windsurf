@@ -34,7 +34,7 @@ Queries create and respond to pressure in the semantic field:
 
 ### Pattern Extraction from Queries
 
-```
+```text
 Query → Pattern Extraction → Query Patterns → Pattern Space Integration
 ```
 

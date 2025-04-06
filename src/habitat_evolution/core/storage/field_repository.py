@@ -7,7 +7,7 @@ from typing import Dict, Optional
 from datetime import datetime
 
 from ..services.field.interfaces import FieldState
-from .neo4j.base_repository import Neo4jBaseRepository
+from ...infrastructure.persistence.arangodb.arangodb_connection import ArangoDBConnection
 
 class FieldRepository(ABC):
     """Repository interface for field state storage"""
@@ -27,65 +27,73 @@ class FieldRepository(ABC):
         """Delete a field's state"""
         pass
 
-class Neo4jFieldRepository(Neo4jBaseRepository[FieldState], FieldRepository):
-    """Neo4j implementation of field repository"""
+class ArangoFieldRepository(FieldRepository):
+    """ArangoDB implementation of field repository"""
     
-    def __init__(self):
-        super().__init__()
-        self.node_label = "FieldState"
-        
+    def __init__(self, db_connection: ArangoDBConnection):
+        self.db_connection = db_connection
+        self.collection_name = "field_states"
+        self._ensure_collection_exists()
+    
+    def _ensure_collection_exists(self):
+        """Ensure the field_states collection exists"""
+        if not self.db_connection.collection_exists(self.collection_name):
+            self.db_connection.create_collection(self.collection_name)
+    
     def _create_entity(self, properties: Dict) -> FieldState:
-        """Create a FieldState instance from Neo4j properties"""
+        """Create a FieldState instance from ArangoDB properties"""
         return FieldState(
-            field_id=properties["field_id"],
-            timestamp=datetime.fromisoformat(properties["timestamp"]),
-            potential=float(properties["potential"]),
-            gradient=properties["gradient"],
-            stability=float(properties["stability"]),
-            metadata=properties["metadata"]
+            field_id=properties.get("field_id"),
+            state_vector=properties.get("state_vector", {}),
+            pressure=properties.get("pressure", 0.0),
+            stability=properties.get("stability", 0.0),
+            timestamp=properties.get("timestamp", datetime.now())
         )
-        
+    
     async def get_field_state(self, field_id: str) -> Optional[FieldState]:
         """Get the current state of a field"""
-        query = (
-            f"MATCH (n:{self.node_label} {{field_id: $field_id}}) "
-            "RETURN n"
-        )
+        query = f"FOR doc IN {self.collection_name} FILTER doc.field_id == @field_id RETURN doc"
         
-        with self.connection_manager.get_session() as session:
-            result = session.run(query, field_id=field_id)
-            record = result.single()
-            if not record:
-                return None
-                
-            properties = self._from_node_properties(dict(record["n"]))
-            return self._create_entity(properties)
+        result = await self.db_connection.execute_query(query, bind_vars={"field_id": field_id})
+        
+        if not result or len(result) == 0:
+            return None
             
+        properties = result[0]
+        return self._create_entity(properties)
+    
     async def update_field_state(self, field_id: str, state: FieldState) -> None:
         """Update the state of a field"""
-        properties = self._to_node_properties(state)
-        properties["last_modified"] = datetime.now().isoformat()
+        query = f"""
+        UPSERT {{ field_id: @field_id }}
+        INSERT {{
+            field_id: @field_id,
+            state_vector: @state_vector,
+            pressure: @pressure,
+            stability: @stability,
+            timestamp: @timestamp
+        }}
+        UPDATE {{
+            state_vector: @state_vector,
+            pressure: @pressure,
+            stability: @stability,
+            timestamp: @timestamp
+        }}
+        IN {self.collection_name}
+        """
         
-        query = (
-            f"MERGE (n:{self.node_label} {{field_id: $field_id}}) "
-            "SET n += $properties"
-        )
+        params = {
+            "field_id": field_id,
+            "state_vector": state.state_vector,
+            "pressure": state.pressure,
+            "stability": state.stability,
+            "timestamp": state.timestamp
+        }
         
-        with self.connection_manager.get_session() as session:
-            session.run(
-                query,
-                field_id=field_id,
-                properties=properties
-            )
-            
+        await self.db_connection.execute_query(query, bind_vars=params)
+    
     async def delete_field_state(self, field_id: str) -> None:
         """Delete a field's state"""
-        query = (
-            f"MATCH (n:{self.node_label} {{field_id: $field_id}}) "
-            "DETACH DELETE n"
-        )
+        query = f"FOR doc IN {self.collection_name} FILTER doc.field_id == @field_id REMOVE doc IN {self.collection_name}"
         
-        with self.connection_manager.get_session() as session:
-            result = session.run(query, field_id=field_id)
-            if result.consume().counters.nodes_deleted == 0:
-                raise ValueError(f"Field state with id {field_id} not found")
+        await self.db_connection.execute_query(query, bind_vars={"field_id": field_id})
