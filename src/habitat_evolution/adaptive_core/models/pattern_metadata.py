@@ -9,7 +9,7 @@ original class directly.
 import logging
 from typing import Dict, Any, Optional
 
-from habitat_evolution.adaptive_core.models.pattern import Pattern
+from src.habitat_evolution.adaptive_core.models.pattern import Pattern
 
 logger = logging.getLogger(__name__)
 

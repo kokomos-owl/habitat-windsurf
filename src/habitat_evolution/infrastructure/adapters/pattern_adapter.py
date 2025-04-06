@@ -160,5 +160,5 @@ class PatternAdapter:
             logger.info("Added metadata property to AdaptiveCore Pattern class")
 
 
-# Patch the AdaptiveCore Pattern class when this module is imported
-PatternAdapter.patch_adaptive_core_pattern_class()
+# The patch is now applied in adaptive_core/models/__init__.py
+# Do not apply it here to avoid circular imports

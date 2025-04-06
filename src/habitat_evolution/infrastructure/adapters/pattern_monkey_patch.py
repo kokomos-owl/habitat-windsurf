@@ -77,5 +77,5 @@ def apply_pattern_metadata_patch():
     logger.info("Added metadata property to AdaptiveCore Pattern class")
 
 
-# Apply the patch when this module is imported
-apply_pattern_metadata_patch()
+# The patch is now applied in adaptive_core/models/__init__.py
+# Do not apply it here to avoid duplicate patching
