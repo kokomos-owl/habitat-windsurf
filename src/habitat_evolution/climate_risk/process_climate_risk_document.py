@@ -20,6 +20,7 @@ if project_root not in sys.path:
 
 from src.habitat_evolution.infrastructure.persistence.arangodb.arangodb_connection import ArangoDBConnection
 from src.habitat_evolution.infrastructure.services.pattern_evolution_service import PatternEvolutionService
+from src.habitat_evolution.infrastructure.services.claude_pattern_extraction_service import ClaudePatternExtractionService
 from src.habitat_evolution.climate_risk.document_processing_service import DocumentProcessingService
 
 # Configure logging
@@ -65,13 +66,14 @@ def setup_arangodb() -> ArangoDBConnection:
     logger.info("ArangoDB setup complete")
     return arangodb_connection
 
-def process_document(document_path: str, arangodb_connection: ArangoDBConnection) -> List[Dict[str, Any]]:
+def process_document(document_path: str, arangodb_connection: ArangoDBConnection, claude_api_key: Optional[str] = None) -> List[Dict[str, Any]]:
     """
     Process a climate risk document.
     
     Args:
         document_path: Path to the document
         arangodb_connection: ArangoDB connection
+        claude_api_key: Optional Claude API key
         
     Returns:
         List of extracted patterns
@@ -87,7 +89,8 @@ def process_document(document_path: str, arangodb_connection: ArangoDBConnection
     # Create DocumentProcessingService
     document_processing_service = DocumentProcessingService(
         pattern_evolution_service=pattern_evolution_service,
-        arangodb_connection=arangodb_connection
+        arangodb_connection=arangodb_connection,
+        claude_api_key=claude_api_key
     )
     
     # Process the document
@@ -127,6 +130,7 @@ def main():
     parser = argparse.ArgumentParser(description="Process climate risk documents")
     parser.add_argument("--document", type=str, required=True, help="Path to the climate risk document")
     parser.add_argument("--query-pattern", type=str, help="Query evolution history for a specific pattern ID")
+    parser.add_argument("--claude-api-key", type=str, help="Claude API key for pattern extraction")
     args = parser.parse_args()
     
     try:
@@ -144,7 +148,7 @@ def main():
                 logger.error(f"Document not found: {document_path}")
                 sys.exit(1)
                 
-            patterns = process_document(document_path, arangodb_connection)
+            patterns = process_document(document_path, arangodb_connection, args.claude_api_key)
             
             # Display results
             logger.info(f"Processed document: {document_path}")
