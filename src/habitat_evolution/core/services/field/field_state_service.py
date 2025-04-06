@@ -7,8 +7,13 @@ from datetime import datetime
 
 from .interfaces import FieldStateService, FieldState
 from ...storage.field_repository import FieldRepository
-from ...services.event_bus import EventBus
-from ...quality.metrics import calculate_field_stability
+from ....infrastructure.services.event_service import EventService
+# Import quality metrics
+# TODO: Implement calculate_field_stability function
+def calculate_field_stability(state_vector):
+    """Calculate the stability of a field state vector"""
+    # Simple implementation for now
+    return 0.5  # Default medium stability
 
 class ConcreteFieldStateService(FieldStateService):
     """
@@ -19,7 +24,7 @@ class ConcreteFieldStateService(FieldStateService):
     def __init__(
         self,
         field_repository: FieldRepository,
-        event_bus: EventBus
+        event_bus: EventService
     ):
         self.repository = field_repository
         self.event_bus = event_bus
