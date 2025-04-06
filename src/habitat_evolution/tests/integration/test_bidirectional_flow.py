@@ -142,12 +142,12 @@ class TestBidirectionalFlow(unittest.TestCase):
     def test_document_processing_to_rag(self):
         """Test document processing to RAG flow."""
         # Process a test document
-        document_path = os.path.join(os.path.dirname(__file__), "../../climate_risk/data/climate_risk_marthas_vineyard.txt")
+        document_path = os.path.join(os.path.dirname(__file__), "../../../data/climate_risk/climate_risk_marthas_vineyard.txt")
         
         # Check if the file exists
         if not os.path.exists(document_path):
             # Try an alternative path
-            document_path = os.path.join(os.path.dirname(__file__), "../../../data/climate_risk_marthas_vineyard.txt")
+            document_path = os.path.join(os.path.dirname(__file__), "../../climate_risk/data/climate_risk_marthas_vineyard.txt")
             
             # If still not found, create a test document
             if not os.path.exists(document_path):
@@ -208,12 +208,12 @@ class TestBidirectionalFlow(unittest.TestCase):
     def test_complete_bidirectional_flow(self):
         """Test complete bidirectional flow from ingestion through RAG and back to persistence."""
         # Process a document
-        document_path = os.path.join(os.path.dirname(__file__), "../../climate_risk/data/climate_risk_marthas_vineyard.txt")
+        document_path = os.path.join(os.path.dirname(__file__), "../../../data/climate_risk/climate_risk_marthas_vineyard.txt")
         
         # Check if the file exists and create it if it doesn't
         if not os.path.exists(document_path):
             # Try an alternative path
-            document_path = os.path.join(os.path.dirname(__file__), "../../../data/climate_risk_marthas_vineyard.txt")
+            document_path = os.path.join(os.path.dirname(__file__), "../../climate_risk/data/climate_risk_marthas_vineyard.txt")
             
             # If still not found, create a test document
             if not os.path.exists(document_path):
