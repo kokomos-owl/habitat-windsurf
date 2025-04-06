@@ -10,7 +10,7 @@ import logging
 
 from .container import DIContainer
 from .module import ModuleRegistry
-from .modules import create_core_services_module, create_infrastructure_module
+from .modules import create_core_services_module, create_infrastructure_module, create_repository_module, create_adapter_module
 # Core service interfaces
 from src.habitat_evolution.infrastructure.interfaces.services.event_service_interface import EventServiceInterface
 from src.habitat_evolution.infrastructure.interfaces.services.pattern_evolution_service_interface import PatternEvolutionServiceInterface
@@ -26,6 +26,15 @@ from src.habitat_evolution.infrastructure.interfaces.services.document_service_i
 from src.habitat_evolution.infrastructure.interfaces.services.api_service_interface import APIServiceInterface
 from src.habitat_evolution.infrastructure.interfaces.services.bidirectional_flow_interface import BidirectionalFlowInterface
 from src.habitat_evolution.infrastructure.interfaces.services.unified_graph_service_interface import UnifiedGraphServiceInterface
+from src.habitat_evolution.infrastructure.interfaces.services.vector_tonic_service_interface import VectorTonicServiceInterface
+from src.habitat_evolution.infrastructure.interfaces.services.pattern_aware_rag_interface import PatternAwareRAGInterface
+
+# Repository implementations
+from src.habitat_evolution.infrastructure.persistence.arangodb.arangodb_pattern_repository import ArangoDBPatternRepository
+
+# Adapters
+from src.habitat_evolution.infrastructure.adapters.pattern_bridge import PatternBridge
+from src.habitat_evolution.adaptive_core.models.pattern import Pattern as AdaptiveCorePattern
 
 T = TypeVar('T')
 logger = logging.getLogger(__name__)
@@ -74,6 +83,8 @@ class ServiceLocator:
         # Register core modules
         self.registry.register_module(create_core_services_module())
         self.registry.register_module(create_infrastructure_module())
+        self.registry.register_module(create_repository_module())
+        self.registry.register_module(create_adapter_module())
         
         # Register modules with container
         self.registry.register_all_with(self.container)
@@ -159,6 +170,26 @@ class ServiceLocator:
     def bidirectional_flow(self) -> BidirectionalFlowInterface:
         """Get the bidirectional flow manager."""
         return self.get_service(BidirectionalFlowInterface)
+    
+    @property
+    def pattern_repository(self) -> ArangoDBPatternRepository:
+        """Get the pattern repository."""
+        return self.get_service(ArangoDBPatternRepository)
+    
+    @property
+    def vector_tonic_service(self) -> VectorTonicServiceInterface:
+        """Get the vector tonic service."""
+        return self.get_service(VectorTonicServiceInterface)
+    
+    @property
+    def pattern_aware_rag(self) -> PatternAwareRAGInterface:
+        """Get the pattern-aware RAG service."""
+        return self.get_service(PatternAwareRAGInterface)
+    
+    @property
+    def pattern_bridge(self) -> PatternBridge[AdaptiveCorePattern]:
+        """Get the pattern bridge for AdaptiveCorePattern."""
+        return self.get_service(PatternBridge[AdaptiveCorePattern])
     
     def shutdown(self):
         """Shut down all services."""

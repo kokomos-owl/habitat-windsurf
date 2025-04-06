@@ -1,0 +1,416 @@
+"""
+ArangoDB connection implementation for Habitat Evolution.
+
+This module provides a concrete implementation of the ArangoDBConnectionInterface,
+enabling consistent access to ArangoDB throughout the application.
+"""
+
+import logging
+from typing import Dict, List, Any, Optional, Union, Tuple
+import os
+from arango import ArangoClient
+from arango.database import Database
+from arango.collection import Collection
+from arango.graph import Graph
+from arango.exceptions import (
+    ArangoServerError,
+    DocumentGetError,
+    DocumentInsertError,
+    DocumentUpdateError,
+    DocumentDeleteError,
+    GraphCreateError
+)
+
+from src.habitat_evolution.infrastructure.interfaces.persistence.arangodb_connection_interface import ArangoDBConnectionInterface
+from src.habitat_evolution.infrastructure.interfaces.services.event_service_interface import EventServiceInterface
+
+logger = logging.getLogger(__name__)
+
+
+class ArangoDBConnection(ArangoDBConnectionInterface):
+    """
+    Implementation of the ArangoDBConnectionInterface for Habitat Evolution.
+    
+    This class provides a consistent approach to ArangoDB access,
+    abstracting the details of connection management and query execution.
+    It supports the pattern evolution and co-evolution principles of Habitat
+    by enabling flexible data persistence while maintaining a consistent interface.
+    """
+    
+    def __init__(self, 
+                 host: str = "localhost",
+                 port: int = 8529,
+                 username: str = "root",
+                 password: str = "",
+                 database_name: str = "habitat_evolution",
+                 event_service: Optional[EventServiceInterface] = None):
+        """
+        Initialize a new ArangoDB connection.
+        
+        Args:
+            host: The ArangoDB host
+            port: The ArangoDB port
+            username: The ArangoDB username
+            password: The ArangoDB password
+            database_name: The name of the database to connect to
+            event_service: Optional event service for publishing events
+        """
+        self._host = host
+        self._port = port
+        self._username = username
+        self._password = password
+        self._database_name = database_name
+        self._event_service = event_service
+        self._client = None
+        self._db = None
+        self._initialized = False
+        logger.debug("ArangoDBConnection created")
+    
+    def initialize(self, config: Optional[Dict[str, Any]] = None) -> None:
+        """
+        Initialize the ArangoDB connection with the specified configuration.
+        
+        Args:
+            config: Optional configuration for the connection
+        """
+        if self._initialized:
+            logger.warning("ArangoDBConnection already initialized")
+            return
+            
+        logger.info("Initializing ArangoDBConnection")
+        
+        # Apply configuration if provided
+        if config:
+            if "host" in config:
+                self._host = config["host"]
+            if "port" in config:
+                self._port = config["port"]
+            if "username" in config:
+                self._username = config["username"]
+            if "password" in config:
+                self._password = config["password"]
+            if "database_name" in config:
+                self._database_name = config["database_name"]
+        
+        # Create client
+        self._client = ArangoClient(
+            hosts=f"http://{self._host}:{self._port}"
+        )
+        
+        # Connect to system database to ensure our database exists
+        sys_db = self._client.db(
+            name="_system",
+            username=self._username,
+            password=self._password
+        )
+        
+        # Create database if it doesn't exist
+        if not sys_db.has_database(self._database_name):
+            logger.info(f"Creating database: {self._database_name}")
+            sys_db.create_database(self._database_name)
+        
+        # Connect to our database
+        self._db = self._client.db(
+            name=self._database_name,
+            username=self._username,
+            password=self._password
+        )
+        
+        self._initialized = True
+        logger.info("ArangoDBConnection initialized")
+        
+        if self._event_service:
+            self._event_service.publish("arangodb.connection_initialized", {
+                "database": self._database_name,
+                "host": self._host,
+                "port": self._port
+            })
+    
+    def shutdown(self) -> None:
+        """
+        Release resources when shutting down the connection.
+        """
+        if not self._initialized:
+            logger.warning("ArangoDBConnection not initialized")
+            return
+            
+        logger.info("Shutting down ArangoDBConnection")
+        self._client = None
+        self._db = None
+        self._initialized = False
+        logger.info("ArangoDBConnection shut down")
+        
+        if self._event_service:
+            self._event_service.publish("arangodb.connection_shutdown", {
+                "database": self._database_name
+            })
+    
+    def get_database(self) -> Database:
+        """
+        Get the ArangoDB database object.
+        
+        Returns:
+            The ArangoDB database object
+        """
+        if not self._initialized:
+            self.initialize()
+            
+        return self._db
+    
+    def ensure_collection(self, collection_name: str) -> Collection:
+        """
+        Ensure that a collection exists, creating it if necessary.
+        
+        Args:
+            collection_name: The name of the collection
+            
+        Returns:
+            The collection object
+        """
+        if not self._initialized:
+            self.initialize()
+            
+        if not self._db.has_collection(collection_name):
+            logger.info(f"Creating collection: {collection_name}")
+            self._db.create_collection(collection_name)
+            
+            if self._event_service:
+                self._event_service.publish("arangodb.collection_created", {
+                    "collection": collection_name
+                })
+                
+        return self._db.collection(collection_name)
+    
+    def ensure_edge_collection(self, collection_name: str) -> Collection:
+        """
+        Ensure that an edge collection exists, creating it if necessary.
+        
+        Args:
+            collection_name: The name of the edge collection
+            
+        Returns:
+            The edge collection object
+        """
+        if not self._initialized:
+            self.initialize()
+            
+        if not self._db.has_collection(collection_name):
+            logger.info(f"Creating edge collection: {collection_name}")
+            self._db.create_collection(collection_name, edge=True)
+            
+            if self._event_service:
+                self._event_service.publish("arangodb.edge_collection_created", {
+                    "collection": collection_name
+                })
+                
+        return self._db.collection(collection_name)
+    
+    def ensure_graph(self, graph_name: str, 
+                    edge_definitions: List[Dict[str, Any]]) -> Graph:
+        """
+        Ensure that a graph exists, creating it if necessary.
+        
+        Args:
+            graph_name: The name of the graph
+            edge_definitions: The edge definitions for the graph
+            
+        Returns:
+            The graph object
+        """
+        if not self._initialized:
+            self.initialize()
+            
+        if not self._db.has_graph(graph_name):
+            logger.info(f"Creating graph: {graph_name}")
+            
+            # Ensure all collections exist
+            for edge_def in edge_definitions:
+                self.ensure_edge_collection(edge_def["collection"])
+                
+                for from_col in edge_def["from"]:
+                    self.ensure_collection(from_col)
+                    
+                for to_col in edge_def["to"]:
+                    self.ensure_collection(to_col)
+            
+            # Create graph
+            self._db.create_graph(graph_name, edge_definitions)
+            
+            if self._event_service:
+                self._event_service.publish("arangodb.graph_created", {
+                    "graph": graph_name,
+                    "edge_definitions": edge_definitions
+                })
+                
+        return self._db.graph(graph_name)
+    
+    def get_document(self, collection_name: str, document_id: str) -> Dict[str, Any]:
+        """
+        Get a document by ID.
+        
+        Args:
+            collection_name: The name of the collection
+            document_id: The ID of the document
+            
+        Returns:
+            The document
+            
+        Raises:
+            DocumentGetError: If the document doesn't exist
+        """
+        if not self._initialized:
+            self.initialize()
+            
+        collection = self._db.collection(collection_name)
+        
+        # Handle both full IDs and keys
+        if "/" in document_id:
+            key = document_id.split("/")[1]
+        else:
+            key = document_id
+            
+        return collection.get(key)
+    
+    def insert(self, collection_name: str, document: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Insert a document into a collection.
+        
+        Args:
+            collection_name: The name of the collection
+            document: The document to insert
+            
+        Returns:
+            The inserted document
+            
+        Raises:
+            DocumentInsertError: If the document couldn't be inserted
+        """
+        if not self._initialized:
+            self.initialize()
+            
+        collection = self._db.collection(collection_name)
+        meta = collection.insert(document, return_new=True)
+        return meta["new"]
+    
+    def update_document(self, collection_name: str, document_id: str, 
+                       document: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Update a document.
+        
+        Args:
+            collection_name: The name of the collection
+            document_id: The ID of the document
+            document: The updated document
+            
+        Returns:
+            The updated document
+            
+        Raises:
+            DocumentUpdateError: If the document couldn't be updated
+        """
+        if not self._initialized:
+            self.initialize()
+            
+        collection = self._db.collection(collection_name)
+        
+        # Handle both full IDs and keys
+        if "/" in document_id:
+            key = document_id.split("/")[1]
+        else:
+            key = document_id
+            
+        meta = collection.update(document, return_new=True)
+        return meta["new"]
+    
+    def delete_document(self, collection_name: str, document_id: str) -> bool:
+        """
+        Delete a document.
+        
+        Args:
+            collection_name: The name of the collection
+            document_id: The ID of the document
+            
+        Returns:
+            True if the document was deleted, False otherwise
+            
+        Raises:
+            DocumentDeleteError: If the document couldn't be deleted
+        """
+        if not self._initialized:
+            self.initialize()
+            
+        collection = self._db.collection(collection_name)
+        
+        # Handle both full IDs and keys
+        if "/" in document_id:
+            key = document_id.split("/")[1]
+        else:
+            key = document_id
+            
+        collection.delete(key)
+        return True
+    
+    def execute_query(self, query: str, 
+                     bind_vars: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
+        """
+        Execute an AQL query.
+        
+        Args:
+            query: The AQL query to execute
+            bind_vars: Optional bind variables for the query
+            
+        Returns:
+            The query results
+        """
+        if not self._initialized:
+            self.initialize()
+            
+        cursor = self._db.aql.execute(query, bind_vars=bind_vars or {})
+        return [doc for doc in cursor]
+    
+    def begin_transaction(self) -> str:
+        """
+        Begin a transaction.
+        
+        Returns:
+            The transaction ID
+        """
+        if not self._initialized:
+            self.initialize()
+            
+        transaction = self._db.begin_transaction()
+        return transaction.id
+    
+    def commit_transaction(self, transaction_id: str) -> bool:
+        """
+        Commit a transaction.
+        
+        Args:
+            transaction_id: The ID of the transaction to commit
+            
+        Returns:
+            True if the transaction was committed, False otherwise
+        """
+        if not self._initialized:
+            self.initialize()
+            
+        transaction = self._db.transaction(transaction_id)
+        transaction.commit()
+        return True
+    
+    def abort_transaction(self, transaction_id: str) -> bool:
+        """
+        Abort a transaction.
+        
+        Args:
+            transaction_id: The ID of the transaction to abort
+            
+        Returns:
+            True if the transaction was aborted, False otherwise
+        """
+        if not self._initialized:
+            self.initialize()
+            
+        transaction = self._db.transaction(transaction_id)
+        transaction.abort()
+        return True

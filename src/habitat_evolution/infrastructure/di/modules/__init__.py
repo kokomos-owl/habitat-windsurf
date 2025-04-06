@@ -8,8 +8,12 @@ aligns with the principles of pattern evolution and co-evolution.
 
 from .core_services_module import create_core_services_module
 from .infrastructure_module import create_infrastructure_module
+from .repository_module import create_repository_module
+from .adapter_module import create_adapter_module
 
 __all__ = [
     'create_core_services_module',
-    'create_infrastructure_module'
+    'create_infrastructure_module',
+    'create_repository_module',
+    'create_adapter_module'
 ]
