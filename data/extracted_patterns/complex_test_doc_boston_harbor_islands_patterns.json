@@ -1,0 +1,49 @@
+{
+  "patterns": [
+    {
+      "id": "pattern-complex_test_doc_boston_harbor_islands-0",
+      "name": "Cross-system impact cascades",
+      "description": "The document emphasizes analyzing interconnected climate risks across natural systems, built infrastructure, and cultural resources. Impact cascades are identified where effects in one system trigger consequences in others.",
+      "evidence": "Primary Cascades: - SLR \u2192 Erosion \u2192 Habitat Loss - Storms \u2192 Infrastructure \u2192 Access - Precipitation \u2192 Runoff \u2192 Water Quality",
+      "quality_state": "stable",
+      "source_document": "complex_test_doc_boston_harbor_islands"
+    },
+    {
+      "id": "pattern-complex_test_doc_boston_harbor_islands-1",
+      "name": "Feedback loops amplifying risks",
+      "description": "The assessment notes the presence of feedback loops, both positive and negative, that can intensify or dampen climate change impacts on the studied systems over time.",
+      "evidence": "Positive Feedbacks: - Erosion acceleration - Habitat degradation - Infrastructure stress; Negative Feedbacks: - Sediment accumulation - Species adaptation - System resilience",
+      "quality_state": "emergent",
+      "source_document": "complex_test_doc_boston_harbor_islands"
+    },
+    {
+      "id": "pattern-complex_test_doc_boston_harbor_islands-2",
+      "name": "Temporal phases of change",
+      "description": "The document frames the analysis across multiple time horizons, delineating near-term continuation of current trends, mid-century acceleration of impacts and required adaptations, and late-century potential for major system transformations.",
+      "evidence": "Short-Term (2025-2035), Mid-Term (2035-2055) Acceleration Phase, Long-Term (2055-2100) Transformation Phase",
+      "quality_state": "hypothetical",
+      "source_document": "complex_test_doc_boston_harbor_islands"
+    },
+    {
+      "id": "pattern-complex_test_doc_boston_harbor_islands-3",
+      "name": "Interconnected adaptation strategies",
+      "description": "For each major system component (natural, infrastructure, cultural resources), the assessment outlines adaptation measures that combine direct actions with supporting efforts that span systems and engage stakeholders.",
+      "evidence": "Natural Systems: Direct Actions: - Habitat protection - Species management - Erosion control; Supportive Measures: - Monitoring programs - Research initiatives - Stakeholder engagement",
+      "quality_state": "emergent",
+      "source_document": "complex_test_doc_boston_harbor_islands"
+    },
+    {
+      "id": "pattern-complex_test_doc_boston_harbor_islands-4",
+      "name": "Quantitative and qualitative evidence",
+      "description": "The document incorporates both quantitative data analysis and qualitative inputs to characterize climate risks and impacts. Primary data from monitoring is combined with secondary research and expert/stakeholder knowledge.",
+      "evidence": "Quantitative: - Statistical analysis - Model applications - Trend assessments; Qualitative: - Expert judgment - Stakeholder input - Case studies",
+      "quality_state": "stable",
+      "source_document": "complex_test_doc_boston_harbor_islands"
+    }
+  ],
+  "model": "claude-3-opus-20240229",
+  "tokens_used": 601,
+  "status": "success",
+  "document_id": "complex_test_doc_boston_harbor_islands",
+  "timestamp": "2025-04-07T07:36:09.574711"
+}

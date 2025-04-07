@@ -9,6 +9,7 @@ capabilities and build a comprehensive climate lexicon.
 import json
 import os
 import sys
+import asyncio
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Any, Optional
@@ -19,7 +20,95 @@ from collections import Counter
 # Add the project root to the Python path
 sys.path.append(str(Path(__file__).parents[3]))
 
-from src.habitat_evolution.core.services.field.field_state_service import FieldStateService
+# Create a simplified field state service for our analysis
+class SimpleFieldStateService:
+    """
+    A simplified implementation of field state service for climate pattern analysis.
+    """
+    
+    def __init__(self):
+        """
+        Initialize the simple field state service.
+        """
+        self.patterns = {}
+        self.relationships = {}
+        print("Initialized SimpleFieldStateService for climate pattern analysis")
+    
+    def add_pattern(self, pattern):
+        """
+        Add a pattern to the field state.
+        
+        Args:
+            pattern: The pattern to add
+        """
+        pattern_id = pattern.get("id")
+        if pattern_id:
+            self.patterns[pattern_id] = pattern
+            print(f"Added pattern: {pattern.get('name')}")
+    
+    def add_pattern_relationship(self, pattern1_id, pattern2_id, relationship_type, strength, description):
+        """
+        Add a relationship between two patterns.
+        
+        Args:
+            pattern1_id: ID of the first pattern
+            pattern2_id: ID of the second pattern
+            relationship_type: Type of relationship
+            strength: Strength of relationship
+            description: Description of relationship
+        """
+        relationship_id = f"{pattern1_id}_{pattern2_id}"
+        
+        self.relationships[relationship_id] = {
+            "pattern1_id": pattern1_id,
+            "pattern2_id": pattern2_id,
+            "relationship_type": relationship_type,
+            "strength": strength,
+            "description": description
+        }
+        
+        print(f"Added relationship between {pattern1_id} and {pattern2_id}")
+    
+    def get_patterns(self):
+        """
+        Get all patterns in the field state.
+        
+        Returns:
+            Dictionary of patterns
+        """
+        return self.patterns
+    
+    def get_relationships(self):
+        """
+        Get all relationships in the field state.
+        
+        Returns:
+            Dictionary of relationships
+        """
+        return self.relationships
+    
+    def export_field_state(self, output_path):
+        """
+        Export the field state to a JSON file.
+        
+        Args:
+            output_path: Path to save the field state
+        """
+        import json
+        from pathlib import Path
+        
+        field_state = {
+            "patterns": self.patterns,
+            "relationships": self.relationships
+        }
+        
+        output_path = Path(output_path)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        
+        with open(output_path, "w") as f:
+            json.dump(field_state, f, indent=2)
+        
+        print(f"Exported field state to {output_path}")
 from src.habitat_evolution.infrastructure.adapters.claude_adapter import ClaudeAdapter
 
 
@@ -35,7 +124,7 @@ class ClimatePatternAnalyzer:
         self.output_dir.mkdir(parents=True, exist_ok=True)
         
         # Initialize services
-        self.field_state_service = FieldStateService()
+        self.field_state_service = SimpleFieldStateService()
         self.claude_adapter = ClaudeAdapter()
     
     def load_extracted_patterns(self) -> List[Dict[str, Any]]:

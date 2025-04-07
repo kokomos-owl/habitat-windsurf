@@ -1,0 +1,41 @@
+{
+  "patterns": [
+    {
+      "id": "pattern-climate_risk_marthas_vineyard-0",
+      "name": "Increased Risk of Extreme Precipitation Events",
+      "description": "Climate change is expected to significantly increase the likelihood of extreme rainfall events on Martha's Vineyard by the mid-21st and late-21st century.",
+      "evidence": "By 2040\u20132060, the historical 100-year event will occur with a return period of 1-in-60 for cities such as Oak Bluffs and Tisbury and 1-in-80 for cities such as West Tisbury and Edgartown. By 2070\u20132090, the historical 100-year event will become a roughly 1-in-20 year event for all of Martha's Vineyard.",
+      "quality_state": "stable",
+      "source_document": "climate_risk_marthas_vineyard"
+    },
+    {
+      "id": "pattern-climate_risk_marthas_vineyard-1",
+      "name": "Increased Occurrence of Extreme Drought",
+      "description": "Extreme drought events are projected to become significantly more common on Martha's Vineyard by the mid-21st and late-21st century.",
+      "evidence": "Our results suggest that, by 2041\u20132060, such an event will happen around 13% of the time, an increase of 5% relative to 2001\u20132020. A more drastic uptick is anticipated toward the end of the century (2071\u20132090), where the probability of annual occurrence will be around 26%, an increase of 17% relative to 2001\u20132020.",
+      "quality_state": "stable",
+      "source_document": "climate_risk_marthas_vineyard"
+    },
+    {
+      "id": "pattern-climate_risk_marthas_vineyard-2",
+      "name": "Substantial Increase in Wildfire Danger Days",
+      "description": "The number of high-danger wildfire days on Martha's Vineyard is projected to increase substantially by the mid-21st and late-21st century.",
+      "evidence": "By mid-century (2040\u20132060), Martha's Vineyard can expect an average additional eight wildfire danger days per year, representing a 44% increase over the historical annual average of 18 days. By late-century (2070\u20132090), the island can expect to experience an average additional 17 wildfire danger days per year compared to 2000\u20132020, a 94% increase over the historical annual average.",
+      "quality_state": "stable",
+      "source_document": "climate_risk_marthas_vineyard"
+    },
+    {
+      "id": "pattern-climate_risk_marthas_vineyard-3",
+      "name": "Uncertain Changes in Extratropical Storm and Surge Risk",
+      "description": "While some studies project an increase in the number and intensity of extratropical storms impacting the Northeast U.S., changes in storm surge risk for the region remain uncertain.",
+      "evidence": "However, future increases in storm tides due to changes in storm tracks in the New England region are less certain (Pringle et al., 2021). This is due to the overall area having a larger tidal range, and the timing of the storms impacting the eastern seaboard of the U.S.",
+      "quality_state": "emergent",
+      "source_document": "climate_risk_marthas_vineyard"
+    }
+  ],
+  "model": "claude-3-opus-20240229",
+  "tokens_used": 693,
+  "status": "success",
+  "document_id": "climate_risk_marthas_vineyard",
+  "timestamp": "2025-04-07T07:36:54.936179"
+}

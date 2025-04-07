@@ -1,0 +1,57 @@
+{
+  "patterns": [
+    {
+      "id": "pattern-vineyard_sound_structure_meaning_test_doc-0",
+      "name": "System Hierarchy",
+      "description": "The document outlines a detailed hierarchical breakdown of the marine and coastal systems, including oceanographic, ecological, chemical, geomorphological, infrastructure, and operational components.",
+      "evidence": "The document contains a section titled 'SYSTEM HIERARCHY' with numbered and indented subsections for each system component, e.g. '1. Marine Systems', '1.1 Oceanographic', etc.",
+      "quality_state": "stable",
+      "source_document": "vineyard_sound_structure_meaning_test_doc"
+    },
+    {
+      "id": "pattern-vineyard_sound_structure_meaning_test_doc-1",
+      "name": "Relationship Networks",
+      "description": "The analysis identifies key relationship networks that span institutional connections, environmental interactions, and coupling of physical, biological and chemical processes.",
+      "evidence": "A section labeled 'RELATIONSHIP NETWORKS' details various types of connections, including research relationships between institutions, data networks, knowledge transfer, and physical, biological and chemical coupling.",
+      "quality_state": "stable",
+      "source_document": "vineyard_sound_structure_meaning_test_doc"
+    },
+    {
+      "id": "pattern-vineyard_sound_structure_meaning_test_doc-2",
+      "name": "Structure-Meaning Relationships",
+      "description": "The document draws connections between physical structures and their environmental meaning or impact, infrastructure and research capacity, and institutions and their knowledge domains.",
+      "evidence": "Under 'STRUCTURE-MEANING RELATIONSHIPS', the document lists associations like 'Physical Structure \u2192 Environmental Meaning', 'Infrastructure \u2192 Research Capacity' and 'Institution \u2192 Knowledge Domain'.",
+      "quality_state": "emergent",
+      "source_document": "vineyard_sound_structure_meaning_test_doc"
+    },
+    {
+      "id": "pattern-vineyard_sound_structure_meaning_test_doc-3",
+      "name": "Climate Impact Analysis",
+      "description": "Climate change impacts on the marine and coastal system are analyzed in terms of physical changes, operational impacts, and the evolution of knowledge and understanding.",
+      "evidence": "The section 'CLIMATE IMPACTS ON STRUCTURE-MEANING' goes into physical changes to the marine environment and coastal systems, impacts on research activities and infrastructure, and how understanding and research priorities may evolve.",
+      "quality_state": "emergent",
+      "source_document": "vineyard_sound_structure_meaning_test_doc"
+    },
+    {
+      "id": "pattern-vineyard_sound_structure_meaning_test_doc-4",
+      "name": "Evidence Hierarchies",
+      "description": "Different levels and types of evidence for assessing the system are laid out, ranging from direct observations to research studies to institutional knowledge.",
+      "evidence": "An 'EVIDENCE HIERARCHIES' section categorizes evidence as observational (direct measurements, remote sensing), research-based (lab studies, field research), or institutional knowledge (historical records, expert knowledge).",
+      "quality_state": "stable",
+      "source_document": "vineyard_sound_structure_meaning_test_doc"
+    },
+    {
+      "id": "pattern-vineyard_sound_structure_meaning_test_doc-5",
+      "name": "Temporal Dynamics",
+      "description": "The document considers system changes over short, medium and long-term timescales, from daily cycles to seasonal patterns to long-term transformations.",
+      "evidence": "Under 'TEMPORAL-STRUCTURAL RELATIONSHIPS', dynamics are broken down into short-term (daily, tidal, seasonal), medium-term (annual variations, habitat changes), and long-term (system reorganization, institutional adaptation).",
+      "quality_state": "hypothetical",
+      "source_document": "vineyard_sound_structure_meaning_test_doc"
+    }
+  ],
+  "model": "claude-3-opus-20240229",
+  "tokens_used": 696,
+  "status": "success",
+  "document_id": "vineyard_sound_structure_meaning_test_doc",
+  "timestamp": "2025-04-07T07:38:02.448911"
+}

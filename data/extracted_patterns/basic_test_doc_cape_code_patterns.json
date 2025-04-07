@@ -1,0 +1,41 @@
+{
+  "patterns": [
+    {
+      "id": "pattern-basic_test_doc_cape_code-0",
+      "name": "Sea Level Rise",
+      "description": "Cape Cod is experiencing ongoing sea level rise that is projected to accelerate, leading to increased coastal flooding and erosion.",
+      "evidence": "Current trends show sea level rising at 3mm per year along Cape Cod's coast. Mid-century projections indicate: 0.5-1.0 feet of rise by 2050, increased coastal flooding frequency, enhanced erosion of barrier beaches.",
+      "quality_state": "stable",
+      "source_document": "basic_test_doc_cape_code"
+    },
+    {
+      "id": "pattern-basic_test_doc_cape_code-1",
+      "name": "Coastal Flooding",
+      "description": "Storm surge flooding poses growing risks to Cape Cod, with expanding flood zones, more frequent moderate floods, and vulnerable low-lying infrastructure.",
+      "evidence": "Storm surge flooding presents increasing risks: Current 100-year flood zones expanding, more frequent moderate flooding events, infrastructure vulnerability in low-lying areas.",
+      "quality_state": "stable",
+      "source_document": "basic_test_doc_cape_code"
+    },
+    {
+      "id": "pattern-basic_test_doc_cape_code-2",
+      "name": "Coastal Erosion",
+      "description": "Cape Cod's shoreline is eroding at an average rate of 2-3 feet per year, with accelerated loss at certain hotspots threatening the barrier beach system.",
+      "evidence": "Shoreline change analysis indicates: Average erosion rates of 2-3 feet per year, accelerating loss at coastal hotspots, barrier beach system vulnerability.",
+      "quality_state": "stable",
+      "source_document": "basic_test_doc_cape_code"
+    },
+    {
+      "id": "pattern-basic_test_doc_cape_code-3",
+      "name": "Increasing Projection Uncertainty",
+      "description": "While current climate trends in Cape Cod are clear, confidence in projections decreases when looking further out to mid-century and especially late-century.",
+      "evidence": "High confidence in current trends, medium confidence in mid-century projections, lower confidence in late-century estimates.",
+      "quality_state": "emergent",
+      "source_document": "basic_test_doc_cape_code"
+    }
+  ],
+  "model": "claude-3-opus-20240229",
+  "tokens_used": 455,
+  "status": "success",
+  "document_id": "basic_test_doc_cape_code",
+  "timestamp": "2025-04-07T07:37:12.772260"
+}
