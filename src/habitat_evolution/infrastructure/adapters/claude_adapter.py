@@ -6,12 +6,13 @@ enabling pattern-aware RAG to leverage Claude's capabilities for enhanced
 pattern extraction and analysis.
 """
 
+import json
 import logging
 import os
 from typing import Dict, List, Any, Optional
 
-# Mock implementation - no need to import anthropic
-# import anthropic
+import anthropic
+from anthropic.types import ContentBlock, MessageParam
 
 logger = logging.getLogger(__name__)
 
@@ -34,10 +35,16 @@ class ClaudeAdapter:
         """
         self.api_key = api_key or os.environ.get("ANTHROPIC_API_KEY")
         
-        # Always use mock responses for testing
-        logger.warning("Using mock responses for testing.")
-        self.client = None
-        self.use_mock = True
+        # Check if we should use mock responses
+        self.use_mock = not self.api_key
+        
+        if self.use_mock:
+            logger.warning("No API key found. Using mock responses for testing.")
+            self.client = None
+        else:
+            # Initialize the Anthropic client
+            self.client = anthropic.Anthropic(api_key=self.api_key)
+            logger.info("Initialized Anthropic client")
             
         logger.info(f"Initialized ClaudeAdapter (use_mock: {self.use_mock})")
         
@@ -63,6 +70,11 @@ class ClaudeAdapter:
             # Format the patterns for Claude
             patterns_text = self._format_patterns_for_prompt(patterns)
             
+            # Format context for Claude if available
+            context_text = ""
+            if context:
+                context_text = "\nContext:\n" + json.dumps(context, indent=2)
+            
             # Create the system prompt
             system_prompt = f"""
             You are an assistant that helps answer questions based on provided patterns and context.
@@ -75,7 +87,7 @@ class ClaudeAdapter:
             """
             
             # Create the user message
-            user_message = f"Query: {query}"
+            user_message = f"Query: {query}{context_text}"
             
             # Call the Claude API
             response = self.client.messages.create(
@@ -125,6 +137,8 @@ class ClaudeAdapter:
         try:
             # Extract the document content
             content = document.get("content", "")
+            metadata = document.get("metadata", {})
+            doc_id = document.get("id", "unknown")
             
             # Create the system prompt
             system_prompt = """
@@ -137,13 +151,30 @@ class ClaudeAdapter:
             1. A short name or title
             2. A brief description
             3. Evidence from the document
-            4. A quality assessment (emerging, established, or validated)
+            4. A quality assessment (hypothetical, emergent, or stable)
             
-            Format your response as JSON with an array of pattern objects.
+            Format your response as JSON with the following structure:
+            {
+                "patterns": [
+                    {
+                        "name": "Pattern Name",
+                        "description": "Pattern Description",
+                        "evidence": "Evidence from document",
+                        "quality_state": "emergent"
+                    },
+                    ...
+                ]
+            }
+            
+            Ensure your response is valid JSON that can be parsed programmatically.
             """
             
-            # Create the user message
-            user_message = f"Document: {content}"
+            # Create the user message with metadata if available
+            metadata_text = ""
+            if metadata:
+                metadata_text = f"\n\nDocument Metadata: {json.dumps(metadata, indent=2)}"
+                
+            user_message = f"Document ID: {doc_id}{metadata_text}\n\nDocument Content:\n{content}"
             
             # Call the Claude API
             response = self.client.messages.create(
@@ -159,17 +190,51 @@ class ClaudeAdapter:
             response_text = response.content[0].text
             
             # Parse the patterns from the response
-            # In a real implementation, we would parse the JSON response
-            # For now, we'll return a placeholder
-            patterns = [
-                {
-                    "id": "pattern1",
-                    "name": "Pattern 1",
-                    "description": "Description of pattern 1",
-                    "evidence": "Evidence from the document",
-                    "quality_state": "emerging"
-                }
-            ]
+            try:
+                # Extract JSON from the response text
+                json_start = response_text.find('{')
+                json_end = response_text.rfind('}') + 1
+                
+                if json_start >= 0 and json_end > json_start:
+                    json_str = response_text[json_start:json_end]
+                    response_data = json.loads(json_str)
+                    
+                    # Extract patterns from the response
+                    extracted_patterns = response_data.get("patterns", [])
+                    
+                    # Add IDs and document reference to patterns
+                    patterns = []
+                    for i, pattern in enumerate(extracted_patterns):
+                        pattern_id = f"pattern-{doc_id}-{i}"
+                        patterns.append({
+                            "id": pattern_id,
+                            "name": pattern.get("name", f"Pattern {i+1}"),
+                            "description": pattern.get("description", "No description"),
+                            "evidence": pattern.get("evidence", "No evidence"),
+                            "quality_state": pattern.get("quality_state", "hypothetical"),
+                            "source_document": doc_id
+                        })
+                else:
+                    # Fallback if JSON parsing fails
+                    logger.warning(f"Could not extract JSON from Claude response for document {doc_id}")
+                    patterns = [{
+                        "id": f"pattern-{doc_id}-fallback",
+                        "name": "Fallback Pattern",
+                        "description": "Pattern extracted without proper JSON structure",
+                        "evidence": "Response did not contain valid JSON",
+                        "quality_state": "hypothetical",
+                        "source_document": doc_id
+                    }]
+            except json.JSONDecodeError as e:
+                logger.error(f"Error parsing JSON from Claude response: {e}")
+                patterns = [{
+                    "id": f"pattern-{doc_id}-error",
+                    "name": "Error Pattern",
+                    "description": "Error parsing pattern from Claude response",
+                    "evidence": f"JSON parsing error: {str(e)}",
+                    "quality_state": "hypothetical",
+                    "source_document": doc_id
+                }]
             
             # Create the result
             result = {

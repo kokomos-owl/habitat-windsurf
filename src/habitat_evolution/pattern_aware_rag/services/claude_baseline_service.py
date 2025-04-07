@@ -15,6 +15,8 @@ import uuid
 from typing import Dict, List, Any, Optional
 from datetime import datetime
 
+from habitat_evolution.infrastructure.adapters.claude_adapter import ClaudeAdapter
+
 logger = logging.getLogger(__name__)
 
 class ClaudeBaselineService:
@@ -22,14 +24,17 @@ class ClaudeBaselineService:
     Service that provides baseline query enhancement using Claude LLM.
     """
     
-    def __init__(self, api_key: Optional[str] = None):
+    def __init__(self, claude_adapter: Optional[ClaudeAdapter] = None, api_key: Optional[str] = None):
         """
         Initialize the Claude baseline service.
         
         Args:
-            api_key: API key for Claude
+            claude_adapter: Optional pre-configured Claude adapter
+            api_key: API key for Claude (used if claude_adapter is not provided)
         """
         self.api_key = api_key
+        self.claude_adapter = claude_adapter or ClaudeAdapter(api_key=api_key)
+        logger.info("Initialized ClaudeBaselineService")
     
     async def enhance_query_baseline(self, query: str) -> Dict[str, Any]:
         """
@@ -41,15 +46,69 @@ class ClaudeBaselineService:
         Returns:
             Enhanced query with minimal semantic structure
         """
-        # This would normally call Claude API for minimal enhancement
-        # For now, we'll simulate the response
+        query_id = str(uuid.uuid4())
         
-        # Simulate API call with a delay
-        await asyncio.sleep(0.5)
+        # Try to use Claude API for enhancement if available
+        try:
+            # Create a system prompt for minimal enhancement
+            system_prompt = """
+            You are an expert system that provides minimal semantic enhancement to queries.
+            Your task is to analyze the query and provide basic semantic dimensions without changing the query itself.
+            Do not add any additional information or context to the query.
+            Format your response as JSON with the following structure:
+            {
+                "enhanced_query": "<original query with minimal refinement>",
+                "semantic_dimensions": {
+                    "specificity": <float between 0 and 1>,
+                    "complexity": <float between 0 and 1>,
+                    "domain_relevance": <float between 0 and 1>
+                },
+                "potential_domains": ["<domain1>", "<domain2>", ...]
+            }
+            """
+            
+            # Process the query with Claude
+            response = await self.claude_adapter.process_query(query, {}, [])
+            
+            if not self.claude_adapter.use_mock and response and "error" not in response:
+                # Parse the response
+                try:
+                    # Try to extract JSON from the response
+                    response_text = response.get("response", "")
+                    json_start = response_text.find('{')
+                    json_end = response_text.rfind('}') + 1
+                    
+                    if json_start >= 0 and json_end > json_start:
+                        json_str = response_text[json_start:json_end]
+                        claude_data = json.loads(json_str)
+                        
+                        # Create enhanced query with Claude's analysis
+                        enhanced_query = {
+                            "query_id": query_id,
+                            "original_query": query,
+                            "enhanced_query": claude_data.get("enhanced_query", query),
+                            "semantic_dimensions": claude_data.get("semantic_dimensions", {
+                                "specificity": self._calculate_specificity(query),
+                                "complexity": self._calculate_complexity(query),
+                                "domain_relevance": 0.7
+                            }),
+                            "potential_domains": claude_data.get("potential_domains", self._extract_potential_domains(query)),
+                            "timestamp": datetime.now().isoformat()
+                        }
+                        
+                        logger.info(f"Enhanced query with Claude API: {query[:50]}...")
+                        return enhanced_query
+                except Exception as e:
+                    logger.error(f"Error parsing Claude response: {e}")
+        except Exception as e:
+            logger.error(f"Error using Claude API for query enhancement: {e}")
+        
+        # Fallback to heuristic enhancement
+        logger.info("Using heuristic query enhancement")
         
         # Create baseline enhancement with minimal structure
         enhanced_query = {
-            "query_id": str(uuid.uuid4()),
+            "query_id": query_id,
             "original_query": query,
             "enhanced_query": query,  # Minimal change at this stage
             "semantic_dimensions": {

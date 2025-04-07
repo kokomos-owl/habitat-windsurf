@@ -11,18 +11,20 @@ import uuid
 from datetime import datetime
 from typing import Dict, List, Any, Optional
 
+from habitat_evolution.infrastructure.adapters.claude_adapter import ClaudeAdapter
+
 logger = logging.getLogger(__name__)
 
 class EnhancedClaudeBaselineService:
     """Service for providing minimal baseline enhancement with dissonance awareness."""
     
-    def __init__(self, claude_adapter, db_connection=None, event_service=None, 
-                 constructive_dissonance_service=None):
-        self.claude_adapter = claude_adapter
+    def __init__(self, claude_adapter=None, db_connection=None, event_service=None, 
+                 constructive_dissonance_service=None, api_key=None):
+        self.claude_adapter = claude_adapter or ClaudeAdapter(api_key=api_key)
         self.db_connection = db_connection
         self.event_service = event_service
         self.constructive_dissonance_service = constructive_dissonance_service
-        self.use_real_claude = hasattr(claude_adapter, 'generate_text')
+        self.use_real_claude = not self.claude_adapter.use_mock
         logger.info(f"Initialized Enhanced Claude Baseline Service (use_real_claude: {self.use_real_claude})")
     
     async def enhance_query(self, query_id, query_text, significance_vector=None):
@@ -45,8 +47,8 @@ class EnhancedClaudeBaselineService:
         # If using real Claude API
         if self.use_real_claude:
             try:
-                # Prepare significance context
-                significance_context = ""
+                # Prepare significance context and patterns for Claude
+                patterns_for_claude = []
                 if significance_vector:
                     # Get top patterns by significance
                     top_patterns = sorted(
@@ -55,38 +57,52 @@ class EnhancedClaudeBaselineService:
                         reverse=True
                     )[:5]
                     
-                    if top_patterns:
-                        significance_context = "\nSignificant patterns:\n"
-                        for pattern_id, score in top_patterns:
-                            # Get pattern details if available
-                            pattern_details = await self._get_pattern_details(pattern_id)
-                            if pattern_details:
-                                significance_context += f"- {pattern_details.get('base_concept', pattern_id)} (significance: {score:.2f})\n"
-                            else:
-                                significance_context += f"- {pattern_id} (significance: {score:.2f})\n"
+                    # Prepare patterns for Claude
+                    for pattern_id, score in top_patterns:
+                        # Get pattern details if available
+                        pattern_details = await self._get_pattern_details(pattern_id)
+                        if pattern_details:
+                            patterns_for_claude.append({
+                                "id": pattern_id,
+                                "name": pattern_details.get('base_concept', pattern_id),
+                                "description": pattern_details.get('description', ''),
+                                "quality_state": pattern_details.get('quality_state', 'hypothetical'),
+                                "significance": score
+                            })
+                        else:
+                            patterns_for_claude.append({
+                                "id": pattern_id,
+                                "name": pattern_id,
+                                "significance": score
+                            })
                 
-                # Create prompt for Claude
-                prompt = f"""
-                You are an expert system that enhances queries for a pattern-aware retrieval system.
-                Your task is to enhance the following query by adding relevant context and terminology,
-                while preserving the original intent and keeping the enhancement minimal.
+                # Create context for Claude
+                context = {
+                    "domains": domains,
+                    "significance_vector": significance_vector,
+                    "query_id": query_id
+                }
                 
-                Consider the query's domains: {', '.join(domains)}
-                {significance_context}
+                # Process the query with Claude
+                response = await self.claude_adapter.process_query(
+                    query_text, 
+                    context, 
+                    patterns_for_claude
+                )
                 
-                Original query: {query_text}
-                
-                Enhanced query:
-                """
-                
-                # Use Claude API to enhance query
-                enhanced_query = self.claude_adapter.generate_text(prompt, max_tokens=150)
-                
-                # Extract just the enhanced query (remove any explanations)
-                enhanced_query = enhanced_query.strip().split("\n")[0]
-                
-                logger.info(f"Enhanced query with Claude API: {enhanced_query}")
-                return enhanced_query
+                # Extract the enhanced query
+                if response and "error" not in response:
+                    # Try to extract just the enhanced query (remove any explanations)
+                    enhanced_query = response.get("response", "").strip()
+                    
+                    # If the response has multiple lines, take the first line as the enhanced query
+                    if "\n" in enhanced_query:
+                        enhanced_query = enhanced_query.split("\n")[0]
+                    
+                    logger.info(f"Enhanced query with Claude API: {enhanced_query}")
+                    return enhanced_query
+                else:
+                    logger.error(f"Error in Claude response: {response.get('error', 'Unknown error')}")
             except Exception as e:
                 logger.error(f"Error using Claude API for query enhancement: {e}")
                 logger.info("Falling back to mock implementation")
@@ -172,68 +188,63 @@ class EnhancedClaudeBaselineService:
         
         if self.use_real_claude and pattern_count > 0:
             try:
-                # Use the real Claude API to analyze interactions
-                # Enhanced to capture larger chunks of data for better pattern transitions
-                patterns_text = ""
+                # Prepare patterns for Claude
+                patterns_for_claude = []
                 for i, result in enumerate(retrieval_results, 1):
                     pattern = result.get("pattern", {})
-                    # Include more detailed pattern information
-                    patterns_text += f"{i}. {pattern.get('base_concept', 'Unknown concept')}:\n"
-                    patterns_text += f"   - Properties: {pattern.get('properties', {})}\n"
-                    patterns_text += f"   - Confidence: {pattern.get('confidence', 0.0)}\n"
-                    patterns_text += f"   - Coherence: {pattern.get('coherence', 0.0)}\n"
-                    # Include related patterns if available
-                    related_patterns = pattern.get('properties', {}).get('related_patterns', [])
-                    if related_patterns:
-                        patterns_text += f"   - Related Patterns: {related_patterns}\n"
-                    patterns_text += "\n"
+                    patterns_for_claude.append({
+                        "id": pattern.get("id", f"pattern-{i}"),
+                        "name": pattern.get("base_concept", "Unknown concept"),
+                        "description": pattern.get("description", ""),
+                        "properties": pattern.get("properties", {}),
+                        "confidence": pattern.get("confidence", 0.0),
+                        "coherence": pattern.get("coherence", 0.0),
+                        "quality_state": pattern.get("quality_state", "hypothetical"),
+                        "relevance": result.get("relevance", 0.5)
+                    })
                 
-                # Enhanced prompt with dissonance awareness
-                prompt = f"""
-                You are an expert system that analyzes interactions between queries and patterns in a semantic field.
-                Analyze the relevance, interaction strength, quality transitions, and constructive dissonance between the query and the patterns below.
+                # Create context for Claude
+                context = {
+                    "query_id": query_id,
+                    "dissonance_metrics": dissonance_metrics,
+                    "task": "interaction_analysis"
+                }
                 
-                Consider how larger semantic chunks might influence pattern transitions from poor to uncertain and uncertain to good quality states.
-                Also evaluate the constructive dissonance potential - the productive tension between patterns that could lead to emergence.
+                # Process the query with Claude
+                response = await self.claude_adapter.process_query(
+                    enhanced_query, 
+                    context, 
+                    patterns_for_claude
+                )
                 
-                Return your analysis as a JSON object with the following structure:
-                {{
-                  "pattern_relevance": {{"pattern-id-1": 0.8, "pattern-id-2": 0.5}}, 
-                  "interaction_strength": 0.7,
-                  "quality_transitions": {{"pattern-id-1": "poor_to_uncertain", "pattern-id-2": "uncertain_to_good"}},
-                  "semantic_chunk_size": "large",
-                  "transition_confidence": 0.75,
-                  "coherence_score": 0.8,
-                  "retrieval_quality": 0.7,
-                  "dissonance_analysis": {{
-                    "pattern_tensions": {{"pattern-id-1": {{"tension_with": ["pattern-id-2"], "tension_level": 0.6, "productive": true}}}},
-                    "emergence_zones": ["zone between pattern-id-1 and pattern-id-2"],
-                    "overall_dissonance": 0.65
-                  }}
-                }}
-                
-                Query: {enhanced_query}
-                
-                Patterns:
-                {patterns_text}
-                
-                JSON Analysis:
-                """
-                
-                # Use the Claude adapter to get a response with increased token limit for larger chunks
-                response = self.claude_adapter.generate_text(prompt, max_tokens=1000)
-                
-                try:
-                    # Extract JSON from response
-                    json_start = response.find('{')
-                    json_end = response.rfind('}')
-                    if json_start >= 0 and json_end >= 0:
-                        json_str = response[json_start:json_end+1]
-                        analysis = json.loads(json_str)
+                # Parse the response
+                if response and "error" not in response:
+                    try:
+                        # Extract JSON from the response
+                        response_text = response.get("response", "")
+                        json_start = response_text.find('{')
+                        json_end = response_text.rfind('}') + 1
                         
-                        # Extract enhanced pattern analysis
-                        pattern_relevance = analysis.get("pattern_relevance", {})
-                        interaction_strength = analysis.get("interaction_strength", 0.1 * pattern_count)
+                        if json_start >= 0 and json_end > json_start:
+                            json_str = response_text[json_start:json_end]
+                            interaction_data = json.loads(json_str)
+                            
+                            logger.info(f"Analyzed interactions with Claude API: {interaction_data}")
+                            
+                            # Combine with basic metrics
+                            observation = {
+                                "query_id": query_id,
+                                "pattern_count": pattern_count,
+                                "timestamp": datetime.now().isoformat(),
+                                "dissonance_metrics": dissonance_metrics,
+                                "interaction_metrics": interaction_data
+                            }
+                            
+                            return observation
+                    except Exception as e:
+                        logger.error(f"Error parsing interaction JSON: {e}")
+                else:
+                    logger.error(f"Error in Claude response: {response.get('error', 'Unknown error')}")
                         quality_transitions = analysis.get("quality_transitions", {})
                         semantic_chunk_size = analysis.get("semantic_chunk_size", "medium")
                         transition_confidence = analysis.get("transition_confidence", 0.5)
