@@ -13,6 +13,7 @@ In the previous model, we used Claude LLM to analyze queries and project pattern
 3. Query is used for retrieval, but doesn't evolve further
 
 This approach had several limitations:
+
 - Pattern projection was one-directional and imposed
 - Queries didn't evolve organically through interactions
 - The system couldn't learn from query-pattern interactions over time
@@ -22,15 +23,23 @@ This approach had several limitations:
 In the relational accretion model:
 
 1. Query arrives → Minimal baseline enhancement from Claude
+
 2. Query interacts with pattern space → Relationships are observed and recorded
+
 3. Query gradually accretes significance through these interactions
+
 4. As significance accretes, query patterns can generate new patterns
+
 5. The system learns from these interactions, creating a co-evolutionary cycle
 
 This shift aligns with core Habitat Evolution principles:
+
 - **Emergence over imposition**: Patterns emerge from interactions rather than being imposed
+
 - **Co-evolution**: Queries and patterns evolve together through mutual interactions
+
 - **Contextual reinforcement**: Significance accretes in context, not in isolation
+
 - **Adaptive learning**: The system learns by observing actual interactions
 
 ## Key Components of the Implementation

@@ -9,10 +9,12 @@ pattern extraction and analysis.
 import json
 import logging
 import os
+import uuid
+from datetime import datetime
 from typing import Dict, List, Any, Optional
 
+# Import Anthropic SDK
 import anthropic
-from anthropic.types import ContentBlock, MessageParam
 
 logger = logging.getLogger(__name__)
 
@@ -48,24 +50,23 @@ class ClaudeAdapter:
             
         logger.info(f"Initialized ClaudeAdapter (use_mock: {self.use_mock})")
         
-    def process_query(self, query: str, context: Dict[str, Any], patterns: List[Dict[str, Any]]) -> Dict[str, Any]:
+    async def process_query(
+        self, query: str, context: Dict[str, Any], patterns: List[Dict[str, Any]]
+    ) -> Dict[str, Any]:
         """
-        Process a query with Claude.
-        
-        This method takes a query, context, and patterns, and processes them
-        through Claude to generate a response that leverages the patterns.
+        Process a query using Claude, with optional context and patterns.
         
         Args:
             query: The query to process
-            context: The context for the query
-            patterns: The patterns to leverage
+            context: Optional context to include with the query
+            patterns: Optional patterns to include with the query
             
         Returns:
-            A dictionary containing the response and additional information
+            Dict containing the processed query and Claude's response
         """
         if self.use_mock:
             return self._mock_process_query(query, context, patterns)
-            
+        
         try:
             # Format the patterns for Claude
             patterns_text = self._format_patterns_for_prompt(patterns)
@@ -104,6 +105,8 @@ class ClaudeAdapter:
             
             # Create the result
             result = {
+                "query_id": str(uuid.uuid4()),
+                "timestamp": datetime.now().isoformat(),
                 "response": response_text,
                 "patterns": patterns,
                 "model": "claude-3-opus-20240229",
@@ -277,7 +280,7 @@ class ClaudeAdapter:
             
         return "\n".join(formatted_patterns)
         
-    def _mock_process_query(self, query: str, context: Dict[str, Any], patterns: List[Dict[str, Any]]) -> Dict[str, Any]:
+    async def _mock_process_query(self, query: str, context: Dict[str, Any], patterns: List[Dict[str, Any]]) -> Dict[str, Any]:
         """
         Generate a mock response for a query.
         
@@ -292,6 +295,12 @@ class ClaudeAdapter:
             A dictionary containing the mock response
         """
         logger.info(f"Generating mock response for query: {query}")
+        
+        # Generate a unique query ID
+        query_id = str(uuid.uuid4())
+        
+        # Get current timestamp
+        timestamp = datetime.now().isoformat()
         
         # Check if the query is about Habitat Evolution
         if "habitat" in query.lower() or "evolution" in query.lower():
@@ -308,32 +317,61 @@ class ClaudeAdapter:
             """
         elif "pattern" in query.lower():
             response = """
-            Patterns in Habitat Evolution are recurring structures, themes, or concepts that are detected and evolved over time. They go through quality states (emerging, established, validated) based on usage and feedback.
+            Patterns in Habitat Evolution are recurring structures, themes, or concepts that are detected and evolved over time. They go through quality states (hypothetical, emergent, stable) based on usage and feedback.
             
             Patterns are stored in ArangoDB and can form relationships with other patterns, creating a knowledge graph that evolves over time. The bidirectional flow system ensures that patterns are updated based on new information and user feedback.
             
             Pattern-aware RAG leverages these patterns to enhance retrieval and generation, providing more contextually relevant responses to user queries.
             """
+        elif "dissonance" in query.lower() or "constructive dissonance" in query.lower():
+            response = """
+            Constructive dissonance in Habitat Evolution refers to the productive tension between patterns that can lead to new insights and pattern emergence. It's a key concept in the system's ability to evolve and adapt over time.
+            
+            When a query or document contains elements that challenge or contradict established patterns, but in a way that could lead to new insights, the system detects this as constructive dissonance. This dissonance is then used to drive pattern evolution, potentially creating new patterns or updating existing ones.
+            
+            The system includes a ConstructiveDissonanceService that calculates dissonance potential for patterns and queries, and an AccretiveWeedingService that uses dissonance metrics to determine which patterns to prune and which to preserve despite low usage.
+            """
+        elif "relational accretion" in query.lower():
+            response = """
+            Relational accretion in Habitat Evolution is an approach to modeling queries as actants in the system. Instead of projecting patterns onto queries, the system observes how queries interact with existing patterns and allows significance to emerge naturally.
+            
+            Queries gradually accrete relationships and significance through their interactions with the pattern space, starting with minimal "sign-ificance" and developing a distinct identity over time. This approach aligns with core Habitat Evolution principles of emergence over imposition, co-evolution, contextual reinforcement, and adaptive learning.
+            
+            The implementation includes services like SignificanceAccretionService, ClaudeBaselineService, and AccretivePatternRAG, which work together to enable this relational accretion approach.
+            """
         else:
+            # Use patterns to inform the response if available
+            pattern_info = ""
+            if patterns:
+                pattern_info = "Based on the relevant patterns, I can tell you that:"
+                for pattern in patterns[:3]:  # Limit to top 3 patterns
+                    name = pattern.get("name", "Unknown pattern")
+                    description = pattern.get("description", "No description available")
+                    pattern_info += f"\n- {name}: {description}"
+            
             response = f"""
-            I understand you're asking about "{query}". Based on the available patterns and context, I can provide the following information:
+            I understand you're asking about "{query}". {pattern_info}
             
             The Habitat Evolution system is designed to process queries like yours by retrieving relevant patterns from its knowledge base and generating responses that leverage those patterns. The system evolves over time based on usage and feedback, improving its ability to provide accurate and helpful responses.
             
             If you have more specific questions about Habitat Evolution or its components, feel free to ask!
             """
             
-        # Create the result
+        # Create the result with the same structure as the real API response
         result = {
-            "response": response.strip(),
+            "query_id": query_id,
+            "timestamp": timestamp,
+            "query": query,
+            "context": context,
             "patterns": patterns,
+            "response": response.strip(),
             "model": "claude-3-opus-20240229-mock",
             "tokens_used": 0
         }
         
         return result
         
-    def _mock_process_document(self, document: Dict[str, Any]) -> Dict[str, Any]:
+    async def _mock_process_document(self, document: Dict[str, Any]) -> Dict[str, Any]:
         """
         Generate mock patterns for a document.
         
@@ -347,47 +385,83 @@ class ClaudeAdapter:
         """
         logger.info(f"Generating mock patterns for document: {document.get('id', 'unknown')}")
         
-        # Extract the document content
+        # Extract the document content and metadata
         content = document.get("content", "").lower()
+        doc_id = document.get("id", f"doc-{uuid.uuid4().hex[:8]}")
+        title = document.get("title", "Untitled Document")
         
         # Generate patterns based on document content
         patterns = []
         
         if "habitat" in content or "evolution" in content:
             patterns.append({
-                "id": "pattern_habitat_evolution",
+                "id": f"pattern-{doc_id}-1",
                 "name": "Habitat Evolution Concept",
                 "description": "The core concept of Habitat Evolution as a pattern evolution system",
                 "evidence": "References to Habitat Evolution in the document",
-                "quality_state": "emerging"
+                "quality_state": "emergent",
+                "source_document": doc_id
             })
             
         if "pattern" in content:
             patterns.append({
-                "id": "pattern_pattern_concept",
+                "id": f"pattern-{doc_id}-2",
                 "name": "Pattern Concept",
                 "description": "The concept of patterns as recurring structures or themes",
                 "evidence": "References to patterns in the document",
-                "quality_state": "emerging"
+                "quality_state": "hypothetical",
+                "source_document": doc_id
             })
             
         if "bidirectional" in content or "flow" in content:
             patterns.append({
-                "id": "pattern_bidirectional_flow",
+                "id": f"pattern-{doc_id}-3",
                 "name": "Bidirectional Flow",
                 "description": "The concept of bidirectional communication between components",
                 "evidence": "References to bidirectional flow in the document",
-                "quality_state": "emerging"
+                "quality_state": "emergent",
+                "source_document": doc_id
+            })
+            
+        if "rag" in content or "retrieval" in content:
+            patterns.append({
+                "id": f"pattern-{doc_id}-4",
+                "name": "Pattern-Aware RAG",
+                "description": "Enhanced retrieval and generation using patterns",
+                "evidence": "References to RAG or retrieval in the document",
+                "quality_state": "stable",
+                "source_document": doc_id
+            })
+            
+        if "dissonance" in content or "constructive" in content:
+            patterns.append({
+                "id": f"pattern-{doc_id}-5",
+                "name": "Constructive Dissonance",
+                "description": "The concept of productive tension between patterns leading to emergence",
+                "evidence": "References to dissonance or constructive tension in the document",
+                "quality_state": "hypothetical",
+                "source_document": doc_id
+            })
+            
+        if "relational" in content or "accretion" in content:
+            patterns.append({
+                "id": f"pattern-{doc_id}-6",
+                "name": "Relational Accretion",
+                "description": "Modeling queries as actants that accrete significance through interactions",
+                "evidence": "References to relational accretion in the document",
+                "quality_state": "emergent",
+                "source_document": doc_id
             })
             
         # If no specific patterns were found, add a generic one
         if not patterns:
             patterns.append({
-                "id": "pattern_generic",
-                "name": "Generic Document Pattern",
+                "id": f"pattern-{doc_id}-generic",
+                "name": f"Generic Pattern: {title}",
                 "description": "A generic pattern extracted from the document",
                 "evidence": "The document content",
-                "quality_state": "emerging"
+                "quality_state": "hypothetical",
+                "source_document": doc_id
             })
             
         # Create the result
@@ -399,3 +473,104 @@ class ClaudeAdapter:
         }
         
         return result
+        
+    async def generate_text(self, prompt: str, max_tokens: int = 1000) -> str:
+        """
+        Generate text using Claude.
+        
+        This method is provided for backward compatibility with code that
+        expects a generate_text method.
+        
+        Args:
+            prompt: The prompt to generate text from
+            max_tokens: Maximum number of tokens to generate
+            
+        Returns:
+            Generated text
+        """
+        if self.use_mock:
+            return await self._mock_generate_text(prompt, max_tokens)
+            
+        try:
+            # Call the Claude API
+            response = self.client.messages.create(
+                model="claude-3-opus-20240229",
+                max_tokens=max_tokens,
+                messages=[
+                    {"role": "user", "content": prompt}
+                ]
+            )
+            
+            # Extract the response text
+            return response.content[0].text
+        except Exception as e:
+            logger.error(f"Error generating text with Claude: {e}")
+            return await self._mock_generate_text(prompt, max_tokens)
+    
+    async def _mock_generate_text(self, prompt: str, max_tokens: int = 1000) -> str:
+        """
+        Generate mock text for a prompt.
+        
+        This method is used for testing when no Claude API key is available.
+        
+        Args:
+            prompt: The prompt to generate text from
+            max_tokens: Maximum number of tokens to generate
+            
+        Returns:
+            Generated text
+        """
+        logger.info(f"Generating mock text for prompt: {prompt[:50]}...")
+        
+        # Check if the prompt is asking for JSON
+        if "JSON" in prompt or "json" in prompt:
+            if "dissonance" in prompt.lower():
+                return """
+                {
+                    "dissonance_detected": true,
+                    "dissonance_zones": [
+                        {
+                            "text": "climate adaptation strategies",
+                            "pattern_id": "pattern-1",
+                            "potential": 0.85
+                        },
+                        {
+                            "text": "economic impacts",
+                            "pattern_id": "pattern-2",
+                            "potential": 0.72
+                        }
+                    ]
+                }
+                """
+            elif "interaction" in prompt.lower() or "analyze" in prompt.lower():
+                return """
+                {
+                    "interaction_strength": 0.78,
+                    "pattern_reinforcement": 0.65,
+                    "emergent_properties": ["adaptive response", "contextual awareness"],
+                    "transition_points": ["climate risk assessment", "adaptation planning"],
+                    "dissonance_zones": ["economic vs. environmental priorities"]
+                }
+                """
+            else:
+                return """
+                {
+                    "enhanced_query": "How do climate change impacts affect coastal communities?",
+                    "semantic_dimensions": {
+                        "specificity": 0.75,
+                        "complexity": 0.68,
+                        "domain_relevance": 0.82
+                    },
+                    "potential_domains": ["climate_science", "coastal_management", "community_resilience"]
+                }
+                """
+        
+        # Default responses based on prompt content
+        if "habitat" in prompt.lower() or "evolution" in prompt.lower():
+            return "Habitat Evolution is a system designed to detect and evolve coherent patterns, while enabling the observation of semantic change across the system."
+        elif "pattern" in prompt.lower():
+            return "Patterns in Habitat Evolution represent recurring structures, themes, or concepts that are detected and evolved over time based on usage and feedback."
+        elif "enhance" in prompt.lower() or "query" in prompt.lower():
+            return "The enhanced query focuses on climate adaptation strategies for coastal communities facing sea level rise and extreme weather events."
+        else:
+            return "I've analyzed the information provided and can offer insights based on the patterns and context available in the Habitat Evolution system."
