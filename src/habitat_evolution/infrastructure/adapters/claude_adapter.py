@@ -9,12 +9,17 @@ pattern extraction and analysis.
 import json
 import logging
 import os
+import time
 import uuid
 from datetime import datetime
 from typing import Dict, List, Any, Optional
 
 # Import Anthropic SDK
 import anthropic
+
+# Import metrics collector and cache
+from src.habitat_evolution.infrastructure.metrics.claude_api_metrics import claude_metrics
+from src.habitat_evolution.infrastructure.adapters.claude_cache import claude_cache
 
 logger = logging.getLogger(__name__)
 
@@ -51,7 +56,8 @@ class ClaudeAdapter:
         logger.info(f"Initialized ClaudeAdapter (use_mock: {self.use_mock})")
         
     async def process_query(
-        self, query: str, context: Dict[str, Any], patterns: List[Dict[str, Any]]
+        self, query: str, context: Dict[str, Any], patterns: List[Dict[str, Any]],
+        use_cache: bool = True
     ) -> Dict[str, Any]:
         """
         Process a query using Claude, with optional context and patterns.
@@ -60,14 +66,27 @@ class ClaudeAdapter:
             query: The query to process
             context: Optional context to include with the query
             patterns: Optional patterns to include with the query
+            use_cache: Whether to use the cache (default: True)
             
         Returns:
             Dict containing the processed query and Claude's response
         """
         if self.use_mock:
             return self._mock_process_query(query, context, patterns)
+            
+        # Check cache if enabled
+        if use_cache:
+            cache_key = claude_cache.get_query_cache_key(query, context, patterns)
+            cache_hit, cached_response = claude_cache.get_from_cache(cache_key)
+            
+            if cache_hit and cached_response:
+                logger.info(f"Cache hit for query: {query[:50]}...")
+                return cached_response
         
         try:
+            # Start timing the API call
+            start_time = time.time()
+            
             # Format the patterns for Claude
             patterns_text = self._format_patterns_for_prompt(patterns)
             
@@ -100,6 +119,9 @@ class ClaudeAdapter:
                 ]
             )
             
+            # Calculate response time
+            response_time_ms = (time.time() - start_time) * 1000
+            
             # Extract the response text
             response_text = response.content[0].text
             
@@ -113,15 +135,30 @@ class ClaudeAdapter:
                 "tokens_used": response.usage.output_tokens
             }
             
+            # Track metrics
+            claude_metrics.track_query(query, result, response_time_ms)
+            
+            # Save to cache if enabled
+            if use_cache:
+                cache_key = claude_cache.get_query_cache_key(query, context, patterns)
+                claude_cache.save_to_cache(cache_key, result)
+            
             return result
         except Exception as e:
             logger.error(f"Error processing query with Claude: {e}")
-            return {
+            error_result = {
                 "error": str(e),
-                "status": "error"
+                "status": "error",
+                "query_id": str(uuid.uuid4()),
+                "timestamp": datetime.now().isoformat()
             }
             
-    def process_document(self, document: Dict[str, Any]) -> Dict[str, Any]:
+            # Track the error in metrics
+            claude_metrics.track_error("query", str(e), {"query": query})
+            
+            return error_result
+            
+    async def process_document(self, document: Dict[str, Any], use_cache: bool = True) -> Dict[str, Any]:
         """
         Process a document with Claude.
         
@@ -130,22 +167,36 @@ class ClaudeAdapter:
         
         Args:
             document: The document to process
+            use_cache: Whether to use the cache (default: True)
             
         Returns:
             A dictionary containing the extracted patterns and additional information
         """
         if self.use_mock:
-            return self._mock_process_document(document)
+            return await self._mock_process_document(document)
+            
+        # Check cache if enabled
+        if use_cache:
+            cache_key = claude_cache.get_document_cache_key(document)
+            cache_hit, cached_response = claude_cache.get_from_cache(cache_key)
+            
+            if cache_hit and cached_response:
+                logger.info(f"Cache hit for document: {document.get('id', 'unknown')}")
+                return cached_response
             
         try:
+            # Start timing the API call
+            start_time = time.time()
+            
             # Extract the document content
             content = document.get("content", "")
             metadata = document.get("metadata", {})
             doc_id = document.get("id", "unknown")
+            title = document.get("title", "Untitled Document")
             
             # Create the system prompt
             system_prompt = """
-            You are an assistant that helps extract patterns from documents.
+            You are an assistant that helps extract patterns from documents related to climate risk.
             
             A pattern is a recurring structure, theme, or concept that appears in the document.
             Patterns should be specific, well-defined, and clearly present in the document.
@@ -239,21 +290,41 @@ class ClaudeAdapter:
                     "source_document": doc_id
                 }]
             
+            # Calculate response time
+            response_time_ms = (time.time() - start_time) * 1000
+            
             # Create the result
             result = {
                 "patterns": patterns,
                 "model": "claude-3-opus-20240229",
                 "tokens_used": response.usage.output_tokens,
-                "status": "success"
+                "status": "success",
+                "document_id": doc_id,
+                "timestamp": datetime.now().isoformat()
             }
+            
+            # Track metrics
+            claude_metrics.track_document(document, result, response_time_ms)
+            
+            # Save to cache if enabled
+            if use_cache:
+                cache_key = claude_cache.get_document_cache_key(document)
+                claude_cache.save_to_cache(cache_key, result)
             
             return result
         except Exception as e:
             logger.error(f"Error processing document with Claude: {e}")
-            return {
+            error_result = {
                 "error": str(e),
-                "status": "error"
+                "status": "error",
+                "document_id": document.get("id", "unknown"),
+                "timestamp": datetime.now().isoformat()
             }
+            
+            # Track the error in metrics
+            claude_metrics.track_error("document", str(e), {"document_id": document.get("id", "unknown")})
+            
+            return error_result
             
     def _format_patterns_for_prompt(self, patterns: List[Dict[str, Any]]) -> str:
         """
