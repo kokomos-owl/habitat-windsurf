@@ -245,47 +245,6 @@ class EnhancedClaudeBaselineService:
                         logger.error(f"Error parsing interaction JSON: {e}")
                 else:
                     logger.error(f"Error in Claude response: {response.get('error', 'Unknown error')}")
-                        quality_transitions = analysis.get("quality_transitions", {})
-                        semantic_chunk_size = analysis.get("semantic_chunk_size", "medium")
-                        transition_confidence = analysis.get("transition_confidence", 0.5)
-                        coherence_score = analysis.get("coherence_score", 0.7)
-                        retrieval_quality = analysis.get("retrieval_quality", 0.7)
-                        
-                        # Extract dissonance analysis
-                        dissonance_analysis = analysis.get("dissonance_analysis", {})
-                        pattern_tensions = dissonance_analysis.get("pattern_tensions", {})
-                        emergence_zones = dissonance_analysis.get("emergence_zones", [])
-                        overall_dissonance = dissonance_analysis.get("overall_dissonance", 0.3)
-                        
-                        # Update dissonance metrics with Claude's analysis
-                        dissonance_metrics["dissonance_potential"] = overall_dissonance
-                        dissonance_metrics["pattern_tensions"] = pattern_tensions
-                        dissonance_metrics["emergence_zones"] = emergence_zones
-                        
-                        # Create enhanced interaction metrics with quality transition and dissonance information
-                        interaction_metrics = {
-                            "pattern_count": pattern_count,
-                            "interaction_strength": interaction_strength,
-                            "pattern_relevance": pattern_relevance,
-                            "quality_transitions": quality_transitions,
-                            "semantic_chunk_size": semantic_chunk_size,
-                            "transition_confidence": transition_confidence,
-                            "coherence_score": coherence_score,
-                            "retrieval_quality": retrieval_quality,
-                            "dissonance_metrics": dissonance_metrics
-                        }
-                        
-                        logger.info(f"Observed interactions with Claude API: {pattern_count} patterns using {semantic_chunk_size} semantic chunks")
-                        logger.info(f"Dissonance potential: {overall_dissonance:.2f} with {len(emergence_zones)} emergence zones")
-                        
-                        # Log quality transitions
-                        for pattern_id, transition in quality_transitions.items():
-                            logger.info(f"Pattern {pattern_id} quality transition: {transition} (confidence: {transition_confidence:.2f})")
-                        
-                        return interaction_metrics
-                except Exception as e:
-                    logger.error(f"Error parsing Claude API response: {e}")
-                    logger.info("Falling back to mock implementation")
             except Exception as e:
                 logger.error(f"Error using Claude API for interaction analysis: {e}")
                 logger.info("Falling back to mock implementation")
