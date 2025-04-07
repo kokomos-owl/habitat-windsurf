@@ -33,7 +33,25 @@ Constructive dissonance occurs when:
 
 For example, in climate risk assessment, there might be constructive dissonance between patterns suggesting increased storm frequency and patterns indicating changing storm intensity. By exploring this dissonance, we can develop a more comprehensive understanding of extreme weather risks.
 
-### 2.3 Sliding Window Analysis
+### 2.3 Actant-Predicate Relationship Model
+
+A fundamental philosophical distinction in Habitat Evolution is its treatment of concepts and relationships not as static entities with fixed properties, but as co-referential elements that evolve over time and across contexts. This is embodied in the system's actant-predicate relationship model.
+
+In traditional knowledge representation systems, concepts (or entities) and relationships are often treated as distinct elements with set properties that are passed between them—akin to "tiddlywinks" that get thrown like a ball. Habitat Evolution rejects this static view in favor of a dynamic, co-evolutionary approach:
+
+1. **Co-referential nature**: Actants (concepts, entities) and predicates (relationships) are viewed as correlates that mutually define and influence each other.
+
+2. **Temporal evolution**: Both actants and predicates change over time as new information is processed and new patterns are detected.
+
+3. **Topological sensitivity**: The meaning and properties of both actants and predicates shift based on their contextual positioning within the broader pattern landscape.
+
+4. **Evolutionary feedback**: The system actively observes these evolutionary changes and uses them as a feedback mechanism to refine its understanding of the pattern landscape.
+
+This observer of evolution approach is used throughout Habitat, creating a system that doesn't just represent knowledge but actively participates in its evolution. By tracking how actant-predicate relationships transform across temporal and topological dimensions, Habitat can identify subtle shifts in meaning and relationship structures that might otherwise go undetected.
+
+For example, in climate risk assessment, the concept of "sea level rise" (actant) and its relationship to "coastal infrastructure" (predicate connecting to another actant) are not treated as fixed entities. Instead, their meanings and relationships evolve as new documents are processed, new patterns are detected, and new contexts are explored. The system observes these evolutionary changes, using them to develop a more nuanced understanding of how sea level rise impacts coastal infrastructure across different temporal and spatial scales.
+
+### 2.4 Sliding Window Analysis
 
 Habitat Evolution employs sliding window analysis to detect patterns across different temporal and conceptual scales. This approach involves:
 
@@ -332,16 +350,26 @@ Quality Distribution:
 
 This distribution reflects the evolving nature of climate risk understanding, with most patterns in the emergent state, indicating that they are supported by evidence but still evolving.
 
-### 6.3 Pattern Relationships
+### 6.3 Pattern Relationships and Co-Evolution
 
-Habitat Evolution identified 45 relationships between patterns, including:
+Habitat Evolution identified 45 relationships between patterns, but unlike traditional systems that treat these relationships as static connections, Habitat observes how these relationships evolve over time and context, consistent with its actant-predicate model.
+
+The system identified several types of relationships:
 
 - Causal relationships (e.g., Sea Level Rise → Coastal Flooding)
 - Correlational relationships (e.g., Extreme Precipitation ↔ Flooding)
 - Hierarchical relationships (e.g., Climate Impact Analysis contains Evidence Hierarchies)
 - Temporal relationships (e.g., Accelerating Sea Level Rise precedes Coastal Infrastructure Failure)
 
-These relationships provide a rich network of connections that enhance our understanding of climate risks and their interdependencies.
+What distinguishes Habitat's approach is that these relationships are not treated as fixed properties but as co-referential elements that evolve alongside the patterns they connect. For example, the relationship between "Sea Level Rise" and "Coastal Flooding" is not static but evolves as new documents are processed and new contexts are explored.
+
+The system actively observes these evolutionary changes, tracking how relationships transform across:
+
+1. **Temporal dimensions**: How relationships change over time as new information becomes available
+2. **Topological dimensions**: How relationships shift based on their position within the broader pattern landscape
+3. **Contextual dimensions**: How relationships vary across different domains and applications
+
+This approach enables Habitat to capture the dynamic nature of climate risk relationships, providing a more nuanced understanding of how patterns interact and co-evolve. Rather than simply mapping static connections between patterns, Habitat creates a living network that adapts and evolves as our understanding of climate risks deepens.
 
 ### 6.4 System Performance
 
