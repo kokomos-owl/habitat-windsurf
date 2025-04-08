@@ -35,6 +35,10 @@ class ArangoDBConnection(ArangoDBConnectionInterface):
     abstracting the details of connection management and query execution.
     It supports the pattern evolution and co-evolution principles of Habitat
     by enabling flexible data persistence while maintaining a consistent interface.
+    
+    The connection also supports vector-tonic field persistence for statistical pattern analysis,
+    enabling the storage and retrieval of time-series patterns, vector field representations,
+    and cross-domain resonance metrics between semantic and statistical patterns.
     """
     
     def __init__(self, 
