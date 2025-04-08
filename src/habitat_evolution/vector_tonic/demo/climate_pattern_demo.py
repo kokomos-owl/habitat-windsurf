@@ -148,20 +148,32 @@ def visualize_resonance(series1, series2, resonance_data):
     return plt
 
 
+class NumpyEncoder(json.JSONEncoder):
+    """Custom JSON encoder that handles NumPy data types."""
+    def default(self, obj):
+        if isinstance(obj, np.integer):
+            return int(obj)
+        elif isinstance(obj, np.floating):
+            return float(obj)
+        elif isinstance(obj, np.ndarray):
+            return obj.tolist()
+        return super(NumpyEncoder, self).default(obj)
+
+
 def save_analysis_results(results, output_dir):
     """Save analysis results to JSON files."""
     os.makedirs(output_dir, exist_ok=True)
     
     # Save the full results
     with open(os.path.join(output_dir, 'analysis_results.json'), 'w') as f:
-        json.dump(results, f, indent=2)
+        json.dump(results, f, indent=2, cls=NumpyEncoder)
     
     # Save individual pattern files
     for region, region_results in results.items():
         if 'patterns' in region_results:
             pattern_file = os.path.join(output_dir, f'{region}_patterns.json')
             with open(pattern_file, 'w') as f:
-                json.dump(region_results['patterns'], f, indent=2)
+                json.dump(region_results['patterns'], f, indent=2, cls=NumpyEncoder)
     
     logger.info(f"Analysis results saved to {output_dir}")
 

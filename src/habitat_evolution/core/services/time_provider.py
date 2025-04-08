@@ -6,7 +6,13 @@ It replaces the more complex TimestampService with a streamlined approach
 that maintains UTC consistency and ISO format compatibility.
 """
 
-from datetime import datetime, UTC
+from datetime import datetime, timezone
+
+# For compatibility with both Python 3.9 and newer versions
+try:
+    from datetime import UTC
+except ImportError:
+    UTC = timezone.utc  # Python 3.9 compatibility
 from typing import Optional
 
 class TimeProvider:

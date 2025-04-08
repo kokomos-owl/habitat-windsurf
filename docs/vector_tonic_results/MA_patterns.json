@@ -1,0 +1,705 @@
+[
+  {
+    "id": "pattern_1",
+    "start_time": "199307",
+    "end_time": "199707",
+    "values": [
+      -0.9,
+      -1,
+      -0.7,
+      -1.5,
+      -1.4
+    ],
+    "trend": "decreasing",
+    "magnitude": 0.40000000000000013,
+    "quality_state": "hypothetical",
+    "metadata": {
+      "window_size": 5,
+      "potential": 0.45,
+      "field_center": [
+        2,
+        2
+      ]
+    }
+  },
+  {
+    "id": "pattern_2",
+    "start_time": "199607",
+    "end_time": "200007",
+    "values": [
+      -1.5,
+      -1.4,
+      -0.9,
+      -0.3,
+      -0.3
+    ],
+    "trend": "increasing",
+    "magnitude": 0.6200000000000001,
+    "quality_state": "hypothetical",
+    "metadata": {
+      "window_size": 5,
+      "potential": 0.5249999999999999,
+      "field_center": [
+        5,
+        3
+      ]
+    }
+  },
+  {
+    "id": "pattern_3",
+    "start_time": "199707",
+    "end_time": "200107",
+    "values": [
+      -1.4,
+      -0.9,
+      -0.3,
+      -0.3,
+      -0.2
+    ],
+    "trend": "increasing",
+    "magnitude": 0.78,
+    "quality_state": "hypothetical",
+    "metadata": {
+      "window_size": 5,
+      "potential": 0.49999999999999994,
+      "field_center": [
+        6,
+        2
+      ]
+    }
+  },
+  {
+    "id": "pattern_4",
+    "start_time": "199907",
+    "end_time": "200307",
+    "values": [
+      -0.3,
+      -0.3,
+      -0.2,
+      0.3,
+      -0.2
+    ],
+    "trend": "increasing",
+    "magnitude": 0.43999999999999995,
+    "quality_state": "hypothetical",
+    "metadata": {
+      "window_size": 5,
+      "potential": 0.5,
+      "field_center": [
+        8,
+        3
+      ]
+    }
+  },
+  {
+    "id": "pattern_5",
+    "start_time": "200007",
+    "end_time": "200407",
+    "values": [
+      -0.3,
+      -0.2,
+      0.3,
+      -0.2,
+      -0.5
+    ],
+    "trend": "decreasing",
+    "magnitude": 0.48,
+    "quality_state": "emergent",
+    "metadata": {
+      "window_size": 5,
+      "potential": 0.7,
+      "field_center": [
+        9,
+        2
+      ]
+    }
+  },
+  {
+    "id": "pattern_6",
+    "start_time": "200107",
+    "end_time": "200507",
+    "values": [
+      -0.2,
+      0.3,
+      -0.2,
+      -0.5,
+      -0.8
+    ],
+    "trend": "decreasing",
+    "magnitude": 0.5800000000000001,
+    "quality_state": "hypothetical",
+    "metadata": {
+      "window_size": 5,
+      "potential": 0.55,
+      "field_center": [
+        10,
+        1
+      ]
+    }
+  },
+  {
+    "id": "pattern_7",
+    "start_time": "201007",
+    "end_time": "201407",
+    "values": [
+      0.3,
+      0,
+      0.7,
+      0.8,
+      0.7
+    ],
+    "trend": "increasing",
+    "magnitude": 0.5,
+    "quality_state": "hypothetical",
+    "metadata": {
+      "window_size": 5,
+      "potential": 0.575,
+      "field_center": [
+        19,
+        3
+      ]
+    }
+  },
+  {
+    "id": "pattern_8",
+    "start_time": "201107",
+    "end_time": "201507",
+    "values": [
+      0,
+      0.7,
+      0.8,
+      0.7,
+      0.1
+    ],
+    "trend": "increasing",
+    "magnitude": 0.4600000000000001,
+    "quality_state": "emergent",
+    "metadata": {
+      "window_size": 5,
+      "potential": 0.75,
+      "field_center": [
+        20,
+        2
+      ]
+    }
+  },
+  {
+    "id": "pattern_9",
+    "start_time": "201207",
+    "end_time": "201607",
+    "values": [
+      0.7,
+      0.8,
+      0.7,
+      0.1,
+      0.6
+    ],
+    "trend": "decreasing",
+    "magnitude": 0.4800000000000001,
+    "quality_state": "hypothetical",
+    "metadata": {
+      "window_size": 5,
+      "potential": 0.55,
+      "field_center": [
+        21,
+        1
+      ]
+    }
+  },
+  {
+    "id": "pattern_10",
+    "start_time": "201707",
+    "end_time": "202107",
+    "values": [
+      0.2,
+      0.1,
+      0.5,
+      1.1,
+      0.9
+    ],
+    "trend": "increasing",
+    "magnitude": 0.54,
+    "quality_state": "hypothetical",
+    "metadata": {
+      "window_size": 5,
+      "potential": 0.5,
+      "field_center": [
+        26,
+        3
+      ]
+    }
+  },
+  {
+    "id": "pattern_11",
+    "start_time": "201807",
+    "end_time": "202207",
+    "values": [
+      0.1,
+      0.5,
+      1.1,
+      0.9,
+      1.1
+    ],
+    "trend": "increasing",
+    "magnitude": 0.64,
+    "quality_state": "hypothetical",
+    "metadata": {
+      "window_size": 5,
+      "potential": 0.5,
+      "field_center": [
+        27,
+        2
+      ]
+    }
+  },
+  {
+    "id": "pattern_1",
+    "start_time": "199307",
+    "end_time": "199907",
+    "values": [
+      -0.9,
+      -1,
+      -0.7,
+      -1.5,
+      -1.4,
+      -0.9,
+      -0.3
+    ],
+    "trend": "increasing",
+    "magnitude": 0.6571428571428573,
+    "quality_state": "hypothetical",
+    "metadata": {
+      "window_size": 7,
+      "potential": 0.45,
+      "field_center": [
+        2,
+        2
+      ]
+    }
+  },
+  {
+    "id": "pattern_2",
+    "start_time": "199407",
+    "end_time": "200007",
+    "values": [
+      -1,
+      -0.7,
+      -1.5,
+      -1.4,
+      -0.9,
+      -0.3,
+      -0.3
+    ],
+    "trend": "increasing",
+    "magnitude": 0.6285714285714287,
+    "quality_state": "hypothetical",
+    "metadata": {
+      "window_size": 7,
+      "potential": 0.5249999999999999,
+      "field_center": [
+        3,
+        5
+      ]
+    }
+  },
+  {
+    "id": "pattern_3",
+    "start_time": "199507",
+    "end_time": "200107",
+    "values": [
+      -0.7,
+      -1.5,
+      -1.4,
+      -0.9,
+      -0.3,
+      -0.3,
+      -0.2
+    ],
+    "trend": "increasing",
+    "magnitude": 0.7428571428571429,
+    "quality_state": "hypothetical",
+    "metadata": {
+      "window_size": 7,
+      "potential": 0.49999999999999994,
+      "field_center": [
+        4,
+        4
+      ]
+    }
+  },
+  {
+    "id": "pattern_4",
+    "start_time": "199607",
+    "end_time": "200207",
+    "values": [
+      -1.5,
+      -1.4,
+      -0.9,
+      -0.3,
+      -0.3,
+      -0.2,
+      0.3
+    ],
+    "trend": "increasing",
+    "magnitude": 0.9142857142857141,
+    "quality_state": "hypothetical",
+    "metadata": {
+      "window_size": 7,
+      "potential": 0.49999999999999994,
+      "field_center": [
+        5,
+        3
+      ]
+    }
+  },
+  {
+    "id": "pattern_5",
+    "start_time": "199707",
+    "end_time": "200307",
+    "values": [
+      -1.4,
+      -0.9,
+      -0.3,
+      -0.3,
+      -0.2,
+      0.3,
+      -0.2
+    ],
+    "trend": "increasing",
+    "magnitude": 0.9714285714285713,
+    "quality_state": "hypothetical",
+    "metadata": {
+      "window_size": 7,
+      "potential": 0.49999999999999994,
+      "field_center": [
+        6,
+        2
+      ]
+    }
+  },
+  {
+    "id": "pattern_6",
+    "start_time": "199707",
+    "end_time": "200307",
+    "values": [
+      -1.4,
+      -0.9,
+      -0.3,
+      -0.3,
+      -0.2,
+      0.3,
+      -0.2
+    ],
+    "trend": "increasing",
+    "magnitude": 0.9714285714285713,
+    "quality_state": "hypothetical",
+    "metadata": {
+      "window_size": 7,
+      "potential": 0.5,
+      "field_center": [
+        6,
+        5
+      ]
+    }
+  },
+  {
+    "id": "pattern_7",
+    "start_time": "199807",
+    "end_time": "200407",
+    "values": [
+      -0.9,
+      -0.3,
+      -0.3,
+      -0.2,
+      0.3,
+      -0.2,
+      -0.5
+    ],
+    "trend": "increasing",
+    "magnitude": 0.6000000000000001,
+    "quality_state": "emergent",
+    "metadata": {
+      "window_size": 7,
+      "potential": 0.7,
+      "field_center": [
+        7,
+        4
+      ]
+    }
+  },
+  {
+    "id": "pattern_8",
+    "start_time": "199907",
+    "end_time": "200507",
+    "values": [
+      -0.3,
+      -0.3,
+      -0.2,
+      0.3,
+      -0.2,
+      -0.5,
+      -0.8
+    ],
+    "trend": "decreasing",
+    "magnitude": 0.5857142857142856,
+    "quality_state": "emergent",
+    "metadata": {
+      "window_size": 7,
+      "potential": 0.7,
+      "field_center": [
+        8,
+        3
+      ]
+    }
+  },
+  {
+    "id": "pattern_9",
+    "start_time": "200007",
+    "end_time": "200607",
+    "values": [
+      -0.3,
+      -0.2,
+      0.3,
+      -0.2,
+      -0.5,
+      -0.8,
+      -0.2
+    ],
+    "trend": "increasing",
+    "magnitude": 0.5714285714285714,
+    "quality_state": "emergent",
+    "metadata": {
+      "window_size": 7,
+      "potential": 0.7,
+      "field_center": [
+        9,
+        2
+      ]
+    }
+  },
+  {
+    "id": "pattern_10",
+    "start_time": "200107",
+    "end_time": "200707",
+    "values": [
+      -0.2,
+      0.3,
+      -0.2,
+      -0.5,
+      -0.8,
+      -0.2,
+      -0.6
+    ],
+    "trend": "decreasing",
+    "magnitude": 0.6142857142857143,
+    "quality_state": "hypothetical",
+    "metadata": {
+      "window_size": 7,
+      "potential": 0.55,
+      "field_center": [
+        10,
+        1
+      ]
+    }
+  },
+  {
+    "id": "pattern_11",
+    "start_time": "200807",
+    "end_time": "201407",
+    "values": [
+      -0.1,
+      -0.2,
+      0.3,
+      0,
+      0.7,
+      0.8,
+      0.7
+    ],
+    "trend": "increasing",
+    "magnitude": 0.5142857142857143,
+    "quality_state": "hypothetical",
+    "metadata": {
+      "window_size": 7,
+      "potential": 0.575,
+      "field_center": [
+        17,
+        5
+      ]
+    }
+  },
+  {
+    "id": "pattern_12",
+    "start_time": "200907",
+    "end_time": "201507",
+    "values": [
+      -0.2,
+      0.3,
+      0,
+      0.7,
+      0.8,
+      0.7,
+      0.1
+    ],
+    "trend": "increasing",
+    "magnitude": 0.5428571428571429,
+    "quality_state": "emergent",
+    "metadata": {
+      "window_size": 7,
+      "potential": 0.75,
+      "field_center": [
+        18,
+        4
+      ]
+    }
+  },
+  {
+    "id": "pattern_13",
+    "start_time": "201007",
+    "end_time": "201607",
+    "values": [
+      0.3,
+      0,
+      0.7,
+      0.8,
+      0.7,
+      0.1,
+      0.6
+    ],
+    "trend": "increasing",
+    "magnitude": 0.4571428571428572,
+    "quality_state": "emergent",
+    "metadata": {
+      "window_size": 7,
+      "potential": 0.75,
+      "field_center": [
+        19,
+        3
+      ]
+    }
+  },
+  {
+    "id": "pattern_14",
+    "start_time": "201107",
+    "end_time": "201707",
+    "values": [
+      0,
+      0.7,
+      0.8,
+      0.7,
+      0.1,
+      0.6,
+      0.2
+    ],
+    "trend": "increasing",
+    "magnitude": 0.44285714285714295,
+    "quality_state": "emergent",
+    "metadata": {
+      "window_size": 7,
+      "potential": 0.75,
+      "field_center": [
+        20,
+        2
+      ]
+    }
+  },
+  {
+    "id": "pattern_15",
+    "start_time": "201207",
+    "end_time": "201807",
+    "values": [
+      0.7,
+      0.8,
+      0.7,
+      0.1,
+      0.6,
+      0.2,
+      0.1
+    ],
+    "trend": "decreasing",
+    "magnitude": 0.3571428571428572,
+    "quality_state": "hypothetical",
+    "metadata": {
+      "window_size": 7,
+      "potential": 0.55,
+      "field_center": [
+        21,
+        1
+      ]
+    }
+  },
+  {
+    "id": "pattern_16",
+    "start_time": "201507",
+    "end_time": "202107",
+    "values": [
+      0.1,
+      0.6,
+      0.2,
+      0.1,
+      0.5,
+      1.1,
+      0.9
+    ],
+    "trend": "increasing",
+    "magnitude": 0.6000000000000001,
+    "quality_state": "hypothetical",
+    "metadata": {
+      "window_size": 7,
+      "potential": 0.5,
+      "field_center": [
+        24,
+        5
+      ]
+    }
+  },
+  {
+    "id": "pattern_17",
+    "start_time": "201607",
+    "end_time": "202207",
+    "values": [
+      0.6,
+      0.2,
+      0.1,
+      0.5,
+      1.1,
+      0.9,
+      1.1
+    ],
+    "trend": "increasing",
+    "magnitude": 0.5428571428571429,
+    "quality_state": "hypothetical",
+    "metadata": {
+      "window_size": 7,
+      "potential": 0.5,
+      "field_center": [
+        25,
+        4
+      ]
+    }
+  },
+  {
+    "id": "pattern_18",
+    "start_time": "201707",
+    "end_time": "202307",
+    "values": [
+      0.2,
+      0.1,
+      0.5,
+      1.1,
+      0.9,
+      1.1,
+      1.5
+    ],
+    "trend": "increasing",
+    "magnitude": 0.7285714285714285,
+    "quality_state": "hypothetical",
+    "metadata": {
+      "window_size": 7,
+      "potential": 0.5,
+      "field_center": [
+        26,
+        3
+      ]
+    }
+  }
+]
