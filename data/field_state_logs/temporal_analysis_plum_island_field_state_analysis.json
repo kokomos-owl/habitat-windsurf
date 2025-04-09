@@ -1,0 +1,198 @@
+{
+  "document_name": "temporal_analysis_plum_island",
+  "field_analysis": {
+    "patterns": [
+      {
+        "id": "trend_pattern",
+        "type": "warming_trend",
+        "magnitude": 0.10286543764704925,
+        "position": [
+          0.10286543764704925,
+          2.8056764392089355,
+          0.5
+        ],
+        "confidence": 0.8
+      }
+    ],
+    "field_properties": {
+      "trend": 0.10286543764704925,
+      "volatility": 2.8056764392089355
+    }
+  },
+  "multi_scale_analysis": {
+    "scale_results": {
+      "30": {
+        "trend": 0.05529427581514746,
+        "scale_magnitude": 0.05529427581514746
+      }
+    },
+    "cross_scale_patterns": [
+      {
+        "id": "multi_scale_warming",
+        "type": "consistent_warming",
+        "scales": [
+          30
+        ],
+        "magnitude": 0.05529427581514746,
+        "confidence": 0.8
+      }
+    ]
+  },
+  "bridge_results": {
+    "field_analysis": {
+      "patterns": [
+        {
+          "id": "trend_pattern",
+          "type": "warming_trend",
+          "magnitude": 0.10286543764704925,
+          "position": [
+            0.10286543764704925,
+            2.8056764392089355,
+            0.5
+          ],
+          "confidence": 0.8
+        }
+      ],
+      "field_properties": {
+        "trend": 0.10286543764704925,
+        "volatility": 2.8056764392089355
+      }
+    },
+    "multi_scale": {
+      "scale_results": {
+        "30": {
+          "trend": 0.05529427581514746,
+          "scale_magnitude": 0.05529427581514746
+        }
+      },
+      "cross_scale_patterns": [
+        {
+          "id": "multi_scale_warming",
+          "type": "consistent_warming",
+          "scales": [
+            30
+          ],
+          "magnitude": 0.05529427581514746,
+          "confidence": 0.8
+        }
+      ]
+    },
+    "patterns": [
+      {
+        "id": "trend_pattern",
+        "type": "climate_warming_trend",
+        "source": "field_state",
+        "confidence": 0.8,
+        "magnitude": 0.10286543764704925,
+        "quality_state": "emergent",
+        "created_at": "2025-04-08T21:38:38.114251",
+        "metadata": {
+          "original_pattern": {
+            "id": "trend_pattern",
+            "type": "warming_trend",
+            "magnitude": 0.10286543764704925,
+            "position": [
+              0.10286543764704925,
+              2.8056764392089355,
+              0.5
+            ],
+            "confidence": 0.8
+          },
+          "user_metadata": {
+            "document_name": "temporal_analysis_plum_island",
+            "source": "climate_field_state_logger"
+          }
+        },
+        "field_position": [
+          0.10286543764704925,
+          2.8056764392089355,
+          0.5
+        ],
+        "context": {
+          "source": "field_pattern_bridge",
+          "created_at": "2025-04-08T21:38:38.114260"
+        }
+      },
+      {
+        "id": "multi_scale_warming",
+        "type": "multi_scale_warming",
+        "source": "multi_scale",
+        "confidence": 0.8,
+        "magnitude": 0.05529427581514746,
+        "quality_state": "emergent",
+        "created_at": "2025-04-08T21:38:38.114258",
+        "metadata": {
+          "original_pattern": {
+            "id": "multi_scale_warming",
+            "type": "consistent_warming",
+            "scales": [
+              30
+            ],
+            "magnitude": 0.05529427581514746,
+            "confidence": 0.8
+          },
+          "user_metadata": {
+            "document_name": "temporal_analysis_plum_island",
+            "source": "climate_field_state_logger"
+          }
+        },
+        "context": {
+          "source": "field_pattern_bridge",
+          "created_at": "2025-04-08T21:38:38.114288"
+        }
+      }
+    ]
+  },
+  "extracted_patterns": [
+    {
+      "id": "pattern-temporal_analysis_plum_island-0",
+      "name": "Accelerating Sea Level Rise",
+      "description": "The rate of sea level rise has been increasing over time, from 2.8mm/year in 1970-1990 to 3.6mm/year in 2010-2020. Projections show this rate further accelerating through 2100.",
+      "evidence": "Historical sea level rise data showing increasing rates per decade. Projections of 4.4mm/year by 2030, and 5-7 feet of total rise by 2100.",
+      "quality_state": "stable",
+      "source_document": "temporal_analysis_plum_island"
+    },
+    {
+      "id": "pattern-temporal_analysis_plum_island-1",
+      "name": "Increasing Storm Frequency",
+      "description": "The number of major storms per year has been steadily increasing since the 1970s. This trend is projected to continue, with storm frequency reaching 6-7 storms/year by 2100.",
+      "evidence": "Historical data shows average of 2 storms/year in 1970s increasing to 3.2/year in 2010s. Projections show 4.5/year by 2050 and 6-7/year by 2100.",
+      "quality_state": "stable",
+      "source_document": "temporal_analysis_plum_island"
+    },
+    {
+      "id": "pattern-temporal_analysis_plum_island-2",
+      "name": "Accelerating Coastal Erosion",
+      "description": "The rate of coastal erosion has accelerated over the historical period and is projected to continue increasing, driven by sea level rise and increasing storm impacts.",
+      "evidence": "Erosion rates increased from 1.2 feet/year in 1970s to 2.1 feet/year in 2010s. Projections reach 3.3 feet/year by 2050 and 5.5-6 feet/year by 2100.",
+      "quality_state": "stable",
+      "source_document": "temporal_analysis_plum_island"
+    },
+    {
+      "id": "pattern-temporal_analysis_plum_island-3",
+      "name": "Sequential Impact Chain",
+      "description": "The document outlines a sequence of impacts starting with sea level rise, leading to increased storm exposure, accelerated erosion, infrastructure damage, habitat loss, and ultimately complete system transformation.",
+      "evidence": "The 'Sequential Impacts' section directly lists out this chain of events.",
+      "quality_state": "emergent",
+      "source_document": "temporal_analysis_plum_island"
+    },
+    {
+      "id": "pattern-temporal_analysis_plum_island-4",
+      "name": "Varying Timescales of Feedback",
+      "description": "Different geomorphological and ecological feedbacks operate over varying timescales in response to the climate impacts. Some respond quickly while others take decades.",
+      "evidence": "The 'Feedback Timelines' section outlines short-term (beach changes), medium-term (marsh drowning, ecosystem shifts) and long-term feedbacks (system restructuring).",
+      "quality_state": "hypothetical",
+      "source_document": "temporal_analysis_plum_island"
+    },
+    {
+      "id": "pattern-temporal_analysis_plum_island-5",
+      "name": "Decreasing Projection Confidence over Time",
+      "description": "The level of confidence in the projections decreases for longer timeframes, due to increasing uncertainty, diverging scenarios, and complex feedback interactions that emerge over time.",
+      "evidence": "Confidence is rated as high for 2020-2030, medium for 2030-2050, and low for 2050-2100 projections, with justifications provided.",
+      "quality_state": "stable",
+      "source_document": "temporal_analysis_plum_island"
+    }
+  ],
+  "status": "success",
+  "timestamp": "2025-04-08T21:38:38.268264"
+}

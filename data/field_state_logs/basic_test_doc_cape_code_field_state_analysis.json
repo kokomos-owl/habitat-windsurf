@@ -1,0 +1,124 @@
+{
+  "document_name": "basic_test_doc_cape_code",
+  "field_analysis": {
+    "patterns": [
+      {
+        "id": "trend_pattern",
+        "type": "warming_trend",
+        "magnitude": 0.26790824322004775,
+        "position": [
+          0.26790824322004775,
+          1.854229160194081,
+          0.5
+        ],
+        "confidence": 0.8
+      }
+    ],
+    "field_properties": {
+      "trend": 0.26790824322004775,
+      "volatility": 1.854229160194081
+    }
+  },
+  "multi_scale_analysis": {
+    "scale_results": {},
+    "cross_scale_patterns": []
+  },
+  "bridge_results": {
+    "field_analysis": {
+      "patterns": [
+        {
+          "id": "trend_pattern",
+          "type": "warming_trend",
+          "magnitude": 0.26790824322004775,
+          "position": [
+            0.26790824322004775,
+            1.854229160194081,
+            0.5
+          ],
+          "confidence": 0.8
+        }
+      ],
+      "field_properties": {
+        "trend": 0.26790824322004775,
+        "volatility": 1.854229160194081
+      }
+    },
+    "multi_scale": {
+      "scale_results": {},
+      "cross_scale_patterns": []
+    },
+    "patterns": [
+      {
+        "id": "trend_pattern",
+        "type": "climate_warming_trend",
+        "source": "field_state",
+        "confidence": 0.8,
+        "magnitude": 0.26790824322004775,
+        "quality_state": "emergent",
+        "created_at": "2025-04-08T21:38:37.958794",
+        "metadata": {
+          "original_pattern": {
+            "id": "trend_pattern",
+            "type": "warming_trend",
+            "magnitude": 0.26790824322004775,
+            "position": [
+              0.26790824322004775,
+              1.854229160194081,
+              0.5
+            ],
+            "confidence": 0.8
+          },
+          "user_metadata": {
+            "document_name": "basic_test_doc_cape_code",
+            "source": "climate_field_state_logger"
+          }
+        },
+        "field_position": [
+          0.26790824322004775,
+          1.854229160194081,
+          0.5
+        ],
+        "context": {
+          "source": "field_pattern_bridge",
+          "created_at": "2025-04-08T21:38:37.958797"
+        }
+      }
+    ]
+  },
+  "extracted_patterns": [
+    {
+      "id": "pattern-basic_test_doc_cape_code-0",
+      "name": "Sea Level Rise",
+      "description": "Cape Cod is experiencing ongoing sea level rise that is projected to accelerate, leading to increased coastal flooding and erosion.",
+      "evidence": "Current trends show sea level rising at 3mm per year along Cape Cod's coast. Mid-century projections indicate: 0.5-1.0 feet of rise by 2050, increased coastal flooding frequency, enhanced erosion of barrier beaches.",
+      "quality_state": "stable",
+      "source_document": "basic_test_doc_cape_code"
+    },
+    {
+      "id": "pattern-basic_test_doc_cape_code-1",
+      "name": "Coastal Flooding",
+      "description": "Storm surge flooding poses growing risks to Cape Cod, with expanding flood zones, more frequent moderate floods, and vulnerable low-lying infrastructure.",
+      "evidence": "Storm surge flooding presents increasing risks: Current 100-year flood zones expanding, more frequent moderate flooding events, infrastructure vulnerability in low-lying areas.",
+      "quality_state": "stable",
+      "source_document": "basic_test_doc_cape_code"
+    },
+    {
+      "id": "pattern-basic_test_doc_cape_code-2",
+      "name": "Coastal Erosion",
+      "description": "Cape Cod's shoreline is eroding at an average rate of 2-3 feet per year, with accelerated loss at certain hotspots threatening the barrier beach system.",
+      "evidence": "Shoreline change analysis indicates: Average erosion rates of 2-3 feet per year, accelerating loss at coastal hotspots, barrier beach system vulnerability.",
+      "quality_state": "stable",
+      "source_document": "basic_test_doc_cape_code"
+    },
+    {
+      "id": "pattern-basic_test_doc_cape_code-3",
+      "name": "Increasing Projection Uncertainty",
+      "description": "While current climate trends in Cape Cod are clear, confidence in projections decreases when looking further out to mid-century and especially late-century.",
+      "evidence": "High confidence in current trends, medium confidence in mid-century projections, lower confidence in late-century estimates.",
+      "quality_state": "emergent",
+      "source_document": "basic_test_doc_cape_code"
+    }
+  ],
+  "status": "success",
+  "timestamp": "2025-04-08T21:38:38.112099"
+}
