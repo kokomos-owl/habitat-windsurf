@@ -257,7 +257,7 @@ class PatternDomainBridge:
             event: The semantic pattern detected event
         """
         # Extract pattern data from Habitat's event format
-        pattern_id = event.data.get("pattern_id", None)
+        pattern_id = getattr(event, "pattern_id", None)
         if not pattern_id:
             return
         
@@ -280,8 +280,8 @@ class PatternDomainBridge:
             event: The semantic pattern quality changed event
         """
         # Extract pattern data from Habitat's event format
-        pattern_id = event.data.get("pattern_id", None)
-        new_state = event.data.get("new_state", None)
+        pattern_id = getattr(event, "pattern_id", None)
+        new_state = getattr(event, "new_state", None)
         
         if not pattern_id or not new_state:
             return
@@ -398,13 +398,11 @@ class PatternDomainBridge:
             semantic_pattern
         )
         
-        # Calculate semantic correlation using keywords and text matching
-        keywords = self._extract_keywords_from_statistical_pattern(statistical_pattern)
-        text = semantic_pattern.get("text", "").lower()
-        
-        # Count keyword matches
-        keyword_matches = sum(1 for keyword in keywords if keyword.lower() in text)
-        semantic_correlation = min(1.0, keyword_matches / max(1, len(keywords) * 0.3))
+        # Calculate semantic correlation
+        semantic_correlation = self._calculate_semantic_correlation(
+            statistical_pattern,
+            semantic_pattern
+        )
         
         # Determine primary correlation type
         if temporal_correlation > semantic_correlation:
@@ -524,6 +522,8 @@ class PatternDomainBridge:
         else:
             return 0.0
     
+    def _extract_time_from_statistical_pattern(self, 
+                                             pattern: Dict[str, Any]) -> Tuple[str, str]:
     def _extract_time_from_statistical_pattern(self, 
                                               pattern: Dict[str, Any]) -> Tuple[str, str]:
         """

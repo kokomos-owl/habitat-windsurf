@@ -478,11 +478,28 @@ class ArangoDBConnection(ArangoDBConnectionInterface):
         Returns:
             True if the collection exists, False otherwise
         """
-        self.initialize()
+        if not self._initialized:
+            self.initialize()
+            
+        return self._db.has_collection(collection_name)
+        
+    def graph_exists(self, graph_name: str) -> bool:
+        """
+        Check if a graph exists in ArangoDB.
+        
+        Args:
+            graph_name: The name of the graph
+            
+        Returns:
+            True if the graph exists, False otherwise
+        """
+        if not self._initialized:
+            self.initialize()
+            
         try:
-            return self._db.has_collection(collection_name)
+            return self._db.has_graph(graph_name)
         except Exception as e:
-            logger.error(f"Error checking if collection exists: {e}")
+            logger.error(f"Error checking if graph exists: {e}")
             return False
     
     def create_collection(self, collection_name: str, edge: bool = False) -> Any:

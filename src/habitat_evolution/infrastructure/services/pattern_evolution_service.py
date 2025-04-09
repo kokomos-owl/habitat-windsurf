@@ -190,6 +190,41 @@ class PatternEvolutionService(PatternEvolutionInterface):
         except Exception as e:
             logger.error(f"Error handling pattern event: {e}")
             
+    def create_pattern(self, pattern_data: Dict[str, Any], context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """
+        Create a new pattern in the system.
+        
+        Args:
+            pattern_data: The pattern data to store
+            context: Optional context information for the pattern creation
+            
+        Returns:
+            The created pattern data with any system-generated fields
+            
+        Raises:
+            Exception: If there is an error creating the pattern
+        """
+        try:
+            # Ensure pattern has required fields
+            if "id" not in pattern_data:
+                pattern_data["id"] = str(uuid.uuid4())
+                
+            if "created_at" not in pattern_data:
+                pattern_data["created_at"] = datetime.utcnow().isoformat()
+                
+            # Add context if provided
+            if context:
+                pattern_data["context"] = context
+                
+            # Delegate to private method for actual creation
+            self._create_pattern(pattern_data)
+            
+            # Return the pattern data with any system-generated fields
+            return pattern_data
+        except Exception as e:
+            logger.error(f"Error creating pattern: {e}")
+            raise
+    
     def _handle_pattern_usage_event(self, event_data: Dict[str, Any]) -> None:
         """
         Handle pattern usage events from the event service.

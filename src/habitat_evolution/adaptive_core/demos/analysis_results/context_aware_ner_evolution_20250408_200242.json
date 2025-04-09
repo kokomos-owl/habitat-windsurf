@@ -1,0 +1,359 @@
+{
+  "documents_processed": 6,
+  "entities": {
+    "total": 746,
+    "by_quality": {
+      "good": 556,
+      "uncertain": 190,
+      "poor": 0
+    },
+    "by_category": {
+      "CLIMATE_HAZARD": 681,
+      "ECOSYSTEM": 23,
+      "INFRASTRUCTURE": 15,
+      "ADAPTATION_STRATEGY": 0,
+      "ASSESSMENT_COMPONENT": 27
+    }
+  },
+  "relationships": {
+    "total": 82715,
+    "by_quality": {
+      "good": 0,
+      "uncertain": 82715,
+      "poor": 0
+    },
+    "by_type": {
+      "part_of": 0,
+      "contains": 0,
+      "component_of": 0,
+      "located_in": 0,
+      "adjacent_to": 0,
+      "causes": 0,
+      "affects": 736,
+      "damages": 119,
+      "mitigates": 0,
+      "prevents": 0,
+      "protects_against": 150,
+      "analyzes": 0,
+      "evaluates": 358,
+      "monitors": 0,
+      "implements": 0,
+      "precedes": 0,
+      "follows": 0,
+      "concurrent_with": 0,
+      "during": 0,
+      "after": 0
+    }
+  },
+  "quality_transitions": {
+    "poor_to_uncertain": 0,
+    "uncertain_to_good": 503,
+    "poor_to_good": 0
+  },
+  "domain_relevance": {
+    "initial": 1.0,
+    "final": 1.0
+  },
+  "document_results": [
+    {
+      "name": "basic_test_doc_cape_code.txt",
+      "entities": {
+        "total": 98,
+        "by_quality": {
+          "good": 36,
+          "uncertain": 62,
+          "poor": 0
+        },
+        "by_category": {
+          "CLIMATE_HAZARD": 91,
+          "ECOSYSTEM": 7,
+          "INFRASTRUCTURE": 0,
+          "ADAPTATION_STRATEGY": 0,
+          "ASSESSMENT_COMPONENT": 0
+        }
+      },
+      "relationships": {
+        "total": 2349,
+        "by_quality": {
+          "good": 0,
+          "uncertain": 2349,
+          "poor": 0
+        },
+        "by_type": {
+          "part_of": 0,
+          "contains": 0,
+          "component_of": 0,
+          "located_in": 0,
+          "adjacent_to": 0,
+          "causes": 0,
+          "affects": 423,
+          "damages": 0,
+          "mitigates": 0,
+          "prevents": 0,
+          "protects_against": 0,
+          "analyzes": 0,
+          "evaluates": 0,
+          "monitors": 0,
+          "implements": 0,
+          "precedes": 0,
+          "follows": 0,
+          "concurrent_with": 0,
+          "during": 0,
+          "after": 0
+        }
+      },
+      "quality_transitions": 28,
+      "domain_relevance": 1.0
+    },
+    {
+      "name": "climate_risk_marthas_vineyard.txt",
+      "entities": {
+        "total": 432,
+        "by_quality": {
+          "good": 426,
+          "uncertain": 6,
+          "poor": 0
+        },
+        "by_category": {
+          "CLIMATE_HAZARD": 432,
+          "ECOSYSTEM": 0,
+          "INFRASTRUCTURE": 0,
+          "ADAPTATION_STRATEGY": 0,
+          "ASSESSMENT_COMPONENT": 0
+        }
+      },
+      "relationships": {
+        "total": 75050,
+        "by_quality": {
+          "good": 0,
+          "uncertain": 75050,
+          "poor": 0
+        },
+        "by_type": {
+          "part_of": 0,
+          "contains": 0,
+          "component_of": 0,
+          "located_in": 0,
+          "adjacent_to": 0,
+          "causes": 0,
+          "affects": 0,
+          "damages": 0,
+          "mitigates": 0,
+          "prevents": 0,
+          "protects_against": 0,
+          "analyzes": 0,
+          "evaluates": 0,
+          "monitors": 0,
+          "implements": 0,
+          "precedes": 0,
+          "follows": 0,
+          "concurrent_with": 0,
+          "during": 0,
+          "after": 0
+        }
+      },
+      "quality_transitions": 395,
+      "domain_relevance": 1.0
+    },
+    {
+      "name": "complex_test_doc_boston_harbor_islands.txt",
+      "entities": {
+        "total": 61,
+        "by_quality": {
+          "good": 44,
+          "uncertain": 17,
+          "poor": 0
+        },
+        "by_category": {
+          "CLIMATE_HAZARD": 38,
+          "ECOSYSTEM": 6,
+          "INFRASTRUCTURE": 0,
+          "ADAPTATION_STRATEGY": 0,
+          "ASSESSMENT_COMPONENT": 17
+        }
+      },
+      "relationships": {
+        "total": 1075,
+        "by_quality": {
+          "good": 0,
+          "uncertain": 1075,
+          "poor": 0
+        },
+        "by_type": {
+          "part_of": 0,
+          "contains": 0,
+          "component_of": 0,
+          "located_in": 0,
+          "adjacent_to": 0,
+          "causes": 0,
+          "affects": 228,
+          "damages": 0,
+          "mitigates": 0,
+          "prevents": 0,
+          "protects_against": 0,
+          "analyzes": 0,
+          "evaluates": 8,
+          "monitors": 0,
+          "implements": 0,
+          "precedes": 0,
+          "follows": 0,
+          "concurrent_with": 0,
+          "during": 0,
+          "after": 0
+        }
+      },
+      "quality_transitions": 36,
+      "domain_relevance": 1.0
+    },
+    {
+      "name": "recovery_test_doc_nantucket_sound.txt",
+      "entities": {
+        "total": 57,
+        "by_quality": {
+          "good": 42,
+          "uncertain": 15,
+          "poor": 0
+        },
+        "by_category": {
+          "CLIMATE_HAZARD": 22,
+          "ECOSYSTEM": 10,
+          "INFRASTRUCTURE": 15,
+          "ADAPTATION_STRATEGY": 0,
+          "ASSESSMENT_COMPONENT": 10
+        }
+      },
+      "relationships": {
+        "total": 1010,
+        "by_quality": {
+          "good": 0,
+          "uncertain": 1010,
+          "poor": 0
+        },
+        "by_type": {
+          "part_of": 0,
+          "contains": 0,
+          "component_of": 0,
+          "located_in": 0,
+          "adjacent_to": 0,
+          "causes": 0,
+          "affects": 85,
+          "damages": 119,
+          "mitigates": 0,
+          "prevents": 0,
+          "protects_against": 150,
+          "analyzes": 0,
+          "evaluates": 350,
+          "monitors": 0,
+          "implements": 0,
+          "precedes": 0,
+          "follows": 0,
+          "concurrent_with": 0,
+          "during": 0,
+          "after": 0
+        }
+      },
+      "quality_transitions": 38,
+      "domain_relevance": 1.0
+    },
+    {
+      "name": "temporal_analysis_plum_island.txt",
+      "entities": {
+        "total": 85,
+        "by_quality": {
+          "good": 0,
+          "uncertain": 85,
+          "poor": 0
+        },
+        "by_category": {
+          "CLIMATE_HAZARD": 85,
+          "ECOSYSTEM": 0,
+          "INFRASTRUCTURE": 0,
+          "ADAPTATION_STRATEGY": 0,
+          "ASSESSMENT_COMPONENT": 0
+        }
+      },
+      "relationships": {
+        "total": 3153,
+        "by_quality": {
+          "good": 0,
+          "uncertain": 3153,
+          "poor": 0
+        },
+        "by_type": {
+          "part_of": 0,
+          "contains": 0,
+          "component_of": 0,
+          "located_in": 0,
+          "adjacent_to": 0,
+          "causes": 0,
+          "affects": 0,
+          "damages": 0,
+          "mitigates": 0,
+          "prevents": 0,
+          "protects_against": 0,
+          "analyzes": 0,
+          "evaluates": 0,
+          "monitors": 0,
+          "implements": 0,
+          "precedes": 0,
+          "follows": 0,
+          "concurrent_with": 0,
+          "during": 0,
+          "after": 0
+        }
+      },
+      "quality_transitions": 0,
+      "domain_relevance": 1.0
+    },
+    {
+      "name": "vineyard_sound_structure_meaning_test_doc.txt",
+      "entities": {
+        "total": 13,
+        "by_quality": {
+          "good": 8,
+          "uncertain": 5,
+          "poor": 0
+        },
+        "by_category": {
+          "CLIMATE_HAZARD": 13,
+          "ECOSYSTEM": 0,
+          "INFRASTRUCTURE": 0,
+          "ADAPTATION_STRATEGY": 0,
+          "ASSESSMENT_COMPONENT": 0
+        }
+      },
+      "relationships": {
+        "total": 78,
+        "by_quality": {
+          "good": 0,
+          "uncertain": 78,
+          "poor": 0
+        },
+        "by_type": {
+          "part_of": 0,
+          "contains": 0,
+          "component_of": 0,
+          "located_in": 0,
+          "adjacent_to": 0,
+          "causes": 0,
+          "affects": 0,
+          "damages": 0,
+          "mitigates": 0,
+          "prevents": 0,
+          "protects_against": 0,
+          "analyzes": 0,
+          "evaluates": 0,
+          "monitors": 0,
+          "implements": 0,
+          "precedes": 0,
+          "follows": 0,
+          "concurrent_with": 0,
+          "during": 0,
+          "after": 0
+        }
+      },
+      "quality_transitions": 6,
+      "domain_relevance": 1.0
+    }
+  ]
+}

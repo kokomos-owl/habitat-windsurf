@@ -16,14 +16,14 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 from typing import Dict, List, Any, Optional, Tuple
 
-from src.habitat_evolution.core.services.event_bus import EventBus
+from src.habitat_evolution.core.services.event_bus import LocalEventBus
 from src.habitat_evolution.core.services.time_provider import TimeProvider
 from src.habitat_evolution.vector_tonic.data.climate_data_loader import ClimateTimeSeriesLoader
 from src.habitat_evolution.vector_tonic.core.time_series_pattern_detector import TimeSeriesPatternDetector
 from src.habitat_evolution.vector_tonic.bridge.pattern_domain_bridge import PatternDomainBridge
 from src.habitat_evolution.vector_tonic.bridge.events import (
-    StatisticalPatternDetectedEvent,
-    StatisticalPatternQualityChangedEvent
+    create_statistical_pattern_detected_event,
+    create_statistical_pattern_quality_changed_event
 )
 from src.habitat_evolution.vector_tonic.visualization.pattern_correlation_visualizer import PatternCorrelationVisualizer
 
@@ -74,7 +74,7 @@ class PatternBridgeDemo:
         
         # Initialize components
         self.time_provider = TimeProvider()
-        self.event_bus = EventBus()
+        self.event_bus = LocalEventBus()
         self.climate_loader = ClimateTimeSeriesLoader()
         self.pattern_detector = TimeSeriesPatternDetector()
         self.pattern_bridge = PatternDomainBridge(self.event_bus, self.time_provider)
@@ -254,7 +254,7 @@ class PatternBridgeDemo:
         Args:
             pattern: The detected statistical pattern
         """
-        event = StatisticalPatternDetectedEvent(
+        event = create_statistical_pattern_detected_event(
             pattern_id=pattern["id"],
             pattern_data=pattern
         )
