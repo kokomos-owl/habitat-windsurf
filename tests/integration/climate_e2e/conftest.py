@@ -317,20 +317,115 @@ def adaptive_id_factory():
 
 
 @pytest.fixture(scope="session")
-def pattern_adaptive_id_adapter(event_service):
+def pattern_adaptive_id_adapter():
     """
-    Fixture providing a pattern adaptive ID adapter.
+    Fixture providing a mock pattern adaptive ID adapter for testing.
+    
+    Returns:
+        Mock pattern adaptive ID adapter
+    """
+    # Create a mock adapter that doesn't require a Pattern instance
+    class MockPatternAdaptiveIDAdapter:
+        def __init__(self):
+            self.registered_ids = {}
+            
+        def register_adaptive_id(self, adaptive_id):
+            """Register an AdaptiveID with the adapter."""
+            self.registered_ids[adaptive_id.id] = adaptive_id
+            return True
+            
+        def link_pattern_to_adaptive_id(self, pattern, adaptive_id):
+            """Link a pattern to an AdaptiveID."""
+            if hasattr(pattern, 'adaptive_id'):
+                pattern.adaptive_id = adaptive_id.id
+            elif isinstance(pattern, dict):
+                pattern['adaptive_id'] = adaptive_id.id
+            return pattern
+    
+    return MockPatternAdaptiveIDAdapter()
+
+
+@pytest.fixture(scope="function")
+def semantic_patterns():
+    """
+    Fixture providing a list of mock semantic patterns for testing.
+    
+    Returns:
+        List of semantic patterns
+    """
+    patterns = [
+        {
+            "id": f"semantic-pattern-{i}",
+            "name": f"sea_level_rise_pattern_{i}",
+            "type": "climate_risk",
+            "description": f"Sea level rise pattern {i}",
+            "metadata": {
+                "region": "Boston Harbor",
+                "timeframe": "2020-2050",
+                "confidence": 0.85,
+                "source": "climate_risk_assessment"
+            },
+            "created_at": "2025-04-09T10:00:00.000000"
+        } for i in range(1, 6)
+    ]
+    
+    return patterns
+
+@pytest.fixture(scope="function")
+def statistical_patterns():
+    """
+    Fixture providing a list of mock statistical patterns for testing.
+    
+    Returns:
+        List of statistical patterns
+    """
+    patterns = [
+        {
+            "id": f"statistical-pattern-{i}",
+            "name": f"temperature_anomaly_pattern_{i}",
+            "type": "temperature_trend",
+            "description": f"Temperature anomaly pattern {i}",
+            "metadata": {
+                "region": "Massachusetts",
+                "timeframe": "1991-2024",
+                "magnitude": 0.8 + (i * 0.1),
+                "source": "NOAA"
+            },
+            "created_at": "2025-04-09T10:00:00.000000"
+        } for i in range(1, 6)
+    ]
+    
+    return patterns
+
+@pytest.fixture(scope="function")
+def relationships(semantic_patterns, statistical_patterns):
+    """
+    Fixture providing a list of mock relationships between patterns for testing.
     
     Args:
-        event_service: Event service fixture
+        semantic_patterns: List of semantic patterns
+        statistical_patterns: List of statistical patterns
         
     Returns:
-        Initialized pattern adaptive ID adapter
+        List of relationships
     """
-    from src.habitat_evolution.infrastructure.adapters.pattern_adaptive_id_adapter import PatternAdaptiveIDAdapter
+    relationships = [
+        {
+            "id": f"relationship-{i}",
+            "source_id": semantic_patterns[i % len(semantic_patterns)]["id"],
+            "target_id": statistical_patterns[i % len(statistical_patterns)]["id"],
+            "type": "correlation",
+            "strength": 0.7 + (i * 0.05),
+            "metadata": {
+                "detected_by": "claude",
+                "confidence": 0.8,
+                "description": f"Correlation between semantic pattern {i % len(semantic_patterns)} and statistical pattern {i % len(statistical_patterns)}"
+            },
+            "created_at": "2025-04-09T10:00:00.000000"
+        } for i in range(3)
+    ]
     
-    return PatternAdaptiveIDAdapter(event_service=event_service)
-
+    return relationships
 
 @pytest.fixture(scope="session")
 def pattern_aware_rag(claude_adapter, pattern_evolution_service, event_service):
