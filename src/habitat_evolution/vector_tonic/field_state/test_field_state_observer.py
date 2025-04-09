@@ -8,12 +8,14 @@ from time series analysis without forcing outcomes.
 
 import json
 import os
+import numpy as np
+import pandas as pd
 from pathlib import Path
 import matplotlib.pyplot as plt
 from datetime import datetime
 
-from field_state_observer import FieldStateObserver
-from simple_field_analyzer import SimpleFieldStateAnalyzer
+from src.habitat_evolution.vector_tonic.field_state.field_state_observer import FieldStateObserver
+from src.habitat_evolution.vector_tonic.field_state.simple_field_analyzer import SimpleFieldStateAnalyzer
 
 def load_semantic_patterns(file_path):
     """Load semantic patterns from a JSON file."""
@@ -30,8 +32,37 @@ def generate_statistical_patterns():
     # Use SimpleFieldStateAnalyzer to generate basic patterns
     analyzer = SimpleFieldStateAnalyzer()
     
-    # Analyze MA data
-    ma_results = analyzer.analyze_time_series()
+    # Create synthetic time series data
+    import numpy as np
+    time_points = 120  # 10 years of monthly data
+    time = np.arange(time_points)
+    
+    # Create a warming trend with seasonal variations and some noise
+    trend = 0.02 * time  # warming trend
+    seasonal = 3 * np.sin(2 * np.pi * time / 12)  # seasonal cycle
+    noise = np.random.normal(0, 1, time_points)  # random variations
+    
+    # Combine components
+    temperature = 50 + trend + seasonal + noise
+    
+    # Create time series DataFrame
+    dates = []
+    temps = []
+    for i, temp in enumerate(temperature):
+        # Format as YYYYMM
+        year = 2010 + i // 12
+        month = i % 12 + 1
+        dates.append(f"{year}{month:02d}")
+        temps.append(temp)
+    
+    # Create DataFrame
+    data = pd.DataFrame({
+        'date': dates,
+        'temperature': temps
+    })
+    
+    # Analyze the synthetic data
+    ma_results = analyzer.analyze_time_series(data)
     
     # Create more sophisticated patterns based on the basic analysis
     patterns = []
@@ -91,11 +122,12 @@ def main():
     output_dir.mkdir(exist_ok=True, parents=True)
     
     # Load semantic patterns from extracted patterns
-    semantic_file = Path(__file__).parents[5] / "data" / "extracted_patterns" / "climate_risk_marthas_vineyard_patterns.json"
+    semantic_file = Path("/Users/prphillips/Documents/GitHub/habitat_alpha/data/extracted_patterns/climate_risk_marthas_vineyard_patterns.json")
     semantic_data = load_semantic_patterns(semantic_file)
     semantic_patterns = semantic_data.get("patterns", [])
     
-    print(f"\nLoaded {len(semantic_patterns)} semantic patterns from climate risk documents")
+    print(f"Loaded {len(semantic_patterns)} semantic patterns from climate risk documents")
+
     
     # Generate statistical patterns
     statistical_data = generate_statistical_patterns()

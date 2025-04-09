@@ -312,6 +312,59 @@ Habitat Evolution identifies named entity recognition (NER) patterns specific to
 
 These NER patterns enhance the system's ability to extract structured information from climate risk documents.
 
+### 5.3 Pattern Detection and Relationship Analysis Across Data Types
+
+Habitat Evolution's capabilities extend beyond semantic pattern analysis to include detection and relationship analysis across multiple data types, particularly integrating semantic patterns from textual data with statistical patterns from time series data. This cross-modal pattern analysis is especially valuable for climate risk assessment, where both qualitative descriptions and quantitative measurements are essential for comprehensive understanding.
+
+#### 5.3.1 Statistical Pattern Detection in Time Series Data
+
+For time series data, Habitat employs a vector-tonic approach to detect meaningful patterns across different temporal scales:
+
+1. **Multi-scale Analysis**: The system analyzes climate time series data at multiple temporal scales using a sliding window approach with configurable window sizes, enabling the detection of both short-term fluctuations and long-term trends.
+
+2. **Pattern Characterization**: Detected patterns are characterized by their:
+   - Temporal range (start and end times)
+   - Trend direction (increasing, decreasing, or stable)
+   - Magnitude (strength of the pattern)
+   - Quality state (hypothetical, emergent, or stable)
+   - Position in the vector-tonic field (enabling spatial relationship detection)
+
+3. **Regional Context**: Patterns are associated with specific geographic regions, allowing for comparative analysis across different areas.
+
+4. **Anomaly Detection**: The system identifies statistical anomalies that deviate significantly from baseline expectations, which often represent critical climate signals.
+
+5. **Pattern Enhancement**: Statistical patterns are enhanced with rich metadata including region information, time range data, magnitude values, and position data to facilitate relationship detection.
+
+#### 5.3.2 Cross-modal Relationship Detection
+
+Habitat Evolution's most powerful capability is its ability to detect and analyze relationships between patterns across different data modalities:
+
+1. **Spatial Proximity Relationships**: The system identifies relationships between patterns that occupy similar positions in the vector-tonic field, indicating potential causal or correlative connections.
+
+2. **Temporal Sequence Relationships**: Patterns that occur in sequence are connected through temporal relationships, enabling the tracking of how one pattern may lead to or influence another over time.
+
+3. **Magnitude Progression Relationships**: The system detects relationships between patterns based on their relative magnitudes, revealing potential intensification or diminishment trends over time or across regions.
+
+4. **Regional Association Relationships**: Patterns occurring in the same geographic region are connected through regional relationships, facilitating the analysis of location-specific climate phenomena.
+
+5. **Type-based Relationships**: Patterns of the same type across different datasets or time periods are linked, allowing for the tracking of how specific climate phenomena evolve over time.
+
+6. **Semantic-Statistical Correlations**: The system can identify correlations between semantic patterns extracted from climate risk documents and statistical patterns detected in temperature and other climate data, bridging the gap between qualitative assessments and quantitative measurements.
+
+#### 5.3.3 Relationship Visualization and Analysis
+
+To make these complex pattern relationships accessible and actionable, Habitat Evolution provides:
+
+1. **Time Series Visualization with Pattern Highlighting**: The system visualizes time series data with detected patterns highlighted, making statistical trends and anomalies immediately apparent.
+
+2. **Relationship Network Visualization**: Pattern relationships are visualized as a network, revealing the complex interconnections between different climate phenomena.
+
+3. **Cross-modal Pattern Correlation**: Correlations between semantic and statistical patterns are visualized to show how qualitative assessments align with quantitative measurements.
+
+4. **Temporal Evolution Tracking**: The system tracks and visualizes how patterns and their relationships evolve over time, providing insights into the dynamics of climate change.
+
+This comprehensive approach to pattern detection and relationship analysis across data types enables Habitat Evolution to provide a more complete understanding of climate risks and their implications, supporting more informed decision-making for climate adaptation strategies.
+
 ## 6. Empirical Results
 
 ### 6.1 Pattern Extraction Results
