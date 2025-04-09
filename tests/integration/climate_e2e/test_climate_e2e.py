@@ -510,7 +510,9 @@ def test_climate_e2e(adaptive_id_factory, pattern_evolution_service, pattern_awa
     """
     
     result = document_processing_service.process_document(
-        document_content,
+        document_path=None,
+        document_id="boston_harbor_assessment_2020",
+        content=document_content,
         metadata={"region": "Boston Harbor", "source": "climate_risk_assessment", "year": "2020"}
     )
     
