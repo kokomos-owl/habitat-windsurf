@@ -1,7 +1,7 @@
 # Pattern-Aware RAG Test Environment Configuration
 
 # Claude API Configuration
-CLAUDE_API_KEY=y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
+CLAUDE_API_KEY=sk-ant-api03-xxxxxxxxxxxx-xxxxxxxxxxxxxxxxxxxxxxxx
 CLAUDE_MODEL=claude-2
 
 # LangChain Configuration
