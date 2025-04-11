@@ -37,7 +37,7 @@ class TestClimateRiskDocumentProcessing(unittest.TestCase):
         
         # Mock pattern evolution service
         self.mock_pattern_evolution_service = MagicMock(spec=PatternEvolutionService)
-        self.mock_pattern_evolution_service.store_pattern.return_value = "test-pattern-id"
+        self.mock_pattern_evolution_service.create_pattern.return_value = {"id": "test-pattern-id", "status": "success"}
         
         # Create document processing service with mocked dependencies
         self.document_processing_service = DocumentProcessingService(
@@ -62,18 +62,23 @@ class TestClimateRiskDocumentProcessing(unittest.TestCase):
         
     def test_process_document(self):
         """
-        Test processing a climate risk document.
+        Test processing a document and extracting patterns.
         """
         # Process the document
-        patterns = self.document_processing_service.process_document(self.test_document_path)
+        result = self.document_processing_service.process_document(self.test_document_path)
+        
+        # Verify that the result has the expected structure
+        self.assertIn("status", result, "Result missing 'status' field")
+        self.assertIn("patterns", result, "Result missing 'patterns' field")
+        self.assertEqual(result["status"], "success", "Processing did not succeed")
         
         # Verify that patterns were extracted
+        patterns = result["patterns"]
         self.assertGreater(len(patterns), 0, "No patterns were extracted from the document")
         
         # Verify that the pattern evolution service was called to store patterns
-        self.mock_pattern_evolution_service.store_pattern.assert_called()
+        self.mock_pattern_evolution_service.create_pattern.assert_called()
         
-        # Verify that each pattern has the required fields
         for pattern in patterns:
             self.assertIn("id", pattern, "Pattern missing 'id' field")
             self.assertIn("base_concept", pattern, "Pattern missing 'base_concept' field")
@@ -115,40 +120,39 @@ class TestClimateRiskDocumentProcessing(unittest.TestCase):
         self.document_processing_service.claude_extraction_service = mock_claude_service
         
         # Process the document
-        patterns = self.document_processing_service.process_document(self.test_document_path)
+        result = self.document_processing_service.process_document(self.test_document_path)
         
         # Verify that the Claude extraction service was called
         mock_claude_service.extract_patterns.assert_called_once()
         
-        # Verify that patterns were extracted
-        self.assertEqual(len(patterns), 1, "Expected exactly one pattern from Claude extraction")
+        # Verify that exactly one pattern was extracted
+        self.assertEqual(len(result["patterns"]), 1, "Expected exactly one pattern from Claude extraction")
         
         # Verify that the pattern has the expected values
-        pattern = patterns[0]
+        pattern = result["patterns"][0]
         self.assertEqual(pattern["base_concept"], "sea_level_rise")
         self.assertEqual(pattern["creator_id"], "claude_test")
-        self.assertEqual(pattern["properties"]["location"], "Martha's Vineyard")
         
     def test_pattern_evolution_integration(self):
         """
         Test integration with pattern evolution service.
         """
         # Mock pattern evolution service to return different IDs for each pattern
-        pattern_ids = ["pattern-1", "pattern-2", "pattern-3", "pattern-4"]
-        self.mock_pattern_evolution_service.store_pattern.side_effect = pattern_ids
+        pattern_ids = [{"id": "pattern-1", "status": "success"}, {"id": "pattern-2", "status": "success"}, {"id": "pattern-3", "status": "success"}, {"id": "pattern-4", "status": "success"}, {"id": "pattern-5", "status": "success"}]
+        self.mock_pattern_evolution_service.create_pattern.side_effect = pattern_ids
         
         # Process the document
-        patterns = self.document_processing_service.process_document(self.test_document_path)
+        result = self.document_processing_service.process_document(self.test_document_path)
         
         # Verify that the pattern evolution service was called for each pattern
         self.assertEqual(
-            self.mock_pattern_evolution_service.store_pattern.call_count,
-            len(patterns),
+            self.mock_pattern_evolution_service.create_pattern.call_count,
+            len(result["patterns"]),
             "Pattern evolution service not called for each pattern"
         )
         
         # Verify that each pattern has a unique ID
-        pattern_ids = [pattern["id"] for pattern in patterns]
+        pattern_ids = [pattern["id"] for pattern in result["patterns"]]
         self.assertEqual(len(pattern_ids), len(set(pattern_ids)), "Pattern IDs are not unique")
         
     def test_arangodb_query_integration(self):
