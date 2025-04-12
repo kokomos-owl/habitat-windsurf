@@ -7,8 +7,10 @@ in the Habitat Evolution system.
 """
 
 import logging
-from typing import Dict, Any, Optional
-
+import os
+import sys
+import uuid
+from typing import Dict, Any, Optional, Tuple, Union, List
 from src.habitat_evolution.infrastructure.persistence.arangodb.arangodb_connection import ArangoDBConnection
 from src.habitat_evolution.infrastructure.services.event_service import EventService
 from src.habitat_evolution.infrastructure.services.bidirectional_flow_service import BidirectionalFlowService
@@ -153,20 +155,128 @@ def create_pkm_bidirectional_integration(
             pattern_class=AdaptiveCorePattern
         )
         
-        # For the vector tonic service, we'd need a mock implementation
-        # This is a simplified approach for demonstration purposes
+        # Create a mock implementation of VectorTonicServiceInterface
         class MockVectorTonicService(VectorTonicServiceInterface):
-            def initialize(self, config=None): pass
-            def shutdown(self): pass
+            """Mock implementation of VectorTonicServiceInterface for testing."""
+            
+            def __init__(self):
+                self.vector_spaces = {}
+                self.vectors = {}
+                self.patterns = {}
+            
+            def initialize(self, config: Optional[Dict[str, Any]] = None) -> None:
+                """Initialize the vector tonic service."""
+                pass
+            
+            def shutdown(self) -> None:
+                """Shutdown the vector tonic service."""
+                pass
+            
+            def register_vector_space(self, name: str, dimensions: int, 
+                                     metadata: Optional[Dict[str, Any]] = None) -> str:
+                """Register a new vector space."""
+                space_id = str(uuid.uuid4())
+                self.vector_spaces[space_id] = {
+                    "name": name,
+                    "dimensions": dimensions,
+                    "metadata": metadata or {}
+                }
+                return space_id
+            
+            def store_vector(self, vector_space_id: str, vector: List[float], 
+                           entity_id: str, metadata: Optional[Dict[str, Any]] = None) -> str:
+                """Store a vector in the specified vector space."""
+                vector_id = str(uuid.uuid4())
+                self.vectors[vector_id] = {
+                    "vector_space_id": vector_space_id,
+                    "vector": vector,
+                    "entity_id": entity_id,
+                    "metadata": metadata or {}
+                }
+                return vector_id
+            
+            def find_similar_vectors(self, vector_space_id: str, 
+                                   query_vector: List[float],
+                                   limit: int = 10,
+                                   threshold: float = 0.0) -> List[Dict[str, Any]]:
+                """Find vectors similar to the query vector."""
+                # Mock implementation returns empty list
+                return []
+            
+            def detect_tonic_patterns(self, vector_space_id: str, 
+                                     vectors: List[List[float]],
+                                     threshold: float = 0.7) -> List[Dict[str, Any]]:
+                """Detect tonic patterns in the specified vectors."""
+                # Mock implementation returns a single pattern
+                pattern_id = str(uuid.uuid4())
+                self.patterns[pattern_id] = {
+                    "id": pattern_id,
+                    "vector_space_id": vector_space_id,
+                    "vectors": vectors,
+                    "centroid": [0.0] * len(vectors[0]) if vectors else [],
+                    "coherence": 0.8
+                }
+                return [self.patterns[pattern_id]]
+            
+            def validate_harmonic_coherence(self, pattern_id: str, 
+                                          new_vector: List[float]) -> Dict[str, Any]:
+                """Validate the harmonic coherence of a new vector with an existing pattern."""
+                # Mock implementation always returns high coherence
+                return {
+                    "coherence": 0.9,
+                    "recommendation": "include",
+                    "pattern_id": pattern_id
+                }
+            
+            def update_pattern_with_vector(self, pattern_id: str, 
+                                         vector: List[float],
+                                         weight: float = 1.0) -> Dict[str, Any]:
+                """Update a pattern with a new vector."""
+                if pattern_id in self.patterns:
+                    self.patterns[pattern_id]["vectors"].append(vector)
+                    return self.patterns[pattern_id]
+                return {}
+            
+            def get_pattern_centroid(self, pattern_id: str) -> List[float]:
+                """Get the centroid vector of a pattern."""
+                if pattern_id in self.patterns:
+                    return self.patterns[pattern_id]["centroid"]
+                return []
+            
+            def get_pattern_vectors(self, pattern_id: str) -> List[Dict[str, Any]]:
+                """Get all vectors associated with a pattern."""
+                if pattern_id in self.patterns:
+                    return [{
+                        "vector": v,
+                        "metadata": {}
+                    } for v in self.patterns[pattern_id]["vectors"]]
+                return []
+            
+            def calculate_vector_gradient(self, vector_space_id: str,
+                                         start_vector: List[float],
+                                         end_vector: List[float],
+                                         steps: int = 10) -> List[List[float]]:
+                """Calculate a gradient between two vectors."""
+                # Mock implementation returns a simple linear interpolation
+                result = []
+                for i in range(steps):
+                    t = i / (steps - 1) if steps > 1 else 0
+                    gradient_vector = [
+                        start_vector[j] * (1 - t) + end_vector[j] * t
+                        for j in range(len(start_vector))
+                    ]
+                    result.append(gradient_vector)
+                return result
         
         vector_tonic_service = MockVectorTonicService()
         
         pattern_aware_rag = PatternAwareRAGService(
             db_connection=arangodb_connection,
-            event_service=event_service,
-            vector_tonic_service=vector_tonic_service,
             pattern_repository=pattern_repository,
-            pattern_bridge=pattern_bridge
+            vector_tonic_service=vector_tonic_service,
+            claude_adapter=claude_adapter,
+            event_service=event_service,
+            config={"creator_id": creator_id}
         )
         
         # Initialize the service

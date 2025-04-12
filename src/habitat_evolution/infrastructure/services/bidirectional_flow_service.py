@@ -188,23 +188,25 @@ class BidirectionalFlowService(BidirectionalFlowInterface):
                 logger.info("Created pattern_relationships collection")
                 
             # Create indexes for efficient querying
-            self.arangodb_connection.create_index(
-                "patterns",
-                {
-                    "type": "persistent",
-                    "fields": ["id"]
-                }
-            )
-            logger.info("Created index on patterns collection")
+            try:
+                self.arangodb_connection.create_index(
+                    collection_name="patterns",
+                    index_type="persistent",
+                    fields=["id"]
+                )
+                logger.info("Created index on patterns collection")
+            except Exception as e:
+                logger.error(f"Error creating index on patterns collection: {e}")
             
-            self.arangodb_connection.create_index(
-                "pattern_transitions",
-                {
-                    "type": "persistent",
-                    "fields": ["pattern_id", "timestamp"]
-                }
-            )
-            logger.info("Created index on pattern_transitions collection")
+            try:
+                self.arangodb_connection.create_index(
+                    collection_name="pattern_transitions",
+                    index_type="persistent",
+                    fields=["pattern_id", "timestamp"]
+                )
+                logger.info("Created index on pattern_transitions collection")
+            except Exception as e:
+                logger.error(f"Error creating index on pattern_transitions collection: {e}")
         except Exception as e:
             logger.error(f"Error initializing collections: {e}")
     
