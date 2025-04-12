@@ -286,7 +286,6 @@ class AdaptiveID(BaseAdaptiveID):
                         field_observer.observations.append({"context": context, "time": datetime.now()})
                 except Exception as e:
                     self.logger.error(f"Error registering with field observer: {e}")
-
     def register_with_learning_window(self, learning_window) -> None:
         """Register this ID with a learning window for change tracking.
         
