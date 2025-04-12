@@ -59,6 +59,8 @@ output/
 # Cache
 .cache/
 .pytest_cache/
+src/data/cache/
+*.pickle
 .coverage
 htmlcov/
 
@@ -67,6 +69,7 @@ htmlcov/
 *.swo
 *~
 .DS_Store
+*.bak
 
 # Project specific
 visualizations/*.json
@@ -119,6 +122,9 @@ test_venv/
 # Test artifacts
 src/tests/**/plots/*.png
 src/tests/**/plots/*.pdf
+
+# Metrics and logs
+src/data/metrics/*.jsonl
 src/tests/**/plots/*.svg
 src/tests/**/test_output/
 *.coverage
