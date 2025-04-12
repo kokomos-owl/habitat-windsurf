@@ -5,20 +5,67 @@ This module provides utility functions for the climate e2e tests,
 including document processing, pattern extraction, and relationship detection.
 """
 
+import os
 import json
 import logging
 import uuid
+import pandas as pd
+import numpy as np
 from typing import Dict, List, Any, Optional
 from pathlib import Path
 from datetime import datetime
 
 from src.habitat_evolution.infrastructure.persistence.arangodb.arangodb_connection import ArangoDBConnection
-from src.habitat_evolution.infrastructure.services.claude_adapter import ClaudeAdapter
+from src.habitat_evolution.infrastructure.adapters.claude_adapter import ClaudeAdapter
 from src.habitat_evolution.climate_risk.document_processing_service import DocumentProcessingService
 from src.habitat_evolution.pattern_aware_rag.pattern_aware_rag import PatternAwareRAG
 from src.habitat_evolution.infrastructure.services.bidirectional_flow_service import BidirectionalFlowService
 
+# Configure logging
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+def get_project_root() -> Path:
+    """
+    Get the absolute path to the project root directory.
+    
+    Returns:
+        Path to the project root
+    """
+    # The tests/integration/climate_e2e directory is 3 levels deep from project root
+    return Path(__file__).parents[3]
+
+def setup_arangodb(db_connection):
+    """
+    Set up ArangoDB collections required for the tests.
+    
+    Args:
+        db_connection: ArangoDB connection object
+        
+    Returns:
+        The initialized ArangoDB connection
+    """
+    logger.info("Setting up ArangoDB collections...")
+    
+    # Initialize the connection
+    db_connection.initialize()
+    
+    # Collections for patterns
+    db_connection.ensure_collection("semantic_patterns")
+    db_connection.ensure_collection("statistical_patterns")
+    db_connection.ensure_edge_collection("pattern_relationships")
+    
+    # Collections for documents and fields
+    db_connection.ensure_collection("documents")
+    db_connection.ensure_collection("fields")
+    
+    # Collections for queries and responses
+    db_connection.ensure_collection("queries")
+    db_connection.ensure_collection("responses")
+    db_connection.ensure_edge_collection("query_response_relationships")
+    
+    logger.info("ArangoDB collections set up successfully")
+    return db_connection
 
 def load_test_data(file_path: str) -> Dict[str, Any]:
     """
@@ -91,6 +138,44 @@ def process_document_files(document_processing_service, directory_path: str) -> 
     logger.info(f"Extracted {len(patterns)} patterns from documents")
     return patterns
 
+def load_time_series_data(file_path: str) -> pd.DataFrame:
+    """
+    Load time series data from a JSON file and convert to DataFrame.
+    
+    Args:
+        file_path: Path to the JSON file
+        
+    Returns:
+        DataFrame with time series data
+    """
+    logger.info(f"Loading time series data from {file_path}")
+    
+    with open(file_path, 'r') as f:
+        data_json = json.load(f)
+    
+    # Convert JSON to DataFrame
+    data_list = []
+    for timestamp, value in data_json.items():
+        if isinstance(value, (int, float)):
+            data_list.append({"date": timestamp, "temperature": value})
+    
+    df = pd.DataFrame(data_list)
+    
+    # Convert date strings to datetime objects if possible
+    if 'date' in df.columns:
+        try:
+            # Try to convert YYYYMM format
+            df['date'] = pd.to_datetime(df['date'], format='%Y%m')
+        except:
+            # If that fails, try standard datetime parsing
+            try:
+                df['date'] = pd.to_datetime(df['date'])
+            except:
+                logger.warning("Could not convert date column to datetime")
+    
+    logger.info(f"Loaded {len(df)} time series data points")
+    return df
+
 def validate_results(arangodb_connection):
     """
     Validate test results by checking ArangoDB collections.
@@ -113,6 +198,77 @@ def validate_results(arangodb_connection):
         "patterns_count": len(patterns),
         "relationships_count": len(relationships)
     }
+
+def generate_report(arangodb_connection, semantic_patterns, statistical_patterns, relationships):
+    """
+    Generate a report of the test results.
+    
+    Args:
+        arangodb_connection: ArangoDB connection object
+        semantic_patterns: List of semantic patterns
+        statistical_patterns: List of statistical patterns
+        relationships: List of relationships
+        
+    Returns:
+        Report as a string
+    """
+    logger.info("Generating test report...")
+    
+    report = f"""# Climate Data Integration Test Report
+Generated: {datetime.now().isoformat()}
+
+## Overview
+
+This report summarizes the results of the climate data integration test,
+which processes both semantic and statistical data, detects patterns and
+relationships, and stores them in ArangoDB.
+
+## Pattern Statistics
+
+- **Semantic Patterns**: {len(semantic_patterns)}
+- **Statistical Patterns**: {len(statistical_patterns)}
+- **Cross-Domain Relationships**: {len(relationships)}
+
+## Pattern Sources
+
+### Semantic Pattern Sources:
+{chr(10).join([f"- {pattern.get('source_file', 'unknown')}" for pattern in semantic_patterns[:5]])}
+{f"... and {len(semantic_patterns) - 5} more" if len(semantic_patterns) > 5 else ""}
+
+### Statistical Pattern Sources:
+{chr(10).join([f"- {pattern.get('source_file', 'unknown')}" for pattern in statistical_patterns[:5]])}
+{f"... and {len(statistical_patterns) - 5} more" if len(statistical_patterns) > 5 else ""}
+
+## Relationship Examples
+
+{chr(10).join([f"- {rel.get('type', 'unknown')}: {rel.get('description', 'No description')[:100]}..." for rel in relationships[:3]])}
+{f"... and {len(relationships) - 3} more" if len(relationships) > 3 else ""}
+
+## Database Status
+
+The following collections were populated:
+- semantic_patterns: {arangodb_connection.execute_query("RETURN LENGTH(FOR doc IN semantic_patterns RETURN doc)")[0]} documents
+- statistical_patterns: {arangodb_connection.execute_query("RETURN LENGTH(FOR doc IN statistical_patterns RETURN doc)")[0]} documents
+- pattern_relationships: {arangodb_connection.execute_query("RETURN LENGTH(FOR doc IN pattern_relationships RETURN doc)")[0]} documents
+- events: {arangodb_connection.execute_query("RETURN LENGTH(FOR doc IN events RETURN doc)")[0]} documents
+- queries: {arangodb_connection.execute_query("RETURN LENGTH(FOR doc IN queries RETURN doc)")[0]} documents
+
+## Conclusion
+
+The test demonstrates the system's ability to process both semantic and statistical data,
+identify patterns, detect cross-domain relationships, and store the results in ArangoDB.
+This provides a foundation for further development of the climate risk analysis system.
+"""
+    
+    # Save report to file
+    report_path = Path(get_project_root()) / "reports" / f"climate_test_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.md"
+    report_path.parent.mkdir(exist_ok=True)
+    
+    with open(report_path, "w") as f:
+        f.write(report)
+    
+    logger.info(f"Report saved to {report_path}")
+    return report
 
 def create_test_pattern(pattern_type: str, content: str, metadata: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     """
