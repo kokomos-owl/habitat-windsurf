@@ -848,19 +848,14 @@ def test_integrated_climate_e2e(
     logger.info("Step 5: Testing Vector Tonic integration...")
     
     try:
-        # Use the already imported Vector Tonic components
-        # No need to re-import here
+        # Use the new vector_tonic_initialization module for proper initialization
+        from src.habitat_evolution.adaptive_core.emergence.vector_tonic_initialization import initialize_vector_tonic_system
         
-        # Initialize Vector Tonic components
-        vector_tonic_integrator = VectorTonicWindowIntegrator()
-        vector_tonic_persistence = VectorTonicPersistenceConnector(arangodb_connection)
-        
-        # Initialize Tonic Harmonic components
-        from src.habitat_evolution.core.services.event_bus import LocalEventBus
-        from src.habitat_evolution.adaptive_core.io.harmonic_io_service import HarmonicIOService
-        
-        event_bus = LocalEventBus()
-        harmonic_io_service = HarmonicIOService()
+        # Initialize the Vector Tonic system with all required dependencies
+        vector_tonic_integrator, vector_tonic_persistence, event_bus, harmonic_io_service = initialize_vector_tonic_system(
+            arangodb_connection=arangodb_connection
+        )
+        logger.info("Vector Tonic system initialized using the new initialization module")
         
         # Create a field state for tonic harmonic analysis
         field_analysis = {

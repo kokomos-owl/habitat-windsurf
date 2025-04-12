@@ -8,6 +8,7 @@ services, and dependencies for the climate end-to-end tests.
 import os
 import pytest
 import logging
+import uuid
 from pathlib import Path
 from typing import Dict, List, Any, Optional
 

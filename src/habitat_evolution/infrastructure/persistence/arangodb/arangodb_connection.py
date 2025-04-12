@@ -296,6 +296,34 @@ class ArangoDBConnection(ArangoDBConnectionInterface):
         meta = collection.insert(document, return_new=True)
         return meta["new"]
     
+    def create_document(self, collection_name: str, document: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Create a document in a collection.
+        
+        This method ensures the collection exists before inserting the document.
+        It leverages the existing insert method for consistency.
+        
+        Args:
+            collection_name: The name of the collection
+            document: The document to create
+            
+        Returns:
+            The created document with its metadata
+            
+        Raises:
+            DocumentInsertError: If the document couldn't be created
+        """
+        # Ensure collection exists
+        if not self._initialized:
+            self.initialize()
+            
+        # Create collection if it doesn't exist
+        if not self._db.has_collection(collection_name):
+            self.create_collection(collection_name)
+            
+        # Use existing insert method to create the document
+        return self.insert(collection_name, document)
+    
     def update_document(self, collection_name: str, document_id: str, 
                        document: Dict[str, Any]) -> Dict[str, Any]:
         """

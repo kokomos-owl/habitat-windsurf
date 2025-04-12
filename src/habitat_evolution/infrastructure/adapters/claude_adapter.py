@@ -55,6 +55,44 @@ class ClaudeAdapter:
             
         logger.info(f"Initialized ClaudeAdapter (use_mock: {self.use_mock})")
         
+    def query(self, query_text: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """
+        Query the Claude API with a simple text query.
+        
+        This is a synchronous wrapper around the async process_query method,
+        simplified for direct use in the PatternAwareRAG integration.
+        
+        Args:
+            query_text: The text query to process
+            context: Optional context to include with the query
+            
+        Returns:
+            Dict containing Claude's response
+        """
+        import asyncio
+        
+        # Use empty patterns list for simple queries
+        patterns = []
+        
+        # Create minimal context if not provided
+        if context is None:
+            context = {}
+            
+        try:
+            # Run the async process_query method in a synchronous context
+            loop = asyncio.get_event_loop()
+            result = loop.run_until_complete(self.process_query(query_text, context, patterns))
+            return result
+        except Exception as e:
+            logger.error(f"Error in query method: {e}")
+            # Return a fallback response
+            return {
+                "response": f"Error processing query: {str(e)}",
+                "error": str(e),
+                "query_id": str(uuid.uuid4()),
+                "timestamp": datetime.now().isoformat()
+            }
+    
     async def process_query(
         self, query: str, context: Dict[str, Any], patterns: List[Dict[str, Any]],
         use_cache: bool = True
