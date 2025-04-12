@@ -15,9 +15,14 @@ logger = logging.getLogger(__name__)
 def run_test_with_api_key():
     """Run the integrated climate e2e test with the provided Claude API key."""
     try:
-        # Set the Claude API key in the environment
-        os.environ["CLAUDE_API_KEY"] = "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"
-        logger.info("Claude API key set in environment")
+        # Set the Claude API key from environment or use a placeholder for testing
+        api_key = os.environ.get("CLAUDE_API_KEY", "")
+        if not api_key:
+            logger.warning("No Claude API key found in environment, some features may not work")
+            # Use mock mode or fallback pattern extraction
+            os.environ["USE_MOCK_CLAUDE"] = "True"
+        else:
+            logger.info("Claude API key found in environment")
         
         # Ensure the EventService is properly initialized
         from src.habitat_evolution.infrastructure.services.event_service import EventService
