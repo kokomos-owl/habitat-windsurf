@@ -27,7 +27,28 @@ def clear_arangodb():
         logger.info("ArangoDB connection initialized")
         
         # Get the database handle
-        db = db_connection.db
+        # The ArangoDBConnection class might expose the database through a different attribute
+        # Let's check what attributes are available
+        logger.info(f"Available attributes: {dir(db_connection)}")
+        
+        # Try to get the database using common attribute names
+        if hasattr(db_connection, 'database'):
+            db = db_connection.database
+        elif hasattr(db_connection, 'db'):
+            db = db_connection.db
+        elif hasattr(db_connection, 'client') and hasattr(db_connection.client, 'db'):
+            db = db_connection.client.db('habitat_evolution')
+        elif hasattr(db_connection, 'get_database'):
+            db = db_connection.get_database()
+        else:
+            # If we can't find the database attribute, let's try to access the ArangoDB client directly
+            from arango import ArangoClient
+            client = ArangoClient(hosts=f"http://localhost:8529")
+            sys_db = client.db('_system', username='root', password='habitat')
+            if sys_db.has_database('habitat_evolution'):
+                db = client.db('habitat_evolution', username='root', password='habitat')
+            else:
+                raise ValueError("Could not find habitat_evolution database")
         
         # Get all collections
         collections = db.collections()

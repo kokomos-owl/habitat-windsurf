@@ -33,3 +33,6 @@
 {"timestamp": "2025-04-12T11:33:32.162356", "type": "query", "query_length": 4457, "tokens_used": 1000, "response_time_ms": 37769.42825317383, "model": "claude-3-opus-20240229", "avg_token_per_second": 26.476439974067343}
 {"timestamp": "2025-04-12T11:34:01.863864", "type": "query", "query_length": 12143, "tokens_used": 794, "response_time_ms": 28760.460138320923, "model": "claude-3-opus-20240229", "avg_token_per_second": 27.60734689853105}
 {"timestamp": "2025-04-12T11:37:46.371441", "type": "query", "query_length": 12143, "tokens_used": 1000, "response_time_ms": 36194.873094558716, "model": "claude-3-opus-20240229", "avg_token_per_second": 27.62822230064216}
+{"timestamp": "2025-04-12T11:42:55.924099", "type": "query", "query_length": 12143, "tokens_used": 867, "response_time_ms": 30639.588117599487, "model": "claude-3-opus-20240229", "avg_token_per_second": 28.296725030125067}
+{"timestamp": "2025-04-12T11:52:00.078334", "type": "query", "query_length": 12143, "tokens_used": 856, "response_time_ms": 28784.00731086731, "model": "claude-3-opus-20240229", "avg_token_per_second": 29.738736193164456}
+{"timestamp": "2025-04-12T11:54:23.957867", "type": "query", "query_length": 12143, "tokens_used": 779, "response_time_ms": 30671.388149261475, "model": "claude-3-opus-20240229", "avg_token_per_second": 25.398263561108408}
