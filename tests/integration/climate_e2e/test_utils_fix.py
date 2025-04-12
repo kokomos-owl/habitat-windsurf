@@ -13,7 +13,7 @@ from pathlib import Path
 from datetime import datetime
 
 from src.habitat_evolution.infrastructure.persistence.arangodb.arangodb_connection import ArangoDBConnection
-from src.habitat_evolution.infrastructure.services.claude_adapter import ClaudeAdapter
+from src.habitat_evolution.infrastructure.adapters.claude_adapter import ClaudeAdapter
 from src.habitat_evolution.climate_risk.document_processing_service import DocumentProcessingService
 from src.habitat_evolution.pattern_aware_rag.pattern_aware_rag import PatternAwareRAG
 from src.habitat_evolution.infrastructure.services.bidirectional_flow_service import BidirectionalFlowService
