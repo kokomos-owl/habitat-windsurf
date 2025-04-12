@@ -97,6 +97,33 @@ def run_fixed_test():
         
         logger.info("Successfully patched conftest.py")
         
+        # Patch the document processing service
+        doc_processing_service_path = os.path.join(
+            os.path.dirname(__file__),
+            "src/habitat_evolution/climate_risk/document_processing_service.py"
+        )
+        doc_processing_service_fix_path = os.path.join(
+            os.path.dirname(__file__),
+            "src/habitat_evolution/climate_risk/document_processing_service_fix.py"
+        )
+        doc_processing_service_backup = doc_processing_service_path + ".bak"
+        
+        # Create backup if it doesn't exist
+        if not os.path.exists(doc_processing_service_backup):
+            logger.info(f"Creating backup of {doc_processing_service_path}")
+            shutil.copy2(doc_processing_service_path, doc_processing_service_backup)
+        
+        # Replace with fixed version
+        logger.info(f"Replacing {doc_processing_service_path} with fixed version")
+        shutil.copy2(doc_processing_service_fix_path, doc_processing_service_path)
+        
+        # Reload the module if it's already loaded
+        if "src.habitat_evolution.climate_risk.document_processing_service" in sys.modules:
+            logger.info("Reloading document_processing_service module")
+            importlib.reload(sys.modules["src.habitat_evolution.climate_risk.document_processing_service"])
+        
+        logger.info("Successfully patched document_processing_service.py")
+        
         # Ensure the EventService is properly initialized
         from src.habitat_evolution.infrastructure.services.event_service import EventService
         

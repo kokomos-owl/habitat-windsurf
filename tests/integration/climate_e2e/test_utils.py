@@ -110,30 +110,39 @@ def process_document_files(document_processing_service, directory_path: str) -> 
     for doc_path in directory.glob("*.txt"):
         logger.info(f"Processing document: {doc_path.name}")
         
-        # Process the document - FIX: Use the correct parameter name
-        # The parameter name should match what's expected in the DocumentProcessingService.process_document method
-        # It could be 'document_path', 'file_path', or 'path' - we're trying all options
+        # Process the document using the correct parameter name
+        doc_path_str = str(doc_path)
         try:
-            # First try with 'document_path'
-            result = document_processing_service.process_document(document_path=str(doc_path))
-        except TypeError:
+            # Use keyword argument to ensure we're passing the parameter correctly
+            result = document_processing_service.process_document(document_path=doc_path_str)
+            
+            # Extract patterns
+            if "patterns" in result:
+                for pattern in result["patterns"]:
+                    pattern["source"] = "semantic"
+                    pattern["source_file"] = doc_path.name
+                    patterns.append(pattern)
+        except Exception as e:
+            logger.error(f"Error processing document {doc_path.name}: {e}")
+            # Try with a fallback approach if the regular approach fails
             try:
-                # Then try with 'file_path'
-                result = document_processing_service.process_document(file_path=str(doc_path))
-            except TypeError:
-                try:
-                    # Then try with 'path'
-                    result = document_processing_service.process_document(path=str(doc_path))
-                except TypeError:
-                    # If all fail, try with positional argument
-                    result = document_processing_service.process_document(str(doc_path))
-        
-        # Extract patterns
-        if "patterns" in result:
-            for pattern in result["patterns"]:
-                pattern["source"] = "semantic"
-                pattern["source_file"] = doc_path.name
-                patterns.append(pattern)
+                with open(doc_path_str, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                
+                result = document_processing_service.process_document(
+                    document_id=doc_path.name,
+                    content=content,
+                    metadata={"source": "file", "path": doc_path_str}
+                )
+                
+                # Extract patterns
+                if "patterns" in result:
+                    for pattern in result["patterns"]:
+                        pattern["source"] = "semantic"
+                        pattern["source_file"] = doc_path.name
+                        patterns.append(pattern)
+            except Exception as inner_e:
+                logger.error(f"Fallback processing failed for {doc_path.name}: {inner_e}")
     
     logger.info(f"Extracted {len(patterns)} patterns from documents")
     return patterns
