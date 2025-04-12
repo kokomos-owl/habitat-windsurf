@@ -1,0 +1,394 @@
+(base) prphillips@Patricks-MacBook-Air habitat_alpha % cd /Users/prphillips/Documents/GitHub/habitat_alpha && python -m pytest tests/integration/climate_e2e/test_climate
+_e2e.py::test_climate_e2e -vv --log-cli-level=DEBUG
+========================================================================== test session starts ==========================================================================
+platform darwin -- Python 3.11.8, pytest-7.4.3, pluggy-1.5.0 -- /Applications/anaconda3/bin/python
+cachedir: .pytest_cache
+rootdir: /Users/prphillips/Documents/GitHub/habitat_alpha
+configfile: pytest.ini
+plugins: anyio-4.9.0, asyncio-0.21.1, mock-3.14.0
+asyncio: mode=Mode.AUTO
+collected 1 item                                                                                                                                                        
+
+tests/integration/climate_e2e/test_climate_e2e.py::test_climate_e2e 
+---------------------------------------------------------------------------- live log setup -----------------------------------------------------------------------------
+DEBUG    src.habitat_evolution.infrastructure.persistence.arangodb.arangodb_connection:arangodb_connection.py:71 ArangoDBConnection created
+INFO     climate_e2e.test_utils:test_utils.py:42 Setting up ArangoDB collections...
+INFO     src.habitat_evolution.infrastructure.persistence.arangodb.arangodb_connection:arangodb_connection.py:84 Initializing ArangoDBConnection
+DEBUG    urllib3.connectionpool:connectionpool.py:245 Starting new HTTP connection (1): localhost:8529
+DEBUG    urllib3.connectionpool:connectionpool.py:547 http://localhost:8529 "GET /_db/_system/_api/database HTTP/1.1" 200 162
+INFO     src.habitat_evolution.infrastructure.persistence.arangodb.arangodb_connection:arangodb_connection.py:124 ArangoDBConnection initialized
+DEBUG    urllib3.connectionpool:connectionpool.py:547 http://localhost:8529 "GET /_db/habitat_evolution_test/_api/collection HTTP/1.1" 200 2638
+DEBUG    urllib3.connectionpool:connectionpool.py:547 http://localhost:8529 "GET /_db/habitat_evolution_test/_api/collection HTTP/1.1" 200 2638
+DEBUG    urllib3.connectionpool:connectionpool.py:547 http://localhost:8529 "GET /_db/habitat_evolution_test/_api/collection HTTP/1.1" 200 2638
+DEBUG    urllib3.connectionpool:connectionpool.py:547 http://localhost:8529 "GET /_db/habitat_evolution_test/_api/collection HTTP/1.1" 200 2638
+DEBUG    urllib3.connectionpool:connectionpool.py:547 http://localhost:8529 "GET /_db/habitat_evolution_test/_api/collection HTTP/1.1" 200 2638
+DEBUG    urllib3.connectionpool:connectionpool.py:547 http://localhost:8529 "GET /_db/habitat_evolution_test/_api/collection HTTP/1.1" 200 2638
+DEBUG    urllib3.connectionpool:connectionpool.py:547 http://localhost:8529 "GET /_db/habitat_evolution_test/_api/collection HTTP/1.1" 200 2638
+DEBUG    urllib3.connectionpool:connectionpool.py:547 http://localhost:8529 "GET /_db/habitat_evolution_test/_api/collection HTTP/1.1" 200 2638
+DEBUG    urllib3.connectionpool:connectionpool.py:547 http://localhost:8529 "GET /_db/habitat_evolution_test/_api/collection HTTP/1.1" 200 2638
+DEBUG    urllib3.connectionpool:connectionpool.py:547 http://localhost:8529 "GET /_db/habitat_evolution_test/_api/collection HTTP/1.1" 200 2638
+DEBUG    urllib3.connectionpool:connectionpool.py:547 http://localhost:8529 "GET /_db/habitat_evolution_test/_api/collection HTTP/1.1" 200 2638
+DEBUG    urllib3.connectionpool:connectionpool.py:547 http://localhost:8529 "GET /_db/habitat_evolution_test/_api/collection HTTP/1.1" 200 2638
+DEBUG    urllib3.connectionpool:connectionpool.py:547 http://localhost:8529 "GET /_db/habitat_evolution_test/_api/collection HTTP/1.1" 200 2638
+DEBUG    urllib3.connectionpool:connectionpool.py:547 http://localhost:8529 "GET /_db/habitat_evolution_test/_api/collection HTTP/1.1" 200 2638
+DEBUG    urllib3.connectionpool:connectionpool.py:547 http://localhost:8529 "GET /_db/habitat_evolution_test/_api/collection HTTP/1.1" 200 2638
+INFO     climate_e2e.test_utils:test_utils.py:74 ArangoDB collections set up successfully
+DEBUG    src.habitat_evolution.infrastructure.services.event_service:event_service.py:28 EventService created
+WARNING  src.habitat_evolution.infrastructure.services.event_service:event_service.py:92 EventService not initialized
+WARNING  src.habitat_evolution.infrastructure.services.event_service:event_service.py:92 EventService not initialized
+WARNING  src.habitat_evolution.infrastructure.services.event_service:event_service.py:92 EventService not initialized
+WARNING  climate_e2e.conftest:conftest.py:192 CLAUDE_API_KEY environment variable not set. Claude API calls will fail.
+INFO     src.habitat_evolution.infrastructure.adapters.claude_adapter:claude_adapter.py:54 Initialized Anthropic client
+INFO     src.habitat_evolution.infrastructure.adapters.claude_adapter:claude_adapter.py:56 Initialized ClaudeAdapter (use_mock: False)
+WARNING  src.habitat_evolution.infrastructure.services.claude_pattern_extraction_service:claude_pattern_extraction_service.py:40 Claude API key not provided, using fallback extraction methods
+INFO     src.habitat_evolution.infrastructure.services.claude_pattern_extraction_service:claude_pattern_extraction_service.py:42 ClaudePatternExtractionService initialized
+WARNING  src.habitat_evolution.pattern_aware_rag.services.claude_integration_service:claude_integration_service.py:41 Claude API key not provided, using fallback methods
+INFO     src.habitat_evolution.pattern_aware_rag.services.claude_integration_service:claude_integration_service.py:43 ClaudeRAGService initialized
+WARNING  climate_e2e.conftest:conftest.py:208 CLAUDE_API_KEY environment variable not set. Claude API calls will fail.
+WARNING  src.habitat_evolution.infrastructure.services.claude_pattern_extraction_service:claude_pattern_extraction_service.py:40 Claude API key not provided, using fallback extraction methods
+INFO     src.habitat_evolution.infrastructure.services.claude_pattern_extraction_service:claude_pattern_extraction_service.py:42 ClaudePatternExtractionService initialized
+WARNING  src.habitat_evolution.infrastructure.services.claude_pattern_extraction_service:claude_pattern_extraction_service.py:40 Claude API key not provided, using fallback extraction methods
+INFO     src.habitat_evolution.infrastructure.services.claude_pattern_extraction_service:claude_pattern_extraction_service.py:42 ClaudePatternExtractionService initialized
+INFO     src.habitat_evolution.climate_risk.document_processing_service:document_processing_service.py:58 DocumentProcessingService initialized with Claude integration and PatternAwareRAG
+----------------------------------------------------------------------------- live log call -----------------------------------------------------------------------------
+INFO     climate_e2e.test_climate_e2e:test_climate_e2e.py:491 Starting climate end-to-end test with AdaptiveID and PatternAwareRAG integration
+INFO     climate_e2e.test_climate_e2e:test_climate_e2e.py:498 Created AdaptiveID: 5ef8162f-351b-4a67-ae1d-eb93bb97f340 for concept: sea_level_rise
+INFO     src.habitat_evolution.climate_risk.document_processing_service:document_processing_service.py:85 Processing document with ID: boston_harbor_assessment_2020
+INFO     src.habitat_evolution.climate_risk.document_processing_service:document_processing_service.py:92 Document content length: 1091
+INFO     src.habitat_evolution.climate_risk.document_processing_service:document_processing_service.py:198 Using Claude for pattern extraction
+INFO     src.habitat_evolution.infrastructure.services.claude_pattern_extraction_service:claude_pattern_extraction_service.py:55 Extracting patterns from document: boston_harbor_assessment_2020
+INFO     src.habitat_evolution.infrastructure.services.claude_pattern_extraction_service:claude_pattern_extraction_service.py:59 Using fallback pattern extraction
+INFO     src.habitat_evolution.climate_risk.document_processing_service:document_processing_service.py:96 Extracted 1 patterns from document
+ERROR    src.habitat_evolution.infrastructure.services.pattern_evolution_service:pattern_evolution_service.py:314 Error creating pattern in ArangoDB: 'ArangoDBConnection' object has no attribute 'create_document'
+INFO     src.habitat_evolution.climate_risk.document_processing_service:document_processing_service.py:120 Processed pattern: storm-risk-20cebde1-cab4-4740-9e91-1f6bde2318ec
+DEBUG    urllib3.connectionpool:connectionpool.py:547 http://localhost:8529 "POST /_db/habitat_evolution_test/_api/cursor HTTP/1.1" 404 118
+ERROR    src.habitat_evolution.infrastructure.services.pattern_evolution_service:pattern_evolution_service.py:287 Error getting pattern from ArangoDB: [HTTP 404][ERR 1203] AQL: collection or view not found: patterns (while parsing)
+ERROR    src.habitat_evolution.infrastructure.services.pattern_evolution_service:pattern_evolution_service.py:420 Pattern not found for usage tracking: storm-risk-20cebde1-cab4-4740-9e91-1f6bde2318ec
+WARNING  src.habitat_evolution.infrastructure.services.event_service:event_service.py:67 EventService not initialized
+INFO     src.habitat_evolution.climate_risk.document_processing_service:document_processing_service.py:158 Published document.processed event for pattern: storm-risk-20cebde1-cab4-4740-9e91-1f6bde2318ec
+INFO     climate_e2e.test_climate_e2e:test_climate_e2e.py:530 Extracted 1 patterns from document
+ERROR    src.habitat_evolution.infrastructure.services.pattern_evolution_service:pattern_evolution_service.py:314 Error creating pattern in ArangoDB: 'ArangoDBConnection' object has no attribute 'create_document'
+INFO     climate_e2e.test_climate_e2e:test_climate_e2e.py:548 Created pattern with ID: {'name': 'boston_harbor_sea_level_rise', 'type': 'climate_risk', 'description': 'Sea level rise pattern in Boston Harbor', 'metadata': {'region': 'Boston Harbor', 'timeframe': '2020-2050', 'confidence': 0.85, 'source': 'climate_risk_assessment'}, 'adaptive_id': '5ef8162f-351b-4a67-ae1d-eb93bb97f340', 'id': '04102c6d-dd80-4116-a73d-240f03fe83d3', 'created_at': '2025-04-12T11:15:53.994605'} linked to AdaptiveID: 5ef8162f-351b-4a67-ae1d-eb93bb97f340
+INFO     climate_e2e.test_climate_e2e:test_climate_e2e.py:564 Mock RAG query: What are the projected impacts of sea level rise in Boston Harbor by 2050?
+INFO     climate_e2e.test_climate_e2e:test_climate_e2e.py:578 RAG query result: {'response': 'By 2050, sea levels in Boston Harbor are projected to rise by 9-21 inches, increasing coastal flooding frequency to 30+ times per year, threatening $85 billion in property and infrastructure, causing saltwater intrusion in freshwater ecosystems, accelerating erosion of harbor islands, and shifting marine ecosystems with impacts on local fisheries and biodiversity.', 'coherence': 0.85, 'pattern_id': '04102c6d-dd80-4116-a73d-240f03fe83d3'}
+INFO     climate_e2e.test_climate_e2e:test_climate_e2e.py:593 Updated AdaptiveID coherence to: 0.85
+INFO     climate_e2e.test_climate_e2e:test_climate_e2e.py:599 Climate end-to-end test completed successfully
+PASSED                                                                                                                                                            [100%]
+--------------------------------------------------------------------------- live log teardown ---------------------------------------------------------------------------
+INFO     climate_e2e.conftest:conftest.py:73 Cleaning up ArangoDB connection
+INFO     src.habitat_evolution.infrastructure.persistence.arangodb.arangodb_connection:arangodb_connection.py:141 Shutting down ArangoDBConnection
+INFO     src.habitat_evolution.infrastructure.persistence.arangodb.arangodb_connection:arangodb_connection.py:145 ArangoDBConnection shut down
+
+
+=========================================================================== warnings summary ============================================================================
+../../../../../Applications/anaconda3/lib/python3.11/site-packages/langchain/vectorstores/__init__.py:35
+  /Applications/anaconda3/lib/python3.11/site-packages/langchain/vectorstores/__init__.py:35: LangChainDeprecationWarning: Importing vector stores from langchain is deprecated. Importing from langchain will no longer be supported as of langchain==0.2.0. Please import from langchain-community instead:
+  
+  `from langchain_community.vectorstores import Chroma`.
+  
+  To install langchain-community run `pip install -U langchain-community`.
+    warnings.warn(
+
+tests/integration/climate_e2e/test_climate_e2e.py::test_climate_e2e
+  /Applications/anaconda3/lib/python3.11/site-packages/_pytest/python.py:198: PytestReturnNotNoneWarning: Expected None, but tests/integration/climate_e2e/test_climate_e2e.py::test_climate_e2e returned {'response': 'By 2050, sea levels in Boston Harbor are projected to rise by 9-21 inches, increasing coastal flooding frequency to 30+ times per year, threatening $85 billion in property and infrastructure, causing saltwater intrusion in freshwater ecosystems, accelerating erosion of harbor islands, and shifting marine ecosystems with impacts on local fisheries and biodiversity.', 'coherence': 0.85, 'pattern_id': '04102c6d-dd80-4116-a73d-240f03fe83d3'}, which will be an error in a future version of pytest.  Did you mean to use `assert` instead of `return`?
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+===================================================================== 1 passed, 2 warnings in 1.15s =====================================================================
+(base) prphillips@Patricks-MacBook-Air habitat_alpha % 
+
+
+
+
+
+
+
+===================================================================== test_integrated_climate_e2e =======================================================================
+
+(base) prphillips@Patricks-MacBook-Air habitat_alpha % cd /Users/prphillips/Documents/GitHub/habitat_alpha && python -m pytest tests/integration/climate_e2e/test_climate
+_e2e.py::test_integrated_climate_e2e -vv --log-cli-level=DEBUG
+========================================================================== test session starts ==========================================================================
+platform darwin -- Python 3.11.8, pytest-7.4.3, pluggy-1.5.0 -- /Applications/anaconda3/bin/python
+cachedir: .pytest_cache
+rootdir: /Users/prphillips/Documents/GitHub/habitat_alpha
+configfile: pytest.ini
+plugins: anyio-4.9.0, asyncio-0.21.1, mock-3.14.0
+asyncio: mode=Mode.AUTO
+collected 1 item                                                                                                                                                        
+
+tests/integration/climate_e2e/test_climate_e2e.py::test_integrated_climate_e2e 
+---------------------------------------------------------------------------- live log setup -----------------------------------------------------------------------------
+DEBUG    src.habitat_evolution.infrastructure.persistence.arangodb.arangodb_connection:arangodb_connection.py:71 ArangoDBConnection created
+INFO     climate_e2e.test_utils:test_utils.py:42 Setting up ArangoDB collections...
+INFO     src.habitat_evolution.infrastructure.persistence.arangodb.arangodb_connection:arangodb_connection.py:84 Initializing ArangoDBConnection
+DEBUG    urllib3.connectionpool:connectionpool.py:245 Starting new HTTP connection (1): localhost:8529
+DEBUG    urllib3.connectionpool:connectionpool.py:547 http://localhost:8529 "GET /_db/_system/_api/database HTTP/1.1" 200 162
+INFO     src.habitat_evolution.infrastructure.persistence.arangodb.arangodb_connection:arangodb_connection.py:124 ArangoDBConnection initialized
+DEBUG    urllib3.connectionpool:connectionpool.py:547 http://localhost:8529 "GET /_db/habitat_evolution_test/_api/collection HTTP/1.1" 200 2638
+DEBUG    urllib3.connectionpool:connectionpool.py:547 http://localhost:8529 "GET /_db/habitat_evolution_test/_api/collection HTTP/1.1" 200 2638
+DEBUG    urllib3.connectionpool:connectionpool.py:547 http://localhost:8529 "GET /_db/habitat_evolution_test/_api/collection HTTP/1.1" 200 2638
+DEBUG    urllib3.connectionpool:connectionpool.py:547 http://localhost:8529 "GET /_db/habitat_evolution_test/_api/collection HTTP/1.1" 200 2638
+DEBUG    urllib3.connectionpool:connectionpool.py:547 http://localhost:8529 "GET /_db/habitat_evolution_test/_api/collection HTTP/1.1" 200 2638
+DEBUG    urllib3.connectionpool:connectionpool.py:547 http://localhost:8529 "GET /_db/habitat_evolution_test/_api/collection HTTP/1.1" 200 2638
+DEBUG    urllib3.connectionpool:connectionpool.py:547 http://localhost:8529 "GET /_db/habitat_evolution_test/_api/collection HTTP/1.1" 200 2638
+DEBUG    urllib3.connectionpool:connectionpool.py:547 http://localhost:8529 "GET /_db/habitat_evolution_test/_api/collection HTTP/1.1" 200 2638
+DEBUG    urllib3.connectionpool:connectionpool.py:547 http://localhost:8529 "GET /_db/habitat_evolution_test/_api/collection HTTP/1.1" 200 2638
+DEBUG    urllib3.connectionpool:connectionpool.py:547 http://localhost:8529 "GET /_db/habitat_evolution_test/_api/collection HTTP/1.1" 200 2638
+DEBUG    urllib3.connectionpool:connectionpool.py:547 http://localhost:8529 "GET /_db/habitat_evolution_test/_api/collection HTTP/1.1" 200 2638
+DEBUG    urllib3.connectionpool:connectionpool.py:547 http://localhost:8529 "GET /_db/habitat_evolution_test/_api/collection HTTP/1.1" 200 2638
+DEBUG    urllib3.connectionpool:connectionpool.py:547 http://localhost:8529 "GET /_db/habitat_evolution_test/_api/collection HTTP/1.1" 200 2638
+DEBUG    urllib3.connectionpool:connectionpool.py:547 http://localhost:8529 "GET /_db/habitat_evolution_test/_api/collection HTTP/1.1" 200 2638
+DEBUG    urllib3.connectionpool:connectionpool.py:547 http://localhost:8529 "GET /_db/habitat_evolution_test/_api/collection HTTP/1.1" 200 2638
+INFO     climate_e2e.test_utils:test_utils.py:74 ArangoDB collections set up successfully
+DEBUG    src.habitat_evolution.infrastructure.services.event_service:event_service.py:28 EventService created
+WARNING  src.habitat_evolution.infrastructure.services.event_service:event_service.py:92 EventService not initialized
+WARNING  src.habitat_evolution.infrastructure.services.event_service:event_service.py:92 EventService not initialized
+WARNING  src.habitat_evolution.infrastructure.services.event_service:event_service.py:92 EventService not initialized
+WARNING  climate_e2e.conftest:conftest.py:208 CLAUDE_API_KEY environment variable not set. Claude API calls will fail.
+WARNING  src.habitat_evolution.infrastructure.services.claude_pattern_extraction_service:claude_pattern_extraction_service.py:40 Claude API key not provided, using fallback extraction methods
+INFO     src.habitat_evolution.infrastructure.services.claude_pattern_extraction_service:claude_pattern_extraction_service.py:42 ClaudePatternExtractionService initialized
+WARNING  src.habitat_evolution.infrastructure.services.claude_pattern_extraction_service:claude_pattern_extraction_service.py:40 Claude API key not provided, using fallback extraction methods
+INFO     src.habitat_evolution.infrastructure.services.claude_pattern_extraction_service:claude_pattern_extraction_service.py:42 ClaudePatternExtractionService initialized
+INFO     src.habitat_evolution.climate_risk.document_processing_service:document_processing_service.py:58 DocumentProcessingService initialized with Claude integration and PatternAwareRAG
+WARNING  climate_e2e.conftest:conftest.py:192 CLAUDE_API_KEY environment variable not set. Claude API calls will fail.
+INFO     src.habitat_evolution.infrastructure.adapters.claude_adapter:claude_adapter.py:54 Initialized Anthropic client
+INFO     src.habitat_evolution.infrastructure.adapters.claude_adapter:claude_adapter.py:56 Initialized ClaudeAdapter (use_mock: False)
+WARNING  src.habitat_evolution.infrastructure.services.claude_pattern_extraction_service:claude_pattern_extraction_service.py:40 Claude API key not provided, using fallback extraction methods
+INFO     src.habitat_evolution.infrastructure.services.claude_pattern_extraction_service:claude_pattern_extraction_service.py:42 ClaudePatternExtractionService initialized
+WARNING  src.habitat_evolution.pattern_aware_rag.services.claude_integration_service:claude_integration_service.py:41 Claude API key not provided, using fallback methods
+INFO     src.habitat_evolution.pattern_aware_rag.services.claude_integration_service:claude_integration_service.py:43 ClaudeRAGService initialized
+----------------------------------------------------------------------------- live log call -----------------------------------------------------------------------------
+INFO     climate_e2e.test_climate_e2e:test_climate_e2e.py:682 Starting integrated climate end-to-end test...
+INFO     climate_e2e.test_climate_e2e:test_climate_e2e.py:685 Step 1: Processing semantic data with AdaptiveID integration...
+INFO     climate_e2e.test_climate_e2e:test_climate_e2e.py:689 Created AdaptiveID for semantic patterns: 234709c3-45d6-40a1-a196-f9b09a3cf587
+INFO     climate_e2e.test_climate_e2e:test_climate_e2e.py:79 Testing semantic data processing...
+INFO     climate_e2e.test_utils:test_utils.py:126 Processing documents in /Users/prphillips/Documents/GitHub/habitat_alpha/data/climate_risk
+INFO     climate_e2e.test_utils:test_utils.py:132 Processing document: complex_test_doc_boston_harbor_islands.txt
+INFO     src.habitat_evolution.climate_risk.document_processing_service:document_processing_service.py:78 Processing document from path: /Users/prphillips/Documents/GitHub/habitat_alpha/data/climate_risk/complex_test_doc_boston_harbor_islands.txt
+INFO     src.habitat_evolution.climate_risk.document_processing_service:document_processing_service.py:92 Document content length: 5008
+INFO     src.habitat_evolution.climate_risk.document_processing_service:document_processing_service.py:198 Using Claude for pattern extraction
+INFO     src.habitat_evolution.infrastructure.services.claude_pattern_extraction_service:claude_pattern_extraction_service.py:55 Extracting patterns from document: complex_test_doc_boston_harbor_islands.txt
+INFO     src.habitat_evolution.infrastructure.services.claude_pattern_extraction_service:claude_pattern_extraction_service.py:59 Using fallback pattern extraction
+INFO     src.habitat_evolution.climate_risk.document_processing_service:document_processing_service.py:96 Extracted 2 patterns from document
+ERROR    src.habitat_evolution.infrastructure.services.pattern_evolution_service:pattern_evolution_service.py:314 Error creating pattern in ArangoDB: 'ArangoDBConnection' object has no attribute 'create_document'
+INFO     src.habitat_evolution.climate_risk.document_processing_service:document_processing_service.py:120 Processed pattern: sea-level-rise-8d053ca5-1429-4d5d-8b35-ce2887e3fc21
+DEBUG    urllib3.connectionpool:connectionpool.py:547 http://localhost:8529 "POST /_db/habitat_evolution_test/_api/cursor HTTP/1.1" 404 118
+ERROR    src.habitat_evolution.infrastructure.services.pattern_evolution_service:pattern_evolution_service.py:287 Error getting pattern from ArangoDB: [HTTP 404][ERR 1203] AQL: collection or view not found: patterns (while parsing)
+ERROR    src.habitat_evolution.infrastructure.services.pattern_evolution_service:pattern_evolution_service.py:420 Pattern not found for usage tracking: sea-level-rise-8d053ca5-1429-4d5d-8b35-ce2887e3fc21
+WARNING  src.habitat_evolution.infrastructure.services.event_service:event_service.py:67 EventService not initialized
+INFO     src.habitat_evolution.climate_risk.document_processing_service:document_processing_service.py:158 Published document.processed event for pattern: sea-level-rise-8d053ca5-1429-4d5d-8b35-ce2887e3fc21
+ERROR    src.habitat_evolution.infrastructure.services.pattern_evolution_service:pattern_evolution_service.py:314 Error creating pattern in ArangoDB: 'ArangoDBConnection' object has no attribute 'create_document'
+INFO     src.habitat_evolution.climate_risk.document_processing_service:document_processing_service.py:120 Processed pattern: storm-risk-8619e9d4-2dbc-4541-b716-12863a4a83e8
+DEBUG    urllib3.connectionpool:connectionpool.py:547 http://localhost:8529 "POST /_db/habitat_evolution_test/_api/cursor HTTP/1.1" 404 118
+ERROR    src.habitat_evolution.infrastructure.services.pattern_evolution_service:pattern_evolution_service.py:287 Error getting pattern from ArangoDB: [HTTP 404][ERR 1203] AQL: collection or view not found: patterns (while parsing)
+ERROR    src.habitat_evolution.infrastructure.services.pattern_evolution_service:pattern_evolution_service.py:420 Pattern not found for usage tracking: storm-risk-8619e9d4-2dbc-4541-b716-12863a4a83e8
+WARNING  src.habitat_evolution.infrastructure.services.event_service:event_service.py:67 EventService not initialized
+INFO     src.habitat_evolution.climate_risk.document_processing_service:document_processing_service.py:158 Published document.processed event for pattern: storm-risk-8619e9d4-2dbc-4541-b716-12863a4a83e8
+INFO     climate_e2e.test_utils:test_utils.py:132 Processing document: recovery_test_doc_nantucket_sound.txt
+INFO     src.habitat_evolution.climate_risk.document_processing_service:document_processing_service.py:78 Processing document from path: /Users/prphillips/Documents/GitHub/habitat_alpha/data/climate_risk/recovery_test_doc_nantucket_sound.txt
+INFO     src.habitat_evolution.climate_risk.document_processing_service:document_processing_service.py:92 Document content length: 3866
+INFO     src.habitat_evolution.climate_risk.document_processing_service:document_processing_service.py:198 Using Claude for pattern extraction
+INFO     src.habitat_evolution.infrastructure.services.claude_pattern_extraction_service:claude_pattern_extraction_service.py:55 Extracting patterns from document: recovery_test_doc_nantucket_sound.txt
+INFO     src.habitat_evolution.infrastructure.services.claude_pattern_extraction_service:claude_pattern_extraction_service.py:59 Using fallback pattern extraction
+INFO     src.habitat_evolution.climate_risk.document_processing_service:document_processing_service.py:96 Extracted 2 patterns from document
+ERROR    src.habitat_evolution.infrastructure.services.pattern_evolution_service:pattern_evolution_service.py:314 Error creating pattern in ArangoDB: 'ArangoDBConnection' object has no attribute 'create_document'
+INFO     src.habitat_evolution.climate_risk.document_processing_service:document_processing_service.py:120 Processed pattern: sea-level-rise-72702ce2-cda6-4543-9b0c-9258a9ad514c
+DEBUG    urllib3.connectionpool:connectionpool.py:547 http://localhost:8529 "POST /_db/habitat_evolution_test/_api/cursor HTTP/1.1" 404 118
+ERROR    src.habitat_evolution.infrastructure.services.pattern_evolution_service:pattern_evolution_service.py:287 Error getting pattern from ArangoDB: [HTTP 404][ERR 1203] AQL: collection or view not found: patterns (while parsing)
+ERROR    src.habitat_evolution.infrastructure.services.pattern_evolution_service:pattern_evolution_service.py:420 Pattern not found for usage tracking: sea-level-rise-72702ce2-cda6-4543-9b0c-9258a9ad514c
+WARNING  src.habitat_evolution.infrastructure.services.event_service:event_service.py:67 EventService not initialized
+INFO     src.habitat_evolution.climate_risk.document_processing_service:document_processing_service.py:158 Published document.processed event for pattern: sea-level-rise-72702ce2-cda6-4543-9b0c-9258a9ad514c
+ERROR    src.habitat_evolution.infrastructure.services.pattern_evolution_service:pattern_evolution_service.py:314 Error creating pattern in ArangoDB: 'ArangoDBConnection' object has no attribute 'create_document'
+INFO     src.habitat_evolution.climate_risk.document_processing_service:document_processing_service.py:120 Processed pattern: storm-risk-eb119e4c-1cfd-40d7-9ee6-35500cf8138e
+DEBUG    urllib3.connectionpool:connectionpool.py:547 http://localhost:8529 "POST /_db/habitat_evolution_test/_api/cursor HTTP/1.1" 404 118
+ERROR    src.habitat_evolution.infrastructure.services.pattern_evolution_service:pattern_evolution_service.py:287 Error getting pattern from ArangoDB: [HTTP 404][ERR 1203] AQL: collection or view not found: patterns (while parsing)
+ERROR    src.habitat_evolution.infrastructure.services.pattern_evolution_service:pattern_evolution_service.py:420 Pattern not found for usage tracking: storm-risk-eb119e4c-1cfd-40d7-9ee6-35500cf8138e
+WARNING  src.habitat_evolution.infrastructure.services.event_service:event_service.py:67 EventService not initialized
+INFO     src.habitat_evolution.climate_risk.document_processing_service:document_processing_service.py:158 Published document.processed event for pattern: storm-risk-eb119e4c-1cfd-40d7-9ee6-35500cf8138e
+INFO     climate_e2e.test_utils:test_utils.py:132 Processing document: climate_risk_marthas_vineyard.txt
+INFO     src.habitat_evolution.climate_risk.document_processing_service:document_processing_service.py:78 Processing document from path: /Users/prphillips/Documents/GitHub/habitat_alpha/data/climate_risk/climate_risk_marthas_vineyard.txt
+INFO     src.habitat_evolution.climate_risk.document_processing_service:document_processing_service.py:92 Document content length: 14020
+INFO     src.habitat_evolution.climate_risk.document_processing_service:document_processing_service.py:198 Using Claude for pattern extraction
+INFO     src.habitat_evolution.infrastructure.services.claude_pattern_extraction_service:claude_pattern_extraction_service.py:55 Extracting patterns from document: climate_risk_marthas_vineyard.txt
+INFO     src.habitat_evolution.infrastructure.services.claude_pattern_extraction_service:claude_pattern_extraction_service.py:59 Using fallback pattern extraction
+INFO     src.habitat_evolution.climate_risk.document_processing_service:document_processing_service.py:96 Extracted 4 patterns from document
+ERROR    src.habitat_evolution.infrastructure.services.pattern_evolution_service:pattern_evolution_service.py:314 Error creating pattern in ArangoDB: 'ArangoDBConnection' object has no attribute 'create_document'
+INFO     src.habitat_evolution.climate_risk.document_processing_service:document_processing_service.py:120 Processed pattern: sea-level-rise-3ffb65b0-5662-4945-9dee-5f68a217ff7a
+DEBUG    urllib3.connectionpool:connectionpool.py:547 http://localhost:8529 "POST /_db/habitat_evolution_test/_api/cursor HTTP/1.1" 404 118
+ERROR    src.habitat_evolution.infrastructure.services.pattern_evolution_service:pattern_evolution_service.py:287 Error getting pattern from ArangoDB: [HTTP 404][ERR 1203] AQL: collection or view not found: patterns (while parsing)
+ERROR    src.habitat_evolution.infrastructure.services.pattern_evolution_service:pattern_evolution_service.py:420 Pattern not found for usage tracking: sea-level-rise-3ffb65b0-5662-4945-9dee-5f68a217ff7a
+WARNING  src.habitat_evolution.infrastructure.services.event_service:event_service.py:67 EventService not initialized
+INFO     src.habitat_evolution.climate_risk.document_processing_service:document_processing_service.py:158 Published document.processed event for pattern: sea-level-rise-3ffb65b0-5662-4945-9dee-5f68a217ff7a
+ERROR    src.habitat_evolution.infrastructure.services.pattern_evolution_service:pattern_evolution_service.py:314 Error creating pattern in ArangoDB: 'ArangoDBConnection' object has no attribute 'create_document'
+INFO     src.habitat_evolution.climate_risk.document_processing_service:document_processing_service.py:120 Processed pattern: extreme-drought-addaffac-9eaf-4618-bee7-fa227947863a
+DEBUG    urllib3.connectionpool:connectionpool.py:547 http://localhost:8529 "POST /_db/habitat_evolution_test/_api/cursor HTTP/1.1" 404 118
+ERROR    src.habitat_evolution.infrastructure.services.pattern_evolution_service:pattern_evolution_service.py:287 Error getting pattern from ArangoDB: [HTTP 404][ERR 1203] AQL: collection or view not found: patterns (while parsing)
+ERROR    src.habitat_evolution.infrastructure.services.pattern_evolution_service:pattern_evolution_service.py:420 Pattern not found for usage tracking: extreme-drought-addaffac-9eaf-4618-bee7-fa227947863a
+WARNING  src.habitat_evolution.infrastructure.services.event_service:event_service.py:67 EventService not initialized
+INFO     src.habitat_evolution.climate_risk.document_processing_service:document_processing_service.py:158 Published document.processed event for pattern: extreme-drought-addaffac-9eaf-4618-bee7-fa227947863a
+ERROR    src.habitat_evolution.infrastructure.services.pattern_evolution_service:pattern_evolution_service.py:314 Error creating pattern in ArangoDB: 'ArangoDBConnection' object has no attribute 'create_document'
+INFO     src.habitat_evolution.climate_risk.document_processing_service:document_processing_service.py:120 Processed pattern: wildfire-risk-30819198-2fe0-40b7-8be2-38e6a1f68301
+DEBUG    urllib3.connectionpool:connectionpool.py:547 http://localhost:8529 "POST /_db/habitat_evolution_test/_api/cursor HTTP/1.1" 404 118
+ERROR    src.habitat_evolution.infrastructure.services.pattern_evolution_service:pattern_evolution_service.py:287 Error getting pattern from ArangoDB: [HTTP 404][ERR 1203] AQL: collection or view not found: patterns (while parsing)
+ERROR    src.habitat_evolution.infrastructure.services.pattern_evolution_service:pattern_evolution_service.py:420 Pattern not found for usage tracking: wildfire-risk-30819198-2fe0-40b7-8be2-38e6a1f68301
+WARNING  src.habitat_evolution.infrastructure.services.event_service:event_service.py:67 EventService not initialized
+INFO     src.habitat_evolution.climate_risk.document_processing_service:document_processing_service.py:158 Published document.processed event for pattern: wildfire-risk-30819198-2fe0-40b7-8be2-38e6a1f68301
+ERROR    src.habitat_evolution.infrastructure.services.pattern_evolution_service:pattern_evolution_service.py:314 Error creating pattern in ArangoDB: 'ArangoDBConnection' object has no attribute 'create_document'
+INFO     src.habitat_evolution.climate_risk.document_processing_service:document_processing_service.py:120 Processed pattern: storm-risk-9bb687ee-e38b-4d4b-99aa-ca92f65e111a
+DEBUG    urllib3.connectionpool:connectionpool.py:547 http://localhost:8529 "POST /_db/habitat_evolution_test/_api/cursor HTTP/1.1" 404 118
+ERROR    src.habitat_evolution.infrastructure.services.pattern_evolution_service:pattern_evolution_service.py:287 Error getting pattern from ArangoDB: [HTTP 404][ERR 1203] AQL: collection or view not found: patterns (while parsing)
+ERROR    src.habitat_evolution.infrastructure.services.pattern_evolution_service:pattern_evolution_service.py:420 Pattern not found for usage tracking: storm-risk-9bb687ee-e38b-4d4b-99aa-ca92f65e111a
+WARNING  src.habitat_evolution.infrastructure.services.event_service:event_service.py:67 EventService not initialized
+INFO     src.habitat_evolution.climate_risk.document_processing_service:document_processing_service.py:158 Published document.processed event for pattern: storm-risk-9bb687ee-e38b-4d4b-99aa-ca92f65e111a
+INFO     climate_e2e.test_utils:test_utils.py:132 Processing document: basic_test_doc_cape_code.txt
+INFO     src.habitat_evolution.climate_risk.document_processing_service:document_processing_service.py:78 Processing document from path: /Users/prphillips/Documents/GitHub/habitat_alpha/data/climate_risk/basic_test_doc_cape_code.txt
+INFO     src.habitat_evolution.climate_risk.document_processing_service:document_processing_service.py:92 Document content length: 1713
+INFO     src.habitat_evolution.climate_risk.document_processing_service:document_processing_service.py:198 Using Claude for pattern extraction
+INFO     src.habitat_evolution.infrastructure.services.claude_pattern_extraction_service:claude_pattern_extraction_service.py:55 Extracting patterns from document: basic_test_doc_cape_code.txt
+INFO     src.habitat_evolution.infrastructure.services.claude_pattern_extraction_service:claude_pattern_extraction_service.py:59 Using fallback pattern extraction
+INFO     src.habitat_evolution.climate_risk.document_processing_service:document_processing_service.py:96 Extracted 2 patterns from document
+ERROR    src.habitat_evolution.infrastructure.services.pattern_evolution_service:pattern_evolution_service.py:314 Error creating pattern in ArangoDB: 'ArangoDBConnection' object has no attribute 'create_document'
+INFO     src.habitat_evolution.climate_risk.document_processing_service:document_processing_service.py:120 Processed pattern: sea-level-rise-d608e924-8e25-4ff5-a6ad-eb150c6364c6
+DEBUG    urllib3.connectionpool:connectionpool.py:547 http://localhost:8529 "POST /_db/habitat_evolution_test/_api/cursor HTTP/1.1" 404 118
+ERROR    src.habitat_evolution.infrastructure.services.pattern_evolution_service:pattern_evolution_service.py:287 Error getting pattern from ArangoDB: [HTTP 404][ERR 1203] AQL: collection or view not found: patterns (while parsing)
+ERROR    src.habitat_evolution.infrastructure.services.pattern_evolution_service:pattern_evolution_service.py:420 Pattern not found for usage tracking: sea-level-rise-d608e924-8e25-4ff5-a6ad-eb150c6364c6
+WARNING  src.habitat_evolution.infrastructure.services.event_service:event_service.py:67 EventService not initialized
+INFO     src.habitat_evolution.climate_risk.document_processing_service:document_processing_service.py:158 Published document.processed event for pattern: sea-level-rise-d608e924-8e25-4ff5-a6ad-eb150c6364c6
+ERROR    src.habitat_evolution.infrastructure.services.pattern_evolution_service:pattern_evolution_service.py:314 Error creating pattern in ArangoDB: 'ArangoDBConnection' object has no attribute 'create_document'
+INFO     src.habitat_evolution.climate_risk.document_processing_service:document_processing_service.py:120 Processed pattern: storm-risk-7bab6b92-8daa-40a9-ac3f-9ffac2cf3896
+DEBUG    urllib3.connectionpool:connectionpool.py:547 http://localhost:8529 "POST /_db/habitat_evolution_test/_api/cursor HTTP/1.1" 404 118
+ERROR    src.habitat_evolution.infrastructure.services.pattern_evolution_service:pattern_evolution_service.py:287 Error getting pattern from ArangoDB: [HTTP 404][ERR 1203] AQL: collection or view not found: patterns (while parsing)
+ERROR    src.habitat_evolution.infrastructure.services.pattern_evolution_service:pattern_evolution_service.py:420 Pattern not found for usage tracking: storm-risk-7bab6b92-8daa-40a9-ac3f-9ffac2cf3896
+WARNING  src.habitat_evolution.infrastructure.services.event_service:event_service.py:67 EventService not initialized
+INFO     src.habitat_evolution.climate_risk.document_processing_service:document_processing_service.py:158 Published document.processed event for pattern: storm-risk-7bab6b92-8daa-40a9-ac3f-9ffac2cf3896
+INFO     climate_e2e.test_utils:test_utils.py:132 Processing document: temporal_analysis_plum_island.txt
+INFO     src.habitat_evolution.climate_risk.document_processing_service:document_processing_service.py:78 Processing document from path: /Users/prphillips/Documents/GitHub/habitat_alpha/data/climate_risk/temporal_analysis_plum_island.txt
+INFO     src.habitat_evolution.climate_risk.document_processing_service:document_processing_service.py:92 Document content length: 3872
+INFO     src.habitat_evolution.climate_risk.document_processing_service:document_processing_service.py:198 Using Claude for pattern extraction
+INFO     src.habitat_evolution.infrastructure.services.claude_pattern_extraction_service:claude_pattern_extraction_service.py:55 Extracting patterns from document: temporal_analysis_plum_island.txt
+INFO     src.habitat_evolution.infrastructure.services.claude_pattern_extraction_service:claude_pattern_extraction_service.py:59 Using fallback pattern extraction
+INFO     src.habitat_evolution.climate_risk.document_processing_service:document_processing_service.py:96 Extracted 2 patterns from document
+ERROR    src.habitat_evolution.infrastructure.services.pattern_evolution_service:pattern_evolution_service.py:314 Error creating pattern in ArangoDB: 'ArangoDBConnection' object has no attribute 'create_document'
+INFO     src.habitat_evolution.climate_risk.document_processing_service:document_processing_service.py:120 Processed pattern: sea-level-rise-895ca397-2777-4d61-9342-32dfdf464378
+DEBUG    urllib3.connectionpool:connectionpool.py:547 http://localhost:8529 "POST /_db/habitat_evolution_test/_api/cursor HTTP/1.1" 404 118
+ERROR    src.habitat_evolution.infrastructure.services.pattern_evolution_service:pattern_evolution_service.py:287 Error getting pattern from ArangoDB: [HTTP 404][ERR 1203] AQL: collection or view not found: patterns (while parsing)
+ERROR    src.habitat_evolution.infrastructure.services.pattern_evolution_service:pattern_evolution_service.py:420 Pattern not found for usage tracking: sea-level-rise-895ca397-2777-4d61-9342-32dfdf464378
+WARNING  src.habitat_evolution.infrastructure.services.event_service:event_service.py:67 EventService not initialized
+INFO     src.habitat_evolution.climate_risk.document_processing_service:document_processing_service.py:158 Published document.processed event for pattern: sea-level-rise-895ca397-2777-4d61-9342-32dfdf464378
+ERROR    src.habitat_evolution.infrastructure.services.pattern_evolution_service:pattern_evolution_service.py:314 Error creating pattern in ArangoDB: 'ArangoDBConnection' object has no attribute 'create_document'
+INFO     src.habitat_evolution.climate_risk.document_processing_service:document_processing_service.py:120 Processed pattern: storm-risk-7ef518a9-6a4f-42f5-9bbd-e91afaebd711
+DEBUG    urllib3.connectionpool:connectionpool.py:547 http://localhost:8529 "POST /_db/habitat_evolution_test/_api/cursor HTTP/1.1" 404 118
+ERROR    src.habitat_evolution.infrastructure.services.pattern_evolution_service:pattern_evolution_service.py:287 Error getting pattern from ArangoDB: [HTTP 404][ERR 1203] AQL: collection or view not found: patterns (while parsing)
+ERROR    src.habitat_evolution.infrastructure.services.pattern_evolution_service:pattern_evolution_service.py:420 Pattern not found for usage tracking: storm-risk-7ef518a9-6a4f-42f5-9bbd-e91afaebd711
+WARNING  src.habitat_evolution.infrastructure.services.event_service:event_service.py:67 EventService not initialized
+INFO     src.habitat_evolution.climate_risk.document_processing_service:document_processing_service.py:158 Published document.processed event for pattern: storm-risk-7ef518a9-6a4f-42f5-9bbd-e91afaebd711
+INFO     climate_e2e.test_utils:test_utils.py:132 Processing document: vineyard_sound_structure_meaning_test_doc.txt
+INFO     src.habitat_evolution.climate_risk.document_processing_service:document_processing_service.py:78 Processing document from path: /Users/prphillips/Documents/GitHub/habitat_alpha/data/climate_risk/vineyard_sound_structure_meaning_test_doc.txt
+INFO     src.habitat_evolution.climate_risk.document_processing_service:document_processing_service.py:92 Document content length: 4969
+INFO     src.habitat_evolution.climate_risk.document_processing_service:document_processing_service.py:198 Using Claude for pattern extraction
+INFO     src.habitat_evolution.infrastructure.services.claude_pattern_extraction_service:claude_pattern_extraction_service.py:55 Extracting patterns from document: vineyard_sound_structure_meaning_test_doc.txt
+INFO     src.habitat_evolution.infrastructure.services.claude_pattern_extraction_service:claude_pattern_extraction_service.py:59 Using fallback pattern extraction
+INFO     src.habitat_evolution.climate_risk.document_processing_service:document_processing_service.py:96 Extracted 2 patterns from document
+ERROR    src.habitat_evolution.infrastructure.services.pattern_evolution_service:pattern_evolution_service.py:314 Error creating pattern in ArangoDB: 'ArangoDBConnection' object has no attribute 'create_document'
+INFO     src.habitat_evolution.climate_risk.document_processing_service:document_processing_service.py:120 Processed pattern: sea-level-rise-52221fd4-6af2-4371-a82a-fe837053ac05
+DEBUG    urllib3.connectionpool:connectionpool.py:547 http://localhost:8529 "POST /_db/habitat_evolution_test/_api/cursor HTTP/1.1" 404 118
+ERROR    src.habitat_evolution.infrastructure.services.pattern_evolution_service:pattern_evolution_service.py:287 Error getting pattern from ArangoDB: [HTTP 404][ERR 1203] AQL: collection or view not found: patterns (while parsing)
+ERROR    src.habitat_evolution.infrastructure.services.pattern_evolution_service:pattern_evolution_service.py:420 Pattern not found for usage tracking: sea-level-rise-52221fd4-6af2-4371-a82a-fe837053ac05
+WARNING  src.habitat_evolution.infrastructure.services.event_service:event_service.py:67 EventService not initialized
+INFO     src.habitat_evolution.climate_risk.document_processing_service:document_processing_service.py:158 Published document.processed event for pattern: sea-level-rise-52221fd4-6af2-4371-a82a-fe837053ac05
+ERROR    src.habitat_evolution.infrastructure.services.pattern_evolution_service:pattern_evolution_service.py:314 Error creating pattern in ArangoDB: 'ArangoDBConnection' object has no attribute 'create_document'
+INFO     src.habitat_evolution.climate_risk.document_processing_service:document_processing_service.py:120 Processed pattern: storm-risk-4e121699-673c-4b20-a229-d7fdcaad9e99
+DEBUG    urllib3.connectionpool:connectionpool.py:547 http://localhost:8529 "POST /_db/habitat_evolution_test/_api/cursor HTTP/1.1" 404 118
+ERROR    src.habitat_evolution.infrastructure.services.pattern_evolution_service:pattern_evolution_service.py:287 Error getting pattern from ArangoDB: [HTTP 404][ERR 1203] AQL: collection or view not found: patterns (while parsing)
+ERROR    src.habitat_evolution.infrastructure.services.pattern_evolution_service:pattern_evolution_service.py:420 Pattern not found for usage tracking: storm-risk-4e121699-673c-4b20-a229-d7fdcaad9e99
+WARNING  src.habitat_evolution.infrastructure.services.event_service:event_service.py:67 EventService not initialized
+INFO     src.habitat_evolution.climate_risk.document_processing_service:document_processing_service.py:158 Published document.processed event for pattern: storm-risk-4e121699-673c-4b20-a229-d7fdcaad9e99
+INFO     climate_e2e.test_utils:test_utils.py:144 Extracted 14 patterns from documents
+INFO     climate_e2e.test_climate_e2e:test_climate_e2e.py:90 Sample semantic pattern 1: {'id': 'sea-level-rise-8d053ca5-1429-4d5d-8b35-ce2887e3fc21', 'base_concept': 'sea_level_rise', 'creator_id': 'claude_extractor', 'weight': 1.0, 'confidence': 0.85, 'uncertainty': 0.15, 'coherence': 0.8, 'phase_stability': 0.7, 'signal_strength': 0.9, 'quality_state': 'hypothetical', 'properties': {'location': 'Unknown', 'risk_type': 'flooding', 'timeframe': '2050', 'source_document': 'complex_test_doc_boston_harbor_islands.txt'}, 'created_at': '2025-04-12T11:17:06.336449', 'context': {'document_id': 'complex_test_doc_boston_harbor_islands.txt', 'source': 'climate_risk_document_processing', 'processed_at': '2025-04-12T07:17:06.336446'}, 'source': 'semantic', 'source_file': 'complex_test_doc_boston_harbor_islands.txt'}
+INFO     climate_e2e.test_climate_e2e:test_climate_e2e.py:90 Sample semantic pattern 2: {'id': 'storm-risk-8619e9d4-2dbc-4541-b716-12863a4a83e8', 'base_concept': 'storm_risk', 'creator_id': 'claude_extractor', 'weight': 1.0, 'confidence': 0.72, 'uncertainty': 0.28, 'coherence': 0.7, 'phase_stability': 0.6, 'signal_strength': 0.75, 'quality_state': 'hypothetical', 'properties': {'location': 'Unknown', 'risk_type': 'storm', 'storm_type': 'extratropical_cyclone', 'trend': 'increasing intensity', 'source_document': 'complex_test_doc_boston_harbor_islands.txt'}, 'created_at': '2025-04-12T11:17:06.341001', 'context': {'document_id': 'complex_test_doc_boston_harbor_islands.txt', 'source': 'climate_risk_document_processing', 'processed_at': '2025-04-12T07:17:06.336446'}, 'source': 'semantic', 'source_file': 'complex_test_doc_boston_harbor_islands.txt'}
+INFO     climate_e2e.test_climate_e2e:test_climate_e2e.py:90 Sample semantic pattern 3: {'id': 'sea-level-rise-72702ce2-cda6-4543-9b0c-9258a9ad514c', 'base_concept': 'sea_level_rise', 'creator_id': 'claude_extractor', 'weight': 1.0, 'confidence': 0.85, 'uncertainty': 0.15, 'coherence': 0.8, 'phase_stability': 0.7, 'signal_strength': 0.9, 'quality_state': 'hypothetical', 'properties': {'location': 'Unknown', 'risk_type': 'flooding', 'timeframe': '2050', 'source_document': 'recovery_test_doc_nantucket_sound.txt'}, 'created_at': '2025-04-12T11:17:06.343991', 'context': {'document_id': 'recovery_test_doc_nantucket_sound.txt', 'source': 'climate_risk_document_processing', 'processed_at': '2025-04-12T07:17:06.343986'}, 'source': 'semantic', 'source_file': 'recovery_test_doc_nantucket_sound.txt'}
+INFO     climate_e2e.test_climate_e2e:test_climate_e2e.py:716 Processed 14 semantic patterns with AdaptiveID integration
+INFO     climate_e2e.test_climate_e2e:test_climate_e2e.py:719 Step 2: Processing statistical data with field state integration...
+INFO     climate_e2e.test_climate_e2e:test_climate_e2e.py:723 Created AdaptiveID for statistical patterns: 53d7db90-5733-4088-92f8-3d0853948c60
+DEBUG    asyncio:selector_events.py:54 Using selector: KqueueSelector
+INFO     climate_e2e.test_climate_e2e:test_climate_e2e.py:759 Registered statistical AdaptiveID with field observer
+INFO     climate_e2e.test_climate_e2e:test_climate_e2e.py:106 Testing statistical data processing...
+INFO     climate_e2e.test_climate_e2e:test_climate_e2e.py:144 No patterns extracted from time series data, using mock statistical patterns
+INFO     climate_e2e.test_climate_e2e:test_climate_e2e.py:147 Using mock statistical pattern: statistical-pattern-1
+INFO     climate_e2e.test_climate_e2e:test_climate_e2e.py:147 Using mock statistical pattern: statistical-pattern-2
+INFO     climate_e2e.test_climate_e2e:test_climate_e2e.py:147 Using mock statistical pattern: statistical-pattern-3
+INFO     climate_e2e.test_climate_e2e:test_climate_e2e.py:147 Using mock statistical pattern: statistical-pattern-4
+INFO     climate_e2e.test_climate_e2e:test_climate_e2e.py:147 Using mock statistical pattern: statistical-pattern-5
+INFO     climate_e2e.test_climate_e2e:test_climate_e2e.py:787 Processed 5 statistical patterns with field state integration
+INFO     climate_e2e.test_climate_e2e:test_climate_e2e.py:790 Step 3: Detecting cross-domain relationships with PatternAwareRAG...
+INFO     climate_e2e.test_climate_e2e:test_climate_e2e.py:168 Testing cross-domain relationship detection...
+ERROR    climate_e2e.test_climate_e2e:test_climate_e2e.py:221 Error querying Claude API: 'ClaudeAdapter' object has no attribute 'query'
+INFO     climate_e2e.test_climate_e2e:test_climate_e2e.py:240 Sample relationship 1: {'semantic_index': 0, 'statistical_index': 0, 'related': True, 'relationship_type': 'temporal_correlation', 'strength': 'moderate', 'description': 'Both patterns show similar temporal trends in the same region.'}
+INFO     climate_e2e.test_climate_e2e:test_climate_e2e.py:240 Sample relationship 2: {'semantic_index': 0, 'statistical_index': 2, 'related': True, 'relationship_type': 'temporal_correlation', 'strength': 'moderate', 'description': 'Both patterns show similar temporal trends in the same region.'}
+INFO     climate_e2e.test_climate_e2e:test_climate_e2e.py:240 Sample relationship 3: {'semantic_index': 2, 'statistical_index': 0, 'related': True, 'relationship_type': 'temporal_correlation', 'strength': 'moderate', 'description': 'Both patterns show similar temporal trends in the same region.'}
+INFO     climate_e2e.test_climate_e2e:test_climate_e2e.py:794 Detected 6 cross-domain relationships with Claude
+ERROR    climate_e2e.test_climate_e2e:test_climate_e2e.py:837 Error in PatternAwareRAG relationship enhancement: name 'uuid' is not defined
+INFO     climate_e2e.test_climate_e2e:test_climate_e2e.py:838 Continuing with Claude-detected relationships only
+INFO     climate_e2e.test_climate_e2e:test_climate_e2e.py:840 Total of 6 cross-domain relationships detected
+INFO     climate_e2e.test_climate_e2e:test_climate_e2e.py:843 Step 4: Storing relationships in ArangoDB...
+INFO     climate_e2e.test_climate_e2e:test_climate_e2e.py:258 Testing relationship storage in ArangoDB...
+INFO     climate_e2e.test_climate_e2e:test_climate_e2e.py:283 Processed relationship:  -> 
+INFO     climate_e2e.test_climate_e2e:test_climate_e2e.py:283 Processed relationship:  -> 
+INFO     climate_e2e.test_climate_e2e:test_climate_e2e.py:283 Processed relationship:  -> 
+INFO     climate_e2e.test_climate_e2e:test_climate_e2e.py:283 Processed relationship:  -> 
+INFO     climate_e2e.test_climate_e2e:test_climate_e2e.py:283 Processed relationship:  -> 
+INFO     climate_e2e.test_climate_e2e:test_climate_e2e.py:283 Processed relationship:  -> 
+INFO     climate_e2e.test_climate_e2e:test_climate_e2e.py:286 Processed 6 relationships
+INFO     climate_e2e.test_climate_e2e:test_climate_e2e.py:845 Stored [{'_id': 'relationships/eccb4f3c-2d34-4c61-818a-4284f3de8c75', '_from': 'patterns/', '_to': 'patterns/', 'type': 'correlation', 'strength': 'moderate', 'metadata': {}, 'created_at': '2025-04-12T07:17:06.456014'}, {'_id': 'relationships/c257195a-70a9-4854-be53-edaecd565e6b', '_from': 'patterns/', '_to': 'patterns/', 'type': 'correlation', 'strength': 'moderate', 'metadata': {}, 'created_at': '2025-04-12T07:17:06.456053'}, {'_id': 'relationships/4ad11315-ae60-4da2-86ea-918b66f2bc4d', '_from': 'patterns/', '_to': 'patterns/', 'type': 'correlation', 'strength': 'moderate', 'metadata': {}, 'created_at': '2025-04-12T07:17:06.456088'}, {'_id': 'relationships/70ae8ddf-7e96-43a8-8c13-2cd2e1c60462', '_from': 'patterns/', '_to': 'patterns/', 'type': 'correlation', 'strength': 'moderate', 'metadata': {}, 'created_at': '2025-04-12T07:17:06.456125'}, {'_id': 'relationships/cec78ac0-9386-4442-8f4d-e462e602b82c', '_from': 'patterns/', '_to': 'patterns/', 'type': 'correlation', 'strength': 'moderate', 'metadata': {}, 'created_at': '2025-04-12T07:17:06.456160'}, {'_id': 'relationships/1fa22fff-4622-4630-ae74-10826bac95a3', '_from': 'patterns/', '_to': 'patterns/', 'type': 'correlation', 'strength': 'moderate', 'metadata': {}, 'created_at': '2025-04-12T07:17:06.456195'}] relationships in ArangoDB
+INFO     climate_e2e.test_climate_e2e:test_climate_e2e.py:848 Step 5: Testing Vector Tonic integration...
+ERROR    climate_e2e.test_climate_e2e:test_climate_e2e.py:952 Error in Vector Tonic integration: VectorTonicWindowIntegrator.__init__() missing 3 required positional arguments: 'tonic_detector', 'event_bus', and 'harmonic_io_service'
+WARNING  climate_e2e.test_climate_e2e:test_climate_e2e.py:953 Vector Tonic integration test failed, but continuing with validation
+INFO     climate_e2e.test_climate_e2e:test_climate_e2e.py:956 Step 6: Validating end-to-end flow...
+INFO     climate_e2e.test_climate_e2e:test_climate_e2e.py:976 End-to-end test completed successfully!
+INFO     climate_e2e.test_climate_e2e:test_climate_e2e.py:314 Testing PatternAwareRAG integration...
+INFO     src.habitat_evolution.climate_risk.document_processing_service:document_processing_service.py:85 Processing document with ID: test_boston_slr
+INFO     src.habitat_evolution.climate_risk.document_processing_service:document_processing_service.py:92 Document content length: 535
+INFO     src.habitat_evolution.climate_risk.document_processing_service:document_processing_service.py:198 Using Claude for pattern extraction
+INFO     src.habitat_evolution.infrastructure.services.claude_pattern_extraction_service:claude_pattern_extraction_service.py:55 Extracting patterns from document: test_boston_slr
+INFO     src.habitat_evolution.infrastructure.services.claude_pattern_extraction_service:claude_pattern_extraction_service.py:59 Using fallback pattern extraction
+INFO     src.habitat_evolution.climate_risk.document_processing_service:document_processing_service.py:96 Extracted 2 patterns from document
+ERROR    src.habitat_evolution.infrastructure.services.pattern_evolution_service:pattern_evolution_service.py:314 Error creating pattern in ArangoDB: 'ArangoDBConnection' object has no attribute 'create_document'
+INFO     src.habitat_evolution.climate_risk.document_processing_service:document_processing_service.py:120 Processed pattern: sea-level-rise-07565efa-b1b7-443f-ae6a-2e3a946e2c53
+DEBUG    urllib3.connectionpool:connectionpool.py:547 http://localhost:8529 "POST /_db/habitat_evolution_test/_api/cursor HTTP/1.1" 404 118
+ERROR    src.habitat_evolution.infrastructure.services.pattern_evolution_service:pattern_evolution_service.py:287 Error getting pattern from ArangoDB: [HTTP 404][ERR 1203] AQL: collection or view not found: patterns (while parsing)
+ERROR    src.habitat_evolution.infrastructure.services.pattern_evolution_service:pattern_evolution_service.py:420 Pattern not found for usage tracking: sea-level-rise-07565efa-b1b7-443f-ae6a-2e3a946e2c53
+WARNING  src.habitat_evolution.infrastructure.services.event_service:event_service.py:67 EventService not initialized
+INFO     src.habitat_evolution.climate_risk.document_processing_service:document_processing_service.py:158 Published document.processed event for pattern: sea-level-rise-07565efa-b1b7-443f-ae6a-2e3a946e2c53
+ERROR    src.habitat_evolution.infrastructure.services.pattern_evolution_service:pattern_evolution_service.py:314 Error creating pattern in ArangoDB: 'ArangoDBConnection' object has no attribute 'create_document'
+INFO     src.habitat_evolution.climate_risk.document_processing_service:document_processing_service.py:120 Processed pattern: storm-risk-7f86b04b-6825-4b77-9450-03932f368103
+DEBUG    urllib3.connectionpool:connectionpool.py:547 http://localhost:8529 "POST /_db/habitat_evolution_test/_api/cursor HTTP/1.1" 404 118
+ERROR    src.habitat_evolution.infrastructure.services.pattern_evolution_service:pattern_evolution_service.py:287 Error getting pattern from ArangoDB: [HTTP 404][ERR 1203] AQL: collection or view not found: patterns (while parsing)
+ERROR    src.habitat_evolution.infrastructure.services.pattern_evolution_service:pattern_evolution_service.py:420 Pattern not found for usage tracking: storm-risk-7f86b04b-6825-4b77-9450-03932f368103
+WARNING  src.habitat_evolution.infrastructure.services.event_service:event_service.py:67 EventService not initialized
+INFO     src.habitat_evolution.climate_risk.document_processing_service:document_processing_service.py:158 Published document.processed event for pattern: storm-risk-7f86b04b-6825-4b77-9450-03932f368103
+INFO     climate_e2e.test_climate_e2e:test_climate_e2e.py:331 Extracted 2 patterns from document
+ERROR    climate_e2e.test_climate_e2e:test_climate_e2e.py:359 Error in PatternAwareRAG integration: name 'uuid' is not defined
+INFO     climate_e2e.test_climate_e2e:test_climate_e2e.py:362 Used mock fallback due to RAG failure
+PASSED                                                                                                                                                            [100%]
+--------------------------------------------------------------------------- live log teardown ---------------------------------------------------------------------------
+INFO     climate_e2e.conftest:conftest.py:73 Cleaning up ArangoDB connection
+INFO     src.habitat_evolution.infrastructure.persistence.arangodb.arangodb_connection:arangodb_connection.py:141 Shutting down ArangoDBConnection
+INFO     src.habitat_evolution.infrastructure.persistence.arangodb.arangodb_connection:arangodb_connection.py:145 ArangoDBConnection shut down
+
+
+=========================================================================== warnings summary ============================================================================
+../../../../../Applications/anaconda3/lib/python3.11/site-packages/langchain/vectorstores/__init__.py:35
+  /Applications/anaconda3/lib/python3.11/site-packages/langchain/vectorstores/__init__.py:35: LangChainDeprecationWarning: Importing vector stores from langchain is deprecated. Importing from langchain will no longer be supported as of langchain==0.2.0. Please import from langchain-community instead:
+  
+  `from langchain_community.vectorstores import Chroma`.
+  
+  To install langchain-community run `pip install -U langchain-community`.
+    warnings.warn(
+
+tests/integration/climate_e2e/test_climate_e2e.py::test_integrated_climate_e2e
+  /Applications/anaconda3/lib/python3.11/site-packages/_pytest/python.py:198: PytestReturnNotNoneWarning: Expected None, but tests/integration/climate_e2e/test_climate_e2e.py::test_integrated_climate_e2e returned {'semantic_patterns': 14, 'statistical_patterns': 5, 'relationships': 6, 'stored_relationships': 6, 'validation_results': {'semantic_adaptive_id_coherence': 1.0, 'statistical_adaptive_id_coherence': 0.85, 'pattern_aware_rag_response': 'Boston Harbor is experiencing sea level rise impacts including coastal flooding and infrastructure damage.'}}, which will be an error in a future version of pytest.  Did you mean to use `assert` instead of `return`?
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+===================================================================== 1 passed, 2 warnings in 1.26s =====================================================================
+(base) prphillips@Patricks-MacBook-Air habitat_alpha % 
