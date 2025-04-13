@@ -26,7 +26,19 @@ import pandas as pd
 import numpy as np
 from pathlib import Path
 from datetime import datetime
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any, Optional, Union
+
+# Import verification helpers
+from .verification_helpers import (
+    verify_component_initialization,
+    verify_system_state,
+    verify_event_service,
+    verify_vector_tonic_integration,
+    verify_pattern_aware_rag,
+    verify_claude_adapter,
+    verify_type_safety,
+    deliberately_break_component
+)
 
 from src.habitat_evolution.infrastructure.persistence.arangodb.arangodb_connection import ArangoDBConnection
 from src.habitat_evolution.infrastructure.services.pattern_evolution_service import PatternEvolutionService
@@ -61,8 +73,9 @@ from .test_utils import (
     get_project_root
 )
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
+# Configure logging - Set to DEBUG level for more detailed logs
+logging.basicConfig(level=logging.DEBUG, 
+                    format='%(asctime)s [%(levelname)s] %(name)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 def test_process_semantic_data(document_processing_service, climate_data_paths):
@@ -653,7 +666,8 @@ def test_integrated_climate_e2e(
     climate_data_paths,
     adaptive_id_factory,
     pattern_aware_rag,
-    statistical_patterns
+    statistical_patterns,
+    request
 ):
     """
     End-to-end test that integrates semantic and statistical data processing,
@@ -680,6 +694,41 @@ def test_integrated_climate_e2e(
         pattern_aware_rag: PatternAwareRAG fixture for pattern-aware retrieval
     """
     logger.info("Starting integrated climate end-to-end test...")
+    
+    # CRITICAL: Verify that all required components are properly initialized
+    logger.debug("Verifying critical component initialization...")
+    
+    # 0. Verify ArangoDB Connection
+    logger.debug("Verifying ArangoDB connection...")
+    assert arangodb_connection is not None, "ArangoDB connection is None"
+    assert hasattr(arangodb_connection, '_initialized'), "ArangoDB connection missing _initialized attribute"
+    assert arangodb_connection._initialized, "ArangoDB connection is not initialized"
+    
+    # 1. Verify EventService initialization
+    logger.debug("Verifying EventService initialization...")
+    verify_event_service(event_service)
+    
+    # 2. Verify ClaudeAdapter initialization
+    logger.debug("Verifying ClaudeAdapter initialization...")
+    verify_claude_adapter(claude_adapter)
+    
+    # 3. Verify PatternAwareRAG initialization
+    logger.debug("Verifying PatternAwareRAG initialization...")
+    verify_pattern_aware_rag(pattern_aware_rag)
+    
+    # 4. Verify system state with all critical components
+    critical_components = {
+        "ArangoDB": arangodb_connection,
+        "EventService": event_service,
+        "PatternEvolutionService": pattern_evolution_service,
+        "DocumentProcessingService": document_processing_service,
+        "FieldPatternBridge": field_pattern_bridge,
+        "ClaudeAdapter": claude_adapter,
+        "BidirectionalFlowService": bidirectional_flow_service,
+        "PatternAwareRAG": pattern_aware_rag
+    }
+    
+    verify_system_state(critical_components)
     
     # 1. Process semantic data with AdaptiveID integration
     logger.info("Step 1: Processing semantic data with AdaptiveID integration...")
@@ -812,30 +861,48 @@ def test_integrated_climate_e2e(
             }
         }
         
+        # CRITICAL: Verify query parameter types before calling the API
+        verify_type_safety(rag_query := "Analyze the relationships between climate risk patterns and temperature trends in Massachusetts from 1991 to 2024.", str, "rag_query")
+        verify_type_safety(rag_context, dict, "rag_context")
+        
         # Query PatternAwareRAG for relationship analysis
-        rag_query = "Analyze the relationships between climate risk patterns and temperature trends in Massachusetts from 1991 to 2024."
+        logger.debug(f"Calling pattern_aware_rag.query with query: {rag_query[:50]}...")
         rag_result = pattern_aware_rag.query(rag_query, rag_context)
         
+        # Verify result structure
+        assert isinstance(rag_result, dict), f"Expected dict result from PatternAwareRAG query, got {type(rag_result)}"
+        assert "response" in rag_result, "PatternAwareRAG query result missing 'response' field"
+        assert "coherence" in rag_result, "PatternAwareRAG query result missing 'coherence' field"
+        
         # Extract relationship insights from RAG response
-        if "response" in rag_result and "coherence" in rag_result:
-            logger.info("Enhanced relationships with PatternAwareRAG insights")
-            
-            # Add RAG-derived relationship
-            rag_relationship = {
-                "semantic_index": 0,  # Representative semantic pattern
-                "statistical_index": 0,  # Representative statistical pattern
-                "related": True,
-                "relationship_type": "rag_enhanced",
-                "strength": rag_result.get("coherence", {}).get("confidence", 0.7),
-                "description": rag_result.get("response", "")[:200],  # First 200 chars of response
-                "rag_pattern_id": rag_result.get("pattern_id")
-            }
-            
-            relationships.append(rag_relationship)
-            logger.info("Added RAG-enhanced relationship")
+        logger.info("Enhanced relationships with PatternAwareRAG insights")
+        
+        # Add RAG-derived relationship with proper type checking
+        coherence_value = rag_result.get("coherence", {})
+        if isinstance(coherence_value, dict):
+            confidence = coherence_value.get("confidence", 0.7)
+        elif isinstance(coherence_value, (int, float)):
+            confidence = coherence_value
+        else:
+            confidence = 0.7
+            logger.warning(f"Unexpected coherence type: {type(coherence_value)}, using default value")
+        
+        rag_relationship = {
+            "semantic_index": 0,  # Representative semantic pattern
+            "statistical_index": 0,  # Representative statistical pattern
+            "related": True,
+            "relationship_type": "rag_enhanced",
+            "strength": confidence,
+            "description": rag_result.get("response", "")[:200],  # First 200 chars of response
+            "rag_pattern_id": rag_result.get("pattern_id")
+        }
+        
+        relationships.append(rag_relationship)
+        logger.info("Added RAG-enhanced relationship")
     except Exception as e:
         logger.error(f"Error in PatternAwareRAG relationship enhancement: {e}")
-        logger.info("Continuing with Claude-detected relationships only")
+        # CRITICAL: Don't silently continue - fail the test if this is a critical component
+        pytest.fail(f"PatternAwareRAG relationship enhancement failed: {e}")
     
     logger.info(f"Total of {len(relationships)} cross-domain relationships detected")
     
@@ -852,10 +919,21 @@ def test_integrated_climate_e2e(
         from src.habitat_evolution.adaptive_core.emergence.vector_tonic_initialization import initialize_vector_tonic_system
         
         # Initialize the Vector Tonic system with all required dependencies
+        logger.debug("Initializing Vector Tonic system with all required dependencies...")
         vector_tonic_integrator, vector_tonic_persistence, event_bus, harmonic_io_service = initialize_vector_tonic_system(
             arangodb_connection=arangodb_connection
         )
-        logger.info("Vector Tonic system initialized using the new initialization module")
+        
+        # CRITICAL: Verify Vector Tonic components are properly initialized
+        logger.debug("Verifying Vector Tonic components...")
+        verify_vector_tonic_integration(vector_tonic_integrator)
+        
+        # Verify other Vector Tonic components
+        verify_component_initialization(vector_tonic_persistence, "VectorTonicPersistenceConnector")
+        verify_component_initialization(event_bus, "EventBus")
+        verify_component_initialization(harmonic_io_service, "HarmonicIOService")
+        
+        logger.info("Vector Tonic system initialized and verified using the new initialization module")
         
         # Create a field state for tonic harmonic analysis
         field_analysis = {
@@ -945,7 +1023,12 @@ def test_integrated_climate_e2e(
         
     except Exception as e:
         logger.error(f"Error in Vector Tonic integration: {e}")
-        logger.warning("Vector Tonic integration test failed, but continuing with validation")
+        # CRITICAL: Don't silently continue - fail the test if this is a critical component
+        # Check if this is a test run with the --allow-vector-tonic-failure flag
+        if request.config.getoption("--allow-vector-tonic-failure", False):
+            logger.warning("Vector Tonic integration test failed, but continuing with validation due to --allow-vector-tonic-failure flag")
+        else:
+            pytest.fail(f"Vector Tonic integration failed: {e}")
     
     # 6. Validate end-to-end flow
     logger.info("Step 6: Validating end-to-end flow...")
@@ -984,14 +1067,18 @@ def test_integrated_climate_e2e(
         rag_result = test_pattern_aware_rag_integration(pattern_aware_rag, document_processing_service, claude_adapter)
         validation_results["pattern_aware_rag_response"] = rag_result.get("response", "")
     
-    # Return test results
-    return {
-        "semantic_patterns": len(semantic_patterns),
-        "statistical_patterns": len(processed_patterns),
-        "relationships": len(relationships),
-        "stored_relationships": len(stored_count),
-        "validation_results": validation_results
-    }
+    # Use assertions instead of returning values
+    assert len(semantic_patterns) > 0, "No semantic patterns were generated"
+    assert len(processed_patterns) > 0, "No statistical patterns were generated"
+    assert len(relationships) > 0, "No relationships were detected"
+    assert stored_count > 0, "No relationships were stored"
+    
+    # Log test results instead of returning them
+    logger.info(f"Test results: {len(semantic_patterns)} semantic patterns, {len(processed_patterns)} statistical patterns, {len(relationships)} relationships, {stored_count} stored relationships")
+    logger.info(f"Validation results: {validation_results}")
+    
+    # Test passed successfully
+    logger.info("Integrated climate end-to-end test completed successfully!")
 
 if __name__ == "__main__":
     # This allows running the test directly with python -m
