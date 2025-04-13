@@ -745,7 +745,32 @@ def test_integrated_climate_e2e(
     semantic_adaptive_id = adaptive_id_factory("climate_risk_patterns", "climate_analyzer")
     logger.info(f"Created AdaptiveID for semantic patterns: {semantic_adaptive_id.id}")
     
+    # Verify all critical components are properly initialized
+    from tests.integration.climate_e2e.verification_helpers import verify_all_critical_components
+    
+    # Create a test context with all components
+    test_context = {
+        'arangodb_connection': arangodb_connection,
+        'event_service': event_service,
+        'pattern_evolution_service': pattern_evolution_service,
+        'document_processing_service': document_processing_service,
+        'field_pattern_bridge': field_pattern_bridge,
+        'claude_adapter': claude_adapter,
+        'bidirectional_flow_service': bidirectional_flow_service,
+        'pattern_aware_rag': pattern_aware_rag
+    }
+    
+    # Add vector_tonic_integrator if it exists
+    if 'vector_tonic_integrator' in locals():
+        test_context['vector_tonic_integrator'] = vector_tonic_integrator
+    
+    # Verify all critical components
+    logger.info("Verifying all critical components before test execution...")
+    verify_all_critical_components(test_context, strict=True)
+    logger.info("All critical components verified successfully")
+    
     # Process semantic data
+    logger.info("Processing semantic data...")
     semantic_patterns = test_process_semantic_data(document_processing_service, climate_data_paths)
     
     # Enhance patterns with AdaptiveID

@@ -209,8 +209,7 @@ class ArangoDBConnection(ArangoDBConnectionInterface):
                 
         return self._db.collection(collection_name)
     
-    def ensure_graph(self, graph_name: str, 
-                    edge_definitions: List[Dict[str, Any]]) -> Graph:
+    def ensure_graph(self, graph_name: str, edge_definitions: List[Dict[str, Any]]) -> Any:
         """
         Ensure that a graph exists, creating it if necessary.
         
@@ -227,18 +226,37 @@ class ArangoDBConnection(ArangoDBConnectionInterface):
         if not self._db.has_graph(graph_name):
             logger.info(f"Creating graph: {graph_name}")
             
-            # Ensure all collections exist
+            # Ensure all collections exist and prepare ArangoDB-compatible edge definitions
+            arango_edge_definitions = []
+            
             for edge_def in edge_definitions:
-                self.ensure_edge_collection(edge_def["collection"])
+                # Handle both 'collection' and 'edge_collection' keys for compatibility
+                edge_collection = edge_def.get("collection") or edge_def.get("edge_collection")
+                if not edge_collection:
+                    raise ValueError("Edge definition must contain 'collection' or 'edge_collection' key")
+                    
+                self.ensure_edge_collection(edge_collection)
                 
-                for from_col in edge_def["from"]:
+                from_collections = edge_def["from"]
+                to_collections = edge_def["to"]
+                
+                # Ensure all vertex collections exist
+                for from_col in from_collections:
                     self.ensure_collection(from_col)
                     
-                for to_col in edge_def["to"]:
+                for to_col in to_collections:
                     self.ensure_collection(to_col)
+                
+                # Create ArangoDB-compatible edge definition
+                arango_edge_def = {
+                    "edge_collection": edge_collection,
+                    "from_vertex_collections": from_collections,  # Use from_vertex_collections instead of from_collections
+                    "to_vertex_collections": to_collections      # Use to_vertex_collections instead of to_collections
+                }
+                arango_edge_definitions.append(arango_edge_def)
             
-            # Create graph
-            self._db.create_graph(graph_name, edge_definitions)
+            # Create graph with ArangoDB-compatible edge definitions
+            self._db.create_graph(graph_name, arango_edge_definitions)
             
             if self._event_service:
                 self._event_service.publish("arangodb.graph_created", {
@@ -609,7 +627,24 @@ class ArangoDBConnection(ArangoDBConnectionInterface):
         Returns:
             The created graph
         """
-        return self.ensure_graph(graph_name, edge_definitions)
+        # Normalize edge definitions to ensure they have the expected format
+        normalized_edge_definitions = []
+        for edge_def in edge_definitions:
+            # Handle both 'collection' and 'edge_collection' keys for compatibility
+            edge_collection = edge_def.get("collection") or edge_def.get("edge_collection")
+            if not edge_collection:
+                raise ValueError("Edge definition must contain 'collection' or 'edge_collection' key")
+                
+            # Create a normalized edge definition with keys expected by ArangoDB client
+            normalized_edge_def = {
+                "collection": edge_collection,
+                "from_vertex_collections": edge_def["from"],
+                "to_vertex_collections": edge_def["to"]
+            }
+            normalized_edge_definitions.append(normalized_edge_def)
+            
+        # Use the normalized edge definitions
+        return self.ensure_graph(graph_name, normalized_edge_definitions)
     
     def get_graph(self, graph_name: str) -> Any:
         """

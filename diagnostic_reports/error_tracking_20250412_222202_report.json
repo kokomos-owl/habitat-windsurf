@@ -1,0 +1,8 @@
+{
+  "timestamp": "2025-04-12T22:22:02.618678",
+  "success": false,
+  "components_initialized": [],
+  "initialization_errors": {
+    "arangodb_connection": "Initialization error: [HTTP 401][ERR 11] not authorized to execute this request"
+  }
+}

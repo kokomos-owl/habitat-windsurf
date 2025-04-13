@@ -58,6 +58,11 @@ class PatternAwareRAGService(PatternAwareRAGInterface):
         self._initialized = False
         self._vector_space_id = None
         
+        # Default thresholds and weights
+        self._coherence_threshold = 0.7  # Default coherence threshold for pattern detection
+        self._quality_threshold = 0.65   # Default quality threshold for pattern retrieval
+        self._quality_weight = 0.5       # Default weight for quality in pattern ranking
+        
         # Initialize direct database access
         if hasattr(db_connection, '_db') and db_connection._db is not None:
             self._db = db_connection._db

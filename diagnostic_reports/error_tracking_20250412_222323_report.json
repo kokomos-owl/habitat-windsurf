@@ -1,0 +1,12 @@
+{
+  "timestamp": "2025-04-12T22:23:23.643404",
+  "success": false,
+  "components_initialized": [
+    "arangodb_connection",
+    "event_service",
+    "claude_adapter"
+  ],
+  "initialization_errors": {
+    "pattern_repository": "Initialization error: ArangoDBPatternRepository.__init__() missing 2 required positional arguments: 'db_connection' and 'event_service'"
+  }
+}

@@ -1,0 +1,95 @@
+{
+  "timestamp": "2025-04-12T22:13:35.144461",
+  "initialization_order": [
+    "event_service",
+    "claude_adapter"
+  ],
+  "initialization_errors": {
+    "vector_tonic_integrator": "Creation error: VectorTonicService.__init__() missing 3 required positional arguments: 'db_connection', 'event_service', and 'pattern_repository'"
+  },
+  "dependency_errors": {
+    "pattern_aware_rag": "Missing dependencies: ['pattern_repository', 'relationship_repository']"
+  },
+  "verification_results": {
+    "EventService": {
+      "present": true,
+      "initialized": true,
+      "attributes": {
+        "_initialized": true,
+        "publish": true,
+        "subscribe": true,
+        "unsubscribe": true
+      },
+      "methods": {
+        "publish": true,
+        "subscribe": true,
+        "unsubscribe": true
+      },
+      "verification_passed": true,
+      "errors": []
+    },
+    "Vector Tonic Integration": {
+      "present": true,
+      "initialized": null,
+      "attributes": {
+        "_initialized": false,
+        "process_window": false
+      },
+      "methods": {
+        "process_window": false
+      },
+      "verification_passed": false,
+      "errors": [
+        "No initialization status available",
+        "Missing required attribute: _initialized",
+        "Missing required attribute: process_window",
+        "Missing required method: process_window"
+      ]
+    },
+    "PatternAwareRAG": {
+      "present": true,
+      "initialized": null,
+      "attributes": {
+        "_initialized": false,
+        "_pattern_repository": false,
+        "_claude_adapter": false
+      },
+      "methods": {
+        "query": false
+      },
+      "verification_passed": false,
+      "errors": [
+        "No initialization status available",
+        "Missing required attribute: _initialized",
+        "Missing required attribute: _pattern_repository",
+        "Missing required attribute: _claude_adapter",
+        "Missing required method: query"
+      ]
+    },
+    "Claude Adapter": {
+      "present": true,
+      "initialized": null,
+      "attributes": {
+        "_initialized": false
+      },
+      "methods": {
+        "query": true,
+        "extract_patterns": false
+      },
+      "verification_passed": false,
+      "errors": [
+        "No initialization status available",
+        "Missing required attribute: _initialized",
+        "Missing required method: extract_patterns"
+      ]
+    },
+    "ArangoDBConnection": {
+      "present": false,
+      "initialized": null,
+      "verification_passed": false,
+      "errors": [
+        "Component not present in test context"
+      ]
+    }
+  }
+}

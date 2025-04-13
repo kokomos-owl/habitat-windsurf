@@ -1,0 +1,8 @@
+{
+  "timestamp": "2025-04-12T22:20:09.917506",
+  "success": false,
+  "components_initialized": [],
+  "initialization_errors": {
+    "arangodb_connection": "Initialization error: ArangoDBConnection.initialize() got an unexpected keyword argument 'host'"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "timestamp": "2025-04-12T22:28:18.959619",
+  "success": false,
+  "components_initialized": [
+    "arangodb_connection",
+    "event_service",
+    "claude_adapter",
+    "pattern_repository",
+    "relationship_repository"
+  ],
+  "initialization_errors": {
+    "vector_tonic_service": "Initialization error: 'collection'"
+  }
+}

@@ -65,17 +65,34 @@ class VectorTonicService(VectorTonicServiceInterface):
         self._db_connection.ensure_collection("patterns")
         self._db_connection.ensure_edge_collection("pattern_vectors")
         
-        # Ensure graph exists
-        self._db_connection.ensure_graph(
-            "vector_tonic_graph",
-            edge_definitions=[
-                {
-                    "collection": "pattern_vectors",
-                    "from": ["patterns"],
-                    "to": ["vectors"]
-                }
-            ]
-        )
+        # Ensure collections exist first
+        self._db_connection.ensure_collection("vector_spaces")
+        self._db_connection.ensure_collection("vectors")
+        self._db_connection.ensure_collection("patterns")
+        self._db_connection.ensure_edge_collection("pattern_vectors")
+        
+        # Check if graph exists
+        if not self._db_connection.graph_exists("vector_tonic_graph"):
+            try:
+                # Create the graph using the ensure_graph method which handles different edge definition formats
+                edge_definitions = [
+                    {
+                        "collection": "pattern_vectors",  # Use 'collection' instead of 'edge_collection'
+                        "from": ["patterns"],           # Use 'from' instead of 'from_collections'
+                        "to": ["vectors"]              # Use 'to' instead of 'to_collections'
+                    }
+                ]
+                
+                # Use the ensure_graph method which normalizes edge definitions
+                self._db_connection.ensure_graph("vector_tonic_graph", edge_definitions)
+                
+                logger.info("Created vector_tonic_graph successfully")
+            except Exception as e:
+                logger.error(f"Error creating graph: {e}")
+                # Log more detailed information about the error
+                import traceback
+                logger.error(f"Detailed error: {traceback.format_exc()}")
+                raise
         
         # Load existing vector spaces
         query = "FOR vs IN vector_spaces RETURN vs"

@@ -1,0 +1,11 @@
+{
+  "timestamp": "2025-04-12T22:22:51.324104",
+  "success": false,
+  "components_initialized": [
+    "arangodb_connection",
+    "event_service"
+  ],
+  "initialization_errors": {
+    "claude_adapter": "Initialization error: 'ClaudeAdapter' object has no attribute 'initialize'"
+  }
+}
