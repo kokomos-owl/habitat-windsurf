@@ -45,10 +45,14 @@ class EventService(EventServiceInterface):
     def shutdown(self) -> None:
         """
         Release resources when shutting down the event service.
+        
+        Raises:
+            RuntimeError: If the EventService is not initialized
         """
         if not self._initialized:
-            logger.warning("EventService not initialized")
-            return
+            error_msg = "EventService not initialized. Call initialize() before shutting down."
+            logger.error(error_msg)
+            raise RuntimeError(error_msg)
             
         logger.info("Shutting down EventService")
         self.clear_subscriptions()
@@ -62,10 +66,14 @@ class EventService(EventServiceInterface):
         Args:
             event_name: The name of the event to publish
             data: The data associated with the event
+            
+        Raises:
+            RuntimeError: If the EventService is not initialized
         """
         if not self._initialized:
-            logger.warning("EventService not initialized")
-            return
+            error_msg = "EventService not initialized. Call initialize() before publishing events."
+            logger.error(error_msg)
+            raise RuntimeError(error_msg)
             
         if event_name not in self._subscribers:
             logger.debug(f"No subscribers for event: {event_name}")
@@ -87,10 +95,14 @@ class EventService(EventServiceInterface):
             event_name: The name of the event to subscribe to
             handler: The function to call when the event is published
             metadata: Optional metadata for the subscription
+            
+        Raises:
+            RuntimeError: If the EventService is not initialized
         """
         if not self._initialized:
-            logger.warning("EventService not initialized")
-            return
+            error_msg = "EventService not initialized. Call initialize() before subscribing to events."
+            logger.error(error_msg)
+            raise RuntimeError(error_msg)
             
         if event_name not in self._subscribers:
             self._subscribers[event_name] = []
@@ -109,11 +121,15 @@ class EventService(EventServiceInterface):
         
         Args:
             event_name: The name of the event to unsubscribe from
-            handler: The handler function to unsubscribe
+            handler: The function to remove from the subscribers list
+            
+        Raises:
+            RuntimeError: If the EventService is not initialized
         """
         if not self._initialized:
-            logger.warning("EventService not initialized")
-            return
+            error_msg = "EventService not initialized. Call initialize() before unsubscribing from events."
+            logger.error(error_msg)
+            raise RuntimeError(error_msg)
             
         if event_name not in self._subscribers:
             logger.debug(f"No subscribers for event: {event_name}")
@@ -131,10 +147,14 @@ class EventService(EventServiceInterface):
     def clear_subscriptions(self) -> None:
         """
         Clear all event subscriptions.
+        
+        Raises:
+            RuntimeError: If the EventService is not initialized
         """
         if not self._initialized:
-            logger.warning("EventService not initialized")
-            return
+            error_msg = "EventService not initialized. Call initialize() before clearing subscriptions."
+            logger.error(error_msg)
+            raise RuntimeError(error_msg)
             
         self._subscribers.clear()
         logger.debug("Cleared all subscriptions")
