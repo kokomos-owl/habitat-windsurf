@@ -1,3 +1,5 @@
+
+from tests.integration.climate_e2e.vector_tonic_fix import initialize_vector_tonic_components
 """
 Pytest fixtures for climate end-to-end integration tests.
 
